@@ -1,0 +1,10 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "model": "rezolve:block_bundle_builder"
+  },
+  "variants": {
+    "normal": [{}],
+    "inventory": [{}]
+  }
+}

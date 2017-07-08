@@ -1,0 +1,26 @@
+# eclipse
+.DS_Store
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
+config/
+asm/
+crash-reports/
+
+# idea
+out
+*.ipr
+*.iws
+*.iml
+.idea
+
+# gradle
+build
+.gradle
+
+# other
+eclipse
+run
