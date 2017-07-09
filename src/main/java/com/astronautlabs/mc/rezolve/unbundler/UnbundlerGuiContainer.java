@@ -1,4 +1,4 @@
-package com.astronautlabs.mc.rezolve.bundler;
+package com.astronautlabs.mc.rezolve.unbundler;
 
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -7,10 +7,10 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 
-public class BundlerGuiContainer extends GuiContainer {
+public class UnbundlerGuiContainer extends GuiContainer {
 
-	public BundlerGuiContainer(IInventory playerInv, BundlerEntity entity) {
-		super(new BundlerContainer(playerInv, entity));
+	public UnbundlerGuiContainer(IInventory playerInv, UnbundlerEntity entity) {
+		super(new UnbundlerContainer(playerInv, entity));
 		
 		this.playerInv = playerInv;
 		this.entity = entity;
@@ -19,7 +19,7 @@ public class BundlerGuiContainer extends GuiContainer {
 	}
 	
 	private IInventory playerInv;
-	private BundlerEntity entity;
+	private UnbundlerEntity entity;
 	
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {

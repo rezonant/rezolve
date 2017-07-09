@@ -1,11 +1,9 @@
 package com.astronautlabs.mc.rezolve.waila;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.astronautlabs.mc.rezolve.common.BlockBase;
 import com.astronautlabs.mc.rezolve.common.ITooltipHint;
-import com.astronautlabs.mc.rezolve.common.TileEntityBase;
 
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
@@ -13,9 +11,7 @@ import mcp.mobius.waila.api.IWailaDataProvider;
 import mcp.mobius.waila.api.IWailaRegistrar;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -49,27 +45,30 @@ public class WailaCompat implements IWailaDataProvider {
 	public List<String> getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
 			IWailaConfigHandler config) {
 		
-
-	    EntityPlayer player = accessor.getPlayer();
 	    BlockPos pos = accessor.getPosition();
-	    int x = pos.getX(),y = pos.getY(), z = pos.getZ();
 	    World world = accessor.getWorld();
 
 	    IBlockState bs = world.getBlockState(pos);
 	    Block block = bs.getBlock();
 	    TileEntity te = world.getTileEntity(pos);
-	    Item item = Item.getItemFromBlock(block);
 	    
 	    ITooltipHint hint = null;
 	    
 	    if (te instanceof ITooltipHint) {
-	    	hint = (ITooltipHint)te;
+	    		hint = (ITooltipHint)te;
 	    } else if (block instanceof ITooltipHint) {
-	    	hint = (ITooltipHint)block;
+	    		hint = (ITooltipHint)block;
 	    }
 
-	    if (hint != null)
-	    	currenttip.add(hint.getTooltipHint(itemStack));
+	    if (hint != null) {
+	    		String tooltip = hint.getTooltipHint(itemStack);
+	    		
+			String[] strs = tooltip.split("\n");
+			
+			for (String line : strs)
+				currenttip.add(line);
+				
+	    }
 	    
 		return currenttip; 
 	}

@@ -3,9 +3,8 @@ package com.astronautlabs.mc.rezolve.bundleBuilder;
 import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.ITooltipHint;
 import com.astronautlabs.mc.rezolve.common.Machine;
-import com.astronautlabs.mc.rezolve.network.BundlerPacketHandler;
+import com.astronautlabs.mc.rezolve.common.TileEntityBase;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.EntityLivingBase;
@@ -14,14 +13,10 @@ import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
 
 public class BundleBuilderBlock extends Machine implements ITooltipHint {
 	public BundleBuilderBlock() {
@@ -31,9 +26,12 @@ public class BundleBuilderBlock extends Machine implements ITooltipHint {
 	@Override
 	public void init(RezolveMod mod) {
 		super.init(mod);
-		
-		BundleBuilderEntity.register();
 		BundleBuilderUpdateMessageHandler.register();
+	}
+	
+	@Override
+	public Class<? extends TileEntityBase> getTileEntityClass() {
+		return BundleBuilderEntity.class;
 	}
 	
 	@Override

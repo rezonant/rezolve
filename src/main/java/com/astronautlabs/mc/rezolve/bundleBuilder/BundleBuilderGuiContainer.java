@@ -4,10 +4,10 @@ import java.io.IOException;
 
 import org.lwjgl.input.Keyboard;
 
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
@@ -32,7 +32,7 @@ public class BundleBuilderGuiContainer extends GuiContainer {
 	@Override
 	public void initGui() {
 		super.initGui();
-		this.nameField = new GuiTextField(NAME_FIELD_ID, this.fontRendererObj, 83, 41, 88, 13);
+		this.nameField = new GuiTextField(NAME_FIELD_ID, this.fontRendererObj, this.guiLeft + 83, this.guiTop + 41, 88, 13);
 		this.nameField.setMaxStringLength(23);
 		this.nameField.setText("");
 		this.nameField.setFocused(true);
@@ -65,6 +65,8 @@ public class BundleBuilderGuiContainer extends GuiContainer {
 	
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+
+		this.nameField.drawTextBox();
 		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
 	
@@ -79,6 +81,7 @@ public class BundleBuilderGuiContainer extends GuiContainer {
 		GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
 	    this.mc.getTextureManager().bindTexture(new ResourceLocation("rezolve:textures/gui/container/bundle_builder_gui.png"));
 	    this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
+
 	}
 
 	@Override
@@ -93,9 +96,8 @@ public class BundleBuilderGuiContainer extends GuiContainer {
 	    int rfBarWidth = 14;
 	    
 	    int usedHeight = (int)(this.entity.getEnergyStored(EnumFacing.DOWN) / (double)this.entity.getMaxEnergyStored(EnumFacing.DOWN) * rfBarHeight);
-	    this.drawRect(rfBarX, rfBarY, rfBarX + rfBarWidth, rfBarY + rfBarHeight, 0xFF000000);
-	    this.drawRect(rfBarX, rfBarY + rfBarHeight - usedHeight, rfBarX + rfBarWidth, rfBarY + rfBarHeight, 0xFFFF0000);
+	    Gui.drawRect(rfBarX, rfBarY, rfBarX + rfBarWidth, rfBarY + rfBarHeight, 0xFF000000);
+	    Gui.drawRect(rfBarX, rfBarY + rfBarHeight - usedHeight, rfBarX + rfBarWidth, rfBarY + rfBarHeight, 0xFFFF0000);
 
-		this.nameField.drawTextBox();
 	}
 }

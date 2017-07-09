@@ -20,10 +20,10 @@ public class ClientProxy extends CommonProxy {
 		super.init(mod);
 		
 		MinecraftForge.EVENT_BUS.register(this); 
-
-    	this.log("Initializing client-side proxy...");
-    	this.mod.registerBlockRenderers();
-    	this.mod.registerItemRenderers();
+	
+	    	this.log("Initializing client-side proxy...");
+	    	this.mod.registerBlockRenderers();
+	    	this.mod.registerItemRenderers();
 	}
 	
 	@SubscribeEvent
@@ -36,14 +36,23 @@ public class ClientProxy extends CommonProxy {
 			Block block = ib.getBlock();
 			
 			if (block instanceof ITooltipHint) {
-				event.getToolTip().add(((ITooltipHint)block).getTooltipHint(stack));
+				String hint = ((ITooltipHint)block).getTooltipHint(stack);
+				String[] strs = hint.split("\n");
+				
+				for (String line : strs)
+					event.getToolTip().add(line);
 			}
 			
 			return;
 		}
 		
 		if (item instanceof ITooltipHint) {
-			event.getToolTip().add(((ITooltipHint)item).getTooltipHint(stack));
+			String hint = ((ITooltipHint)item).getTooltipHint(stack);
+			
+			String[] strs = hint.split("\n");
+			
+			for (String line : strs)
+				event.getToolTip().add(line);
 		}
 	}
 	

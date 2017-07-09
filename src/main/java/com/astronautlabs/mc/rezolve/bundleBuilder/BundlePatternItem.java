@@ -6,12 +6,8 @@ import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.ITooltipHint;
 import com.astronautlabs.mc.rezolve.common.ItemBase;
 
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 
 public class BundlePatternItem extends ItemBase implements ITooltipHint {
 	public BundlePatternItem() {

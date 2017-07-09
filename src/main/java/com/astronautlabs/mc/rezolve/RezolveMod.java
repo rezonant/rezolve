@@ -1,5 +1,6 @@
 package com.astronautlabs.mc.rezolve;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 
 import org.apache.logging.log4j.LogManager;
@@ -11,25 +12,18 @@ import com.astronautlabs.mc.rezolve.bundleBuilder.BundlePatternItem;
 import com.astronautlabs.mc.rezolve.bundler.BundlerBlock;
 import com.astronautlabs.mc.rezolve.bundler.BundlerGuiHandler;
 import com.astronautlabs.mc.rezolve.common.BlockBase;
-import com.astronautlabs.mc.rezolve.common.ITooltipHint;
 import com.astronautlabs.mc.rezolve.common.ItemBase;
+import com.astronautlabs.mc.rezolve.common.TileEntityBase;
+import com.astronautlabs.mc.rezolve.unbundler.UnbundlerBlock;
 
-import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 @Mod(modid = RezolveMod.MODID, version = RezolveMod.VERSION, name = "Rezolve", dependencies = "after:Waila;after:EnderIO")
@@ -42,6 +36,7 @@ public class RezolveMod {
 	public static final String VERSION = "1.0";
 
 	public static BundlerBlock bundlerBlock;
+	public static UnbundlerBlock unbundlerBlock;
 	public static BundleBuilderBlock bundleBuilderBlock;
 	public static ItemBlock bundlerItem;
 	public static BundlePatternItem bundlePatternItem;
@@ -124,6 +119,22 @@ public class RezolveMod {
 
 		block.itemBlock = item;
 	}
+	
+	public void registerTileEntity(Class<? extends TileEntityBase> entityClass) {
+		try {
+			Constructor<? extends TileEntityBase> x = entityClass.getConstructor();
+			
+			TileEntityBase instance = x.newInstance();
+			String registryName = instance.getRegistryName();
+			
+			GameRegistry.registerTileEntity(entityClass, registryName);
+			
+		} catch (Exception e) {
+			 System.err.println("Cannot register tile entity class "+entityClass.getCanonicalName()+": Caught exception");
+			 System.err.println(e.toString());
+			 return;
+		}
+	}
 
 	public boolean isDye(Item item) {
 		return "minecraft:dye".equals(item.getRegistryName().toString());
@@ -136,6 +147,7 @@ public class RezolveMod {
 		this.log("Registering blocks...");
 
 		this.registerItemBlock(bundlerBlock = new BundlerBlock());
+		this.registerItemBlock(unbundlerBlock = new UnbundlerBlock());
 		this.registerItemBlock(bundleBuilderBlock = new BundleBuilderBlock());
 	}
 
@@ -201,7 +213,7 @@ public class RezolveMod {
 		this.registerBlockRecipes();
 		this.registerItemRecipes();
 
-		this.proxy.init(this);
+		proxy.init(this);
 
 		FMLInterModComms.sendMessage("Waila", "register", "com.astronautlabs.mc.rezolve.waila.WailaCompat.load");
 

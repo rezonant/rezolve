@@ -1,15 +1,23 @@
 package com.astronautlabs.mc.rezolve.common;
 
-import cofh.api.energy.IEnergyHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ITickable;
 
 public class TileEntityBase extends TileEntity  {
+	TileEntityBase(String registryName) {
+		this.registryName = registryName;
+	}
+	
+	private String registryName;
+	
+	public String getRegistryName() {
+		return this.registryName;
+	}
+	
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
 
@@ -43,12 +51,12 @@ public class TileEntityBase extends TileEntity  {
     
     @Override
     public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-    	this.readFromNBT(pkt.getNbtCompound());
+    		this.readFromNBT(pkt.getNbtCompound());
     }
     
     @Override
     public NBTTagCompound getUpdateTag() {
-    	NBTTagCompound tagCompound = super.getUpdateTag();
+    		NBTTagCompound tagCompound = super.getUpdateTag();
 		this.writeToNBT(tagCompound);
 		return tagCompound;
     }
