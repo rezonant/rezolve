@@ -23,13 +23,6 @@ public class UnbundlerEntity extends MachineEntity {
 		return 25;
 	}
 	
-	@Override
-	public boolean allowInputToSlot(int index) {
-		if (this.isOutputSlot(index))
-			return false;
-		return true;
-	}
-
 	public boolean isOutputSlot(int index) {
 		return index >= 10 && index <= 25;
 	}
@@ -90,8 +83,6 @@ public class UnbundlerEntity extends MachineEntity {
 			if (inputStack == null || inputStack.stackSize == 0) {
 				continue;
 			}
-			
-			System.out.println("Located a bundle to unbundle");
 		
 			// OK, this bundle can be unbundled!
 			
@@ -118,14 +109,12 @@ public class UnbundlerEntity extends MachineEntity {
 
 			for (ItemStack outputItem : this.dummyInventory.getStacks()) {
 				if (!this.distributeItem(outputItem, true)) {
-					System.out.println("Cancelled, can't distribute item stack of "+outputItem.getItem().getRegistryName());
 					cancelled = true;
 					continue;
 				}
 			}
 			
 			if (cancelled) {
-				System.out.println("Unbundle cancelled");
 				continue;
 			}
 
@@ -135,7 +124,6 @@ public class UnbundlerEntity extends MachineEntity {
 			
 			// Consume the bundle
 			
-			System.out.println("Consume the bundle");
 			inputStack.stackSize -= 1;
 			
 			if (inputStack.stackSize == 0)
@@ -162,16 +150,20 @@ public class UnbundlerEntity extends MachineEntity {
 
 	@Override
 	public void updatePeriodically() {
-		unpackBundle();
+		//unpackBundle();
 	}
 	
 	@Override
 	protected boolean allowedToPullFrom(int slot) {
-		return this.isOutputSlot(slot);
+		return true;
+		
+		//return this.isOutputSlot(slot);
 	}
 	
 	@Override
 	protected boolean allowedToPushTo(int slot) {
-		return this.isInputSlot(slot);
+		return true;
+		
+		//return this.isInputSlot(slot);
 	}
 }

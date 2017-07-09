@@ -227,6 +227,7 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
 			return (T) this;
 		}
+		
 		return super.getCapability(capability, facing);
 	}
 	
@@ -255,13 +256,20 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 	
 	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+		System.out.println("Trying to push into "+this.getRegistryName() + " slot "+slot);
 		if (!this.allowedToPushTo(slot))
 			return null;
-		
+
+		System.out.println("Acceptable to push into "+this.getRegistryName()+ " slot "+slot);
 		ItemStack existingStack = this.getStackInSlot(slot);
 		
-		if (existingStack != null && !RezolveMod.areStacksSame(stack, existingStack))
+		if (existingStack != null && !RezolveMod.areStacksSame(stack, existingStack)) {
+
+			System.out.println("There's a different stack in this slot: trying to push into "+this.getRegistryName()+ " slot "+slot);
 			return stack;
+		}
+		
+		System.out.println("No existing stack in this slot, should be able to push into "+this.getRegistryName()+ " slot "+slot);
 		
 		int itemsToKeep = stack.stackSize;
 		ItemStack returnStack = null;
@@ -278,6 +286,8 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 		if (!simulate) {
 			this.setInventorySlotContents(slot, keepStack);
 		}
+
+		System.out.println("Allowing push into "+this.getRegistryName()+ " slot "+slot);
 		
 		return returnStack;
 	}

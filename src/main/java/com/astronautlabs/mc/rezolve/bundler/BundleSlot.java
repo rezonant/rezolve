@@ -13,6 +13,10 @@ public class BundleSlot extends Slot {
 
 	@Override
 	public boolean isItemValid(ItemStack stack) {
+		if (stack == null) {
+			System.out.println("THATS IT");
+		}
+		
 		if (RezolveMod.bundleItem.getRegistryName().equals(stack.getItem().getRegistryName()))
 			return true;
 		

@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack;
 public class UnbundlerContainer extends Container {
 	
 	public UnbundlerContainer(IInventory playerInv, UnbundlerEntity te) {
+
 		this.entity = te;
 		int invSlotSize = 18;
 
