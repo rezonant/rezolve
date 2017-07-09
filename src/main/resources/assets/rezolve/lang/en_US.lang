@@ -1,4 +1,5 @@
 tile.rezolve:block_bundler.name=Bundler
+tile.rezolve:block_unbundler.name=Unbundler
 tile.rezolve:block_bundle_builder.name=Bundle Pattern Builder
 item.rezolve:item_bundle.name=Bundle
 

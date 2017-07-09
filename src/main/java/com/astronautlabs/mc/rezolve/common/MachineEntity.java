@@ -1,5 +1,7 @@
 package com.astronautlabs.mc.rezolve.common;
 
+import com.astronautlabs.mc.rezolve.RezolveMod;
+
 import cofh.api.energy.IEnergyReceiver;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -9,8 +11,12 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
-public class MachineEntity extends TileEntityBase implements IInventory, ITickable, IEnergyReceiver, IMachineInventory {
+public class MachineEntity extends TileEntityBase implements IInventory, ITickable, IEnergyReceiver, IMachineInventory, ICapabilityProvider, IItemHandler {
 	public MachineEntity(String registryName) {
 		super(registryName);
 		this.inventory = new ItemStack[this.getSizeInventory()];
@@ -80,11 +86,19 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 		return null;
 	}
 
+	public boolean allowInputToSlot(int index) {
+		return true;
+	}
+	
+	public boolean allowOutputFromSlot(int index) {
+		return true;
+	}
+	
 	@Override
 	public void setInventorySlotContents(int index, ItemStack stack) {
 	    if (index < 0 || index >= this.getSizeInventory())
 	        return;
-
+	    
 	    if (stack != null && stack.stackSize > this.getInventoryStackLimit())
 	        stack.stackSize = this.getInventoryStackLimit();
 	        
@@ -206,5 +220,90 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 	@Override
 	public void outputSlotActivated(int index) {
 		
+	}
+	
+	@Override
+	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+			return (T) this;
+		}
+		return super.getCapability(capability, facing);
+	}
+	
+	@Override
+	public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+			return true;
+		}
+		
+		return super.hasCapability(capability, facing);
+	}
+
+	@Override
+	public int getSlots() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	protected boolean allowedToPullFrom(int slot) {
+		return true;
+	}
+	
+	protected boolean allowedToPushTo(int slot) {
+		return true;
+	}
+	
+	@Override
+	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+		if (!this.allowedToPushTo(slot))
+			return null;
+		
+		ItemStack existingStack = this.getStackInSlot(slot);
+		
+		if (existingStack != null && !RezolveMod.areStacksSame(stack, existingStack))
+			return stack;
+		
+		int itemsToKeep = stack.stackSize;
+		ItemStack returnStack = null;
+		ItemStack keepStack = stack.copy();
+		
+		if (existingStack != null && existingStack.stackSize + stack.stackSize > this.getInventoryStackLimit()) {
+			itemsToKeep = this.getInventoryStackLimit() - existingStack.stackSize;
+			returnStack = keepStack.splitStack(stack.stackSize - itemsToKeep);
+		}
+
+		if (existingStack != null)
+			keepStack.stackSize += existingStack.stackSize;
+		
+		if (!simulate) {
+			this.setInventorySlotContents(slot, keepStack);
+		}
+		
+		return returnStack;
+	}
+
+	@Override
+	public ItemStack extractItem(int slot, int amount, boolean simulate) {
+		if (!this.allowedToPullFrom(slot))
+			return null;
+		
+		ItemStack existingStack = this.getStackInSlot(slot);
+		
+		if (existingStack == null)
+			return null;
+		
+		ItemStack keepStack = null;
+		ItemStack returnStack = existingStack.copy();
+		
+		if (existingStack.stackSize > amount) {
+			returnStack = existingStack.splitStack(amount);
+			keepStack = existingStack;
+		}
+		
+		if (!simulate) {
+			this.setInventorySlotContents(slot, keepStack);
+		}
+		
+		return existingStack;
 	}
 }

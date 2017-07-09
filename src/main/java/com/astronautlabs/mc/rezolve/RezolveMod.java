@@ -18,6 +18,7 @@ import com.astronautlabs.mc.rezolve.unbundler.UnbundlerBlock;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -56,6 +57,16 @@ public class RezolveMod {
 			return "";
 
 		return dyeNames[dye];
+	}
+
+	public static boolean areStacksSame(ItemStack stackA, ItemStack stackB) {
+		if (stackA == stackB)
+			return true;
+		
+		if (stackA == null || stackB == null)
+			return false;
+		
+		return (stackA.isItemEqual(stackB) && ItemStack.areItemStackTagsEqual(stackA, stackB));
 	}
 
 	@SidedProxy(clientSide = "com.astronautlabs.mc.rezolve.ClientProxy", serverSide = "com.astronautlabs.mc.rezolve.ServerProxy")

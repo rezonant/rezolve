@@ -25,6 +25,12 @@ public class BundlerNBT {
 	}
 	
 	public static void readInventory(NBTTagCompound nbt, IInventory inventory) {
+		if (nbt == null)
+			return;
+		
+		if (!nbt.hasKey("Items"))
+			return;
+		
 	    NBTTagList list = nbt.getTagList("Items", 10);
 	    for (int i = 0; i < list.tagCount(); ++i) {
 	        NBTTagCompound stackTag = list.getCompoundTagAt(i);

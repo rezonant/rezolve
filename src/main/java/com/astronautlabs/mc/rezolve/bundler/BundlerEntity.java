@@ -9,6 +9,7 @@ import com.astronautlabs.mc.rezolve.common.VirtualInventory;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.items.IItemHandler;
 
 public class BundlerEntity extends MachineEntity {
 	public BundlerEntity() {
@@ -100,7 +101,7 @@ public class BundlerEntity extends MachineEntity {
 				for (int j = 0, maxJ = availableItems.size(); j < maxJ; ++j) {
 					ItemMemo availableItem = availableItems.get(j);
 					
-					if (!this.areStacksSame(availableItem.stack, requestedItem))
+					if (!RezolveMod.areStacksSame(availableItem.stack, requestedItem))
 						continue;
 					
 					selectedItems.add(availableItem);
@@ -154,16 +155,6 @@ public class BundlerEntity extends MachineEntity {
 		return bundleStack;
 	}
 
-	private boolean areStacksSame(ItemStack stackA, ItemStack stackB) {
-		if (stackA == stackB)
-			return true;
-		
-		if (stackA == null || stackB == null)
-			return false;
-		
-		return (stackA.isItemEqual(stackB) && ItemStack.areItemStackTagsEqual(stackA, stackB));
-	}
-	
 	private VirtualInventory dummyInventory = new VirtualInventory();
 	
     private void produceBundles() {
@@ -202,7 +193,7 @@ public class BundlerEntity extends MachineEntity {
 				continue;
 			}
 			
-			if (!this.areStacksSame(bundle, outputStack))
+			if (!RezolveMod.areStacksSame(bundle, outputStack))
 				continue;
 		
 			existingOutputStack = outputStack;
@@ -229,5 +220,18 @@ public class BundlerEntity extends MachineEntity {
 	@Override
 	public void updatePeriodically() {
 		this.produceBundles();
+	}
+
+	@Override
+	public int getSlots() {
+		return this.getSizeInventory();
+	}
+
+	protected boolean allowedToPullFrom(int slot) {
+		return this.isOutputSlot(slot);
+	}
+	
+	protected boolean allowedToPushTo(int slot) {
+		return this.isInputSlot(slot);
 	}
 }

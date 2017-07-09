@@ -31,7 +31,7 @@ public class UnbundlerBlock extends Machine {
 	public void registerRecipes() {
 		
 		GameRegistry.addRecipe(new ItemStack(this.itemBlock), 
-			"IMI",
+			"III",
 			"CSC",
 			"IHI", 
 			
