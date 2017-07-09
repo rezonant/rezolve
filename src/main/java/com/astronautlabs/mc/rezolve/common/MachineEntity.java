@@ -242,8 +242,7 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 
 	@Override
 	public int getSlots() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.getSizeInventory();
 	}
 
 	protected boolean allowedToPullFrom(int slot) {

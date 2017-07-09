@@ -69,6 +69,14 @@ public class UnbundlerEntity extends MachineEntity {
 		
 		return false;
 	}
+
+	protected boolean allowedToPullFrom(int slot) {
+		return this.isOutputSlot(slot);
+	}
+	
+	protected boolean allowedToPushTo(int slot) {
+		return this.isInputSlot(slot);
+	}
 	
 	private void unpackBundle() {
 		if (this.storedEnergy < this.unbundleEnergyCost)
@@ -138,32 +146,7 @@ public class UnbundlerEntity extends MachineEntity {
 	}
 	
 	@Override
-	public boolean isItemValidForSlot(int index, ItemStack stack) {
-		if (this.isInputSlot(index))
-			return true;
-	
-		if (this.isOutputSlot(index))
-			return false; 
-		
-		return true;
-	}
-
-	@Override
 	public void updatePeriodically() {
-		//unpackBundle();
-	}
-	
-	@Override
-	protected boolean allowedToPullFrom(int slot) {
-		return true;
-		
-		//return this.isOutputSlot(slot);
-	}
-	
-	@Override
-	protected boolean allowedToPushTo(int slot) {
-		return true;
-		
-		//return this.isInputSlot(slot);
+		this.unpackBundle();
 	}
 }

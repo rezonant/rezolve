@@ -26,7 +26,7 @@ public class UnbundlerContainer extends Container {
 		
 	    for (int y = 0; y < inputItemsHeight; ++y) {
 	        for (int x = 0; x < inputItemsWidth; ++x) {
-	            this.addSlotToContainer(new BundleSlot(te, firstInputItemSlot + x + y * inputItemsWidth, inputItemsOffsetX + x * invSlotSize, inputItemsOffsetY + y * invSlotSize));
+	            this.addSlotToContainer(new Slot(te, firstInputItemSlot + x + y * inputItemsWidth, inputItemsOffsetX + x * invSlotSize, inputItemsOffsetY + y * invSlotSize));
 	        }
 	    }
 	    
