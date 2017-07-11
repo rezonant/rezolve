@@ -3,6 +3,7 @@ package com.astronautlabs.mc.rezolve.bundleBuilder;
 import com.astronautlabs.mc.rezolve.common.ContainerBase;
 import com.astronautlabs.mc.rezolve.common.DyeSlot;
 import com.astronautlabs.mc.rezolve.common.GhostSlot;
+import com.astronautlabs.mc.rezolve.common.MachineOutputSlot;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -18,7 +19,7 @@ public class BundleBuilderContainer extends ContainerBase<BundleBuilderEntity> {
 
 		// Pattern/Dye Slots
 
-        this.addSlotToContainer(new BundlePatternOutputSlot(te, BundleBuilderEntity.PATTERN_OUTPUT_SLOT, 137, 59));		// Pattern slot
+        this.addSlotToContainer(new MachineOutputSlot(te, BundleBuilderEntity.PATTERN_OUTPUT_SLOT, 137, 59));		// Pattern slot
         this.addSlotToContainer(new BundlePatternSlot(te, BundleBuilderEntity.PATTERN_INPUT_SLOT, 101, 59));		// Pattern slot
         this.addSlotToContainer(new DyeSlot(te, BundleBuilderEntity.DYE_SLOT, 119, 77));					// Dye slot
         

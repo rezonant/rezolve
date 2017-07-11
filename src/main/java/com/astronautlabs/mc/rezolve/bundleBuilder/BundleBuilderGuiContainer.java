@@ -17,7 +17,7 @@ import net.minecraft.util.ResourceLocation;
 public class BundleBuilderGuiContainer extends GuiContainerBase {
 
 	public BundleBuilderGuiContainer(IInventory playerInv, BundleBuilderEntity entity) {
-		super(new BundleBuilderContainer(playerInv, entity));
+		super(new BundleBuilderContainer(playerInv, entity), "rezolve:textures/gui/container/bundle_builder_gui.png");
 		
 		this.playerInv = playerInv;
 		this.entity = entity;
@@ -36,56 +36,17 @@ public class BundleBuilderGuiContainer extends GuiContainerBase {
 		super.initGui();
 		this.nameField = new GuiTextField(NAME_FIELD_ID, this.fontRendererObj, this.guiLeft + 83, this.guiTop + 41, 88, 13);
 		this.nameField.setMaxStringLength(23);
-		this.nameField.setText("");
+		this.nameField.setText(this.entity.getPatternName() != null ? this.entity.getPatternName() : "");
 		this.nameField.setFocused(true);
+		this.addControl(this.nameField);
 	}
 	
 	@Override
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
-  
-		
-		if (this.nameField.isFocused()) {
-
-			if (keyCode != Keyboard.KEY_E)
-				super.keyTyped(typedChar, keyCode);
-			
-			this.nameField.textboxKeyTyped(typedChar, keyCode);
-			
-			// TODO: send to server
-			
-			entity.setPatternName(this.nameField.getText());
-		} else {
-			super.keyTyped(typedChar, keyCode);
-		}
+		super.keyTyped(typedChar, keyCode);
+		entity.setPatternName(this.nameField.getText());
 	}
 	
-	@Override
-	public void updateScreen() {
-		super.updateScreen();
-		this.nameField.updateCursorCounter();
-	}
-	
-	@Override
-	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-
-		this.nameField.drawTextBox();
-		super.drawScreen(mouseX, mouseY, partialTicks);
-	}
-	
-	@Override
-	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-		super.mouseClicked(mouseX, mouseY, mouseButton);
-		this.nameField.mouseClicked(mouseX, mouseY, mouseButton);
-	}
-	
-	@Override
-	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-		GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
-	    this.mc.getTextureManager().bindTexture(new ResourceLocation("rezolve:textures/gui/container/bundle_builder_gui.png"));
-	    this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
-
-	}
-
 	@Override
 	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
 	    //String s = this.entity.getDisplayName().getUnformattedText();
@@ -101,5 +62,6 @@ public class BundleBuilderGuiContainer extends GuiContainerBase {
 	    Gui.drawRect(rfBarX, rfBarY, rfBarX + rfBarWidth, rfBarY + rfBarHeight, 0xFF000000);
 	    Gui.drawRect(rfBarX, rfBarY + rfBarHeight - usedHeight, rfBarX + rfBarWidth, rfBarY + rfBarHeight, 0xFFFF0000);
 
+	    super.drawGuiContainerForegroundLayer(mouseX, mouseY);
 	}
 }

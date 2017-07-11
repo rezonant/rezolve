@@ -49,23 +49,6 @@ public class BundlePatternItem extends ItemBase implements ITooltipHint {
 	
 	@Override
 	public String getTooltipHint(ItemStack itemStack) {
-
-		NBTTagCompound nbt = itemStack.getTagCompound();
-		String name = null;
-		
-		if (nbt == null || !nbt.hasKey("Items")) {
-			return "Combines multiple items for automation. See Bundler/Unbundler";
-		}
-		
-		dummyInventory.clear();
-		RezolveNBT.readInventory(nbt, dummyInventory);
-		ArrayList<String> itemStrings = new ArrayList<String>();
-		
-		for (ItemStack stack : dummyInventory.getStacks()) {
-			Item item = stack.getItem();
-			itemStrings.add(stack.stackSize+" "+item.getItemStackDisplayName(stack));
-		}
-		
-		return String.join("\n", itemStrings);
+		return RezolveMod.bundleItem.describeContents(itemStack);
 	}
 }

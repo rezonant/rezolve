@@ -17,8 +17,8 @@ import net.minecraftforge.items.IItemHandler;
 public class BundlerEntity extends MachineEntity {
 	public BundlerEntity() {
 		super("bundler_tile_entity");
-	    this.updateInterval = 20 * 2;
-	    this.maxEnergyStored = 20000;
+	    this.updateInterval = 5;
+	    this.maxEnergyStored = 50000;
 	}
 
 	class ItemMemo {
@@ -35,19 +35,19 @@ public class BundlerEntity extends MachineEntity {
     
 	@Override
 	public int getSizeInventory() {
-		return 30;
+		return 27;
 	}
 
 	public boolean isOutputSlot(int index) {
-		return index >= 20 && index <= 29;
+		return index >= 18 && index <= 26;
 	}
 	
 	public boolean isPatternSlot(int index) {
-		return index >= 10 && index <= 19;
+		return index >= 9 && index <= 17;
 	}
 	
 	public boolean isInputSlot(int index) {
-		return index < 10;
+		return index < 9;
 	}
 	
 	@Override
@@ -65,24 +65,18 @@ public class BundlerEntity extends MachineEntity {
 	}
 
 	private boolean startProducing(ItemStack pattern) {
-		
-		if (!pattern.hasTagCompound())
+		if (!pattern.hasTagCompound()) {
+			System.out.println("Bundler: Invalid pattern: No NBT...");
 			return false;
+		}
 		
 		ArrayList<ItemMemo> selectedItems = this.selectItemsFor(pattern);
 
 		// If we don't have the correct amount of items, then we don't have enough to make a bundle.
 		if (selectedItems == null) {
-			System.out.println("Could not select items");
 			return false;
 		}
 
-		// Produce a bundle
-		ItemStack bundleStack = this.makeBundleStack(pattern);
-		
-		// Ensure we have space to store the output bundle, otherwise duck out early.
-		
-		System.out.println("Starting operation...");
 		this.startOperation(new BundlerOperation(this, pattern));
 		return true;
 	}
@@ -101,22 +95,22 @@ public class BundlerEntity extends MachineEntity {
 	private VirtualInventory dummyInventory = new VirtualInventory();
 	
     private void produceBundles() {
-    		if (this.hasCurrentOperation())
-    			return;
+		if (this.hasCurrentOperation())
+			return;
+		
+    	for (int i = 0, max = this.getSizeInventory(); i < max; ++i) {
+    		if (!this.isPatternSlot(i))
+    			continue;
     		
-	    	for (int i = 0, max = this.getSizeInventory(); i < max; ++i) {
-	    		if (!this.isPatternSlot(i))
-	    			continue;
-	    	
-	    		ItemStack pattern = this.getStackInSlot(i);
-	    		if (pattern == null || pattern.stackSize == 0)
-	    			continue;
-	    		
-	    		boolean started = this.startProducing(pattern);
-	    		
-	    		if (started)
-	    			break;
-	    	}
+    		ItemStack pattern = this.getStackInSlot(i);
+    		if (pattern == null || pattern.stackSize == 0)
+    			continue;
+    		
+    		boolean started = this.startProducing(pattern);
+    		
+    		if (started)
+    			break;
+    	}
     }
     
     public boolean storeBundle(ItemStack bundle, boolean simulate) {
@@ -176,14 +170,6 @@ public class BundlerEntity extends MachineEntity {
 	
 	protected boolean allowedToPushTo(int slot) {
 		return this.isInputSlot(slot);
-	}
-
-	public int takeEnergy(int i) {
-		int energyTaken = Math.min(i, this.storedEnergy);
-		this.storedEnergy -= energyTaken;
-		this.notifyUpdate();
-		
-		return energyTaken;
 	}
 
 	public boolean hasPattern(ItemStack pattern) {

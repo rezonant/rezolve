@@ -1,5 +1,7 @@
 package com.astronautlabs.mc.rezolve.bundler;
 
+import org.lwjgl.opengl.GL11;
+
 import com.astronautlabs.mc.rezolve.common.GuiContainerBase;
 import com.astronautlabs.mc.rezolve.common.MachineEntity;
 import com.astronautlabs.mc.rezolve.common.Operation;
@@ -15,7 +17,7 @@ import net.minecraft.util.ResourceLocation;
 public class BundlerGuiContainer extends GuiContainerBase {
 
 	public BundlerGuiContainer(IInventory playerInv, BundlerEntity entity) {
-		super(new BundlerContainer(playerInv, entity));
+		super(new BundlerContainer(playerInv, entity), "rezolve:textures/gui/container/bundler_gui.png");
 		
 		this.playerInv = playerInv;
 		this.entity = entity;
@@ -25,14 +27,6 @@ public class BundlerGuiContainer extends GuiContainerBase {
 	
 	private IInventory playerInv;
 	private BundlerEntity entity;
-	
-	@Override
-	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-		GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
-	    this.mc.getTextureManager().bindTexture(new ResourceLocation("rezolve:textures/gui/container/bundler_gui.png"));
-	    this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
-	    
-	}
 
 	@Override
 	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
@@ -49,15 +43,20 @@ public class BundlerGuiContainer extends GuiContainerBase {
 	    Gui.drawRect(rfBarX, rfBarY, rfBarX + rfBarWidth, rfBarY + rfBarHeight - usedHeight, 0xFF000000);
 	    
 	    Operation<BundlerEntity> op = this.entity.getCurrentOperation();
+	    String statusStr;
 	    
 	    if (op != null) {
-	    		int width = (int)(27 * op.getPercentage() / (double)100);
-	    		
-	    		System.out.println("drawing arrow at "+width);
+    		int width = (int)(32 * op.getPercentage() / (double)100);
 
-	    	    this.mc.getTextureManager().bindTexture(new ResourceLocation("rezolve:textures/gui/container/arrow.png"));
-	    	    
-	    		this.drawTexturedModalRect(135, 62, 0, 0, width, 28);
+    	    GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+    	    this.mc.getTextureManager().bindTexture(new ResourceLocation("rezolve:textures/gui/container/arrow.png"));
+    	    this.drawModalRectWithCustomSizedTexture(133, 54, 0, 0, width, 32, 32, 32);
+    	    
+    		statusStr = "Operation: "+op.getPercentage()+"%";
+	    } else {
+	    	statusStr = "Idle.";
 	    }
+	    
+		this.fontRendererObj.drawString(statusStr, 7, 102, 0xFF000000);
 	}
 }

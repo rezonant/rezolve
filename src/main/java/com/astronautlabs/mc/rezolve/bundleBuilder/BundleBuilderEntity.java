@@ -3,10 +3,13 @@ package com.astronautlabs.mc.rezolve.bundleBuilder;
 import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.RezolvePacketHandler;
 import com.astronautlabs.mc.rezolve.common.RezolveNBT;
+import com.astronautlabs.mc.rezolve.common.VirtualInventory;
 import com.astronautlabs.mc.rezolve.common.MachineEntity;
 
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
 public class BundleBuilderEntity extends MachineEntity {
 	public BundleBuilderEntity() {
@@ -76,7 +79,7 @@ public class BundleBuilderEntity extends MachineEntity {
 		ItemStack stack = this.getStackInSlot(DYE_SLOT);
 		
 		if (stack == null || stack.stackSize == 0)
-			return 0;
+			return -1;
 		
 		return stack.getItem().getDamage(stack);
 	}
@@ -105,10 +108,52 @@ public class BundleBuilderEntity extends MachineEntity {
 
 	@Override
 	public void setInventorySlotContents(int index, ItemStack stack) {
-	    	super.setInventorySlotContents(index, stack);
+	    
+	    if (index == PATTERN_INPUT_SLOT) {
+	    	// Check if its not a blank pattern
 	    	
-	    if (index != PATTERN_OUTPUT_SLOT)
-	    		this.updateOutputSlot();
+	    	if (stack != null && !RezolveMod.blankBundlePatternItem.getRegistryName().equals(stack.getItem().getRegistryName())) {
+	    		// A non-blank pattern was put into the input slot.
+	    		// Transform it into a blank slot and set up the other inventory slots according to the pattern.
+	    		
+	    		// Clear existing items
+	    		for (int i = 0, max = this.getSizeInventory(); i < max; ++i) {
+	    			if (i == PATTERN_INPUT_SLOT || i == PATTERN_OUTPUT_SLOT || i == DYE_SLOT)
+	    				continue;
+	    			
+	    			this.setInventorySlotContents(i, null);
+	    		}
+	    		
+	    		if (stack.hasTagCompound()) {
+		    		VirtualInventory vinv = new VirtualInventory();
+		    		RezolveNBT.readInventory(stack.getTagCompound(), vinv);
+		    		
+		    		int slot = 0;
+		    		for (ItemStack patternStack : vinv.getStacks()) {
+		    			if (patternStack == null)
+			    			System.out.println("Handling a stack of NULL");
+		    			else
+		    				System.out.println("Handling a stack of "+patternStack.getItem().getRegistryName());
+		    			this.setInventorySlotContents(3 + slot++, patternStack);
+		    		}
+
+		    		int dyeValue = stack.getTagCompound().getInteger("Color");
+		    		
+		    		if (dyeValue >= 0)
+		    			this.setInventorySlotContents(DYE_SLOT, new ItemStack(Items.DYE, 1, dyeValue));
+		    		else 
+		    			this.setInventorySlotContents(DYE_SLOT, null);
+	    		}
+	    		
+	    		stack = new ItemStack(RezolveMod.blankBundlePatternItem, stack.stackSize);
+	    	}
+	    }
+
+	    super.setInventorySlotContents(index, stack);
+	    
+	    if (index != PATTERN_OUTPUT_SLOT) {
+	    	this.updateOutputSlot();
+	    }
 	}
 
 	@Override
@@ -159,6 +204,12 @@ public class BundleBuilderEntity extends MachineEntity {
 	}
 	
 	public void setPatternName(String text) {
+		if (this.patternName == null && text == null)
+			return;
+		
+		if (this.patternName != null && this.patternName.equals(text))
+			return;
+		
 		this.patternName = text;
 		this.updateOutputSlot();
 		

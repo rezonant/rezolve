@@ -47,7 +47,7 @@ public class RezolveMod {
 
 	public static final Logger logger = LogManager.getLogger(RezolveMod.MODID);
 	private static RezolveMod _instance = null;
-
+	
 	public static RezolveMod instance() {
 		return _instance;
 	}

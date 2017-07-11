@@ -3,6 +3,35 @@
 
 This is a Minecraft mod which simplifies automation and provides tools to help you manage complex modded Minecraft bases.
 
+## Features 
+
+This section describes the features that this mod adds from the perspective of a player.
+
+### Machine: Bundler 
+
+You can use this machine to bundle a set of items into a single item. This can be used for automation/flow control purposes or for inventory storage purposes. The bundler requires RF energy, and the bigger the bundle being made, the more RF is required. To create a bundle, you must supply the bundler with a Bundle Pattern (see Bundle Pattern Builder below).
+
+After you have made a bundle, you can then reduce the bundle to its constituent items via the Unbundler (see below).
+
+Bundles can be nested, allowing for arbitrarily deep storage. However, this exponentially increases the RF cost. The cost to bundle an item is the same as the cost to unbundle an item.
+
+The formula for the RF cost of bundling/unbundling is as follows: 
+
+```
+(ItemCount * 100) * 2^(MaxBundleDepth)
+```
+Where `ItemCount` is the total number of items involved in the bundle (including all nested items, and including 1 point per Bundle item), and `MaxBundleDepth` is the deepest level of Bundle involved in the bundle you are creating. This makes very deep bundles very expensive.
+
+### Machine: Bundle Pattern Builder 
+
+Use this machine to create patterns which can be slotted into Bundlers. The Bundle Pattern Builder offers a 9x9 ghost inventory for specifying the component items of a bundle. You must then insert a Blank Bundle Pattern, and then you can extract a Bundle Pattern encoded with the items you specified. You can also color-code the bundle pattern which may help with mod compatibility and organization- to do so, insert a dye into the dye slot. The resulting bundle will be colored based on the dye. Each color of bundle is its own distinct item, so no metadata discrimination is required in order to sort bundles of different colors.
+
+The Bundle Pattern Builder requires RF to work, but it is a small static fee of 100 RF. This fee does not change regardless of how complex a bundle is. The item tooltip for a bundle pattern indicates what items are included, including any nested bundles.
+
+### Machine: Unbundler 
+
+You can reconstitute the component items of a bundle using an Unbundler. Unbundlers require RF just like Bundlers, and the cost is the same as creating the bundle. 
+
 ## Development: Getting Started
 
 Add this folder within an Eclipse workspace folder and run:

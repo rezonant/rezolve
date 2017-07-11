@@ -30,7 +30,15 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 	protected boolean hasCurrentOperation() {
 		return this.currentOperation != null;
 	}
-	
+
+	public int takeEnergy(int i) {
+		int energyTaken = Math.min(i, this.storedEnergy);
+		this.storedEnergy -= energyTaken;
+		this.notifyUpdate();
+		
+		return energyTaken;
+	}
+
 	public Operation getCurrentOperation() {
 		return this.currentOperation;
 	}
@@ -201,6 +209,43 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 		this.notifyUpdate();
 		return true;
 	}
+	
+	protected InventorySnapshot createInventorySnapshot() {
+		ItemStack[] slots = new ItemStack[this.inventory.length];
+		for (int i = 0, max = this.inventory.length; i < max; ++i) {
+			slots[i] = this.inventory[i] != null ? this.inventory[i].copy() : null;
+		}
+		
+		return new InventorySnapshot(slots);
+	}
+	
+	protected boolean applyInventorySnapshot(InventorySnapshot snapshot) {
+
+		if (snapshot.getSlots().length != this.inventory.length)
+			return false;
+		
+		ItemStack[] slots = new ItemStack[this.inventory.length];
+		ItemStack[] snapshotSlots = snapshot.getSlots();
+		
+		for (int i = 0, max = this.inventory.length; i < max; ++i) {
+			slots[i] = snapshotSlots[i] != null ? snapshotSlots[i].copy() : null;
+		}
+		
+		this.inventory = slots;
+		return true;
+	}
+	
+	protected InventorySnapshot startInventoryTransaction() {
+		return this.createInventorySnapshot();
+	}
+	
+	protected void rollbackInventoryTransaction(InventorySnapshot snapshot) {
+		this.applyInventorySnapshot(snapshot);
+	}
+	
+	protected void commitInventoryTransaction(InventorySnapshot snapshot) {
+		// noop
+	}
     
 	@Override
 	public void update() {
@@ -335,23 +380,27 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 	}
 	
 	@Override
-	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		NBTTagCompound nbt = super.writeToNBT(compound);
 		if (this.currentOperation != null) {
 			nbt.setBoolean("HasOp", true);
 			this.currentOperation.writeNBT(nbt);
 		} else {
 			nbt.setBoolean("HasOp", false);
 		}
-		return nbt;
+		
+		return super.writeToNBT(nbt);
 	}
 	
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
 		if (compound.hasKey("HasOp") && compound.getBoolean("HasOp")) {
-			if (this.currentOperation == null)
+			if (this.currentOperation == null) {
 				this.currentOperation = this.createOperation();
+				if (this.currentOperation == null) {
+					System.err.println("ERROR: Machine "+this.getClass().getCanonicalName()+" has not implemented createOperation()!");
+				}
+			}
 			this.currentOperation.readNBT(compound);
 		} else {
 			this.currentOperation = null;

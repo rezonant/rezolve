@@ -2,6 +2,7 @@ package com.astronautlabs.mc.rezolve.unbundler;
 
 import com.astronautlabs.mc.rezolve.bundleBuilder.BundlePatternSlot;
 import com.astronautlabs.mc.rezolve.bundler.BundleSlot;
+import com.astronautlabs.mc.rezolve.common.ContainerBase;
 import com.astronautlabs.mc.rezolve.common.MachineOutputSlot;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -10,10 +11,12 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
-public class UnbundlerContainer extends Container {
+public class UnbundlerContainer extends ContainerBase {
 	
 	public UnbundlerContainer(IInventory playerInv, UnbundlerEntity te) {
 
+		super(te);
+		
 		this.entity = te;
 		int invSlotSize = 18;
 
