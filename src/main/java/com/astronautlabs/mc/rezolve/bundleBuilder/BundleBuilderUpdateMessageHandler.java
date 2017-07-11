@@ -1,7 +1,7 @@
 package com.astronautlabs.mc.rezolve.bundleBuilder;
 
-import com.astronautlabs.mc.rezolve.network.BundlerPacketHandler;
-import com.astronautlabs.mc.rezolve.network.MessageHandler;
+import com.astronautlabs.mc.rezolve.MessageHandler;
+import com.astronautlabs.mc.rezolve.RezolvePacketHandler;
 
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
@@ -11,7 +11,7 @@ import net.minecraftforge.fml.relauncher.Side;
 public class BundleBuilderUpdateMessageHandler extends MessageHandler<BundleBuilderUpdateMessage, IMessage> {
 
 	public static void register() {
-		BundlerPacketHandler.registerMessage(BundleBuilderUpdateMessageHandler.class, BundleBuilderUpdateMessage.class, Side.SERVER);
+		RezolvePacketHandler.registerMessage(BundleBuilderUpdateMessageHandler.class, BundleBuilderUpdateMessage.class, Side.SERVER);
 	}
 	
 	@Override

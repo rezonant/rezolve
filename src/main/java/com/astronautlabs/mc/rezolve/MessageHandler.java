@@ -1,4 +1,4 @@
-package com.astronautlabs.mc.rezolve.network;
+package com.astronautlabs.mc.rezolve;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.IThreadListener;

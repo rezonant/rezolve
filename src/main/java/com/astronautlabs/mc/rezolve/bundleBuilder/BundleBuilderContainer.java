@@ -1,6 +1,8 @@
 package com.astronautlabs.mc.rezolve.bundleBuilder;
 
+import com.astronautlabs.mc.rezolve.common.ContainerBase;
 import com.astronautlabs.mc.rezolve.common.DyeSlot;
+import com.astronautlabs.mc.rezolve.common.GhostSlot;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -8,10 +10,10 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
-public class BundleBuilderContainer extends Container {
+public class BundleBuilderContainer extends ContainerBase<BundleBuilderEntity> {
 	
 	public BundleBuilderContainer(IInventory playerInv, BundleBuilderEntity te) {
-		this.entity = te;
+		super(te);
 		int invSlotSize = 18;
 
 		// Pattern/Dye Slots
@@ -29,7 +31,7 @@ public class BundleBuilderContainer extends Container {
 		
 	    for (int y = 0; y < invHeight; ++y) {
 	        for (int x = 0; x < invWidth; ++x) {
-	            this.addSlotToContainer(new Slot(te, 3 + x + y * invWidth, invOffsetX + x * invSlotSize, invOffsetY + y * invSlotSize));
+	            this.addSlotToContainer(new GhostSlot(te, 3 + x + y * invWidth, invOffsetX + x * invSlotSize, invOffsetY + y * invSlotSize, false));
 	        }
 	    }
 
@@ -82,8 +84,6 @@ public class BundleBuilderContainer extends Container {
 	    }
 	    return previous;
 	}
-	
-	private BundleBuilderEntity entity;
 	
 	@Override
 	public boolean canInteractWith(EntityPlayer player) {

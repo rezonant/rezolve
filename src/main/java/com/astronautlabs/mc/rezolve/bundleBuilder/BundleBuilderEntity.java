@@ -1,9 +1,9 @@
 package com.astronautlabs.mc.rezolve.bundleBuilder;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
-import com.astronautlabs.mc.rezolve.common.BundlerNBT;
+import com.astronautlabs.mc.rezolve.RezolvePacketHandler;
+import com.astronautlabs.mc.rezolve.common.RezolveNBT;
 import com.astronautlabs.mc.rezolve.common.MachineEntity;
-import com.astronautlabs.mc.rezolve.network.BundlerPacketHandler;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -59,7 +59,7 @@ public class BundleBuilderEntity extends MachineEntity {
 		ItemStack stack = new ItemStack(RezolveMod.bundlePatternItem, 1, 0);
 		NBTTagCompound nbt = new NBTTagCompound();
 		
-		BundlerNBT.writeInventory(nbt, this, 3, 9);
+		RezolveNBT.writeInventory(nbt, this, 3, 9);
 		
 		if (this.patternName != null)
 			nbt.setString("Name", this.patternName);
@@ -163,6 +163,6 @@ public class BundleBuilderEntity extends MachineEntity {
 		this.updateOutputSlot();
 		
 		if (this.worldObj.isRemote)
-			BundlerPacketHandler.INSTANCE.sendToServer(new BundleBuilderUpdateMessage(this));
+			RezolvePacketHandler.INSTANCE.sendToServer(new BundleBuilderUpdateMessage(this));
 	}
 }

@@ -1,7 +1,8 @@
 package com.astronautlabs.mc.rezolve.unbundler;
 
+import com.astronautlabs.mc.rezolve.BundleItem;
 import com.astronautlabs.mc.rezolve.RezolveMod;
-import com.astronautlabs.mc.rezolve.common.BundlerNBT;
+import com.astronautlabs.mc.rezolve.common.RezolveNBT;
 import com.astronautlabs.mc.rezolve.common.MachineEntity;
 import com.astronautlabs.mc.rezolve.common.VirtualInventory;
 
@@ -112,9 +113,11 @@ public class UnbundlerEntity extends MachineEntity {
 			
 			this.dummyInventory.clear();
 			
-			BundlerNBT.readInventory(nbt, this.dummyInventory);
+			RezolveNBT.readInventory(nbt, this.dummyInventory);
 			boolean cancelled = false;
-
+			
+			int cost = BundleItem.getBundleCost(inputStack);
+			
 			for (ItemStack outputItem : this.dummyInventory.getStacks()) {
 				if (!this.distributeItem(outputItem, true)) {
 					cancelled = true;
@@ -122,6 +125,8 @@ public class UnbundlerEntity extends MachineEntity {
 				}
 			}
 			
+			// Calculate the cost 
+
 			if (cancelled) {
 				continue;
 			}
@@ -139,7 +144,7 @@ public class UnbundlerEntity extends MachineEntity {
 			
 			// Consume the power 
 			
-			this.storedEnergy -= this.unbundleEnergyCost;
+			this.storedEnergy -= cost;
 			
 			break;
 		}

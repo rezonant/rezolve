@@ -2,9 +2,12 @@ package com.astronautlabs.mc.rezolve.bundler;
 
 import java.util.ArrayList;
 
+import com.astronautlabs.mc.rezolve.BundleItem;
 import com.astronautlabs.mc.rezolve.RezolveMod;
-import com.astronautlabs.mc.rezolve.common.BundlerNBT;
+import com.astronautlabs.mc.rezolve.bundler.BundlerEntity.ItemMemo;
+import com.astronautlabs.mc.rezolve.common.RezolveNBT;
 import com.astronautlabs.mc.rezolve.common.MachineEntity;
+import com.astronautlabs.mc.rezolve.common.Operation;
 import com.astronautlabs.mc.rezolve.common.VirtualInventory;
 
 import net.minecraft.item.ItemStack;
@@ -16,6 +19,16 @@ public class BundlerEntity extends MachineEntity {
 		super("bundler_tile_entity");
 	    this.updateInterval = 20 * 2;
 	    this.maxEnergyStored = 20000;
+	}
+
+	class ItemMemo {
+		ItemMemo(int index, ItemStack stack) {
+			this.index = index;
+			this.stack = stack;
+		}
+		
+		public int index;
+		public ItemStack stack;
 	}
 	
     private int bundleEnergyCost = 1000;
@@ -51,132 +64,62 @@ public class BundlerEntity extends MachineEntity {
 		return true;
 	}
 
-	private ItemStack createItemFromPattern(ItemStack pattern) {
-		
-		this.dummyInventory.clear();
+	private boolean startProducing(ItemStack pattern) {
 		
 		if (!pattern.hasTagCompound())
-			return null;
+			return false;
 		
-		NBTTagCompound nbt = pattern.getTagCompound();
-		BundlerNBT.readInventory(nbt, this.dummyInventory);
-		
-		class ItemMemo {
-			ItemMemo(int index, ItemStack stack) {
-				this.index = index;
-				this.stack = stack;
-			}
-			
-			public int index;
-			public ItemStack stack;
-		}
-		
-		ArrayList<ItemMemo> availableItems = new ArrayList<ItemMemo>();
+		ArrayList<ItemMemo> selectedItems = this.selectItemsFor(pattern);
 
-		for (int i = 0, max = this.getSizeInventory(); i < max; ++i) {
-			if (!this.isInputSlot(i))
-				continue;
-			
-			ItemStack slotStack = this.getStackInSlot(i);
-			
-			if (slotStack == null)
-				continue;
-			
-			for (int j = 0, maxJ = slotStack.stackSize; j < maxJ; ++j)
-				availableItems.add(new ItemMemo(i, slotStack));
-		}
-		
-		ArrayList<ItemMemo> selectedItems = new ArrayList<ItemMemo>();
-		
-		int requestedItemCount = 0;
-		
-		for (ItemStack requestedItem : this.dummyInventory.getStacks()) {
-			if (requestedItem == null || requestedItem.stackSize == 0)
-				continue;
-		
-			int missing = requestedItem.stackSize;
-			requestedItemCount += missing;
-			
-			for (int i = 0, max = requestedItem.stackSize; i < max; ++i) {
-				for (int j = 0, maxJ = availableItems.size(); j < maxJ; ++j) {
-					ItemMemo availableItem = availableItems.get(j);
-					
-					if (!RezolveMod.areStacksSame(availableItem.stack, requestedItem))
-						continue;
-					
-					selectedItems.add(availableItem);
-					availableItems.remove(j--);
-					--maxJ;
-					--missing;
-					
-					if (missing <= 0)
-						break;
-				}
-				
-				if (missing <= 0)
-					break;
-			}
-		}
-		
 		// If we don't have the correct amount of items, then we don't have enough to make a bundle.
-		if (requestedItemCount != selectedItems.size())
-			return null;
+		if (selectedItems == null) {
+			System.out.println("Could not select items");
+			return false;
+		}
 
 		// Produce a bundle
-		ItemStack bundleStack = new ItemStack(RezolveMod.bundleItem, 1);
-		bundleStack.setTagCompound(pattern.getTagCompound());
+		ItemStack bundleStack = this.makeBundleStack(pattern);
 		
 		// Ensure we have space to store the output bundle, otherwise duck out early.
 		
-		if (!this.storeBundle(bundleStack, true))
-			return null;
-		
-		// Ensure we have the power to do it
-		
-		if (this.storedEnergy < this.bundleEnergyCost)
-			return null;
+		System.out.println("Starting operation...");
+		this.startOperation(new BundlerOperation(this, pattern));
+		return true;
+	}
+
+	@Override
+	public Operation createOperation() {
+		return new BundlerOperation(this);
+	}
 	
-		// OK, remove the source materials
-		
-		for (ItemMemo selectedItem : selectedItems) {
-			selectedItem.stack.stackSize -= 1;
-			if (selectedItem.stack.stackSize <= 0) {
-				this.setInventorySlotContents(selectedItem.index, null);
-			}
-		}
-		
-		// Remove the energy, too
-		
-		this.storedEnergy -= this.bundleEnergyCost;
-		this.notifyUpdate();
-		
-		// Return the new bundle
-		
+	public ItemStack makeBundleStack(ItemStack pattern) {
+		ItemStack bundleStack = new ItemStack(RezolveMod.bundleItem, 1);
+		bundleStack.setTagCompound(pattern.getTagCompound());
 		return bundleStack;
 	}
 
 	private VirtualInventory dummyInventory = new VirtualInventory();
 	
     private void produceBundles() {
-    	for (int i = 0, max = this.getSizeInventory(); i < max; ++i) {
-    		if (!this.isPatternSlot(i))
-    			continue;
-    	
-    		ItemStack pattern = this.getStackInSlot(i);
-    		if (pattern == null || pattern.stackSize == 0)
-    			continue;
+    		if (this.hasCurrentOperation())
+    			return;
     		
-    		ItemStack bundle = this.createItemFromPattern(pattern);
-    		if (bundle != null) {
-    			this.storeBundle(bundle, false);
-    			
-    			// Break now so we have to wait for the next cycle to produce a bundle
-    			break;
-    		}
-    	}
+	    	for (int i = 0, max = this.getSizeInventory(); i < max; ++i) {
+	    		if (!this.isPatternSlot(i))
+	    			continue;
+	    	
+	    		ItemStack pattern = this.getStackInSlot(i);
+	    		if (pattern == null || pattern.stackSize == 0)
+	    			continue;
+	    		
+	    		boolean started = this.startProducing(pattern);
+	    		
+	    		if (started)
+	    			break;
+	    	}
     }
     
-    private boolean storeBundle(ItemStack bundle, boolean simulate) {
+    public boolean storeBundle(ItemStack bundle, boolean simulate) {
 
 		ItemStack existingOutputStack = null;
 		int firstEmptySlot = -1;
@@ -233,5 +176,119 @@ public class BundlerEntity extends MachineEntity {
 	
 	protected boolean allowedToPushTo(int slot) {
 		return this.isInputSlot(slot);
+	}
+
+	public int takeEnergy(int i) {
+		int energyTaken = Math.min(i, this.storedEnergy);
+		this.storedEnergy -= energyTaken;
+		this.notifyUpdate();
+		
+		return energyTaken;
+	}
+
+	public boolean hasPattern(ItemStack pattern) {
+		for (int i = 0, max = this.getSizeInventory(); i < max; ++i) {
+			ItemStack slotStack = this.getStackInSlot(i);
+			
+			if (slotStack == null || slotStack.stackSize <= 0)
+				continue;
+			
+			if (RezolveMod.areStacksSame(slotStack, pattern))
+				return true;
+		}
+		
+		return false;
+	}
+
+	protected ArrayList<ItemMemo> getAvailableItems() {
+
+		ArrayList<ItemMemo> availableItems = new ArrayList<ItemMemo>();
+
+		for (int i = 0, max = this.getSizeInventory(); i < max; ++i) {
+			if (!this.isInputSlot(i))
+				continue;
+			
+			ItemStack slotStack = this.getStackInSlot(i);
+			
+			if (slotStack == null)
+				continue;
+			
+			for (int j = 0, maxJ = slotStack.stackSize; j < maxJ; ++j)
+				availableItems.add(new ItemMemo(i, slotStack));
+		}
+		
+		return availableItems;
+	}
+	
+	protected ArrayList<ItemMemo> selectItemsFor(ItemStack pattern) {
+
+		this.dummyInventory.clear();
+
+		NBTTagCompound nbt = pattern.getTagCompound();
+		RezolveNBT.readInventory(nbt, this.dummyInventory);
+		
+		ArrayList<ItemMemo> availableItems = this.getAvailableItems();
+		ArrayList<ItemMemo> selectedItems = new ArrayList<ItemMemo>();
+		
+		int requestedItemCount = 0;
+		int bundleDepth = 0;
+		
+		for (ItemStack requestedItem : this.dummyInventory.getStacks()) {
+			if (requestedItem == null || requestedItem.stackSize == 0)
+				continue;
+		
+			if (RezolveMod.instance().isBundleItem(requestedItem.getItem()))
+				bundleDepth = Math.max(bundleDepth, BundleItem.getBundleDepth(requestedItem));
+			
+			int missing = requestedItem.stackSize;
+			requestedItemCount += missing;
+			
+			for (int i = 0, max = requestedItem.stackSize; i < max; ++i) {
+				for (int j = 0, maxJ = availableItems.size(); j < maxJ; ++j) {
+					ItemMemo availableItem = availableItems.get(j);
+					
+					if (!RezolveMod.areStacksSame(availableItem.stack, requestedItem))
+						continue;
+					
+					selectedItems.add(availableItem);
+					availableItems.remove(j--);
+					--maxJ;
+					--missing;
+					
+					if (missing <= 0)
+						break;
+				}
+				
+				if (missing <= 0)
+					break;
+			}
+		}
+		
+		if (requestedItemCount != selectedItems.size())
+			return null;
+		
+		return selectedItems;
+	}
+	
+	public boolean hasItemsFor(ItemStack pattern) {
+		ArrayList<ItemMemo> selectedItems = this.selectItemsFor(pattern);
+		return selectedItems != null;
+	}
+
+	public void completeOperation(BundlerOperation bundlerOperation) {
+		
+		ArrayList<ItemMemo> selectedItems = this.selectItemsFor(bundlerOperation.getPattern());
+		// OK, remove the source materials
+		
+		for (ItemMemo selectedItem : selectedItems) {
+			selectedItem.stack.stackSize -= 1;
+			if (selectedItem.stack.stackSize <= 0) {
+				this.setInventorySlotContents(selectedItem.index, null);
+			}
+		}
+		
+		ItemStack bundleStack = this.makeBundleStack(bundlerOperation.getPattern());
+		this.storeBundle(bundleStack, false);
+		
 	}
 }

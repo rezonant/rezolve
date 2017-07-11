@@ -1,13 +1,18 @@
 package com.astronautlabs.mc.rezolve.bundler;
 
+import com.astronautlabs.mc.rezolve.common.GuiContainerBase;
+import com.astronautlabs.mc.rezolve.common.MachineEntity;
+import com.astronautlabs.mc.rezolve.common.Operation;
+
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 
-public class BundlerGuiContainer extends GuiContainer {
+public class BundlerGuiContainer extends GuiContainerBase {
 
 	public BundlerGuiContainer(IInventory playerInv, BundlerEntity entity) {
 		super(new BundlerContainer(playerInv, entity));
@@ -36,13 +41,23 @@ public class BundlerGuiContainer extends GuiContainer {
 	    //this.fontRendererObj.drawString(this.playerInv.getDisplayName().getUnformattedText(), 8, 72, 4210752);      //#404040
 
 	    int rfBarX = 231;
-	    int rfBarY = 25;
+	    int rfBarY = 20;
 	    int rfBarHeight = 88;
 	    int rfBarWidth = 14;
 	    
 	    int usedHeight = (int)(this.entity.getEnergyStored(EnumFacing.DOWN) / (double)this.entity.getMaxEnergyStored(EnumFacing.DOWN) * rfBarHeight);
-	    Gui.drawRect(rfBarX, rfBarY, rfBarX + rfBarWidth, rfBarY + rfBarHeight, 0xFF000000);
-	    Gui.drawRect(rfBarX, rfBarY + rfBarHeight - usedHeight, rfBarX + rfBarWidth, rfBarY + rfBarHeight, 0xFFFF0000);
+	    Gui.drawRect(rfBarX, rfBarY, rfBarX + rfBarWidth, rfBarY + rfBarHeight - usedHeight, 0xFF000000);
 	    
+	    Operation<BundlerEntity> op = this.entity.getCurrentOperation();
+	    
+	    if (op != null) {
+	    		int width = (int)(27 * op.getPercentage() / (double)100);
+	    		
+	    		System.out.println("drawing arrow at "+width);
+
+	    	    this.mc.getTextureManager().bindTexture(new ResourceLocation("rezolve:textures/gui/container/arrow.png"));
+	    	    
+	    		this.drawTexturedModalRect(135, 62, 0, 0, width, 28);
+	    }
 	}
 }

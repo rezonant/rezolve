@@ -1,4 +1,4 @@
-package com.astronautlabs.mc.rezolve.waila;
+package com.astronautlabs.mc.rezolve;
 
 import java.util.List;
 

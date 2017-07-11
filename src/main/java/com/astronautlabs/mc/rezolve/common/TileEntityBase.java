@@ -26,7 +26,7 @@ public class TileEntityBase extends TileEntity  {
 	    }
 	    
 		if (this instanceof IInventory) {
-			BundlerNBT.writeInventory(compound, (IInventory)this);
+			RezolveNBT.writeInventory(compound, (IInventory)this);
 		}
 		
 		if (this.storedEnergy >= 0)
@@ -72,7 +72,7 @@ public class TileEntityBase extends TileEntity  {
 	    	this.storedEnergy = compound.getInteger("RF");
 	    
 		if (this instanceof IInventory) {
-			BundlerNBT.readInventory(compound, (IInventory)this);
+			RezolveNBT.readInventory(compound, (IInventory)this);
 		}
 		
 		super.readFromNBT(compound);

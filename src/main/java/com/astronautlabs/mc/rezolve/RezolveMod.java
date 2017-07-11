@@ -10,8 +10,8 @@ import com.astronautlabs.mc.rezolve.bundleBuilder.BlankBundlePatternItem;
 import com.astronautlabs.mc.rezolve.bundleBuilder.BundleBuilderBlock;
 import com.astronautlabs.mc.rezolve.bundleBuilder.BundlePatternItem;
 import com.astronautlabs.mc.rezolve.bundler.BundlerBlock;
-import com.astronautlabs.mc.rezolve.bundler.BundlerGuiHandler;
 import com.astronautlabs.mc.rezolve.common.BlockBase;
+import com.astronautlabs.mc.rezolve.common.GhostSlotUpdateMessageHandler;
 import com.astronautlabs.mc.rezolve.common.ItemBase;
 import com.astronautlabs.mc.rezolve.common.TileEntityBase;
 import com.astronautlabs.mc.rezolve.unbundler.UnbundlerBlock;
@@ -209,21 +209,23 @@ public class RezolveMod {
 		this.registerItem(item);
 	}
 
-	BundlerGuiHandler guiHandler;
+	RezolveGuiHandler guiHandler;
 
-	public BundlerGuiHandler getGuiHandler() {
+	public RezolveGuiHandler getGuiHandler() {
 		return this.guiHandler;
 	}
 
 	@EventHandler
 	public void preinit(FMLPreInitializationEvent event) {
-		this.guiHandler = new BundlerGuiHandler();
+		this.guiHandler = new RezolveGuiHandler();
 		this.registerBlocks();
 		this.registerItems();
 
 		this.registerBlockRecipes();
 		this.registerItemRecipes();
 
+		GhostSlotUpdateMessageHandler.register();
+		
 		proxy.init(this);
 
 		FMLInterModComms.sendMessage("Waila", "register", "com.astronautlabs.mc.rezolve.waila.WailaCompat.load");

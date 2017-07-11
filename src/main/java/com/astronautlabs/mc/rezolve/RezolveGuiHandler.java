@@ -1,4 +1,4 @@
-package com.astronautlabs.mc.rezolve.bundler;
+package com.astronautlabs.mc.rezolve;
 
 import java.util.ArrayList;
 
@@ -8,7 +8,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 
-public class BundlerGuiHandler implements IGuiHandler {
+public class RezolveGuiHandler implements IGuiHandler {
 
     public static final int MOD_TILE_ENTITY_GUI = 0;
 
@@ -23,18 +23,18 @@ public class BundlerGuiHandler implements IGuiHandler {
     @Override
     public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
     	
-    	if (ID >= this.guis.size())
-    		return null;
-    	
-    	return this.guis.get(ID).createServerGui(player, world, x, y, z);
+	    	if (ID >= this.guis.size())
+	    		return null;
+	    	
+	    	return this.guis.get(ID).createServerGui(player, world, x, y, z);
     }
 
     @Override
     public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-
-    	if (ID >= this.guis.size())
-    		return null;
-    	
-    	return this.guis.get(ID).createClientGui(player, world, x, y, z);
+	
+	    	if (ID >= this.guis.size())
+	    		return null;
+	    	
+	    	return this.guis.get(ID).createClientGui(player, world, x, y, z);
     }
 }

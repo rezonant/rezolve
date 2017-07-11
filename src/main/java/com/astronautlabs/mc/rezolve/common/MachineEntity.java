@@ -6,6 +6,7 @@ import cofh.api.energy.IEnergyReceiver;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.text.ITextComponent;
@@ -24,7 +25,16 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 	}
 	
     protected ItemStack[] inventory;
-
+	Operation currentOperation;
+	
+	protected boolean hasCurrentOperation() {
+		return this.currentOperation != null;
+	}
+	
+	public Operation getCurrentOperation() {
+		return this.currentOperation;
+	}
+	
     @Override
     public ITextComponent getDisplayName() {
         return this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName());
@@ -159,7 +169,7 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
     /**
      * Fire an update every N ticks (20 ticks per second)
      */
-    protected long updateInterval = 20 * 2;
+    protected long updateInterval = 10;
     
     /**
      * This is run every `updateInterval` with the default implementation
@@ -168,6 +178,29 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
     public void updatePeriodically() {
     		// TODO: implement in subclass
     }
+
+    /**
+     * Start a new operation, called in the tick update method.
+     * @return
+     */
+    public Operation startOperation() {
+    		return null;
+    }
+
+    /**
+     * Manually start an operation
+     * @param operation
+     * @return
+     */
+	protected boolean startOperation(Operation operation) {
+		if (this.currentOperation != null)
+			return false;
+		
+		this.currentOperation = operation;
+		System.out.println("Starting operation");
+		this.notifyUpdate();
+		return true;
+	}
     
 	@Override
 	public void update() {
@@ -181,6 +214,20 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 			return;
 		
 		lastUpdate = currentTime;
+
+		if (this.hasCurrentOperation()) {
+			boolean finished = this.currentOperation.update();
+			if (finished) {
+				System.out.println("Operation completed.");
+				this.currentOperation = null;
+			}
+			this.notifyUpdate();
+		} else {
+			Operation op = this.startOperation();
+			if (op != null)
+				this.startOperation(op);
+		}
+		
 		this.updatePeriodically();
 		
 	}
@@ -255,20 +302,14 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 	
 	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-		System.out.println("Trying to push into "+this.getRegistryName() + " slot "+slot);
 		if (!this.allowedToPushTo(slot))
 			return null;
 
-		System.out.println("Acceptable to push into "+this.getRegistryName()+ " slot "+slot);
 		ItemStack existingStack = this.getStackInSlot(slot);
 		
 		if (existingStack != null && !RezolveMod.areStacksSame(stack, existingStack)) {
-
-			System.out.println("There's a different stack in this slot: trying to push into "+this.getRegistryName()+ " slot "+slot);
 			return stack;
 		}
-		
-		System.out.println("No existing stack in this slot, should be able to push into "+this.getRegistryName()+ " slot "+slot);
 		
 		int itemsToKeep = stack.stackSize;
 		ItemStack returnStack = null;
@@ -285,12 +326,39 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 		if (!simulate) {
 			this.setInventorySlotContents(slot, keepStack);
 		}
-
-		System.out.println("Allowing push into "+this.getRegistryName()+ " slot "+slot);
 		
 		return returnStack;
 	}
 
+	public Operation createOperation() {
+		return null;
+	}
+	
+	@Override
+	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+		// TODO Auto-generated method stub
+		NBTTagCompound nbt = super.writeToNBT(compound);
+		if (this.currentOperation != null) {
+			nbt.setBoolean("HasOp", true);
+			this.currentOperation.writeNBT(nbt);
+		} else {
+			nbt.setBoolean("HasOp", false);
+		}
+		return nbt;
+	}
+	
+	@Override
+	public void readFromNBT(NBTTagCompound compound) {
+		if (compound.hasKey("HasOp") && compound.getBoolean("HasOp")) {
+			if (this.currentOperation == null)
+				this.currentOperation = this.createOperation();
+			this.currentOperation.readNBT(compound);
+		} else {
+			this.currentOperation = null;
+		}
+		
+		super.readFromNBT(compound);
+	}
 	@Override
 	public ItemStack extractItem(int slot, int amount, boolean simulate) {
 		if (!this.allowedToPullFrom(slot))

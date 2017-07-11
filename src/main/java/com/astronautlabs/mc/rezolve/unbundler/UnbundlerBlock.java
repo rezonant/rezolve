@@ -1,5 +1,6 @@
 package com.astronautlabs.mc.rezolve.unbundler;
 
+import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.bundler.BundlerContainer;
 import com.astronautlabs.mc.rezolve.bundler.BundlerEntity;
 import com.astronautlabs.mc.rezolve.bundler.BundlerGuiContainer;
@@ -8,6 +9,8 @@ import com.astronautlabs.mc.rezolve.common.TileEntityBase;
 
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -32,15 +35,15 @@ public class UnbundlerBlock extends Machine {
 	public void registerRecipes() {
 		
 		GameRegistry.addRecipe(new ItemStack(this.itemBlock), 
-			"III",
-			"CSC",
-			"IHI", 
+			"PcP",
+			"CpC",
+			"PHP", 
 			
-			'I', Item.REGISTRY.getObject(new ResourceLocation("minecraft:iron_block")),
-			'M', Item.REGISTRY.getObject(new ResourceLocation("minecraft:minecart")),
-			'C', Item.REGISTRY.getObject(new ResourceLocation("minecraft:chest")),
-			'S', Item.REGISTRY.getObject(new ResourceLocation("minecraft:sticky_piston")),
-			'H', Item.REGISTRY.getObject(new ResourceLocation("minecraft:hopper"))
+			'P', RezolveMod.blankBundlePatternItem,
+			'c', Blocks.CRAFTING_TABLE,
+			'C', Blocks.CHEST,
+			'p', Blocks.PISTON,
+			'H', Blocks.HOPPER
 		);
 	}
 	
