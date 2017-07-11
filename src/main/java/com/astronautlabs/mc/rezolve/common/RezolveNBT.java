@@ -5,7 +5,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public class BundlerNBT {
+public class RezolveNBT {
 	public static void writeInventory(NBTTagCompound nbt, IInventory inventory) {
 		writeInventory(nbt, inventory, 0, inventory.getSizeInventory());
 	}
