@@ -1,7 +1,10 @@
 package com.astronautlabs.mc.rezolve.bundleBuilder;
 
+import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.ItemBase;
 
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -15,15 +18,30 @@ public class BlankBundlePatternItem extends ItemBase {
 	@Override
 	public void registerRecipes() {
 
-		GameRegistry.addRecipe(new ItemStack(this), 
-			"OSO",
-			"GIG",
-			"OSO", 
+		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
+
+			RezolveMod.addRecipe(new ItemStack(this), 
+				"PSP",
+				"GFG",
+				"PSP", 
+				
+				'P', "item|enderio:itemAlloy|5",
+				'S', "item|enderio:itemMaterial",
+				'G', Items.GLOWSTONE_DUST,
+				'F', "item|enderio:itemBasicFilterUpgrade"
+			);
 			
-			'O', Item.REGISTRY.getObject(new ResourceLocation("minecraft:obsidian")),
-			'S', Item.REGISTRY.getObject(new ResourceLocation("minecraft:slime_ball")),
-			'G', Item.REGISTRY.getObject(new ResourceLocation("minecraft:glowstone_dust")),
-			'I', Item.REGISTRY.getObject(new ResourceLocation("minecraft:item_frame"))
-		);
+		} else {
+			RezolveMod.addRecipe(new ItemStack(this), 
+				"OSO",
+				"GIG",
+				"OSO", 
+				
+				'O', Blocks.OBSIDIAN,
+				'S', Items.SLIME_BALL,
+				'G', Items.GLOWSTONE_DUST,
+				'I', Items.ITEM_FRAME
+			);
+		}
 	}
 }

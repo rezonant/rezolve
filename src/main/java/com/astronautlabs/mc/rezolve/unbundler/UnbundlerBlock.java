@@ -7,6 +7,7 @@ import com.astronautlabs.mc.rezolve.bundler.BundlerGuiContainer;
 import com.astronautlabs.mc.rezolve.common.Machine;
 import com.astronautlabs.mc.rezolve.common.TileEntityBase;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -33,18 +34,36 @@ public class UnbundlerBlock extends Machine {
 	
 	@Override
 	public void registerRecipes() {
-		
-		GameRegistry.addRecipe(new ItemStack(this.itemBlock), 
-			"PcP",
-			"CpC",
-			"PHP", 
+
+		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
+
+			RezolveMod.addRecipe(
+				new ItemStack(this.itemBlock), 
+				"BCB",
+				"EME",
+				"BcB", 
+				
+				'B', RezolveMod.blankBundlePatternItem,
+				'C', "block|enderio:blockCapBank",
+				'E', "item|enderio:itemMagnet",
+				'M', "item|enderio:itemMachinePart|0",
+				'c', "item|enderio:itemItemConduit"
+			);
 			
-			'P', RezolveMod.blankBundlePatternItem,
-			'c', Blocks.CRAFTING_TABLE,
-			'C', Blocks.CHEST,
-			'p', Blocks.PISTON,
-			'H', Blocks.HOPPER
-		);
+		} else {
+			RezolveMod.addRecipe(
+				new ItemStack(this.itemBlock), 
+				"PcP",
+				"CpC",
+				"PHP", 
+				
+				'P', RezolveMod.blankBundlePatternItem,
+				'c', Blocks.CRAFTING_TABLE,
+				'C', Blocks.CHEST,
+				'p', Blocks.PISTON,
+				'H', Blocks.HOPPER
+			);
+		}
 	}
 	
 	@Override

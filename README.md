@@ -40,10 +40,10 @@ Add this folder within an Eclipse workspace folder and run:
 gradlew setupDecompWorkspace
 ```
 
-You can now `Import` the folder as an `Existing Project` within Eclipse. 
+Install Gradle Buildship in Eclipse via Help -> Install New Software.
+You can now `Import` the folder as a `Gradle Project` within Eclipse. 
 
-To build the mod and run it within Minecraft:
-
+To build the mod and run it within Minecraft use the `runClient` Gradle task via command line or within Eclipse:
 ```
 gradlew runClient
 ```

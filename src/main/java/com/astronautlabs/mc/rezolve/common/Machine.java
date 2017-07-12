@@ -3,7 +3,10 @@ package com.astronautlabs.mc.rezolve.common;
 import java.lang.reflect.Constructor;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
+import com.google.common.base.Predicate;
 
+import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.EntityLivingBase;
@@ -20,6 +23,35 @@ public abstract class Machine extends TileBlockBase implements IGuiProvider {
 	public Machine(String registryName) {
 		super(registryName);
 		RezolveMod.instance().registerTileEntity(this.getTileEntityClass());
+		this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
+	}
+	
+	public static final PropertyDirection FACING = PropertyDirection.create("facing", new Predicate<EnumFacing>() {
+		@Override
+		public boolean apply(EnumFacing input) {
+			return input != EnumFacing.DOWN && input != EnumFacing.UP;
+		}
+	});
+	
+	public int getMetaFromState(IBlockState state) {
+		return state.getValue(FACING).ordinal();
+	};
+	
+	@Override
+	public IBlockState getStateFromMeta(int meta) {
+		return this.blockState.getBaseState()
+			.withProperty(FACING, EnumFacing.VALUES[meta]);
+	}
+	
+	@Override
+	public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ,
+			int meta, EntityLivingBase placer) {
+		return getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite());
+	}
+	
+	@Override
+	protected BlockStateContainer createBlockState() {
+		return new BlockStateContainer(this, FACING);
 	}
 	
 	@Override()

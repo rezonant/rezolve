@@ -67,7 +67,7 @@ dependencies {
     
     compile "mcp.mobius.waila:Waila:${waila_version}"
     compile "mezz.jei:jei_${minecraft_version}:${jei_version}"
-    compile "codechicken:CodeChickenCore:${ccc_version}"
+    compile "com.enderio.core:EnderCore:${endercore_version}"
     compile "com.enderio:EnderIO:${enderio_version}"
     compile "appeng:appliedenergistics2:${ae_version}:api"
     compile "net.darkhax.tesla:Tesla:${tesla_version}"
@@ -95,6 +95,9 @@ sourceSets {
     main {
         java {
             srcDir 'src/main/java'
+            srcDir 'ext/cofhlib/src/main/java'
+            exclude '**/cofh/lib/**'
+            exclude '**/IGeneratorParser.java'
         }
         resources {
             srcDir 'src/main/resources'
@@ -103,10 +106,7 @@ sourceSets {
     
     cofh {
         java {
-            srcDir 'ext/cofhlib/src/main/java'
             // Note: If this doesn't work in Eclipse, add those as Resource Filters to the package, not as filters to the source set...
-            exclude '**/cofh/lib/**'
-            exclude '**/IGeneratorParser.java'
         }
     }
 }

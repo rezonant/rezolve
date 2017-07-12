@@ -5,10 +5,13 @@ import com.astronautlabs.mc.rezolve.common.ITooltipHint;
 import com.astronautlabs.mc.rezolve.common.Machine;
 import com.astronautlabs.mc.rezolve.common.TileEntityBase;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -36,18 +39,31 @@ public class BundleBuilderBlock extends Machine implements ITooltipHint {
 	
 	@Override
 	public void registerRecipes() {
-		
-		GameRegistry.addRecipe(new ItemStack(this.itemBlock), 
-			"QEQ",
-			"CRC",
-			"QNQ", 
-			
-			'Q', Item.REGISTRY.getObject(new ResourceLocation("minecraft:quartz_block")),
-			'E', Item.REGISTRY.getObject(new ResourceLocation("minecraft:enchanting_table")),
-			'C', Item.REGISTRY.getObject(new ResourceLocation("minecraft:crafting_table")),
-			'R', Item.REGISTRY.getObject(new ResourceLocation("minecraft:comparator")),
-			'N', Item.REGISTRY.getObject(new ResourceLocation("minecraft:nether_star"))
-		);
+		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
+			RezolveMod.addRecipe(new ItemStack(this.itemBlock), 
+				"RCR",
+				"FMF",
+				"RcR", 
+
+				'R', "item|enderio:itemAlloy|3",
+				'C', Items.COMPARATOR,
+				'F', "item|enderio:itemBasicFilterUpgrade",
+				'M', "item|enderio:itemMachinePart|0",
+				'c', "item|enderio:itemBasicCapacitor|2"
+			);
+		} else {
+			RezolveMod.addRecipe(new ItemStack(this.itemBlock), 
+				"QEQ",
+				"CRC",
+				"QNQ", 
+				
+				'Q', Blocks.QUARTZ_BLOCK,
+				'E', Blocks.ENCHANTING_TABLE,
+				'C', Blocks.CRAFTING_TABLE,
+				'R', Items.COMPARATOR,
+				'N', Items.NETHER_STAR
+			);
+		}
 	}
 	
 	@Override

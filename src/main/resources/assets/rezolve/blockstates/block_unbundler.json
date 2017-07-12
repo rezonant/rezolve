@@ -4,6 +4,13 @@
     "model": "rezolve:block_unbundler"
   },
   "variants": {
+    "facing=up": [{ "model": "rezolve:block_unbundler" }],
+    "facing=down": [{ "model": "rezolve:block_unbundler" }],
+    
+    "facing=north": [{ "model": "rezolve:block_unbundler" }],
+    "facing=south": [{ "model": "rezolve:block_unbundler", "y": 180 }],
+    "facing=west": [{ "model": "rezolve:block_unbundler", "y": 270 }],
+    "facing=east": [{ "model": "rezolve:block_unbundler", "y": 90 }],
     "normal": [{}],
     "inventory": [{}]
   }

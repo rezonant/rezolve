@@ -4,6 +4,13 @@
     "model": "rezolve:block_bundle_builder"
   },
   "variants": {
+    "facing=up": [{ "model": "rezolve:block_bundle_builder" }],
+    "facing=down": [{ "model": "rezolve:block_bundle_builder" }],
+    
+    "facing=north": [{ "model": "rezolve:block_bundle_builder" }],
+    "facing=south": [{ "model": "rezolve:block_bundle_builder", "y": 180 }],
+    "facing=west": [{ "model": "rezolve:block_bundle_builder", "y": 270 }],
+    "facing=east": [{ "model": "rezolve:block_bundle_builder", "y": 90 }],
     "normal": [{}],
     "inventory": [{}]
   }
