@@ -7,13 +7,15 @@ buildscript {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
     }
 }
+
 apply plugin: 'net.minecraftforge.gradle.forge'
+
 //Only edit below this line, the above code adds and enables the nessasary things for Forge to be setup.
 
 
 version = "1.0"
-group= "com.yourname.modid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "modid"
+group= "com.astronautlabs.mc.rezolve" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "rezolve"
 
 sourceCompatibility = targetCompatibility = "1.6" // Need this here so eclipse task generates correctly.
 compileJava {
@@ -33,12 +35,44 @@ minecraft {
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
+repositories {
+    mavenCentral()
+    maven { url = "http://chickenbones.net/maven" }
+    maven { url = "http://mobiusstrip.eu/maven" }
+    maven { url = "http://dl.tsr.me/artifactory/libs-release-local" }
+    maven { url = "http://maven.tterrag.com" }
+    maven { url = "http://dvs1.progwml6.com/files/maven" } 
+    maven { url = "http://files.minecraftforge.net/maven" }
+    maven { url = "http://maven.cil.li/" }
+    maven { url = "http://maven.ic2.player.to" }
+    maven { url = "http://maven.epoxide.xyz" }
+    maven { url = "https://www.curseforge.com/api/maven/?token=99cbb405-a0ae-4a7f-87dc-24ab55a44b4b" }
+    ivy {
+        url "http://ae-mod.info/builds"
+        layout "pattern", {
+            artifact "[module]-[revision](-[classifier])(.[ext])"
+        }
+    }
+    mavenLocal()
+}
+
+
 dependencies {
     // you may put jars on which you depend on in ./libs
     // or you may define them like so..
     //compile "some.group:artifact:version:classifier"
     //compile "some.group:artifact:version"
       
+    // compile "com.mod-buildcraft:buildcraft:${buildcraft_version}:api"
+    
+    compile "mcp.mobius.waila:Waila:${waila_version}"
+    compile "mezz.jei:jei_${minecraft_version}:${jei_version}"
+    compile "codechicken:CodeChickenCore:${ccc_version}"
+    compile "com.enderio:EnderIO:${enderio_version}"
+    compile "appeng:appliedenergistics2:${ae_version}:api"
+    compile "net.darkhax.tesla:Tesla:${tesla_version}"
+    // deobfCompile "cofhcore:CoFHCore-1.10.2:release:universal"
+    
     // real examples
     //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
     //compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
@@ -55,6 +89,26 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+        resources {
+            srcDir 'src/main/resources'
+        }
+    }
+    
+    cofh {
+        java {
+            srcDir 'ext/cofhlib/src/main/java'
+            // Note: If this doesn't work in Eclipse, add those as Resource Filters to the package, not as filters to the source set...
+            exclude '**/cofh/lib/**'
+            exclude '**/IGeneratorParser.java'
+        }
+    }
 }
 
 processResources

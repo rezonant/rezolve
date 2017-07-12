@@ -1,0 +1,3 @@
+[submodule "ext/cofhlib"]
+	path = ext/cofhlib
+	url = https://github.com/TheCBProject/CoFHLib.git
