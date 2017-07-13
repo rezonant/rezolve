@@ -62,8 +62,6 @@ public abstract class GuiContainerBase extends GuiContainer {
 	@Override
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
 
-		super.mouseClicked(mouseX, mouseY, mouseButton);
-
 		for (Gui control : this.controls) {
 			if (control instanceof GuiTextField) {
 				GuiTextField textField = (GuiTextField)control;
