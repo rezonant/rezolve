@@ -152,6 +152,9 @@ public class UnbundlerEntity extends MachineEntity {
 	
 	public boolean attemptUnbundle(ItemStack bundle) {
 
+		if (bundle == null)
+			return true;
+		
 		int slot = this.getSlotWithBundle(bundle);
 		
 		if (slot < 0)

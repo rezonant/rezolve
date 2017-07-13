@@ -50,7 +50,7 @@ public class UnbundlerOperation extends Operation<UnbundlerEntity> {
 		this.timeRequired = nbt.getLong("Op_TimeRequired");
 
 		if (nbt.hasKey("Op_Stack"))
-			bundle = ItemStack.loadItemStackFromNBT(nbt.getCompoundTag("Op_Stack"));
+			this.bundle = ItemStack.loadItemStackFromNBT(nbt.getCompoundTag("Op_Stack"));
 	}
 
 	@Override
