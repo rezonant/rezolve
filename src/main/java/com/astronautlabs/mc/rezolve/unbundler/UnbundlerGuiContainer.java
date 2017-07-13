@@ -49,6 +49,7 @@ public class UnbundlerGuiContainer extends GuiContainerBase {
 
     	    GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
     	    this.mc.getTextureManager().bindTexture(new ResourceLocation("rezolve:textures/gui/container/arrow.png"));
+    	    GlStateManager.enableBlend();
     	    this.drawModalRectWithCustomSizedTexture(103, 81, 0, 0, width, 32, 32, 32);
     	    
     		statusStr = "Operation: "+op.getPercentage()+"%";
