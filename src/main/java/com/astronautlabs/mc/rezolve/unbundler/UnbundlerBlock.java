@@ -43,7 +43,7 @@ public class UnbundlerBlock extends Machine {
 				"EME",
 				"BcB", 
 				
-				'B', RezolveMod.blankBundlePatternItem,
+				'B', RezolveMod.bundlePatternItem.blank(),
 				'C', "block|enderio:blockCapBank",
 				'E', "item|enderio:itemMagnet",
 				'M', "item|enderio:itemMachinePart|0",
@@ -57,7 +57,7 @@ public class UnbundlerBlock extends Machine {
 				"CpC",
 				"PHP", 
 				
-				'P', RezolveMod.blankBundlePatternItem,
+				'P', RezolveMod.bundlePatternItem.blank(),
 				'c', Blocks.CRAFTING_TABLE,
 				'C', Blocks.CHEST,
 				'p', Blocks.PISTON,

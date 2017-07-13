@@ -43,7 +43,6 @@ public class RezolveMod {
 	public static BundleBuilderBlock bundleBuilderBlock;
 	public static ItemBlock bundlerItem;
 	public static BundlePatternItem bundlePatternItem;
-	public static BlankBundlePatternItem blankBundlePatternItem;
 	public static BundleItem bundleItem;
 	public static ArrayList<BundleItem> coloredBundleItems = new ArrayList<BundleItem>();
 
@@ -154,10 +153,10 @@ public class RezolveMod {
 	}
 	
 	public String getColorName(int dye) {
-		if (dye < 0 || dye >= dyeNames.length)
+		if (dye < 0 || dye >= DYE_NAMES.length)
 			return "";
 
-		return dyeNames[dye];
+		return DYE_NAMES[dye];
 	}
 
 	public static boolean areStacksSame(ItemStack stackA, ItemStack stackB) {
@@ -270,38 +269,16 @@ public class RezolveMod {
 		this.log("Registering items...");
 
 		this.registerItem(bundlePatternItem = new BundlePatternItem());
-		this.registerItem(blankBundlePatternItem = new BlankBundlePatternItem());
 
 		this.registerItem(bundleItem = new BundleItem());
-		for (String color : dyes)
-			this.registerColoredBundleItem(color);
+		//for (String color : DYES)
+		//	this.registerColoredBundleItem(color);
 	}
-
-	public boolean isBundleItem(Item item) {
-		if (bundleItem.getRegistryName().equals(item.getRegistryName()))
-			return true;
-
-		for (BundleItem coloredBundleItem : coloredBundleItems) {
-			if (coloredBundleItem.getRegistryName().equals(item.getRegistryName()))
-				return true;
-		}
-
-		return false;
-	}
-
-	public boolean isBundlePatternItem(Item item) {
-		if (bundlePatternItem.getRegistryName().equals(item.getRegistryName()))
-			return true;
-		if (blankBundlePatternItem.getRegistryName().equals(item.getRegistryName()))
-			return true;
-
-		return false;
-	}
-
-	private static final String[] dyes = new String[] { "black", "red", "green", "brown", "blue", "purple", "cyan",
+	
+	public static final String[] DYES = new String[] { "black", "red", "green", "brown", "blue", "purple", "cyan",
 			"light_gray", "gray", "pink", "lime", "yellow", "light_blue", "magenta", "orange", "white" };
 
-	private static final String[] dyeNames = new String[] { "Black", "Red", "Green", "Brown", "Blue", "Purple", "Cyan",
+	public static final String[] DYE_NAMES = new String[] { "Black", "Red", "Green", "Brown", "Blue", "Purple", "Cyan",
 			"Light Gray", "Gray", "Pink", "Lime", "Yellow", "Light Blue", "Magenta", "Orange", "White" };
 
 	private void registerColoredBundleItem(String color) {

@@ -2,18 +2,20 @@ package com.astronautlabs.mc.rezolve;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import com.astronautlabs.mc.rezolve.common.RezolveNBT;
 import com.astronautlabs.mc.rezolve.common.ITooltipHint;
-import com.astronautlabs.mc.rezolve.common.ItemBase;
+import com.astronautlabs.mc.rezolve.common.MetaItemBase;
 import com.astronautlabs.mc.rezolve.common.VirtualInventory;
 
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public class BundleItem extends ItemBase implements ITooltipHint {
+public class BundleItem extends MetaItemBase implements ITooltipHint {
 	public BundleItem(String color) {
 		super("item_bundle_"+color);
 	}
@@ -22,6 +24,23 @@ public class BundleItem extends ItemBase implements ITooltipHint {
 		super("item_bundle");
 	}
 
+	@Override
+	public void getSubItems(Item itemIn, CreativeTabs tab, List<ItemStack> subItems) {
+		for (int i = 0, max = 17; i < max; ++i) {
+			subItems.add(new ItemStack(itemIn, 1, i));
+		}
+	}
+	
+	@Override
+	public String getUnlocalizedName(ItemStack stack) {
+		// TODO Auto-generated method stub
+		
+		if (stack.getMetadata() == 0 || stack.getMetadata() >= RezolveMod.DYES.length)
+			return this.getUnlocalizedName();
+		
+		return this.getUnlocalizedName()+"_"+RezolveMod.DYES[stack.getMetadata()];
+	}
+	
 	@Override
 	public String getItemStackDisplayName(ItemStack stack) {
 		
@@ -64,7 +83,7 @@ public class BundleItem extends ItemBase implements ITooltipHint {
 			if (stack == null)
 				continue;
 			
-			if (RezolveMod.instance().isBundleItem(stack.getItem()))
+			if (stack.getItem() == RezolveMod.bundleItem)
 				itemCount += countBundleItems(stack);
 			
 			itemCount += stack.stackSize;
@@ -113,7 +132,7 @@ public class BundleItem extends ItemBase implements ITooltipHint {
 			if (stack == null)
 				continue;
 			
-			if (RezolveMod.instance().isBundleItem(stack.getItem())) {
+			if (stack.getItem() == RezolveMod.bundleItem) {
 				int thisSubDepth = getBundleDepth(stack);
 				subdepth = Math.max(subdepth, thisSubDepth);
 			}
@@ -144,13 +163,14 @@ public class BundleItem extends ItemBase implements ITooltipHint {
 		for (ItemStack stack : getItemsFromBundle(bundleOrPattern)) {
 			Item item = stack.getItem();
 			itemStrings.add(prefix + stack.stackSize+" "+item.getItemStackDisplayName(stack));
-			if (RezolveMod.instance().isBundleItem(item)) {
+			if (item == RezolveMod.bundleItem) {
 				itemStrings.add(describeContents(stack, depth + 1));
 			}
 		}
 		
 		return String.join("\n", itemStrings);
 	}
+	
 	@Override
 	public String getTooltipHint(ItemStack itemStack) {
 		return this.describeContents(itemStack);

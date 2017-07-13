@@ -112,7 +112,7 @@ public class BundleBuilderEntity extends MachineEntity {
 	    if (index == PATTERN_INPUT_SLOT) {
 	    	// Check if its not a blank pattern
 	    	
-	    	if (stack != null && !RezolveMod.blankBundlePatternItem.getRegistryName().equals(stack.getItem().getRegistryName())) {
+	    	if (stack != null && !RezolveMod.bundlePatternItem.isBlank(stack)) {
 	    		// A non-blank pattern was put into the input slot.
 	    		// Transform it into a blank slot and set up the other inventory slots according to the pattern.
 	    		
@@ -145,7 +145,7 @@ public class BundleBuilderEntity extends MachineEntity {
 		    			this.setInventorySlotContents(DYE_SLOT, null);
 	    		}
 	    		
-	    		stack = new ItemStack(RezolveMod.blankBundlePatternItem, stack.stackSize);
+	    		stack = RezolveMod.bundlePatternItem.blank(stack.stackSize);
 	    	}
 	    }
 
@@ -168,8 +168,8 @@ public class BundleBuilderEntity extends MachineEntity {
 			return false;
 
 		} else if (index == PATTERN_INPUT_SLOT) {
-				
-			return RezolveMod.instance().isBundlePatternItem(stack.getItem());
+			
+			return stack.getItem() == RezolveMod.bundlePatternItem;
 			
 		} else if (index == DYE_SLOT) {
 			

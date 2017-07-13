@@ -26,12 +26,12 @@ public class BundlePatternOutputSlot extends MachineOutputSlot {
 		
 		// Don't allow it if the item is a blank pattern
 		
-		if (RezolveMod.blankBundlePatternItem.getRegistryName().equals(stack.getItem().getRegistryName()))
+		if (RezolveMod.bundlePatternItem.isBlank(stack))
 			return false;
 		
 		// Otherwise use the basic pattern rules
 
-		if (!RezolveMod.instance().isBundlePatternItem(stack.getItem()))
+		if (stack.getItem() != RezolveMod.bundlePatternItem)
 			return false;
 
 		return true;
