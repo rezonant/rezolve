@@ -3,7 +3,7 @@
 	  "modid": "rezolve",
 	  "name": "Rezolve",
 	  "description": "Simplify automation and management of complex modded Minecraft bases",
-	  "version": "0.1",
+	  "version": "${version}",
 	  "mcversion": "${mcversion}",
 	  "url": "https://mc.astronautlabs.com/rezolve",
 	  "updateUrl": "",

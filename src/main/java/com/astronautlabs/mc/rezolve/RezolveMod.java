@@ -295,6 +295,9 @@ public class RezolveMod {
 
 	@EventHandler
 	public void preinit(FMLPreInitializationEvent event) {
+		
+		System.out.println("Starting Rezolve @VERSION@...");
+		
 		this.guiHandler = new RezolveGuiHandler();
 		this.registerBlocks();
 		this.registerItems();
