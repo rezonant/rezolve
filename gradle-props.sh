@@ -10,7 +10,7 @@ function copyEnvVarsToGradleProperties {
         echo "Creating Gradle Properties file..."
         touch $GRADLE_PROPERTIES
 
-        echo "Writing TEST_API_KEY to gradle.properties..."
+        echo "Writing MAVEN_PASSWORD to gradle.properties..."
         echo "rezolveMavenPassword=$MAVEN_PASSWORD" >> $GRADLE_PROPERTIES
     fi
 }
