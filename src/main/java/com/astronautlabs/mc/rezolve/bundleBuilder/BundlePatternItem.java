@@ -87,7 +87,7 @@ public class BundlePatternItem extends MetaItemBase implements ITooltipHint {
 	
 	@Override
 	public String getTooltipHint(ItemStack itemStack) {
-		return RezolveMod.bundleItem.describeContents(itemStack);
+		return RezolveMod.BUNDLE_ITEM.describeContents(itemStack);
 	}
 
 	@Override

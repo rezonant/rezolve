@@ -59,7 +59,7 @@ public class BundleBuilderEntity extends MachineEntity {
 	
 	private void producePattern() {
 		
-		ItemStack stack = new ItemStack(RezolveMod.bundlePatternItem, 1, 0);
+		ItemStack stack = new ItemStack(RezolveMod.BUNDLE_PATTERN_ITEM, 1, 0);
 		NBTTagCompound nbt = new NBTTagCompound();
 		
 		RezolveNBT.writeInventory(nbt, this, 3, 9);
@@ -112,7 +112,7 @@ public class BundleBuilderEntity extends MachineEntity {
 	    if (index == PATTERN_INPUT_SLOT) {
 	    	// Check if its not a blank pattern
 	    	
-	    	if (stack != null && !RezolveMod.bundlePatternItem.isBlank(stack)) {
+	    	if (stack != null && !RezolveMod.BUNDLE_PATTERN_ITEM.isBlank(stack)) {
 	    		// A non-blank pattern was put into the input slot.
 	    		// Transform it into a blank slot and set up the other inventory slots according to the pattern.
 	    		
@@ -145,7 +145,7 @@ public class BundleBuilderEntity extends MachineEntity {
 		    			this.setInventorySlotContents(DYE_SLOT, null);
 	    		}
 	    		
-	    		stack = RezolveMod.bundlePatternItem.blank(stack.stackSize);
+	    		stack = RezolveMod.BUNDLE_PATTERN_ITEM.blank(stack.stackSize);
 	    	}
 	    }
 
@@ -169,7 +169,7 @@ public class BundleBuilderEntity extends MachineEntity {
 
 		} else if (index == PATTERN_INPUT_SLOT) {
 			
-			return stack.getItem() == RezolveMod.bundlePatternItem;
+			return stack.getItem() == RezolveMod.BUNDLE_PATTERN_ITEM;
 			
 		} else if (index == DYE_SLOT) {
 			

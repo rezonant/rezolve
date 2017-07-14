@@ -95,7 +95,7 @@ public class BundlerEntity extends MachineEntity {
 				dye = nbt.getInteger("Color") + 1;
 		}
 		
-		ItemStack bundleStack = new ItemStack(RezolveMod.bundleItem, 1, dye);
+		ItemStack bundleStack = new ItemStack(RezolveMod.BUNDLE_ITEM, 1, dye);
 		bundleStack.setTagCompound(pattern.getTagCompound());
 		return bundleStack;
 	}
@@ -231,7 +231,7 @@ public class BundlerEntity extends MachineEntity {
 			if (requestedItem == null || requestedItem.stackSize == 0)
 				continue;
 		
-			if (requestedItem.getItem() == RezolveMod.bundleItem)
+			if (requestedItem.getItem() == RezolveMod.BUNDLE_ITEM)
 				bundleDepth = Math.max(bundleDepth, BundleItem.getBundleDepth(requestedItem));
 			
 			int missing = requestedItem.stackSize;

@@ -22,7 +22,6 @@ import net.minecraft.world.World;
 public abstract class Machine extends TileBlockBase implements IGuiProvider {
 	public Machine(String registryName) {
 		super(registryName);
-		RezolveMod.instance().registerTileEntity(this.getTileEntityClass());
 		this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
 	}
 	
@@ -57,7 +56,7 @@ public abstract class Machine extends TileBlockBase implements IGuiProvider {
 	@Override()
 	public void init(RezolveMod mod) {
 		super.init(mod);
-		
+		RezolveMod.instance().registerTileEntity(this.getTileEntityClass());
 		this.guiId = mod.getGuiHandler().registerGui(this);
 	}
 	

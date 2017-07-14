@@ -1,0 +1,7 @@
+ {
+	"parent": "rezolve:block/cable_desuw",
+	"textures": {
+		"texture": "blocks/iron_block",
+        "particle": "blocks/iron_block"
+	}
+}c

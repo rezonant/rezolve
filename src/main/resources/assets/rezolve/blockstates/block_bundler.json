@@ -4,14 +4,14 @@
     "model": "rezolve:block_bundler"
   },
   "variants": {
-    "facing=up": [{ "model": "rezolve:block_bundler" }],
-    "facing=down": [{ "model": "rezolve:block_bundler" }],
-    
-    "facing=north": [{ "model": "rezolve:block_bundler" }],
-    "facing=south": [{ "model": "rezolve:block_bundler", "y": 180 }],
-    "facing=west": [{ "model": "rezolve:block_bundler", "y": 270 }],
-    "facing=east": [{ "model": "rezolve:block_bundler", "y": 90 }],
     "normal": [{}],
-    "inventory": [{}]
+    "inventory": [{}],
+    
+    "facing=up": [{}],
+    "facing=down": [{}],
+    "facing=north": [{}],
+    "facing=south": [{ "y": 180 }],
+    "facing=west": [{ "y": 270 }],
+    "facing=east": [{ "y": 90 }]
   }
 }

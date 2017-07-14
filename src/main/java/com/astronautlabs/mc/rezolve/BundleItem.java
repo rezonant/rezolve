@@ -83,7 +83,7 @@ public class BundleItem extends MetaItemBase implements ITooltipHint {
 			if (stack == null)
 				continue;
 			
-			if (stack.getItem() == RezolveMod.bundleItem)
+			if (stack.getItem() == RezolveMod.BUNDLE_ITEM)
 				itemCount += countBundleItems(stack);
 			
 			itemCount += stack.stackSize;
@@ -132,7 +132,7 @@ public class BundleItem extends MetaItemBase implements ITooltipHint {
 			if (stack == null)
 				continue;
 			
-			if (stack.getItem() == RezolveMod.bundleItem) {
+			if (stack.getItem() == RezolveMod.BUNDLE_ITEM) {
 				int thisSubDepth = getBundleDepth(stack);
 				subdepth = Math.max(subdepth, thisSubDepth);
 			}
@@ -163,7 +163,7 @@ public class BundleItem extends MetaItemBase implements ITooltipHint {
 		for (ItemStack stack : getItemsFromBundle(bundleOrPattern)) {
 			Item item = stack.getItem();
 			itemStrings.add(prefix + stack.stackSize+" "+item.getItemStackDisplayName(stack));
-			if (item == RezolveMod.bundleItem) {
+			if (item == RezolveMod.BUNDLE_ITEM) {
 				itemStrings.add(describeContents(stack, depth + 1));
 			}
 		}

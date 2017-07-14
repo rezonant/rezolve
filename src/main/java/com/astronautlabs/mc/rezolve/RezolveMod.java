@@ -14,6 +14,8 @@ import com.astronautlabs.mc.rezolve.common.BlockBase;
 import com.astronautlabs.mc.rezolve.common.GhostSlotUpdateMessageHandler;
 import com.astronautlabs.mc.rezolve.common.ItemBase;
 import com.astronautlabs.mc.rezolve.common.TileEntityBase;
+import com.astronautlabs.mc.rezolve.remoteShell.EthernetCableBlock;
+import com.astronautlabs.mc.rezolve.remoteShell.RemoteShellBlock;
 import com.astronautlabs.mc.rezolve.unbundler.UnbundlerBlock;
 
 import net.minecraft.block.Block;
@@ -21,6 +23,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -38,13 +41,16 @@ public class RezolveMod {
 	public static final String MODID = "rezolve";
 	public static final String VERSION = "1.0";
 
-	public static BundlerBlock bundlerBlock;
-	public static UnbundlerBlock unbundlerBlock;
-	public static BundleBuilderBlock bundleBuilderBlock;
-	public static ItemBlock bundlerItem;
-	public static BundlePatternItem bundlePatternItem;
-	public static BundleItem bundleItem;
-	public static ArrayList<BundleItem> coloredBundleItems = new ArrayList<BundleItem>();
+	// Blocks
+	public static final BundlerBlock BUNDLER_BLOCK = new BundlerBlock();
+	public static final UnbundlerBlock UNBUNDLER_BLOCK = new UnbundlerBlock();
+	public static final BundleBuilderBlock BUNDLE_BUILDER_BLOCK = new BundleBuilderBlock();
+	public static final EthernetCableBlock ETHERNET_CABLE_BLOCK = new EthernetCableBlock();
+	public static final RemoteShellBlock REMOTE_SHELL_BLOCK = new RemoteShellBlock();
+
+	// Items
+	public static final BundlePatternItem BUNDLE_PATTERN_ITEM = new BundlePatternItem();
+	public static final BundleItem BUNDLE_ITEM = new BundleItem();
 
 	public static final Logger logger = LogManager.getLogger(RezolveMod.MODID);
 	private static RezolveMod _instance = null;
@@ -257,9 +263,11 @@ public class RezolveMod {
 	private void registerBlocks() {
 		this.log("Registering blocks...");
 
-		this.registerItemBlock(bundlerBlock = new BundlerBlock());
-		this.registerItemBlock(unbundlerBlock = new UnbundlerBlock());
-		this.registerItemBlock(bundleBuilderBlock = new BundleBuilderBlock());
+		this.registerItemBlock(BUNDLER_BLOCK);
+		this.registerItemBlock(UNBUNDLER_BLOCK);
+		this.registerItemBlock(BUNDLE_BUILDER_BLOCK);
+		this.registerItemBlock(ETHERNET_CABLE_BLOCK);
+		this.registerItemBlock(REMOTE_SHELL_BLOCK);
 	}
 
 	/**
@@ -268,11 +276,8 @@ public class RezolveMod {
 	private void registerItems() {
 		this.log("Registering items...");
 
-		this.registerItem(bundlePatternItem = new BundlePatternItem());
-
-		this.registerItem(bundleItem = new BundleItem());
-		//for (String color : DYES)
-		//	this.registerColoredBundleItem(color);
+		this.registerItem(BUNDLE_PATTERN_ITEM);
+		this.registerItem(BUNDLE_ITEM);
 	}
 	
 	public static final String[] DYES = new String[] { "black", "red", "green", "brown", "blue", "purple", "cyan",
@@ -280,12 +285,6 @@ public class RezolveMod {
 
 	public static final String[] DYE_NAMES = new String[] { "Black", "Red", "Green", "Brown", "Blue", "Purple", "Cyan",
 			"Light Gray", "Gray", "Pink", "Lime", "Yellow", "Light Blue", "Magenta", "Orange", "White" };
-
-	private void registerColoredBundleItem(String color) {
-		BundleItem item = new BundleItem(color);
-		coloredBundleItems.add(item);
-		this.registerItem(item);
-	}
 
 	RezolveGuiHandler guiHandler;
 

@@ -1,5 +1,7 @@
 package com.astronautlabs.mc.rezolve.common;
 
+import com.astronautlabs.mc.rezolve.RezolveMod;
+
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.inventory.IInventory;
@@ -13,7 +15,7 @@ public abstract class TileBlockBase extends BlockBase implements ITileEntityProv
 		super(registryName);
         this.isBlockContainer = true;
 	}
-
+	
 	@Override
 	public abstract TileEntity createNewTileEntity(World worldIn, int meta);
 

@@ -17,7 +17,7 @@ public class BundleSlot extends Slot {
 			System.out.println("THATS IT");
 		}
 		
-		if (RezolveMod.bundleItem.getRegistryName().equals(stack.getItem().getRegistryName()))
+		if (RezolveMod.BUNDLE_ITEM.getRegistryName().equals(stack.getItem().getRegistryName()))
 			return true;
 		
 		return false;
