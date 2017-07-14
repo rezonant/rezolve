@@ -4,11 +4,17 @@
 
 This is a Minecraft mod which simplifies automation and provides tools to help you manage complex modded Minecraft bases.
 
+## Getting the mod 
+
+**Note**: This mod is still experimental and is, at best, alpha-quality. The developers are not responsible for damage to your world files, and the mod lacks a lot of the gameplay balance work that you would expect from a polished mod. **You have been warned.**
+
+That being said, official play-ready builds for this mod can be found on CurseForge:
+https://minecraft.curseforge.com/projects/rezolve
+
+
 ## Features 
 
-This section describes the features that this mod adds from the perspective of a player.
-
-### Machine: Bundler 
+### Bundler 
 
 You can use this machine to bundle a set of items into a single item. This can be used for automation/flow control purposes or for inventory storage purposes. The bundler requires RF energy, and the bigger the bundle being made, the more RF is required. To create a bundle, you must supply the bundler with a Bundle Pattern (see Bundle Pattern Builder below).
 
@@ -23,9 +29,9 @@ The formula for the RF cost of bundling/unbundling is as follows:
 ```
 Where `ItemCount` is the total number of items involved in the bundle (including all nested items, and including 1 point per Bundle item), and `MaxBundleDepth` is the deepest level of Bundle involved in the bundle you are creating. This makes very deep bundles very expensive.
 
-### Machine: Bundle Pattern Builder 
+### Bundle Pattern Builder 
 
-Use this machine to create patterns which can be slotted into Bundlers. The Bundle Pattern Builder offers a 9x9 ghost inventory for specifying the component items of a bundle. You must then insert a Blank Bundle Pattern, and then you can extract a Bundle Pattern encoded with the items you specified. You can also color-code the bundle pattern which may help with mod compatibility and organization- to do so, insert a dye into the dye slot. The resulting bundle will be colored based on the dye. Each color of bundle is its own distinct item, so no metadata discrimination is required in order to sort bundles of different colors.
+Use this machine to create patterns which can be slotted into Bundlers. The Bundle Pattern Builder offers a 9x9 ghost inventory for specifying the component items of a bundle. You must then insert a Blank Bundle Pattern, and then you can extract a Bundle Pattern encoded with the items you specified. You can also color-code the bundle pattern which may help with mod compatibility and sorting/organization- to do so, insert a dye into the dye slot. The resulting bundle will be colored based on the dye.
 
 The Bundle Pattern Builder requires RF to work, but it is a small static fee of 100 RF. This fee does not change regardless of how complex a bundle is. The item tooltip for a bundle pattern indicates what items are included, including any nested bundles.
 
@@ -33,7 +39,9 @@ The Bundle Pattern Builder requires RF to work, but it is a small static fee of 
 
 You can reconstitute the component items of a bundle using an Unbundler. Unbundlers require RF just like Bundlers, and the cost is the same as creating the bundle. 
 
-## Development: Getting Started
+## Developers
+
+### Getting Started
 
 Add this folder within an Eclipse workspace folder and run:
 
@@ -51,8 +59,14 @@ gradlew runClient
 
 If you wish to test alongside compatible mods, you can copy the mods from the `mods` folder into `run/mods`.
 
-## Troubleshooting
+### Maven
 
+All versions of this mod are available in a Maven repository hosted on PackageCloud:
+https://packagecloud.io/rezonant/rezolve
+
+You can depend on this repository in your own mod's `build.gradle` to include it in your development environment.
+
+### Troubleshooting
 If at any point you are missing libraries in your IDE, or you've run into problems you can run "gradlew --refresh-dependencies" to refresh the local cache. "gradlew clean" to reset everything {this does not effect your code} and then start the processs again.
 
 Should it still not work, 
