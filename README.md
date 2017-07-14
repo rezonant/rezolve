@@ -1,5 +1,6 @@
 
 # rezolve
+[![CircleCI](https://circleci.com/gh/astronautlabs/rezolve/tree/master.svg?style=shield)](https://circleci.com/gh/astronautlabs/rezolve/tree/master)
 
 This is a Minecraft mod which simplifies automation and provides tools to help you manage complex modded Minecraft bases.
 
