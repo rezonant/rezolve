@@ -14,8 +14,8 @@ jobs:
       TERM: dumb
     
     steps:
-      - run: source ./gradle-props.sh && copyEnvVarsToGradleProperties
       - checkout
+      - run: source ./gradle-props.sh && copyEnvVarsToGradleProperties
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "build.gradle" }}
