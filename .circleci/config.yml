@@ -14,6 +14,7 @@ jobs:
       TERM: dumb
     
     steps:
+      - run: source .circleci/gradle-props.sh && copyEnvVarsToGradleProperties
       - checkout
       - restore_cache:
           keys:
