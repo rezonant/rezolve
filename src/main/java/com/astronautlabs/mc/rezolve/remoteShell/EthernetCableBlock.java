@@ -1,19 +1,20 @@
 package com.astronautlabs.mc.rezolve.remoteShell;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
-import com.astronautlabs.mc.rezolve.common.BlockBase;
 
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class EthernetCableBlock extends BlockBase {
+public class EthernetCableBlock extends CableBlock {
 
 	public EthernetCableBlock() {
 		super("block_ethernet_cable");
@@ -35,7 +36,70 @@ public class EthernetCableBlock extends BlockBase {
 	protected BlockStateContainer createBlockState() {
 		return new BlockStateContainer(this, DOWN, EAST, NORTH, SOUTH, UP, WEST);
 	}
+	
+	@Override
+	public boolean canPlaceTorchOnTop(IBlockState state, IBlockAccess world, BlockPos pos) {
+		return false;
+	}
+	
+	@Override
+	public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side) {
+		this.notifyNetwork(worldIn, pos);
+		return super.canPlaceBlockOnSide(worldIn, pos, side);
+	}
+	
+	@Override
+	public void onBlockAdded(World world, BlockPos pos, IBlockState state) {
+		this.notifyNetwork(world, pos);		
+		super.onBlockAdded(world, pos, state);
+	}
+	
+	@Override
+	public void onBlockDestroyedByPlayer(World world, BlockPos pos, IBlockState state) {
+		this.onBlockDestroyed(world, pos);
+		super.onBlockDestroyedByPlayer(world, pos, state);
+	}
+	
+	@Override
+	public void onBlockDestroyedByExplosion(World world, BlockPos pos, Explosion explosionIn) {
+		this.onBlockDestroyed(world, pos);
+		super.onBlockDestroyedByExplosion(world, pos, explosionIn);
+	}
+	
+	private void onBlockDestroyed(World world, BlockPos pos)
+	{
+		this.notifyNetwork(world, pos);
+	}
+	
+	/**
+	 * Update the cable network if we're on the server
+	 * 
+	 * @param world
+	 * @param pos
+	 */
+	private void notifyNetwork(World world, BlockPos pos) {
+		// Update the cable network if we're on the server
+		
+		if (world.isRemote)
+			return;
+		
+		System.out.println("Finding endpoints of placed cable...");
+		CableNetwork network = new CableNetwork(world, pos, RezolveMod.ETHERNET_CABLE_BLOCK);
+		
+		for (BlockPos otherPos : network.getEndpoints()) {
+			TileEntity entity = world.getTileEntity(otherPos);
+			if (entity == null)
+				continue;
 
+			System.out.println("Found tile entity at endpoint of cable...");
+			
+			if (entity instanceof ICableEndpoint) {
+				System.out.println(" - Entity is ICableEndpoint, notifying it...");
+				((ICableEndpoint)entity).onCableUpdate();
+			}
+		}
+	}
+	
 	public static final PropertyBool DOWN = PropertyBool.create("down");
 	public static final PropertyBool EAST = PropertyBool.create("east");
 	public static final PropertyBool NORTH = PropertyBool.create("north");
@@ -58,6 +122,12 @@ public class EthernetCableBlock extends BlockBase {
 		return false;
 	}
 	
+	@Override
+	public boolean isVisuallyOpaque() {
+		// TODO Auto-generated method stub
+		return super.isVisuallyOpaque();
+	}
+	
 	/**
 	 * Sets the data values of a BlockState instance to represent this block
 	 */
@@ -72,18 +142,28 @@ public class EthernetCableBlock extends BlockBase {
 				.withProperty(UP, this.canConnectTo(world, coord, oldBS, EnumFacing.UP, coord.up()))
 				.withProperty(NORTH, this.canConnectTo(world, coord, oldBS, EnumFacing.NORTH, coord.north()));
 	}
-
-	protected boolean canConnectTo(IBlockAccess w, BlockPos thisBlock, IBlockState bs, EnumFacing face, BlockPos otherBlock) {
-		IBlockState st = w.getBlockState(otherBlock);
-		TileEntity te = w.getTileEntity(otherBlock);
+	
+	public boolean canConnectTo(IBlockAccess world, BlockPos pos) {
+		IBlockState st = world.getBlockState(pos);
+		TileEntity te = world.getTileEntity(pos);
+		
+		if (st == null || st.getBlock() == null)
+			return false;
 		
 		if (st.getBlock() == RezolveMod.ETHERNET_CABLE_BLOCK)
 			return true;
+		
+		if ("enderio:blockConduitBundle".equals(st.getBlock().getRegistryName().toString()))
+			return false;
 		
 		if (te != null)
 			return true;
 		
 		return false;
+	}
+
+	public boolean canConnectTo(IBlockAccess w, BlockPos thisBlock, IBlockState bs, EnumFacing face, BlockPos otherBlock) {
+		return this.canConnectTo(w, otherBlock);
 	}
 	
 	/**

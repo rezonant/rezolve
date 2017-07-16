@@ -158,29 +158,17 @@ public class BundleBuilderEntity extends MachineEntity {
 
 	@Override
 	public boolean isItemValidForSlot(int index, ItemStack stack) {
-
-		if (index == PATTERN_OUTPUT_SLOT) {
-			
-			// Automation should never push into the pattern output slot,
-			// as the only reason to put an item in there is to edit an existing 
-			// pattern, which is not possible with automation.
-			
-			return false;
-
-		} else if (index == PATTERN_INPUT_SLOT) {
-			
+		if (index == PATTERN_INPUT_SLOT)
 			return stack.getItem() == RezolveMod.BUNDLE_PATTERN_ITEM;
-			
-		} else if (index == DYE_SLOT) {
-			
-			// Allow it if it's a dye
-			
-			return RezolveMod.instance().isDye(stack.getItem());
-		}
 		
-		return true;
+		return false;
 	}
 
+	@Override
+	protected boolean allowedToPullFrom(int slot) {
+		return false;
+	}
+	
 	@Override
 	public void outputSlotActivated(int index) {
 		

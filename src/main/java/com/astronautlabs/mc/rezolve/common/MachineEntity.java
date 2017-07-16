@@ -17,16 +17,17 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
-public class MachineEntity extends TileEntityBase implements IInventory, ITickable, IEnergyReceiver, IMachineInventory, ICapabilityProvider, IItemHandler {
+public class MachineEntity extends TileEntityBase
+		implements IInventory, ITickable, IEnergyReceiver, IMachineInventory, ICapabilityProvider, IItemHandler {
 	public MachineEntity(String registryName) {
 		super(registryName);
 		this.inventory = new ItemStack[this.getSizeInventory()];
 		this.storedEnergy = 0;
 	}
-	
-    protected ItemStack[] inventory;
+
+	protected ItemStack[] inventory;
 	Operation currentOperation;
-	
+
 	protected boolean hasCurrentOperation() {
 		return this.currentOperation != null;
 	}
@@ -35,27 +36,28 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 		int energyTaken = Math.min(i, this.storedEnergy);
 		this.storedEnergy -= energyTaken;
 		this.notifyUpdate();
-		
+
 		return energyTaken;
 	}
 
 	public Operation getCurrentOperation() {
 		return this.currentOperation;
 	}
-	
-    @Override
-    public ITextComponent getDisplayName() {
-        return this.hasCustomName() ? new TextComponentString(this.getName()) : new TextComponentTranslation(this.getName());
-    }
-    
+
+	@Override
+	public ITextComponent getDisplayName() {
+		return this.hasCustomName() ? new TextComponentString(this.getName())
+				: new TextComponentTranslation(this.getName());
+	}
+
 	@Override
 	public String getName() {
-	    return this.hasCustomName() ? this.getCustomName() : "container."+this.getRegistryName();
+		return this.hasCustomName() ? this.getCustomName() : "container." + this.getRegistryName();
 	}
 
 	@Override
 	public boolean hasCustomName() {
-	    return this.getCustomName() != null && !"".equals(this.getCustomName());
+		return this.getCustomName() != null && !"".equals(this.getCustomName());
 	}
 
 	@Override
@@ -66,36 +68,36 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 	@Override
 	public ItemStack getStackInSlot(int index) {
 		if (index < 0 || index >= this.getSizeInventory())
-	        return null;
-	    return this.inventory[index];
+			return null;
+		return this.inventory[index];
 	}
 
 	@Override
 	public ItemStack decrStackSize(int index, int count) {
 		if (this.getStackInSlot(index) != null) {
-	        ItemStack itemstack;
+			ItemStack itemstack;
 
-	        if (this.getStackInSlot(index).stackSize <= count) {
-	            itemstack = this.getStackInSlot(index);
-	            this.setInventorySlotContents(index, null);
-	            this.markDirty();
-	            return itemstack;
-	        } else {
-	            itemstack = this.getStackInSlot(index).splitStack(count);
+			if (this.getStackInSlot(index).stackSize <= count) {
+				itemstack = this.getStackInSlot(index);
+				this.setInventorySlotContents(index, null);
+				this.markDirty();
+				return itemstack;
+			} else {
+				itemstack = this.getStackInSlot(index).splitStack(count);
 
-	            if (this.getStackInSlot(index).stackSize <= 0) {
-	                this.setInventorySlotContents(index, null);
-	            } else {
-	                //Just to show that changes happened
-	                this.setInventorySlotContents(index, this.getStackInSlot(index));
-	            }
+				if (this.getStackInSlot(index).stackSize <= 0) {
+					this.setInventorySlotContents(index, null);
+				} else {
+					// Just to show that changes happened
+					this.setInventorySlotContents(index, this.getStackInSlot(index));
+				}
 
-	            this.markDirty();
-	            return itemstack;
-	        }
-	    } else {
-	        return null;
-	    }
+				this.markDirty();
+				return itemstack;
+			}
+		} else {
+			return null;
+		}
 	}
 
 	@Override
@@ -107,24 +109,24 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 	public boolean allowInputToSlot(int index) {
 		return true;
 	}
-	
+
 	public boolean allowOutputFromSlot(int index) {
 		return true;
 	}
-	
+
 	@Override
 	public void setInventorySlotContents(int index, ItemStack stack) {
-	    if (index < 0 || index >= this.getSizeInventory())
-	        return;
-	    
-	    if (stack != null && stack.stackSize > this.getInventoryStackLimit())
-	        stack.stackSize = this.getInventoryStackLimit();
-	        
-	    if (stack != null && stack.stackSize == 0)
-	        stack = null;
+		if (index < 0 || index >= this.getSizeInventory())
+			return;
 
-	    this.inventory[index] = stack;
-	    this.markDirty();	
+		if (stack != null && stack.stackSize > this.getInventoryStackLimit())
+			stack.stackSize = this.getInventoryStackLimit();
+
+		if (stack != null && stack.stackSize == 0)
+			stack = null;
+
+		this.inventory[index] = stack;
+		this.markDirty();
 	}
 
 	@Override
@@ -134,7 +136,8 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 
 	@Override
 	public boolean isUseableByPlayer(EntityPlayer player) {
-	    return this.worldObj.getTileEntity(this.getPos()) == this && player.getDistanceSq(this.pos.add(0.5, 0.5, 0.5)) <= 64;
+		return this.worldObj.getTileEntity(this.getPos()) == this
+				&& player.getDistanceSq(this.pos.add(0.5, 0.5, 0.5)) <= 64;
 	}
 
 	@Override
@@ -143,7 +146,7 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 
 	@Override
 	public void closeInventory(EntityPlayer player) {
-		
+
 	}
 
 	@Override
@@ -158,7 +161,7 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 
 	@Override
 	public void setField(int id, int value) {
-		
+
 	}
 
 	@Override
@@ -168,96 +171,98 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 
 	@Override
 	public void clear() {
-	    for (int i = 0; i < this.getSizeInventory(); i++)
-	        this.setInventorySlotContents(i, null);
+		for (int i = 0; i < this.getSizeInventory(); i++)
+			this.setInventorySlotContents(i, null);
 	}
 
-    private long lastUpdate = 0;
-    
-    /**
-     * Fire an update every N ticks (20 ticks per second)
-     */
-    protected long updateInterval = 10;
-    
-    /**
-     * This is run every `updateInterval` with the default implementation
-     * of update()
-     */
-    public void updatePeriodically() {
-    		// TODO: implement in subclass
-    }
+	private long lastUpdate = 0;
 
-    /**
-     * Start a new operation, called in the tick update method.
-     * @return
-     */
-    public Operation startOperation() {
-    		return null;
-    }
+	/**
+	 * Fire an update every N ticks (20 ticks per second)
+	 */
+	protected long updateInterval = 10;
 
-    /**
-     * Manually start an operation
-     * @param operation
-     * @return
-     */
+	/**
+	 * This is run every `updateInterval` with the default implementation of
+	 * update()
+	 */
+	public void updatePeriodically() {
+		// TODO: implement in subclass
+	}
+
+	/**
+	 * Start a new operation, called in the tick update method.
+	 * 
+	 * @return
+	 */
+	public Operation startOperation() {
+		return null;
+	}
+
+	/**
+	 * Manually start an operation
+	 * 
+	 * @param operation
+	 * @return
+	 */
 	protected boolean startOperation(Operation operation) {
 		if (this.currentOperation != null)
 			return false;
-		
+
 		this.currentOperation = operation;
 		System.out.println("Starting operation");
 		this.notifyUpdate();
 		return true;
 	}
-	
+
 	protected InventorySnapshot createInventorySnapshot() {
 		ItemStack[] slots = new ItemStack[this.inventory.length];
 		for (int i = 0, max = this.inventory.length; i < max; ++i) {
 			slots[i] = this.inventory[i] != null ? this.inventory[i].copy() : null;
 		}
-		
+
 		return new InventorySnapshot(slots);
 	}
-	
+
 	protected boolean applyInventorySnapshot(InventorySnapshot snapshot) {
 
 		if (snapshot.getSlots().length != this.inventory.length)
 			return false;
-		
+
 		ItemStack[] slots = new ItemStack[this.inventory.length];
 		ItemStack[] snapshotSlots = snapshot.getSlots();
-		
+
 		for (int i = 0, max = this.inventory.length; i < max; ++i) {
 			slots[i] = snapshotSlots[i] != null ? snapshotSlots[i].copy() : null;
 		}
-		
+
 		this.inventory = slots;
 		return true;
 	}
-	
+
 	protected InventorySnapshot startInventoryTransaction() {
 		return this.createInventorySnapshot();
 	}
-	
+
 	protected void rollbackInventoryTransaction(InventorySnapshot snapshot) {
 		this.applyInventorySnapshot(snapshot);
 	}
-	
+
 	protected void commitInventoryTransaction(InventorySnapshot snapshot) {
 		// noop
 	}
-    
+
 	@Override
 	public void update() {
-		
+
 		if (this.worldObj.isRemote)
 			return;
-		
+
 		long currentTime = this.worldObj.getTotalWorldTime();
-		
+
 		if (lastUpdate + updateInterval > currentTime)
 			return;
-		
+
 		lastUpdate = currentTime;
 
 		if (this.hasCurrentOperation()) {
@@ -272,13 +277,13 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 			if (op != null)
 				this.startOperation(op);
 		}
-		
+
 		this.updatePeriodically();
-		
+
 	}
 
 	protected int maxEnergyStored = 20000;
-	
+
 	@Override
 	public int getEnergyStored(EnumFacing arg0) {
 		// TODO Auto-generated method stub
@@ -300,35 +305,35 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 	public int receiveEnergy(EnumFacing from, int maxReceive, boolean simulate) {
 		int availableStorage = this.maxEnergyStored - this.storedEnergy;
 		int receivedEnergy = Math.min(availableStorage, maxReceive);
-		
+
 		if (!simulate) {
 			this.storedEnergy += receivedEnergy;
 			this.notifyUpdate();
 		}
-		
+
 		return receivedEnergy;
 	}
 
 	@Override
 	public void outputSlotActivated(int index) {
-		
+
 	}
-	
+
 	@Override
 	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
 		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
 			return (T) this;
 		}
-		
+
 		return super.getCapability(capability, facing);
 	}
-	
+
 	@Override
 	public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
 		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
 			return true;
 		}
-		
+
 		return super.hasCapability(capability, facing);
 	}
 
@@ -340,26 +345,29 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 	protected boolean allowedToPullFrom(int slot) {
 		return true;
 	}
-	
+
 	protected boolean allowedToPushTo(int slot) {
 		return true;
 	}
-	
+
 	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
 		if (!this.allowedToPushTo(slot))
-			return null;
+			return stack;
+
+		if (!this.isItemValidForSlot(slot, stack))
+			return stack;
 
 		ItemStack existingStack = this.getStackInSlot(slot);
-		
+
 		if (existingStack != null && !RezolveMod.areStacksSame(stack, existingStack)) {
 			return stack;
 		}
-		
+
 		int itemsToKeep = stack.stackSize;
 		ItemStack returnStack = null;
 		ItemStack keepStack = stack.copy();
-		
+
 		if (existingStack != null && existingStack.stackSize + stack.stackSize > this.getInventoryStackLimit()) {
 			itemsToKeep = this.getInventoryStackLimit() - existingStack.stackSize;
 			returnStack = keepStack.splitStack(stack.stackSize - itemsToKeep);
@@ -367,18 +375,18 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 
 		if (existingStack != null)
 			keepStack.stackSize += existingStack.stackSize;
-		
+
 		if (!simulate) {
 			this.setInventorySlotContents(slot, keepStack);
 		}
-		
+
 		return returnStack;
 	}
 
 	public Operation createOperation() {
 		return null;
 	}
-	
+
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
@@ -388,48 +396,50 @@ public class MachineEntity extends TileEntityBase implements IInventory, ITickab
 		} else {
 			nbt.setBoolean("HasOp", false);
 		}
-		
+
 		return super.writeToNBT(nbt);
 	}
-	
+
 	@Override
 	public void readFromNBT(NBTTagCompound compound) {
 		if (compound.hasKey("HasOp") && compound.getBoolean("HasOp")) {
 			if (this.currentOperation == null) {
 				this.currentOperation = this.createOperation();
 				if (this.currentOperation == null) {
-					System.err.println("ERROR: Machine "+this.getClass().getCanonicalName()+" has not implemented createOperation()!");
+					System.err.println("ERROR: Machine " + this.getClass().getCanonicalName()
+							+ " has not implemented createOperation()!");
 				}
 			}
 			this.currentOperation.readNBT(compound);
 		} else {
 			this.currentOperation = null;
 		}
-		
+
 		super.readFromNBT(compound);
 	}
+
 	@Override
 	public ItemStack extractItem(int slot, int amount, boolean simulate) {
 		if (!this.allowedToPullFrom(slot))
 			return null;
-		
+
 		ItemStack existingStack = this.getStackInSlot(slot);
-		
+
 		if (existingStack == null)
 			return null;
-		
+
 		ItemStack keepStack = null;
 		ItemStack returnStack = existingStack.copy();
-		
+
 		if (existingStack.stackSize > amount) {
 			returnStack = existingStack.splitStack(amount);
 			keepStack = existingStack;
 		}
-		
+
 		if (!simulate) {
 			this.setInventorySlotContents(slot, keepStack);
 		}
-		
+
 		return existingStack;
 	}
 }

@@ -166,3 +166,10 @@ processResources
         exclude 'mcmod.info'
     }
 }
+
+jar {
+    manifest {
+        attributes 'FMLCorePlugin': 'com.astronautlabs.mc.rezolve.core.RezolveLoadingPlugin'
+		attributes 'FMLCorePluginContainsFMLMod': 'true'
+    }
+}

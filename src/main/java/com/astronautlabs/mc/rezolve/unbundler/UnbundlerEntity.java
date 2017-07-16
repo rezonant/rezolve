@@ -26,6 +26,14 @@ public class UnbundlerEntity extends MachineEntity {
 		return 25;
 	}
 	
+	@Override
+	public boolean isItemValidForSlot(int index, ItemStack stack) {
+		if (this.isInputSlot(index))
+			return stack.getItem() == RezolveMod.BUNDLE_ITEM;
+		
+		return false;
+	}
+	
 	public boolean isOutputSlot(int index) {
 		return index >= 10 && index <= 25;
 	}

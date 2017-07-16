@@ -10,6 +10,7 @@ import com.astronautlabs.mc.rezolve.common.MachineEntity;
 import com.astronautlabs.mc.rezolve.common.Operation;
 import com.astronautlabs.mc.rezolve.common.VirtualInventory;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.items.IItemHandler;
@@ -19,6 +20,7 @@ public class BundlerEntity extends MachineEntity {
 		super("bundler_tile_entity");
 	    this.updateInterval = 5;
 	    this.maxEnergyStored = 50000;
+	    
 	}
 
 	class ItemMemo {

@@ -16,6 +16,7 @@ import net.minecraft.client.gui.GuiControls;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
@@ -38,13 +39,57 @@ public abstract class GuiContainerBase extends GuiContainer {
 	ContainerBase container;
 	String guiBackgroundResource;
 
+	protected void drawSubWindows(int mouseX, int mouseY) {
+		
+	}
+	
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+		
+		GlStateManager.disableDepth();
+
+		GlStateManager.pushMatrix();
+			GlStateManager.translate(this.guiLeft + 10, this.guiTop + 10, 0);
+			this.drawRect(0, 0, this.xSize - 20, this.ySize - 20, 0xFFB0B0B0);
+		GlStateManager.popMatrix();
+		
+		GlStateManager.pushMatrix();
+			GlStateManager.translate(this.guiLeft, this.guiTop, 0);
+			this.drawSubWindows(mouseX - this.guiLeft, mouseY - this.guiTop);
+		GlStateManager.popMatrix();
+
+		GlStateManager.disableDepth();
+		GlStateManager.disableLighting();
 		GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
 	    this.mc.getTextureManager().bindTexture(new ResourceLocation(this.guiBackgroundResource));
 	    this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
 	}
 
+	protected void drawItem(ItemStack stack, int x, int y) {
+
+		GlStateManager.color(1, 1, 1, 1);
+        GlStateManager.translate(0.0F, 0.0F, 32.0F);
+        GlStateManager.disableLighting();
+        GlStateManager.enableDepth();
+        
+        RenderHelper.disableStandardItemLighting();
+        RenderHelper.enableGUIStandardItemLighting();
+        
+        this.zLevel = 200.0F;
+        this.itemRender.zLevel = 200.0F;
+        net.minecraft.client.gui.FontRenderer font = null;
+        if (stack != null) font = stack.getItem().getFontRenderer(stack);
+        if (font == null) font = fontRendererObj;
+        this.itemRender.renderItemAndEffectIntoGUI(stack, x, y);
+        this.itemRender.renderItemOverlayIntoGUI(font, stack, x, y, null);
+        this.zLevel = 0.0F;
+        this.itemRender.zLevel = 0.0F;
+        
+        RenderHelper.enableStandardItemLighting();
+        GlStateManager.enableLighting();
+        GlStateManager.disableDepth();
+	}
+	
 	@Override
 	protected void mouseReleased(int mouseX, int mouseY, int state) {
 		Slot slot = this.getSlotUnderMouse();
