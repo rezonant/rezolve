@@ -211,7 +211,7 @@ public class SecurityServerEntity extends MachineEntity {
 			return;
 		}
 		
-		Rule ruleToRemove = this.getRuleById(selectedRule.getId());
+		Rule ruleToRemove = this.getRuleByIdInternal(selectedRule.getId());
 		if (ruleToRemove == null)
 			return;
 

@@ -27,7 +27,7 @@ public class SecurityServerGuiContainer extends GuiContainerBase {
 	public void initGui() {
 		super.initGui();
 		
-		this.searchField = new GuiTextField(SEARCH_FIELD, this.fontRendererObj, this.guiLeft + 10, this.guiTop + 7, 235, 18);
+		this.searchField = new GuiTextField(SEARCH_FIELD, this.fontRendererObj, this.guiLeft + 10, this.guiTop + 7, 218, 18);
 		this.searchField.setVisible(true);
 		this.searchField.setText("");
 		this.searchField.setEnableBackgroundDrawing(false);
@@ -265,13 +265,15 @@ public class SecurityServerGuiContainer extends GuiContainerBase {
 				this.editing = true;
 				
 			} else if (this.removeBtn.visible && this.removeBtn.mousePressed(mc, mouseX, mouseY)) {
+
+				// Remove button clicked
 				
 				if (this.selectedRule != null) {
 					if ("<players>".equals(this.selectedRule.getName()) || "<machines>".equals(this.selectedRule.getName()))
 						return;
 					
-					// Remove button clicked
 					this.entity.removeRule(this.selectedRule);
+					this.selectedRule = null;
 				}
 				
 			} else if (this.playerModeBtn.visible && this.playerModeBtn.mousePressed(mc, mouseX, mouseY)) {
