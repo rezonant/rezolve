@@ -28,7 +28,9 @@ public class RemoteShellBlock extends Machine {
 	@Override
 	public void init(RezolveMod mod) {
 		super.init(mod);
-		RemoteShellActivateMessageHandler.register();		
+		RemoteShellActivateMessageHandler.register();
+		RemoteShellReturnMessageHandler.register();
+		RemoteShellRenameMachineMessageHandler.register();
 	}
 	
 	@Override

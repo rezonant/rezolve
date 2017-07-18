@@ -2,17 +2,22 @@ package com.astronautlabs.mc.rezolve.remoteShell;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.ChunkCache;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldType;
 
 public class EthernetCableBlock extends CableBlock {
 
@@ -30,7 +35,12 @@ public class EthernetCableBlock extends CableBlock {
 		);
 	}
 
-	float radius = 4f / 16f;
+	float radius = 3f / 16f;
+
+	@Override
+	public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn) {
+		this.notifyNetwork(worldIn, pos);
+	}
 	
 	@Override
 	protected BlockStateContainer createBlockState() {
@@ -83,18 +93,14 @@ public class EthernetCableBlock extends CableBlock {
 		if (world.isRemote)
 			return;
 		
-		System.out.println("Finding endpoints of placed cable...");
 		CableNetwork network = new CableNetwork(world, pos, RezolveMod.ETHERNET_CABLE_BLOCK);
 		
 		for (BlockPos otherPos : network.getEndpoints()) {
 			TileEntity entity = world.getTileEntity(otherPos);
 			if (entity == null)
 				continue;
-
-			System.out.println("Found tile entity at endpoint of cable...");
 			
 			if (entity instanceof ICableEndpoint) {
-				System.out.println(" - Entity is ICableEndpoint, notifying it...");
 				((ICableEndpoint)entity).onCableUpdate();
 			}
 		}
@@ -124,8 +130,7 @@ public class EthernetCableBlock extends CableBlock {
 	
 	@Override
 	public boolean isVisuallyOpaque() {
-		// TODO Auto-generated method stub
-		return super.isVisuallyOpaque();
+		return false;
 	}
 	
 	/**
@@ -147,16 +152,10 @@ public class EthernetCableBlock extends CableBlock {
 		IBlockState st = world.getBlockState(pos);
 		TileEntity te = world.getTileEntity(pos);
 		
-		if (st == null || st.getBlock() == null)
+		if (st == null || st.getBlock() == null || "enderio:blockConduitBundle".equals(st.getBlock().getRegistryName().toString()))
 			return false;
 		
-		if (st.getBlock() == RezolveMod.ETHERNET_CABLE_BLOCK)
-			return true;
-		
-		if ("enderio:blockConduitBundle".equals(st.getBlock().getRegistryName().toString()))
-			return false;
-		
-		if (te != null)
+		if (st.getBlock() == RezolveMod.ETHERNET_CABLE_BLOCK || st.getBlock() == Blocks.ANVIL || te != null)
 			return true;
 		
 		return false;

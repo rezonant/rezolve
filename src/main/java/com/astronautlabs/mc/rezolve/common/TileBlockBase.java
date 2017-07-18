@@ -1,5 +1,7 @@
 package com.astronautlabs.mc.rezolve.common;
 
+import java.lang.reflect.Constructor;
+
 import com.astronautlabs.mc.rezolve.RezolveMod;
 
 import net.minecraft.block.ITileEntityProvider;
@@ -11,13 +13,48 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public abstract class TileBlockBase extends BlockBase implements ITileEntityProvider {
-	TileBlockBase(String registryName) {
+	public TileBlockBase(String registryName) {
 		super(registryName);
         this.isBlockContainer = true;
 	}
 	
 	@Override
-	public abstract TileEntity createNewTileEntity(World worldIn, int meta);
+	public void init(RezolveMod mod) {
+		super.init(mod);
+		RezolveMod.instance().registerTileEntity(this.getTileEntityClass());
+	}
+
+
+	public abstract Class<? extends TileEntityBase> getTileEntityClass();
+
+    /**
+     * Returns a new instance of a block's tile entity class. Called on placing the block.
+     * 
+     * PERFORMANCE NOTE: Default implementation relies on reflection, if performance is an issue (due to lots of 
+     * tile entities being created at the same time) then this should be overridden to use 
+     * a standard invocation.
+     */
+	@Override
+	public TileEntity createNewTileEntity(World worldIn, int meta) {
+		Class<? extends TileEntityBase> klass = this.getTileEntityClass();
+		
+		if (klass == null)
+			return null;
+		
+		Constructor<? extends TileEntityBase> ctor;
+		TileEntityBase instance;
+		
+		try {
+			ctor = klass.getConstructor();
+			instance = ctor.newInstance();
+		} catch (Exception e) {
+			System.err.println("Cannot construct tile entity "+klass.getCanonicalName()+": "+e.getMessage());
+			System.err.println(e.toString());
+			return null;
+		}
+		
+		return instance;
+	}
 
     @Override
     public void breakBlock(World world, BlockPos pos, IBlockState state) {

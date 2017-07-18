@@ -252,16 +252,22 @@ public class MachineEntity extends TileEntityBase
 		// noop
 	}
 
+	protected void updatePeriodicallyOnClient() {
+		
+	}
+	
 	@Override
 	public void update() {
-
-		if (this.worldObj.isRemote)
-			return;
 
 		long currentTime = this.worldObj.getTotalWorldTime();
 
 		if (lastUpdate + updateInterval > currentTime)
 			return;
+
+		if (this.worldObj.isRemote) {
+			this.updatePeriodicallyOnClient();
+			return;
+		}
 
 		lastUpdate = currentTime;
 

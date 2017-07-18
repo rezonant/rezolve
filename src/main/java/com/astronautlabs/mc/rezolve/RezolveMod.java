@@ -17,8 +17,10 @@ import com.astronautlabs.mc.rezolve.common.BlockBase;
 import com.astronautlabs.mc.rezolve.common.GhostSlotUpdateMessageHandler;
 import com.astronautlabs.mc.rezolve.common.ItemBase;
 import com.astronautlabs.mc.rezolve.common.TileEntityBase;
+import com.astronautlabs.mc.rezolve.databaseServer.DatabaseServerBlock;
 import com.astronautlabs.mc.rezolve.remoteShell.EthernetCableBlock;
 import com.astronautlabs.mc.rezolve.remoteShell.RemoteShellBlock;
+import com.astronautlabs.mc.rezolve.securityServer.SecurityServerBlock;
 import com.astronautlabs.mc.rezolve.unbundler.UnbundlerBlock;
 
 import net.minecraft.block.Block;
@@ -95,6 +97,8 @@ public class RezolveMod {
 	public static final BundleBuilderBlock BUNDLE_BUILDER_BLOCK = new BundleBuilderBlock();
 	public static final EthernetCableBlock ETHERNET_CABLE_BLOCK = new EthernetCableBlock();
 	public static final RemoteShellBlock REMOTE_SHELL_BLOCK = new RemoteShellBlock();
+	public static final DatabaseServerBlock DATABASE_SERVER_BLOCK = new DatabaseServerBlock();
+	public static final SecurityServerBlock SECURITY_SERVER_BLOCK = new SecurityServerBlock();
 
 	// Items
 	public static final BundlePatternItem BUNDLE_PATTERN_ITEM = new BundlePatternItem();
@@ -316,6 +320,8 @@ public class RezolveMod {
 		this.registerItemBlock(BUNDLE_BUILDER_BLOCK);
 		this.registerItemBlock(ETHERNET_CABLE_BLOCK);
 		this.registerItemBlock(REMOTE_SHELL_BLOCK);
+		this.registerItemBlock(DATABASE_SERVER_BLOCK);
+		this.registerItemBlock(SECURITY_SERVER_BLOCK);
 	}
 
 	/**

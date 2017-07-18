@@ -77,12 +77,8 @@ public class CableNetwork {
 					IBlockState cableBlockState = this.world.getBlockState(cable);
 					
 					if (cableBlockState.getBlock() != this.cableType) {
-						
-						TileEntity te = this.world.getTileEntity(cable);
-						if (te != null) {
-							if (!endpoints.contains(cable))
-								endpoints.add(cable);
-						}
+						if (!endpoints.contains(cable))
+							endpoints.add(cable);
 						
 						continue;
 					}

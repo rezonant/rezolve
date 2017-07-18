@@ -8,7 +8,7 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 
 public class TileEntityBase extends TileEntity  {
-	TileEntityBase(String registryName) {
+	public TileEntityBase(String registryName) {
 		this.registryName = registryName;
 	}
 	
@@ -16,6 +16,10 @@ public class TileEntityBase extends TileEntity  {
 	
 	public String getRegistryName() {
 		return this.registryName;
+	}
+	
+	public void init() {
+		
 	}
 	
 	@Override

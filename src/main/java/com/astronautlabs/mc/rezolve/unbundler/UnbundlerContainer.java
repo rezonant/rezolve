@@ -67,11 +67,4 @@ public class UnbundlerContainer extends ContainerBase<UnbundlerEntity> {
 	        this.addSlotToContainer(new Slot(playerInv, x, playerHotbarOffsetX + x * 18, playerHotbarOffsetY));
 	    }
 	}
-	
-	@Override
-	public boolean canInteractWith(EntityPlayer player) {
-		// TODO Auto-generated method stub
-		return this.entity.isUseableByPlayer(player);
-	}
-	
 }

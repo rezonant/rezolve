@@ -56,13 +56,10 @@ public abstract class Machine extends TileBlockBase implements IGuiProvider {
 	@Override()
 	public void init(RezolveMod mod) {
 		super.init(mod);
-		RezolveMod.instance().registerTileEntity(this.getTileEntityClass());
 		this.guiId = mod.getGuiHandler().registerGui(this);
 	}
 	
 	private int guiId = -1;
-
-	public abstract Class<? extends TileEntityBase> getTileEntityClass();
 	
 	@Override
 	public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
@@ -87,33 +84,11 @@ public abstract class Machine extends TileBlockBase implements IGuiProvider {
 	    return true;
 	}
 	
-    /**
-     * Returns a new instance of a block's tile entity class. Called on placing the block.
-     * 
-     * PERFORMANCE NOTE: Default implementation relies on reflection, if performance is an issue (due to lots of 
-     * tile entities being created at the same time) then this should be overridden to use 
-     * a standard invocation.
-     */
-	@Override
-	public TileEntity createNewTileEntity(World worldIn, int meta) {
-		Class<? extends TileEntityBase> klass = this.getTileEntityClass();
-		
-		if (klass == null)
-			return null;
-		
-		Constructor<? extends TileEntityBase> ctor;
-		TileEntityBase instance;
-		
-		try {
-			ctor = klass.getConstructor();
-			instance = ctor.newInstance();
-		} catch (Exception e) {
-			System.err.println("Cannot construct tile entity "+klass.getCanonicalName()+": "+e.getMessage());
-			System.err.println(e.toString());
-			return null;
-		}
-		
-		return instance;
+	public void openGui(World world, BlockPos pos, EntityPlayer player)
+	{
+		if (!world.isRemote) {
+	        player.openGui(this.mod, this.guiId, world, pos.getX(), pos.getY(), pos.getZ());
+	    }
 	}
 	
 	@Override

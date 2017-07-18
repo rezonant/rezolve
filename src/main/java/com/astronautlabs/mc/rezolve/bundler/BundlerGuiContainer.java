@@ -17,12 +17,10 @@ import net.minecraft.util.ResourceLocation;
 public class BundlerGuiContainer extends GuiContainerBase {
 
 	public BundlerGuiContainer(IInventory playerInv, BundlerEntity entity) {
-		super(new BundlerContainer(playerInv, entity), "rezolve:textures/gui/container/bundler_gui.png");
+		super(new BundlerContainer(playerInv, entity), "rezolve:textures/gui/container/bundler_gui.png", 255, 212);
 		
 		this.playerInv = playerInv;
 		this.entity = entity;
-	    this.xSize = 255;
-	    this.ySize = 212;
 	}
 	
 	private IInventory playerInv;

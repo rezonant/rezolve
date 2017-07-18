@@ -25,10 +25,12 @@ import net.minecraft.util.ResourceLocation;
 
 public abstract class GuiContainerBase extends GuiContainer {
 
-	public GuiContainerBase(ContainerBase inventorySlotsIn, String guiBackgroundResource) {
+	public GuiContainerBase(ContainerBase inventorySlotsIn, String guiBackgroundResource, int width, int height) {
 		super(inventorySlotsIn);
 		this.container = inventorySlotsIn;
 		this.guiBackgroundResource = guiBackgroundResource;
+		this.xSize = width;
+		this.ySize = height;
 	}
 	
 	public void initGui() {

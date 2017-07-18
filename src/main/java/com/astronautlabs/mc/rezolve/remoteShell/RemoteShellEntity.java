@@ -1,24 +1,40 @@
 package com.astronautlabs.mc.rezolve.remoteShell;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import com.astronautlabs.mc.rezolve.CommonProxy;
 import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.RezolvePacketHandler;
 import com.astronautlabs.mc.rezolve.common.MachineEntity;
+import com.astronautlabs.mc.rezolve.databaseServer.DatabaseServerEntity;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IContainerListener;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagByteArray;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.Constants.NBT;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import scala.actors.threadpool.Arrays;
 
-public class RemoteShellEntity extends MachineEntity implements ICableEndpoint {
+public class RemoteShellEntity extends MachineEntity implements ICableEndpoint, IContainerListener {
 	public RemoteShellEntity() {
 		super("remote_shell_entity");
 		
@@ -70,7 +86,6 @@ public class RemoteShellEntity extends MachineEntity implements ICableEndpoint {
 
 	@Override
 	public void onCableUpdate() {
-		System.out.println("Remote shell was notified that a connected cable network was changed. Updating machines...");
 		this.updateMachines();
 	}
 	
@@ -86,13 +101,8 @@ public class RemoteShellEntity extends MachineEntity implements ICableEndpoint {
 	}
 	
 	public void updateMachines(BlockPos pos) {
-		System.out.println("Scanning for connected machines...");
 		CableNetwork network = new CableNetwork(this.worldObj, pos, RezolveMod.ETHERNET_CABLE_BLOCK);
 		this.connectedMachines = new ArrayList<BlockPos>(Arrays.asList(network.getEndpoints()));
-		
-		for (BlockPos mac : this.connectedMachines) {
-			System.out.println(" - Connected at "+mac.toString());
-		}
 		
 		this.notifyUpdate();
 	}
@@ -112,14 +122,29 @@ public class RemoteShellEntity extends MachineEntity implements ICableEndpoint {
 	}
 
 	ArrayList<EntityPlayer> activatedPlayers = new ArrayList<EntityPlayer>();
+	BlockPos clientActivatedMachine = null;
 	
+	public BlockPos getClientActivatedMachine() {
+		return this.clientActivatedMachine;
+	}
+
+	@SidedProxy(
+			clientSide = "com.astronautlabs.mc.rezolve.remoteShell.RemoteShellClientProxy", 
+			serverSide = "com.astronautlabs.mc.rezolve.remoteShell.RemoteShellServerProxy"
+	)
+	public static RemoteShellProxy proxy;
+
 	public void activate(BlockPos activatedMachine, EntityPlayer player) {
-		if (this.getWorld().isRemote) {
-			RezolvePacketHandler.INSTANCE.sendToServer(new RemoteShellActivateMessage(this, activatedMachine, player.getUniqueID().toString()));
-			return;
-		}
 		
 		if (this.storedEnergy < this.openEnergyCost) {
+			return;
+		}
+
+		if (this.getWorld().isRemote) {
+			RezolvePacketHandler.INSTANCE.sendToServer(new RemoteShellActivateMessage(this, activatedMachine, player.getUniqueID().toString()));
+			this.clientActivatedMachine = activatedMachine;
+
+			this.clientOverlay = proxy.addRemoteShellOverlay(this);
 			return;
 		}
 		
@@ -128,27 +153,69 @@ public class RemoteShellEntity extends MachineEntity implements ICableEndpoint {
 		
 		IBlockState state = this.getWorld().getBlockState(activatedMachine);
 
+		RezolveMod.setPlayerOverridePosition(player.getUniqueID(), activatedMachine);
+
 		System.out.println("Activating block using Remote Shell: "+state.getBlock().getRegistryName());
 		
-		state.getBlock().onBlockActivated(this.getWorld(), activatedMachine, state, player, EnumHand.MAIN_HAND, null, EnumFacing.NORTH, 0, 0, 0);
-
-		System.out.println("Overriding player position...");
-		RezolveMod.setPlayerOverridePosition(player.getUniqueID(), activatedMachine);
+		Container existingContainer = player.openContainer;
 		
-		synchronized (this.activatedPlayers) {
-			if (!this.activatedPlayers.contains(player))
-				this.activatedPlayers.add(player);	
+		state.getBlock().onBlockActivated(
+				this.getWorld(), activatedMachine, state, player, 
+				EnumHand.MAIN_HAND, null, EnumFacing.NORTH, 
+				0, 0, 0
+		);
+
+		if (existingContainer != player.openContainer) {
+			Container remoteContainer = player.openContainer;
+	
+			// Open was successful.
+
+			synchronized (this.activatedPlayers) {
+				if (!this.activatedPlayers.contains(player))
+					this.activatedPlayers.add(player);	
+			}
+			
+			// Track events in the container 
+			
+			remoteContainer.addListener(this);
 		}
+		
 	}
 	
 	private int openEnergyCost = 1000;
 	private int constantDrawCost = 50;
 	
+	private Object clientOverlay = null;
+	private GuiScreen currentGui = null;
+	
+	@Override
+	protected void updatePeriodicallyOnClient() {
+		boolean guiChanged = false;
+		EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+		
+		if (this.currentGui != Minecraft.getMinecraft().currentScreen) {
+			guiChanged = true;
+			this.currentGui = Minecraft.getMinecraft().currentScreen;
+		}
+		
+		if (this.clientActivatedMachine == null)
+			return;
+		
+		if (guiChanged) {
+			if (this.currentGui != null) {
+				System.out.println("GUI is now of type "+this.currentGui.getClass().getCanonicalName());
+			}
+			
+			if (this.currentGui == null || this.currentGui instanceof RemoteShellGuiContainer) {
+				this.clientActivatedMachine = null;
+				proxy.removeRemoteShellOverlay(this.clientOverlay);
+				this.clientOverlay = null;
+			}
+		}
+	}
+	
 	@Override
 	public void updatePeriodically() {
-		
-		if (this.getWorld().isRemote)
-			return;
 		
 		ArrayList<EntityPlayer> deactivatedPlayers = new ArrayList<EntityPlayer>();
 		
@@ -176,8 +243,6 @@ public class RemoteShellEntity extends MachineEntity implements ICableEndpoint {
 						;
 					} else {
 						this.storedEnergy -= this.constantDrawCost;
-						System.out.println("Drew "+this.constantDrawCost+" RF to sustain remote connection. "+this.storedEnergy+" RF remains.");
-						
 						this.notifyUpdate();
 					}
 				}
@@ -205,5 +270,139 @@ public class RemoteShellEntity extends MachineEntity implements ICableEndpoint {
 			System.out.println("An update to the ethernet network is required. Updating...");
 			this.updateMachines();
 		}
+	}
+
+	public void open(EntityPlayer player) {
+		
+		if (this.getWorld().isRemote)
+			return;
+		
+		IBlockState state = this.getWorld().getBlockState(this.getPos());
+		Block block = state.getBlock();
+		
+		if (block instanceof RemoteShellBlock) {
+			((RemoteShellBlock)block).openGui(this.getWorld(), this.getPos(), player);
+		}
+	}
+
+	public void returnToShell() {
+		if (!this.getWorld().isRemote)
+			return;
+
+		this.clientActivatedMachine = null;
+		proxy.removeRemoteShellOverlay(this.clientOverlay);
+		this.clientOverlay = null;
+		
+		EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+		RezolvePacketHandler.INSTANCE.sendToServer(new RemoteShellReturnMessage(this, player.getUniqueID().toString()));
+	}
+	
+	public void returnToShell(EntityPlayer player) {
+		if (this.getWorld().isRemote)
+			return;
+		
+		if (!this.activatedPlayers.contains(player))
+			return;
+		
+		this.activatedPlayers.remove(player);
+		this.open(player);
+	}
+	
+	private int accessCharge = 10;
+	
+	private void chargeForAccess(int itemCount) {
+		
+		int totalCharge = this.accessCharge * itemCount;
+		
+		if (this.storedEnergy < totalCharge) {
+			this.storedEnergy = 0;
+		} else {
+			this.storedEnergy -= this.accessCharge * itemCount;
+		}
+		
+		// If we are out of energy, we'll let the tile entity update handle closing all connections.
+		
+		this.notifyUpdate();
+	}
+
+	@Override
+	public void updateCraftingInventory(Container containerToSend, List<ItemStack> itemsList) {
+		System.out.println("Send craft inventory:");
+		int index = 0;
+		
+		for (ItemStack stack : itemsList) {
+			++index;
+			
+			if (stack == null)
+				System.out.println("["+index+"] No item");
+			else
+				System.out.println("["+index+"] "+stack.stackSize+"x "+stack.getDisplayName());
+		}
+	}
+
+	public DatabaseServerEntity getDatabase()
+	{
+		for (BlockPos pos : this.connectedMachines) {
+			TileEntity entity = this.getWorld().getTileEntity(pos);
+			
+			if (entity instanceof DatabaseServerEntity) {
+				return (DatabaseServerEntity)entity;
+			}
+		}
+		
+		return null;
+	}
+	
+	@Override
+	public void sendSlotContents(Container containerToSend, int slotInd, ItemStack stack) {
+		
+		Slot slot = containerToSend.getSlot(slotInd);
+		boolean charge = true;
+		
+		if (slot != null) {
+			if (slot.inventory instanceof InventoryPlayer) {
+				// We don't charge for changes to the player's inventory.
+				charge = false;
+			}
+		}
+		
+		System.out.println("Send slot contents for "+slotInd+":");
+		if (stack == null)
+			System.out.println(" - No contents");
+		else
+			System.out.println(" - "+stack.stackSize+" "+stack.getDisplayName());
+		
+		if (charge) {
+			System.out.println("Charging a fee for data transfer...");
+			this.chargeForAccess(1);
+		}
+		
+	}
+
+	@Override
+	public void sendProgressBarUpdate(Container containerIn, int varToUpdate, int newValue) {
+		System.out.println("Send progress: "+varToUpdate+" :: "+newValue);
+		
+	}
+
+	@Override
+	public void sendAllWindowProperties(Container containerIn, IInventory inventory) {
+		System.out.println("Send all window props");
+		
+	}
+
+	public void renameMachine(BlockPos machinePos, String name) {
+		if (this.getWorld().isRemote) {
+			System.out.println("Rename machine client side");
+			RezolvePacketHandler.INSTANCE.sendToServer(new RemoteShellRenameMachineMessage(this, machinePos, name));
+			return;
+		}
+		System.out.println("Rename machine server side");
+		
+		DatabaseServerEntity dbServer = this.getDatabase();
+		if (dbServer == null)
+			return;
+		
+		dbServer.setMachineName(machinePos, name);
 	}
 }

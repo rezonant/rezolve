@@ -77,10 +77,4 @@ public class BundlerContainer extends ContainerBase<BundlerEntity> {
 	    }
 	}
 	
-	@Override
-	public boolean canInteractWith(EntityPlayer player) {
-		// TODO Auto-generated method stub
-		return this.entity.isUseableByPlayer(player);
-	}
-	
 }

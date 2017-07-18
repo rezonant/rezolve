@@ -25,3 +25,6 @@ item.rezolve:item_bundle_pattern_blank.name=Blank Bundle Pattern
 
 tile.rezolve:block_ethernet_cable.name=Ethernet Cable
 tile.rezolve:block_remote_shell.name=Remote Shell
+
+tile.rezolve:block_database_server.name=Database Server
+tile.rezolve:block_security_server.name=Security Server

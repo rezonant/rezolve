@@ -26,6 +26,15 @@ public abstract class ContainerBase<T extends TileEntity> extends Container {
 	}
 
 	@Override
+	public boolean canInteractWith(EntityPlayer player) {
+		// TODO Auto-generated method stub
+		if (this.entity instanceof IInventory)
+			return ((IInventory)this.entity).isUseableByPlayer(player);
+		
+		return true;
+	}
+	
+	@Override
 	public ItemStack transferStackInSlot(EntityPlayer playerIn, int fromSlot) {
 	    ItemStack previous = null;
 	    Slot slot = (Slot) this.inventorySlots.get(fromSlot);
