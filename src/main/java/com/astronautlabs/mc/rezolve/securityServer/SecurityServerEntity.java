@@ -9,8 +9,11 @@ import com.astronautlabs.mc.rezolve.common.TileEntityBase;
 import com.astronautlabs.mc.rezolve.securityServer.SecurityServerEntity.Rule;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.Constants.NBT;
 
 public class SecurityServerEntity extends MachineEntity {
@@ -20,10 +23,20 @@ public class SecurityServerEntity extends MachineEntity {
 		this.rules = new ArrayList<Rule>();
 		this.rules.add(new Rule("<machines>", Rule.MODE_OPEN));
 		this.rules.add(new Rule("<players>", Rule.MODE_RESTRICTED));
-		this.rules.add(new Rule("rezonaut", Rule.MODE_OWNER));
-		this.rules.add(new Rule("maxillaria", Rule.MODE_OWNER));
-		this.rules.add(new Rule("dudeguypal", Rule.MODE_OWNER));
-		this.rules.add(new Rule("hypergamer", Rule.MODE_OWNER));
+	}
+	
+	void setRootUser(EntityLivingBase player) {
+		this.rootUser = player.getName();
+		
+		Rule playerRule = this.getRuleByNameInternal(this.rootUser);
+		
+		if (playerRule == null) {
+			System.out.println("CREATING ROOT USER OF "+this.rootUser);
+			playerRule = new Rule(this.rootUser, Rule.MODE_OWNER);
+			this.rules.add(playerRule);
+		} else {
+			playerRule.mode = Rule.MODE_OWNER;
+		}
 	}
 
 	public class Rule {
@@ -231,5 +244,77 @@ public class SecurityServerEntity extends MachineEntity {
 		}
 		
 		return null;
+	}
+	
+	private Rule getRuleByNameInternal(String name) {
+		for (Rule rule : this.rules) {
+			if (name.equals(rule.name))
+				return rule;
+		}
+		
+		return null;
+	}
+
+	public boolean canPlayerOpen(EntityPlayer player) {
+
+		if (this.rootUser != null && this.rootUser.equals(player.getName())) 
+			return true;
+		
+		int playerAccess = this.getPlayerAccess(player);
+		if (playerAccess == Rule.MODE_OWNER)
+			return true;
+		
+		return false;
+	}
+	
+	public int getPlayerAccess(EntityPlayer player) {
+
+		int playerAccess = Rule.MODE_RESTRICTED;
+
+		for (Rule rule : this.rules) {
+			if ("<players>".equals(rule.getName())) {
+				playerAccess = rule.getMode();
+			}
+		}
+		
+		for (Rule rule : this.rules) {
+			if (rule.getName().equals(player.getName())) {
+				playerAccess = rule.getMode();
+			}
+		}
+		
+		return playerAccess;
+	}
+	
+	public boolean canPlayerUse(EntityPlayer entityPlayer, BlockPos pos) {
+
+		int playerAccess = this.getPlayerAccess(entityPlayer);
+		
+		int machineAccess = Rule.MODE_NONE;
+		Rule machineRule = this.getRuleByName("<machines>");
+		
+		if (machineRule != null) {
+			machineAccess = machineRule.getMode();
+		}
+		
+		if (machineAccess == Rule.MODE_NONE) {
+			return true;
+		} else if (machineAccess == Rule.MODE_PROTECTED) {
+			if (playerAccess == Rule.MODE_ALLOWED || playerAccess == Rule.MODE_OWNER)
+				return true;
+			return false;
+		} else if (machineAccess == Rule.MODE_OPEN) {
+			if (playerAccess == Rule.MODE_RESTRICTED)
+				return false;
+			return true;
+		} else if (machineAccess == Rule.MODE_OWNER) {
+			if (playerAccess == Rule.MODE_OWNER)
+				return true;
+			return false;
+		}
+		
+		// Well we don't know how to handle it.
+		
+		return true;
 	}
 }

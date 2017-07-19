@@ -4,9 +4,13 @@ import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.Machine;
 import com.astronautlabs.mc.rezolve.common.TileEntityBase;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -20,6 +24,25 @@ public class SecurityServerBlock extends Machine {
 	public void init(RezolveMod mod) {
 		super.init(mod);
 		RuleModificationMessageHandler.register();
+		this.accessController = new SecurityAccessController();
+	}
+	
+	private SecurityAccessController accessController;
+	
+	public SecurityAccessController getAccessController() {
+		return this.accessController;
+	}
+	
+	@Override
+	public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer,
+			ItemStack stack) {
+		TileEntity entity = worldIn.getTileEntity(pos);
+		if (entity != null) {
+			SecurityServerEntity securityServerEntity = (SecurityServerEntity)entity;
+			securityServerEntity.setRootUser(placer);
+		}
+		
+		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
 	}
 	
 	@Override
