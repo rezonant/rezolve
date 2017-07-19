@@ -9,12 +9,11 @@ dependencies {
 	deployerJars "io.packagecloud.maven.wagon:maven-packagecloud-wagon:0.0.4"
 }
 
-
 uploadArchives {
     repositories.mavenDeployer {
         configuration = configurations.deployerJars
         repository(url: "packagecloud+https://packagecloud.io/rezonant/rezolve") {
-            authentication(password: rezolveMavenPassword)
+            authentication(password: project.hasProperty('rezolveMavenPassword') ? rezolveMavenPassword : '')
         }
     }
 }
