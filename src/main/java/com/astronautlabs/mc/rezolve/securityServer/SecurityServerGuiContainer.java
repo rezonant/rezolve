@@ -23,6 +23,13 @@ public class SecurityServerGuiContainer extends GuiContainerBase {
 	
 	private SecurityServerEntity entity;
 	
+	public boolean matchesSearch(Rule rule) {
+		if (rule.getName().toLowerCase().contains(this.searchField.getText()))
+			return true;
+		
+		return false;
+	}
+	
 	@Override
 	public void initGui() {
 		super.initGui();
@@ -203,6 +210,10 @@ public class SecurityServerGuiContainer extends GuiContainerBase {
 					modeStr = this.getMachinePolicyMode(rule.getMode());
 				} else if ("<players>".equals(rule.getName())) {
 					nameStr = "Default User Policy";
+				}
+				
+				if (this.entity.rootUser != null && this.entity.rootUser.equals(rule.getName())) {
+					modeStr = modeStr + " [root]";
 				}
 				
 				this.fontRendererObj.drawString(

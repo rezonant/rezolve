@@ -18,6 +18,7 @@ import com.astronautlabs.mc.rezolve.common.GhostSlotUpdateMessageHandler;
 import com.astronautlabs.mc.rezolve.common.ItemBase;
 import com.astronautlabs.mc.rezolve.common.TileEntityBase;
 import com.astronautlabs.mc.rezolve.databaseServer.DatabaseServerBlock;
+import com.astronautlabs.mc.rezolve.remoteShell.CableNetwork;
 import com.astronautlabs.mc.rezolve.remoteShell.EthernetCableBlock;
 import com.astronautlabs.mc.rezolve.remoteShell.RemoteShellBlock;
 import com.astronautlabs.mc.rezolve.securityServer.SecurityServerBlock;
@@ -32,12 +33,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 @Mod(modid = RezolveMod.MODID, version = RezolveMod.VERSION, name = "Rezolve", dependencies = "after:Waila;after:EnderIO")
@@ -72,6 +75,9 @@ public class RezolveMod {
 		
 		Container container = (Container)containerObj;
 		EntityPlayer player = (EntityPlayer)playerObj;
+		
+		// Security check
+		
 		
 		if (container.canInteractWith(player))
 			return true;

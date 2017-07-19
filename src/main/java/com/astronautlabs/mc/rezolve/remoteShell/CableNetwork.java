@@ -3,6 +3,8 @@ package com.astronautlabs.mc.rezolve.remoteShell;
 import java.util.ArrayList;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
+import com.astronautlabs.mc.rezolve.databaseServer.DatabaseServerEntity;
+import com.astronautlabs.mc.rezolve.securityServer.SecurityServerEntity;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -50,6 +52,36 @@ public class CableNetwork {
 		}
 		
 		return viableCables.toArray(new BlockPos[viableCables.size()]);
+	}
+	
+	public SecurityServerEntity getSecurityServer() {
+		return this.getSecurityServer(this.getEndpoints());
+	}
+	
+	public SecurityServerEntity getSecurityServer(BlockPos[] endpoints) {
+		for (BlockPos pos : endpoints) {
+			TileEntity entity = this.world.getTileEntity(pos);
+			
+			if (entity instanceof SecurityServerEntity) 
+				return (SecurityServerEntity)entity;
+		}
+		
+		return null;
+	}
+	
+	public DatabaseServerEntity getDatabaseServer() {
+		return this.getDatabaseServer(this.getEndpoints());
+	}
+	
+	public DatabaseServerEntity getDatabaseServer(BlockPos[] endpoints) {
+		for (BlockPos pos : endpoints) {
+			TileEntity entity = this.world.getTileEntity(pos);
+			
+			if (entity instanceof DatabaseServerEntity) 
+				return (DatabaseServerEntity)entity;
+		}
+		
+		return null;
 	}
 	
 	public BlockPos[] getEndpoints() {
