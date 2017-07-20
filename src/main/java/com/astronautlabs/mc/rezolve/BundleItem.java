@@ -175,4 +175,22 @@ public class BundleItem extends MetaItemBase implements ITooltipHint {
 	public String getTooltipHint(ItemStack itemStack) {
 		return this.describeContents(itemStack);
 	}
+
+	public ItemStack withContents(int count, ItemStack ...stacks) {
+		ItemStack result = new ItemStack(this, count, 0);
+		
+		VirtualInventory vinv = new VirtualInventory();
+		
+		int slot = 0;
+		for (ItemStack stack : stacks) {
+			vinv.setInventorySlotContents(slot, stack);
+			++slot;
+		}
+		
+		NBTTagCompound nbt = new NBTTagCompound();
+		RezolveNBT.writeInventory(nbt, vinv);
+		
+		result.setTagCompound(nbt);
+		return result;
+	}
 }

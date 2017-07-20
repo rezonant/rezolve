@@ -14,11 +14,14 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -28,6 +31,40 @@ public class DatabaseServerBlock extends TileBlockBase {
 	public DatabaseServerBlock() {
 		super("block_database_server");
 		this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
+	}
+
+	@Override
+	public void registerRecipes() {
+		
+		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
+			RezolveMod.addRecipe(
+				new ItemStack(this.itemBlock), 
+				"nen",
+				"CMC",
+				"cac", 
+
+				'n', Items.NAME_TAG,
+				'e', Items.ENDER_EYE,
+				'C', Blocks.CHEST,
+				'M', Item.REGISTRY.getObject(new ResourceLocation("enderio:itemMachinePart")),
+				'c', RezolveMod.ETHERNET_CABLE_BLOCK,
+				'a', Blocks.ANVIL
+			);
+		} else {
+			RezolveMod.addRecipe(
+				new ItemStack(this.itemBlock), 
+				"ene",
+				"CpC",
+				"cac", 
+				
+				'e', Items.ENDER_EYE,
+				'n', Items.NAME_TAG,
+				'C', Blocks.CHEST,
+				'p', Items.PRISMARINE_SHARD,
+				'c', RezolveMod.ETHERNET_CABLE_BLOCK,
+				'a', Blocks.ANVIL
+			);
+		}
 	}
 	
 	@Override

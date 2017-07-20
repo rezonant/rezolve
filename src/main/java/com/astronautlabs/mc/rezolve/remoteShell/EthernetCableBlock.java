@@ -9,8 +9,12 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ChunkCache;
@@ -35,6 +39,46 @@ public class EthernetCableBlock extends CableBlock {
 		);
 	}
 
+	@Override
+	public void registerRecipes() {
+		ItemStack redstoneBundle = RezolveMod.BUNDLE_ITEM.withContents(
+			1,
+			new ItemStack(Items.REDSTONE, 1),
+			new ItemStack(Items.REDSTONE, 1),
+			new ItemStack(Items.REDSTONE, 1),
+			new ItemStack(Items.REDSTONE, 1),
+			new ItemStack(Items.REDSTONE, 1),
+			new ItemStack(Items.REDSTONE, 1),
+			new ItemStack(Items.REDSTONE, 1),
+			new ItemStack(Items.REDSTONE, 1),
+			new ItemStack(Items.REDSTONE, 1)
+		);
+		
+		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
+			RezolveMod.addRecipe(
+				new ItemStack(this.itemBlock), 
+				"pWp",
+				"WRW",
+				"pWp", 
+				
+				'p', new ItemStack(Item.REGISTRY.getObject(new ResourceLocation("enderio:itemMaterial")), 1, 3),
+				'W', Blocks.WOOL,
+				'R', redstoneBundle
+			);
+		} else {
+			RezolveMod.addRecipe(
+				new ItemStack(this.itemBlock), 
+				"IWI",
+				"WRW",
+				"IWI", 
+				
+				'I', Items.IRON_INGOT,
+				'W', Blocks.WOOL,
+				'R', redstoneBundle
+			);
+		}
+	}
+	
 	float radius = 3f / 16f;
 
 	@Override
