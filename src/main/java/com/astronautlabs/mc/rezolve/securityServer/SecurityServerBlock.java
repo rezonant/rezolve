@@ -8,9 +8,13 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -25,6 +29,22 @@ public class SecurityServerBlock extends Machine {
 		super.init(mod);
 		RuleModificationMessageHandler.register();
 		this.accessController = new SecurityAccessController();
+	}
+
+	@Override
+	public void registerRecipes() {
+		RezolveMod.addRecipe(
+			new ItemStack(this.itemBlock), 
+			"oNo",
+			"cRc",
+			"oDo", 
+			
+			'o', Blocks.OBSIDIAN,
+			'N', Items.NETHER_STAR,
+			'c', RezolveMod.ETHERNET_CABLE_BLOCK,
+			'R', RezolveMod.REMOTE_SHELL_BLOCK,
+			'D', Items.IRON_DOOR
+		);
 	}
 	
 	private SecurityAccessController accessController;
