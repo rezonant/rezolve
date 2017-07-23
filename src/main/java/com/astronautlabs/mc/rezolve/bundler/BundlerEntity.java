@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.astronautlabs.mc.rezolve.BundleItem;
 import com.astronautlabs.mc.rezolve.RezolveMod;
+import com.astronautlabs.mc.rezolve.bundleBuilder.BundlePatternItem;
 import com.astronautlabs.mc.rezolve.bundler.BundlerEntity.ItemMemo;
 import com.astronautlabs.mc.rezolve.common.RezolveNBT;
 import com.astronautlabs.mc.rezolve.common.MachineEntity;
@@ -50,6 +51,122 @@ public class BundlerEntity extends MachineEntity {
 	
 	public boolean isInputSlot(int index) {
 		return index < 9;
+	}
+	
+	public ItemStack[] getAvailableMaterials() 
+	{
+		ArrayList<ItemStack> availableMaterials = new ArrayList<ItemStack>();
+		
+		for (int i = 0, max = this.getSlots(); i < max; ++i) {
+			if (!this.isInputSlot(i))
+				continue;
+			
+			ItemStack ingredient = this.getStackInSlot(i);
+
+			if (ingredient == null)
+				continue;
+			
+			ItemStack materialStack = null;
+			for (ItemStack potentialMaterialStack : availableMaterials) {
+				if (RezolveMod.areStacksSame(potentialMaterialStack, ingredient)) {
+					materialStack = potentialMaterialStack;
+					break;
+				}
+			}
+			
+			if (materialStack == null) {
+				materialStack = ingredient.copy();
+				availableMaterials.add(materialStack);
+			} else {
+				materialStack.stackSize += ingredient.stackSize;
+			}	
+		}
+
+		return availableMaterials.toArray(new ItemStack[availableMaterials.size()]);
+	}
+	
+	public ItemStack[] getNeededMaterials()
+	{
+		ArrayList<ItemStack> neededMaterials = new ArrayList<ItemStack>();
+		
+		for (int i = 0, max = this.getSlots(); i < max; ++i) {
+			if (!this.isPatternSlot(i))
+				continue;
+			
+			ItemStack pattern = this.getStackInSlot(i);
+			
+			if (pattern == null)
+				continue;
+			
+			for (ItemStack ingredient : RezolveMod.instance().BUNDLE_ITEM.getItemsFromBundle(pattern)) {
+				
+				ItemStack materialStack = null;
+				for (ItemStack potentialMaterialStack : neededMaterials) {
+					if (RezolveMod.areStacksSame(potentialMaterialStack, ingredient)) {
+						materialStack = potentialMaterialStack;
+						break;
+					}
+				}
+				
+				if (materialStack == null) {
+					materialStack = ingredient.copy();
+					neededMaterials.add(materialStack);
+				} else {
+					materialStack.stackSize += ingredient.stackSize;
+				}
+			}	
+		}
+
+		return neededMaterials.toArray(new ItemStack[neededMaterials.size()]);
+	}
+	
+	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+		if (!this.isInputSlot(slot) || stack == null || stack.stackSize == 0)
+			return stack;
+		
+		ItemStack[] neededMaterials = this.getNeededMaterials();
+		ItemStack[] availableMaterials = this.getAvailableMaterials();
+		ItemStack neededMaterialStack = null;
+		ItemStack availableMaterialStack = null;
+
+		for (ItemStack neededMaterial : neededMaterials) {
+			if (RezolveMod.areStacksSame(neededMaterial, stack)) {
+				neededMaterialStack = neededMaterial;
+				break;
+			}
+		}
+		
+		for (ItemStack availableMaterial : availableMaterials) {
+			if (RezolveMod.areStacksSame(availableMaterial, stack)) {
+				availableMaterialStack = availableMaterial;
+				break;
+			}
+		}
+		
+		if (neededMaterialStack == null)
+			return stack;
+		
+		int availableItemCount = 0;
+		
+		if (availableMaterialStack != null)
+			availableItemCount = availableMaterialStack.stackSize;
+		
+		if (availableItemCount >= neededMaterialStack.stackSize)
+			return stack;
+		
+		if (availableItemCount + stack.stackSize > neededMaterialStack.stackSize) {
+			stack = stack.copy();
+			ItemStack remainder = stack.splitStack(stack.stackSize - (neededMaterialStack.stackSize - availableItemCount));
+			ItemStack secondRemainder = super.insertItem(slot, stack, simulate);
+			
+			if (secondRemainder != null) {
+				remainder.stackSize += secondRemainder.stackSize;
+			}
+			
+			return remainder;
+		} else {
+			return super.insertItem(slot, stack, simulate);
+		}
 	}
 	
 	@Override
