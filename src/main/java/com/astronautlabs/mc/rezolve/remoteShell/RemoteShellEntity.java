@@ -1,6 +1,7 @@
 package com.astronautlabs.mc.rezolve.remoteShell;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.astronautlabs.mc.rezolve.CommonProxy;
@@ -32,7 +33,6 @@ import net.minecraftforge.common.util.Constants.NBT;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import scala.actors.threadpool.Arrays;
 
 public class RemoteShellEntity extends MachineEntity implements ICableEndpoint, IContainerListener {
 	public RemoteShellEntity() {

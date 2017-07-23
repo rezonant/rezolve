@@ -38,8 +38,17 @@ public abstract class Machine extends TileBlockBase implements IGuiProvider {
 	
 	@Override
 	public IBlockState getStateFromMeta(int meta) {
+		EnumFacing facing = EnumFacing.VALUES[meta];
+		
+		if (!FACING.getAllowedValues().contains(facing)) {
+			for (EnumFacing value : FACING.getAllowedValues()) {
+				facing = value;
+				break;
+			}
+		}
+		
 		return this.blockState.getBaseState()
-			.withProperty(FACING, EnumFacing.VALUES[meta]);
+			.withProperty(FACING, facing);
 	}
 	
 	@Override

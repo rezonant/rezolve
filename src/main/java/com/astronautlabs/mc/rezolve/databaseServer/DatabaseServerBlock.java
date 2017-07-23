@@ -83,8 +83,17 @@ public class DatabaseServerBlock extends TileBlockBase {
 	
 	@Override
 	public IBlockState getStateFromMeta(int meta) {
+		EnumFacing facing = EnumFacing.VALUES[meta];
+		
+		if (!FACING.getAllowedValues().contains(facing)) {
+			for (EnumFacing value : FACING.getAllowedValues()) {
+				facing = value;
+				break;
+			}
+		}
+			
 		return this.blockState.getBaseState()
-			.withProperty(FACING, EnumFacing.VALUES[meta]);
+			.withProperty(FACING, facing);
 	}
 	
 	public static final PropertyDirection FACING = PropertyDirection.create("facing", new Predicate<EnumFacing>() {

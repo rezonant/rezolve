@@ -91,7 +91,7 @@ public class RemoteShellGuiContainer extends GuiContainerBase {
 		
 		this.listScrollPosition += Mouse.getEventDWheel() / 10;
 		this.listScrollPosition = Math.min(0, this.listScrollPosition);
-		this.listScrollPosition = Math.max(machines.length * this.slotHeight * -1 + this.listHeight, this.listScrollPosition);
+		this.listScrollPosition = Math.max(Math.min(0, machines.length * this.slotHeight * -1 + this.listHeight), this.listScrollPosition);
 	}
 	
 	private BlockPos selectedMachine = null;

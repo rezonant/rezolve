@@ -1,8 +1,7 @@
 package com.astronautlabs.mc.rezolve.core;
 
+import java.util.Arrays;
 import java.util.List;
-
-import javax.management.modelmbean.ModelMBeanConstructorInfo;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -14,7 +13,6 @@ import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import scala.actors.threadpool.Arrays;
 
 public class RezolveModContainer extends DummyModContainer {
 	public RezolveModContainer() {
@@ -23,14 +21,18 @@ public class RezolveModContainer extends DummyModContainer {
 		ModMetadata meta = getMetadata();
 		
 		meta.modId = "rezolvecore";
-		meta.name = "Rezolve (Core)";
+		meta.name = "RezolveCore";
 		meta.version = "@VERSION@";
-		meta.credits = "Written by William Lahti (rezonant)";
-		meta.authorList = Arrays.asList(new String[] { "William Lahti" });
-		meta.description = "Core modifications needed for Rezolve";
-		meta.url = "https://github.com/astronautlabs/rezolve";
+		meta.credits = "By William Lahti (rezonant)";
+		meta.authorList = Arrays.asList(new String[] { "rezonant" });
+		meta.description = "RezolveCore provides core modifications needed for Rezolve. Specifically, modifies EntityPlayer to allow the Remote Shell to override machine access restrictions related to the player's distance from the block.";
+		meta.url = "https://minecraft.curseforge.com/projects/rezolve";
 		meta.screenshots = new String[0];
-		meta.logoFile = "";
+		
+		// I think it's a bummer that if you declare a parent, then the information is no longer browseable in the 
+		// mods list. So I'm not declaring it.
+		// meta.parent = "rezolve";
+		meta.logoFile = "assets/rezolve/logo.png";
 	}
 	
 	@Override

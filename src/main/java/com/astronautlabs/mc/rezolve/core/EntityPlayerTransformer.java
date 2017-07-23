@@ -17,11 +17,10 @@ public class EntityPlayerTransformer implements IClassTransformer {
 
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] basicClass) {
-		if ("net.minecraft.entity.player.EntityPlayer".equals(name))
+		if ("net.minecraft.entity.player.EntityPlayer".equals(transformedName))
 			return this.patchEntityPlayer(name, transformedName, basicClass);
-		if ("net.minecraft.entity.player.EntityPlayerMP".equals(name))
+		if ("net.minecraft.entity.player.EntityPlayerMP".equals(transformedName))
 			return this.patchEntityPlayer(name, transformedName, basicClass);
-		
 		
 		return basicClass;
 	}
@@ -34,6 +33,12 @@ public class EntityPlayerTransformer implements IClassTransformer {
 		String targetInvokedMethodName = "canInteractWith";
 		String targetInvokedMethodOwner = "net/minecraft/inventory/Container";
 		String targetInvokedMethodDesc = "(Lnet/minecraft/entity/player/EntityPlayer;)Z";
+		
+		if (!name.equals(transformedName)) {
+			targetMethodName = "func_70071_h_";
+			targetInvokedMethodName = "func_75145_c";
+		}
+		
 		//set up ASM class manipulation stuff. Consult the ASM docs for details
 		ClassNode classNode = new ClassNode();
 		ClassReader classReader = new ClassReader(bytes);
@@ -118,7 +123,7 @@ public class EntityPlayerTransformer implements IClassTransformer {
 		}
 
 		//ASM specific for cleaning up and returning the final bytes for JVM processing.
-		ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+		ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 		classNode.accept(writer);
 		return writer.toByteArray();
 		

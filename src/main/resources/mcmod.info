@@ -5,11 +5,11 @@
 	  "description": "Simplify automation and management of complex modded Minecraft bases",
 	  "version": "${version}",
 	  "mcversion": "${mcversion}",
-	  "url": "https://mc.astronautlabs.com/rezolve",
+	  "url": "https://minecraft.curseforge.com/projects/rezolve",
 	  "updateUrl": "",
-	  "authorList": ["rezonant"],
-	  "credits": "",
-	  "logoFile": "",
+	  "authorList": ["rezonant", "maxillaria"],
+	  "credits": "By William Lahti (rezonant) and Maxillaria",
+	  "logoFile": "assets/rezolve/logo.png",
 	  "screenshots": [],
 	  "dependencies": []
 	}
