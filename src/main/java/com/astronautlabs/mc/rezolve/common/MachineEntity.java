@@ -18,7 +18,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 public class MachineEntity extends TileEntityBase
-		implements IInventory, ITickable, IEnergyReceiver, IMachineInventory, ICapabilityProvider, IItemHandler {
+		implements IInventory, ITickable, IEnergyReceiver, IMachineInventory, ICapabilityProvider {
 	public MachineEntity(String registryName) {
 		super(registryName);
 		this.inventory = new ItemStack[this.getSizeInventory()];
@@ -328,7 +328,7 @@ public class MachineEntity extends TileEntityBase
 	@Override
 	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
 		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-			return (T) this;
+			return (T) new MachineItemHandler(this);
 		}
 
 		return super.getCapability(capability, facing);
@@ -343,7 +343,6 @@ public class MachineEntity extends TileEntityBase
 		return super.hasCapability(capability, facing);
 	}
 
-	@Override
 	public int getSlots() {
 		return this.getSizeInventory();
 	}
@@ -356,7 +355,6 @@ public class MachineEntity extends TileEntityBase
 		return true;
 	}
 
-	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
 		if (!this.allowedToPushTo(slot))
 			return stack;
@@ -424,7 +422,6 @@ public class MachineEntity extends TileEntityBase
 		super.readFromNBT(compound);
 	}
 
-	@Override
 	public ItemStack extractItem(int slot, int amount, boolean simulate) {
 		if (!this.allowedToPullFrom(slot))
 			return null;
