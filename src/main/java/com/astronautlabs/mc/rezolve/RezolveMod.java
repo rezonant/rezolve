@@ -13,6 +13,8 @@ import com.astronautlabs.mc.rezolve.bundleBuilder.BlankBundlePatternItem;
 import com.astronautlabs.mc.rezolve.bundleBuilder.BundleBuilderBlock;
 import com.astronautlabs.mc.rezolve.bundleBuilder.BundlePatternItem;
 import com.astronautlabs.mc.rezolve.bundler.BundlerBlock;
+import com.astronautlabs.mc.rezolve.cities.CityBiome;
+import com.astronautlabs.mc.rezolve.cities.CityGenerator;
 import com.astronautlabs.mc.rezolve.common.BlockBase;
 import com.astronautlabs.mc.rezolve.common.GhostSlotUpdateMessageHandler;
 import com.astronautlabs.mc.rezolve.common.ItemBase;
@@ -26,6 +28,7 @@ import com.astronautlabs.mc.rezolve.unbundler.UnbundlerBlock;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Biomes;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -33,6 +36,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldType;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.gen.structure.MapGenVillage;
+import net.minecraftforge.common.BiomeManager;
+import net.minecraftforge.common.BiomeManager.BiomeEntry;
+import net.minecraftforge.common.BiomeManager.BiomeType;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -352,10 +362,31 @@ public class RezolveMod {
 		return this.guiHandler;
 	}
 
+	public static final CityBiome CITY_BIOME = new CityBiome();
+	public static final CityGenerator CITY_GENERATOR = new CityGenerator();
+	
 	@EventHandler
 	public void preinit(FMLPreInitializationEvent event) {
 		
 		System.out.println("Starting Rezolve @VERSION@...");
+
+		boolean enabled = false;
+		if (enabled) {
+
+			GameRegistry.register(CITY_BIOME);
+			GameRegistry.registerWorldGenerator(CITY_GENERATOR, Integer.MAX_VALUE);
+			
+			BiomeProvider.allowedBiomes.clear();
+			
+			int cityWeight = 3;
+			
+			//cityWeight = 999999;
+			BiomeManager.addBiome(BiomeType.DESERT, new BiomeEntry(CITY_BIOME, cityWeight));
+			BiomeManager.addBiome(BiomeType.WARM, new BiomeEntry(CITY_BIOME, cityWeight));
+			BiomeManager.addBiome(BiomeType.COOL, new BiomeEntry(CITY_BIOME, cityWeight));
+			BiomeManager.addBiome(BiomeType.ICY, new BiomeEntry(CITY_BIOME, cityWeight));
+			BiomeManager.addSpawnBiome(CITY_BIOME);
+		}
 		
 		this.guiHandler = new RezolveGuiHandler();
 		this.registerBlocks();
