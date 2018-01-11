@@ -9,6 +9,9 @@ bin
 config/
 asm/
 crash-reports/
+logs/
+saves/
+options.txt
 
 # idea
 out
