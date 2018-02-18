@@ -2,6 +2,7 @@ package com.astronautlabs.mc.rezolve.cities;
 
 import java.util.ArrayList;
 
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import scala.util.Random;
 
@@ -43,7 +44,7 @@ public class FeatureGenerator {
 			for (int sizeZ = 1; sizeZ <= this.maxSizeZ; ++sizeZ) {
 				for (int x = 0; x < this.maxSizeX; ++x) {
 					for (int z = 0; z < this.maxSizeZ; ++z) {
-						generators.add(new ShapeGenerator(new Shape(-x, -z, sizeX, sizeZ)));		
+						generators.add(new ShapeGenerator(this, new Shape(-x, -z, sizeX, sizeZ)));		
 					}
 				}
 			}
@@ -60,22 +61,26 @@ public class FeatureGenerator {
 	 */
 	public static class Shape {
 		public Shape(int originX, int originZ, int sizeX, int sizeZ) {
+			this(originX, originZ, sizeX, sizeZ, 0);
+		}
+
+		public Shape(int originX, int originZ, int sizeX, int sizeZ, int feature) {
 			this.originX = originX;
 			this.originZ = originZ;
 			this.sizeX = sizeX;
 			this.sizeZ = sizeZ;
+			this.feature = feature;
 		}
+
 		public int originX;
 		public int originZ;
 		public int sizeX;
 		public int sizeZ;
+		public int feature;
 		
 		@Override
 		public boolean equals(Object obj) {
-			if (!(obj instanceof Shape))
-				return false;
-			
-			if (obj == null)
+			if (obj == null || !(obj instanceof Shape))
 				return false;
 			
 			Shape shape = (Shape)obj;
@@ -87,7 +92,15 @@ public class FeatureGenerator {
 				&& this.sizeZ == shape.sizeZ
 			);
 		}
-		
+
+		public ChunkPos localToGlobal(ChunkPos pos) {
+			return new ChunkPos(this.originX + pos.chunkXPos, this.originZ + pos.chunkZPos);
+		}
+
+		public ChunkPos globalToLocal(ChunkPos pos) {
+			return new ChunkPos(pos.chunkXPos - this.originX, pos.chunkZPos - this.originZ);
+		}
+
 		/**
 		 * Determine if the given chunk position is part of this shape.
 		 * Default implementation is square (originX, originZ, sizeX, sizeZ),
@@ -97,12 +110,28 @@ public class FeatureGenerator {
 		 * @param chunkZ
 		 * @return
 		 */
-		public boolean collides(int chunkX, int chunkZ) {
-			return 	   chunkX >= this.originX 
-					&& chunkX <  this.originX + this.sizeX 
-					&& chunkZ >= this.originZ 
-					&& chunkZ <  this.originZ + this.sizeZ
+		public boolean collides(ChunkPos chunk) {
+			return 	   chunk.chunkXPos >= this.originX
+					&& chunk.chunkXPos <  this.originX + this.sizeX
+					&& chunk.chunkZPos >= this.originZ
+					&& chunk.chunkZPos <  this.originZ + this.sizeZ
 			;
+		}
+
+		public boolean connectsNorth(ChunkPos pos) {
+			return this.collides(new ChunkPos(pos.chunkXPos, pos.chunkZPos - 1));
+		}
+
+		public boolean connectsWest(ChunkPos pos) {
+			return this.collides(new ChunkPos(pos.chunkXPos - 1, pos.chunkZPos));
+		}
+
+		public boolean connectsSouth(ChunkPos pos) {
+			return this.collides(new ChunkPos(pos.chunkXPos, pos.chunkZPos + 1));
+		}
+
+		public boolean connectsEast(ChunkPos pos) {
+			return this.collides(new ChunkPos(pos.chunkXPos + 1, pos.chunkZPos));
 		}
 		
 		public int[] getOffset(int chunkX, int chunkZ) {
@@ -162,15 +191,30 @@ public class FeatureGenerator {
 		FeatureGenerator featureGenerator;
 		Shape prototype;
 		
-		public Shape shapeAt(int chunkX, int chunkZ) {
-			return new Shape(this.prototype.originX + chunkX, this.prototype.originZ + chunkZ, this.prototype.sizeX, this.prototype.sizeZ);
+		public Shape shapeAt(World world, int chunkX, int chunkZ) {
+			return new Shape(
+				this.prototype.originX + chunkX,
+				this.prototype.originZ + chunkZ,
+				this.prototype.sizeX,
+				this.prototype.sizeZ,
+				this.featureGenerator.getFeature(world, chunkX, chunkZ));
 		}
 		
 		public int score(World world, int originX, int originZ) {
-			return Shape.scoreOrigin(world, originX + this.prototype.originX, this.prototype.originZ, this.prototype.sizeX, this.prototype.sizeZ);
+			return Shape.scoreOrigin(
+				world,
+				originX + this.prototype.originX,
+				originZ + this.prototype.originZ,
+				this.prototype.sizeX,
+				this.prototype.sizeZ
+			);
 		}
-		
+
 		public boolean isViable(World world, int originX, int originZ) {
+			return this.isViable(world, originX, originZ, new ArrayList<String>());
+		}
+
+		public boolean isViable(World world, int originX, int originZ, ArrayList<String> knownViable) {
 			int thisScore = this.score(world, originX, originZ);
 			Shape shape = this.shapeAt(originX, originZ);
 			
@@ -185,17 +229,28 @@ public class FeatureGenerator {
 				}
 			}
 			
-			return false;
+			return true;
 		}
 	}
-	
+
+	public int getFeature(final World world, int chunkX, int chunkZ) {
+		Random r = new Random(world.getSeed() + chunkX * 9 + chunkZ * 12);
+		return r.nextInt(5);
+	}
+
 	public Shape getShape(final World world, int chunkX, int chunkZ) {
+		return this.getShape(world, chunkX, chunkZ, new ArrayList<String>());
+	}
+
+	public Shape getShape(final World world, int chunkX, int chunkZ, ArrayList<String> knownViable) {
 		int maxScore = Integer.MIN_VALUE;
 		ShapeGenerator chosen = null;
 		
 		for (ShapeGenerator gen : this.getGenerators()) {
 			int score = gen.score(world, chunkX, chunkZ);
-			boolean viable = gen.isViable(world, chunkX, chunkZ);
+			ArrayList<String> subViable = new ArrayList<String>(knownViable);
+
+			boolean viable = gen.isViable(world, chunkX, chunkZ, subViable);
 			
 			if (viable && score > (int)(Integer.MAX_VALUE * this.featurePresenceThreshold) && score > maxScore) {
 				maxScore = score;

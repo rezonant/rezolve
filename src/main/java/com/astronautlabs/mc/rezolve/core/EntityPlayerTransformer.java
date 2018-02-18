@@ -58,7 +58,6 @@ public class EntityPlayerTransformer implements IClassTransformer {
 	
 			MethodInsnNode targetNode = null;
 	
-			@SuppressWarnings("unchecked")
 			Iterator<AbstractInsnNode> iter = m.instructions.iterator();
 	
 			int index = -1;

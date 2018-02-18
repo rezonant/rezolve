@@ -9,7 +9,6 @@ import com.astronautlabs.mc.rezolve.common.MachineEntity;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 
 public class BundleBuilderEntity extends MachineEntity {
 	public BundleBuilderEntity() {

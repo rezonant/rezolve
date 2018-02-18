@@ -1,8 +1,6 @@
 package com.astronautlabs.mc.rezolve.core;
 
 import java.util.Arrays;
-import java.util.List;
-
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 

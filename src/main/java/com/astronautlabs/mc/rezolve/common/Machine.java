@@ -1,7 +1,5 @@
 package com.astronautlabs.mc.rezolve.common;
 
-import java.lang.reflect.Constructor;
-
 import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.google.common.base.Predicate;
 

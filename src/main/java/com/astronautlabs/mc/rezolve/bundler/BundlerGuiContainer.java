@@ -1,15 +1,13 @@
 package com.astronautlabs.mc.rezolve.bundler;
 
+import net.minecraft.tileentity.TileEntity;
 import org.lwjgl.opengl.GL11;
 
 import com.astronautlabs.mc.rezolve.common.GuiContainerBase;
-import com.astronautlabs.mc.rezolve.common.MachineEntity;
 import com.astronautlabs.mc.rezolve.common.Operation;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
@@ -40,7 +38,7 @@ public class BundlerGuiContainer extends GuiContainerBase {
 	    int usedHeight = (int)(this.entity.getEnergyStored(EnumFacing.DOWN) / (double)this.entity.getMaxEnergyStored(EnumFacing.DOWN) * rfBarHeight);
 	    Gui.drawRect(rfBarX, rfBarY, rfBarX + rfBarWidth, rfBarY + rfBarHeight - usedHeight, 0xFF000000);
 	    
-	    Operation<BundlerEntity> op = this.entity.getCurrentOperation();
+	    Operation<? extends TileEntity> op = this.entity.getCurrentOperation();
 	    String statusStr;
 	    
 	    if (op != null) {

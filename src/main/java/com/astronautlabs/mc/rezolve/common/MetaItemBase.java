@@ -2,8 +2,6 @@ package com.astronautlabs.mc.rezolve.common;
 
 import java.util.List;
 
-import com.astronautlabs.mc.rezolve.RezolveMod;
-
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

@@ -1,14 +1,10 @@
 package com.astronautlabs.mc.rezolve.bundler;
 
 import com.astronautlabs.mc.rezolve.BundleItem;
-import com.astronautlabs.mc.rezolve.bundler.BundlerEntity.ItemMemo;
-import com.astronautlabs.mc.rezolve.common.MachineEntity;
 import com.astronautlabs.mc.rezolve.common.Operation;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.world.World;
 
 public class BundlerOperation extends Operation<BundlerEntity> {
 

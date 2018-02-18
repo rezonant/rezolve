@@ -4,14 +4,12 @@ import java.io.IOException;
 
 import org.lwjgl.input.Mouse;
 
-import com.astronautlabs.mc.rezolve.common.ContainerBase;
 import com.astronautlabs.mc.rezolve.common.GuiContainerBase;
 import com.astronautlabs.mc.rezolve.securityServer.SecurityServerEntity.Rule;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.util.math.BlockPos;
 
 public class SecurityServerGuiContainer extends GuiContainerBase {

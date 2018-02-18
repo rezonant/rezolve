@@ -1,11 +1,7 @@
 package com.astronautlabs.mc.rezolve.databaseServer;
 
 import com.astronautlabs.mc.rezolve.common.TileEntityBase;
-import com.google.common.base.Predicate;
-
-import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
 public class DatabaseServerEntity extends TileEntityBase {

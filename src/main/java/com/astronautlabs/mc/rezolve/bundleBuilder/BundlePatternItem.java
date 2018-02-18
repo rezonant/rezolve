@@ -5,9 +5,7 @@ import java.util.List;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.ITooltipHint;
-import com.astronautlabs.mc.rezolve.common.ItemBase;
 import com.astronautlabs.mc.rezolve.common.MetaItemBase;
-import com.astronautlabs.mc.rezolve.common.RezolveNBT;
 import com.astronautlabs.mc.rezolve.common.VirtualInventory;
 
 import net.minecraft.creativetab.CreativeTabs;

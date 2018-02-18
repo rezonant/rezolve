@@ -6,26 +6,25 @@ import java.util.ArrayList;
 import org.lwjgl.input.Keyboard;
 
 import com.astronautlabs.mc.rezolve.RezolvePacketHandler;
-import com.astronautlabs.mc.rezolve.bundleBuilder.BundleBuilderUpdateMessage;
+import com.astronautlabs.mc.rezolve.bundleBuilder.BundleBuilderContainer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiControls;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 
 public abstract class GuiContainerBase extends GuiContainer {
 
-	public GuiContainerBase(ContainerBase inventorySlotsIn, String guiBackgroundResource, int width, int height) {
+	public GuiContainerBase(ContainerBase<? extends TileEntity> inventorySlotsIn, String guiBackgroundResource, int width, int height) {
 		super(inventorySlotsIn);
 		this.container = inventorySlotsIn;
 		this.guiBackgroundResource = guiBackgroundResource;
@@ -38,7 +37,7 @@ public abstract class GuiContainerBase extends GuiContainer {
 		this.controls.clear();
 	};
 	
-	ContainerBase container;
+	ContainerBase<? extends TileEntity> container;
 	String guiBackgroundResource;
 
 	protected void drawSubWindows(int mouseX, int mouseY) {

@@ -1,11 +1,8 @@
 package com.astronautlabs.mc.rezolve.remoteShell;
 
-import java.util.UUID;
-
 import com.astronautlabs.mc.rezolve.MessageHandler;
 import com.astronautlabs.mc.rezolve.RezolvePacketHandler;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;

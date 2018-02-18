@@ -2,14 +2,14 @@ package com.astronautlabs.mc.rezolve.bundleBuilder;
 
 import java.io.IOException;
 
+import com.astronautlabs.mc.rezolve.common.ContainerBase;
+import net.minecraft.tileentity.TileEntity;
 import org.lwjgl.input.Keyboard;
 
 import com.astronautlabs.mc.rezolve.common.GuiContainerBase;
 
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;

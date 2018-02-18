@@ -1,6 +1,5 @@
 package com.astronautlabs.mc.rezolve.unbundler;
 
-import com.astronautlabs.mc.rezolve.BundleItem;
 import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.RezolveNBT;
 import com.astronautlabs.mc.rezolve.common.InventorySnapshot;

@@ -1,15 +1,11 @@
 package com.astronautlabs.mc.rezolve.unbundler;
 
-import com.astronautlabs.mc.rezolve.bundleBuilder.BundlePatternSlot;
 import com.astronautlabs.mc.rezolve.bundler.BundleSlot;
 import com.astronautlabs.mc.rezolve.common.ContainerBase;
 import com.astronautlabs.mc.rezolve.common.MachineOutputSlot;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
 
 public class UnbundlerContainer extends ContainerBase<UnbundlerEntity> {
 	

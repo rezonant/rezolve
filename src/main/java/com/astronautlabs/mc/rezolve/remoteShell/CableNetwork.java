@@ -2,11 +2,9 @@ package com.astronautlabs.mc.rezolve.remoteShell;
 
 import java.util.ArrayList;
 
-import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.databaseServer.DatabaseServerEntity;
 import com.astronautlabs.mc.rezolve.securityServer.SecurityServerEntity;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;

@@ -2,22 +2,24 @@ package com.astronautlabs.mc.rezolve.cities;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Vector;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.google.common.collect.Lists;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.WeightedRandom;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraftforge.fml.common.IWorldGenerator;
+import org.lwjgl.util.vector.Vector2f;
 
 public class CityGenerator implements IWorldGenerator {
 
@@ -104,7 +106,7 @@ public class CityGenerator implements IWorldGenerator {
 		Blocks.STONE.getStateFromMeta(6), // polished andesite
 	};
 	
-	public void generateTower(Random random, World world, int posX, int posY, int posZ, int sizeX, int sizeZ, int floors) {
+	public void generateTower(Random random, World world, FeatureGenerator.Shape shape, ChunkPos chunk, int groundY, int floors) {
 
 		boolean roundedCorners = random.nextBoolean();
 		boolean tallWindows = random.nextBoolean();
@@ -122,17 +124,40 @@ public class CityGenerator implements IWorldGenerator {
 		} else {
 			glassMaterial = GLASS_PANE_MATERIALS[random.nextInt(GLASS_PANE_MATERIALS.length)];
 		}
-		
+
+		ChunkPos globalChunk = shape.localToGlobal(chunk);
+		int sizeX = 16;
+		int sizeZ = 16;
+		boolean connectsNorth = shape.connectsNorth(chunk);
+		boolean connectsSouth = shape.connectsSouth(chunk);
+		boolean connectsEast = shape.connectsEast(chunk);
+		boolean connectsWest = shape.connectsWest(chunk);
+
 		for (int x = 0; x < sizeX; ++x) {
 			for (int z = 0; z < sizeZ; ++z) {
 
 				int edgeX = (x > sizeX / 2) ? sizeX - 1 - x : x;
 				int edgeZ = (z > sizeZ / 2) ? sizeZ - 1 - z : z;
+				boolean xWall = edgeX == 4;
+				boolean zWall = edgeZ == 4;
 
 				// Skip drawing the edges if we are the corners and rounded corners is on
-				boolean skipWall = roundedCorners && edgeX == 0 && edgeZ == 0;
-				
-				if (!skipWall && (edgeX == 0 || edgeZ == 0)) {
+				if (roundedCorners && xWall && zWall)
+					xWall = zWall = false;
+
+				if (z < 8 && connectsNorth)
+					zWall = false;
+
+				if (z > 8 && connectsSouth)
+					zWall = false;
+
+				if (x < 8 && connectsWest)
+					xWall = false;
+
+				if (x > 8 && connectsEast)
+					xWall = false;
+
+				if (xWall || zWall) {
 					for (int y = 0; y < towerHeight; ++y) {
 						
 						IBlockState wallMaterial = buildingMaterial;
@@ -155,7 +180,7 @@ public class CityGenerator implements IWorldGenerator {
 						}
 						
 						world.setBlockState(
-							new BlockPos(posX + x, posY + y, posZ + z), 
+							globalChunk.getBlock(x, y, z),
 							wallMaterial,
 							2
 						);
@@ -167,7 +192,7 @@ public class CityGenerator implements IWorldGenerator {
 				
 				if (tallWindows && (edgeX == 0 || edgeZ == 0)) {
 					world.setBlockState(
-						new BlockPos(posX + x, posY - 1, posZ + z), 
+						globalChunk.getBlock(x, groundY - 1, z),
 						floorMaterial,
 						2
 					);
@@ -176,7 +201,7 @@ public class CityGenerator implements IWorldGenerator {
 				if (edgeX > 0 && edgeZ > 0) {
 					for (int y = -1; y < towerHeight; y += floorHeight) {
 						world.setBlockState(
-							new BlockPos(posX + x, posY + y, posZ + z), 
+							globalChunk.getBlock(x, groundY + y, z),
 							floorMaterial,
 							2
 						);
@@ -268,133 +293,203 @@ public class CityGenerator implements IWorldGenerator {
 		
 	}
 	
-	private void drawStandardRoads(World world, int chunkX, int groundY, int chunkZ, int chunkSize) {
+	private void drawStandardRoads(World world, FeatureGenerator.Shape shape, ChunkPos chunk, int groundY) {
 
 		// Draw roads
 
-		for (int x = 0, maxX = chunkSize; x < maxX; ++x) {
-			for (int z = 0, maxZ = chunkSize; z < maxZ; ++z) {
-				int edgeX = (x > chunkSize / 2) ? chunkSize - 1 - x : x;
-				int edgeZ = (z > chunkSize / 2) ? chunkSize - 1 - z : z;
-						
-				if (edgeX < 2 || edgeZ < 2) {
-					world.setBlockState(new BlockPos(chunkX * 16 + x, groundY, chunkZ * 16 + z), 
-							Blocks.STONE.getStateFromMeta(4), 2);
+		ChunkPos globalChunk = shape.localToGlobal(chunk);
+		boolean connectNorth = shape.connectsNorth(chunk);
+		boolean connectSouth = shape.connectsSouth(chunk);
+		boolean connectEast = shape.connectsEast(chunk);
+		boolean connectWest = shape.connectsWest(chunk);
+
+		for (int x = 0, maxX = 16; x < maxX; ++x) {
+			for (int z = 0, maxZ = 16; z < maxZ; ++z) {
+				int edgeX = (x > maxX / 2) ? maxX - 1 - x : x;
+				int edgeZ = (z > maxZ / 2) ? maxZ - 1 - z : z;
+
+				boolean xRoads = edgeX < 2;
+				boolean zRoads = edgeZ < 2;
+
+				if (z < 2 && connectNorth)
+					zRoads = false;
+
+				if (z >= maxZ - 2 && connectSouth)
+					zRoads = false;
+
+				if (x >= maxX - 2 && connectEast)
+					xRoads = false;
+
+				if (x < 2 && connectWest)
+					xRoads = false;
+
+				if (xRoads || zRoads) {
+					world.setBlockState(
+						globalChunk.getBlock(x, groundY, z),
+						Blocks.STONE.getStateFromMeta(4),
+						2
+					);
 				}
 			}
 		}
 	}
 	
-	private void drawStandardSidewalks(World world, int chunkX, int groundY, int chunkZ, int chunkSize) {
+	private void drawStandardSidewalks(World world, FeatureGenerator.Shape shape, ChunkPos chunk, int groundY) {
 
 		// Draw the sidewalks
 
-		for (int x = 0, maxX = chunkSize; x < maxX; ++x) {
-			for (int z = 0, maxZ = chunkSize; z < maxZ; ++z) {
-				int edgeX = x > 8 ? (chunkSize - 1) - x : x;
-				int edgeZ = z > 8 ? (chunkSize - 1) - z : z;
+		ChunkPos globalChunk = shape.localToGlobal(chunk);
+		boolean connectNorth = shape.connectsNorth(chunk);
+		boolean connectSouth = shape.connectsSouth(chunk);
+		boolean connectEast = shape.connectsEast(chunk);
+		boolean connectWest = shape.connectsWest(chunk);
 
+		for (int x = 0, maxX = 16; x < maxX; ++x) {
+			for (int z = 0, maxZ = 16; z < maxZ; ++z) {
+				int edgeX = x > 8 ? 16 - 1 - x : x;
+				int edgeZ = z > 8 ? 16 - 1 - z : z;
+
+				boolean xSidewalks = edgeX >= 2 && edgeX < 4;
+				boolean zSidewalks = edgeZ >= 2 && edgeZ < 4;
 				if (edgeX < 2 || edgeZ < 2)
 					continue;
 
 				if (edgeX >= 4 && edgeZ >= 4)
 					continue;
 
-				world.setBlockState(new BlockPos(chunkX * 16 + x, groundY + 1, chunkZ * 16 + z), Blocks.STONE_SLAB.getDefaultState(), 2);
+				if (z < 5 && connectNorth)
+					zSidewalks = false;
+
+				if (z >= maxZ - 5 && connectSouth)
+					zSidewalks = false;
+
+				if (x >= maxX - 5 && connectEast)
+					xSidewalks = false;
+
+				if (x < 5 && connectWest)
+					xSidewalks = false;
+
+				if (xSidewalks || zSidewalks) {
+					world.setBlockState(
+						globalChunk.getBlock(x, groundY + 1, z),
+						Blocks.STONE_SLAB.getDefaultState(),
+						2
+					);
+				}
 			}
 		}
 
 	}
 
-	private void prepareSpace(World world, int chunkX, int groundY, int chunkZ, int chunkSize, IBlockState groundBlock) {
-		this.prepareSpace(world, chunkX, groundY, chunkZ, chunkSize, groundBlock, Blocks.STONE.getDefaultState());
+	private void prepareSpace(World world, ChunkPos chunk, int groundY, IBlockState groundBlock) {
+		this.prepareSpace(world, chunk, groundY, groundBlock, Blocks.STONE.getDefaultState());
 	}
 	
-	private void prepareSpace(World world, int chunkX, int groundY, int chunkZ, int chunkSize, IBlockState groundBlock, IBlockState undergroundBlock) {
-
+	private void prepareSpace(World world, ChunkPos chunk, int groundY, IBlockState groundBlock, IBlockState undergroundBlock) {
 		// Flatten that shit.
+
+		int chunkSize = 16;
 
 		for (int x = 0, maxX = chunkSize; x < maxX; ++x) {
 			for (int z = 0, maxZ = chunkSize; z < maxZ; ++z) {
 				for (int y = 0, yMax = 255; y < yMax; ++y) {
+					IBlockState block = null;
+
 					if (y > groundY)
-						world.setBlockState(new BlockPos(chunkX * 16 + x, y, chunkZ * 16 + z), Blocks.AIR.getDefaultState(), 2);
+						block = Blocks.AIR.getDefaultState();
 					else if (y == groundY) 
-						world.setBlockState(new BlockPos(chunkX * 16 + x, y, chunkZ * 16 + z), groundBlock, 2);
+						block = groundBlock;
 					else if (y > groundY - 4 && y > 1)
-						world.setBlockState(new BlockPos(chunkX * 16 + x, y, chunkZ * 16 + z), undergroundBlock, 2);
+						block = undergroundBlock;
+
+					if (block != null)
+						world.setBlockState(chunk.getBlock(x, y, z), undergroundBlock, 2);
 				}
 			}
 		}
 	}
 
-	private void generatePark(Random rand, int chunkX, int chunkZ, int chunkSize, World world, IChunkGenerator chunkGenerator,
-			IChunkProvider chunkProvider) {
-		int groundY = world.getSeaLevel() + 2;
+	private void generatePark(Random rand, FeatureGenerator.Shape shape, ChunkPos chunk, World world, IChunkGenerator chunkGenerator,
+			IChunkProvider chunkProvider, int groundY) {
 
-		this.prepareSpace(world, chunkX, groundY, chunkZ, chunkSize, Blocks.GRASS.getDefaultState());
-		this.drawStandardRoads(world, chunkX, groundY, chunkZ, chunkSize);
-		this.drawStandardSidewalks(world, chunkX, groundY, chunkZ, chunkSize);
+		//int groundY = world.getSeaLevel() + 2;
+		int chunkSize = 16;
+
+		this.prepareSpace(world,
+			shape.localToGlobal(chunk),
+			groundY,
+			Blocks.GRASS.getDefaultState()
+		);
+
+		this.drawStandardRoads(world, shape, chunk, groundY);
+		this.drawStandardSidewalks(world, shape, chunk, groundY);
 		
 		// If we're 1x1 chunk...
-		
-		if (chunkSize == 16) {
-			GeneratedItem chosenItem = WeightedRandom.getRandomItem(rand, PARK_FEATURES);
-			if (chosenItem.key == TREE_FEATURE ) {
-				
-				int centerBlockX = chunkSize / 2;
-				int centerBlockZ = chunkSize / 2;
-				BlockPos saplingPos = new BlockPos(chunkX * 16 + centerBlockX, groundY + 1, chunkZ * 16 + centerBlockZ);
-				IBlockState sapling = Blocks.SAPLING.getStateFromMeta(rand.nextInt(6));
-				world.setBlockState(
-					saplingPos,
-					sapling,
-					2
-				);
-				
-				int meta = Blocks.SAPLING.getMetaFromState(sapling);
-				if (sapling.getBlock() == Blocks.SAPLING && meta == 5) {
-					// Dark oak needs 4 saplings
-					world.setBlockState(new BlockPos(saplingPos.getX() + 1, saplingPos.getY(), saplingPos.getZ()), sapling, 2);
-					world.setBlockState(new BlockPos(saplingPos.getX(), saplingPos.getY(), saplingPos.getZ() + 1), sapling, 2);
-					world.setBlockState(new BlockPos(saplingPos.getX() + 1, saplingPos.getY(), saplingPos.getZ() + 1), sapling, 2);
-				}
-				
-				IGrowable growable = (IGrowable)sapling.getBlock(); 
-				growable.grow(world, rand, saplingPos, sapling);
-				growable.grow(world, rand, saplingPos, world.getBlockState(saplingPos));
-				//growable.grow(world, rand, saplingPos, world.getBlockState(saplingPos));
-				
-			} else if ("pumpkins".equals(chosenItem.key)) {
 
-				int centerBlockX = chunkSize / 2;
-				int centerBlockZ = chunkSize / 2;
-				BlockPos saplingPos = new BlockPos(chunkX * 16 + centerBlockX, groundY, chunkZ * 16 + centerBlockZ);
-				IBlockState sapling = Blocks.SAPLING.getStateFromMeta(rand.nextInt(6));
-				world.setBlockState(
-					saplingPos,
-					sapling,
-					2
-				);
-				
-				IGrowable growable = (IGrowable)sapling.getBlock(); 
-				growable.grow(world, rand, saplingPos, sapling);
+		ChunkPos globalChunk = shape.localToGlobal(chunk);
+
+		GeneratedItem chosenItem = WeightedRandom.getRandomItem(rand, PARK_FEATURES);
+		if (chosenItem.key == TREE_FEATURE ) {
+
+			int centerBlockX = chunkSize / 2;
+			int centerBlockZ = chunkSize / 2;
+			BlockPos saplingPos = globalChunk.getBlock(centerBlockX, groundY + 1, centerBlockZ);
+			IBlockState sapling = Blocks.SAPLING.getStateFromMeta(rand.nextInt(6));
+			world.setBlockState(
+				saplingPos,
+				sapling,
+				2
+			);
+
+			int meta = Blocks.SAPLING.getMetaFromState(sapling);
+			if (sapling.getBlock() == Blocks.SAPLING && meta == 5) {
+				// Dark oak needs 4 saplings
+				world.setBlockState(new BlockPos(saplingPos.getX() + 1, saplingPos.getY(), saplingPos.getZ()), sapling, 2);
+				world.setBlockState(new BlockPos(saplingPos.getX(), saplingPos.getY(), saplingPos.getZ() + 1), sapling, 2);
+				world.setBlockState(new BlockPos(saplingPos.getX() + 1, saplingPos.getY(), saplingPos.getZ() + 1), sapling, 2);
 			}
+
+			IGrowable growable = (IGrowable)sapling.getBlock();
+			growable.grow(world, rand, saplingPos, sapling);
+			growable.grow(world, rand, saplingPos, world.getBlockState(saplingPos));
+			//growable.grow(world, rand, saplingPos, world.getBlockState(saplingPos));
+
+		} else if ("pumpkins".equals(chosenItem.key)) {
+
+			int centerBlockX = chunkSize / 2;
+			int centerBlockZ = chunkSize / 2;
+			BlockPos saplingPos = globalChunk.getBlock(centerBlockX, groundY, centerBlockZ);
+			IBlockState sapling = Blocks.SAPLING.getStateFromMeta(rand.nextInt(6));
+			world.setBlockState(
+				saplingPos,
+				sapling,
+				2
+			);
+
+			IGrowable growable = (IGrowable)sapling.getBlock();
+			growable.grow(world, rand, saplingPos, sapling);
 		}
 		
 	}
 	
 	private void generateBuilding(
-		Random rand, int chunkX, int groundY, int chunkZ, int chunkSize, int towerFloors, 
+		Random rand, FeatureGenerator.Shape shape, ChunkPos chunk, int groundY, int towerFloors,
 		World world, IChunkGenerator chunkGenerator, IChunkProvider chunkProvider) 
 	{
 
-		this.prepareSpace(world, chunkX, groundY, chunkZ, chunkSize, Blocks.AIR.getDefaultState());
-		this.drawStandardRoads(world, chunkX, groundY, chunkZ, chunkSize);
-		this.drawStandardSidewalks(world, chunkX, groundY, chunkZ, chunkSize);
+		ChunkPos globalChunk = shape.localToGlobal(chunk);
+
+		this.prepareSpace(world, globalChunk, groundY, Blocks.AIR.getDefaultState());
+		this.drawStandardRoads(world, shape, chunk, groundY);
+		this.drawStandardSidewalks(world, shape, chunk, groundY);
 	
 		// Draw the tower	
-		this.generateTower(rand, world, chunkX * 16 + 4, groundY + 1, chunkZ * 16 + 4, chunkSize - 8, chunkSize - 8, towerFloors);
+		this.generateTower(
+			rand, world,
+			shape, chunk,
+			groundY + 1,
+			towerFloors
+		);
 		
 	}
 
@@ -416,12 +511,14 @@ public class CityGenerator implements IWorldGenerator {
 	
 	private final static Object GENERATION_LOCK = new Object();
 
+	private final static FeatureGenerator FEATURE_GENERATOR = new FeatureGenerator(3, 3, 1);
+
 	@Override
 	public void generate(Random rand, int chunkX, int chunkZ, World world, IChunkGenerator chunkGenerator,
 			IChunkProvider chunkProvider) {
 
-		if (this.isSpaceUsed(world, chunkX, chunkZ))
-			return;
+		//if (this.isSpaceUsed(world, chunkX, chunkZ))
+		//	return;
 
 		boolean isCity = false;
 
@@ -443,29 +540,23 @@ public class CityGenerator implements IWorldGenerator {
 		if (!isCity)
 			return;
 
+
+		FeatureGenerator.Shape shape = FEATURE_GENERATOR.getShape(world, chunkX, chunkZ);
 		int groundY = world.getSeaLevel() + 2;
-		
-		int originalChunkX = chunkX;
-		int originalChunkZ = chunkZ;
-		GeneratedItem selectedItem = WeightedRandom.getRandomItem(rand, FEATURES);
-		int feature = selectedItem.key;
 		
 		int chunkSize = 16;
 		int minFloors = 3;
 		int maxFloors = 8;
 
-		if (this.isSpaceUsed(world, chunkX, chunkZ))
-			return;
-
 		int[] superposition = null;
 		
-		if (feature == PARK_FEATURE) {
+		if (shape.feature == PARK_FEATURE) {
 			
 			if (rand.nextInt(100) > 60) {
 				superposition = this.findSpaceForMegaStructure(world, chunkX, chunkZ, 2, 2);
 			}
 
-		} else if (feature == BUILDING_FEATURE) {
+		} else if (shape.feature == BUILDING_FEATURE) {
 			Chunk[] neighborCities = this.getNeighborCities(world, chunkX, chunkZ);
 			int megaBuildingChance = 30;
 			
@@ -512,17 +603,11 @@ public class CityGenerator implements IWorldGenerator {
 			this.markSpaceUsed(world, chunkX, chunkZ, chunkSize / 16);
 		}
 		
-		if (feature == PARK_FEATURE) {
-			this.generatePark(rand, chunkX, chunkZ, chunkSize, world, chunkGenerator, chunkProvider);
-		} else if (feature == BUILDING_FEATURE) {
+		if (shape.feature == PARK_FEATURE) {
+			this.generatePark(rand, shape, chunk, world, chunkGenerator, chunkProvider);
+		} else if (shape.feature == BUILDING_FEATURE) {
 			int towerFloors = minFloors + rand.nextInt(maxFloors - minFloors);
-			this.generateBuilding(rand, chunkX, groundY, chunkZ, chunkSize, towerFloors, world, chunkGenerator, chunkProvider);
-		}
-		
-		// Avoid skipping the original chunk in the case that we moved slightly to accomodate a mega structure.
-		
-		if ((originalChunkX != chunkX || originalChunkZ != chunkZ) && !this.isSpaceUsed(world, originalChunkX, originalChunkZ)) {
-			this.generate(rand, originalChunkX, originalChunkZ, world, chunkGenerator, chunkProvider);
+			this.generateBuilding(rand, shape, chunk, groundY, towerFloors, world, chunkGenerator, chunkProvider);
 		}
 	}
 

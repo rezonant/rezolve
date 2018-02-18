@@ -1,6 +1,5 @@
 package com.astronautlabs.mc.rezolve;
 
-import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 public class CommonProxy {

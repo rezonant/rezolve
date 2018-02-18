@@ -5,9 +5,9 @@ import com.astronautlabs.mc.rezolve.common.GuiContainerBase;
 import com.astronautlabs.mc.rezolve.common.Operation;
 
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 
@@ -39,7 +39,7 @@ public class UnbundlerGuiContainer extends GuiContainerBase {
 
 	    // Draw operation details
 	    
-	    Operation<BundlerEntity> op = this.entity.getCurrentOperation();
+	    Operation<? extends TileEntity> op = this.entity.getCurrentOperation();
 	    String statusStr;
 	    
 	    if (op != null) {

@@ -4,17 +4,13 @@ import java.util.ArrayList;
 
 import com.astronautlabs.mc.rezolve.BundleItem;
 import com.astronautlabs.mc.rezolve.RezolveMod;
-import com.astronautlabs.mc.rezolve.bundleBuilder.BundlePatternItem;
-import com.astronautlabs.mc.rezolve.bundler.BundlerEntity.ItemMemo;
 import com.astronautlabs.mc.rezolve.common.RezolveNBT;
 import com.astronautlabs.mc.rezolve.common.MachineEntity;
 import com.astronautlabs.mc.rezolve.common.Operation;
 import com.astronautlabs.mc.rezolve.common.VirtualInventory;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.items.IItemHandler;
 
 public class BundlerEntity extends MachineEntity {
 	public BundlerEntity() {
@@ -201,7 +197,7 @@ public class BundlerEntity extends MachineEntity {
 	}
 
 	@Override
-	public Operation createOperation() {
+	public Operation<BundlerEntity> createOperation() {
 		return new BundlerOperation(this);
 	}
 	

@@ -15,7 +15,6 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
 
 public class MachineEntity extends TileEntityBase
 		implements IInventory, ITickable, IEnergyReceiver, IMachineInventory, ICapabilityProvider {
@@ -26,7 +25,7 @@ public class MachineEntity extends TileEntityBase
 	}
 
 	protected ItemStack[] inventory;
-	Operation currentOperation;
+	Operation<? extends MachineEntity> currentOperation;
 
 	protected boolean hasCurrentOperation() {
 		return this.currentOperation != null;
@@ -40,7 +39,7 @@ public class MachineEntity extends TileEntityBase
 		return energyTaken;
 	}
 
-	public Operation getCurrentOperation() {
+	public Operation<? extends MachineEntity> getCurrentOperation() {
 		return this.currentOperation;
 	}
 
@@ -325,6 +324,7 @@ public class MachineEntity extends TileEntityBase
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
 		if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {

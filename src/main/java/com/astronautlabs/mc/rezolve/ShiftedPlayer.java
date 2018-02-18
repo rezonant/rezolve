@@ -1,7 +1,6 @@
 package com.astronautlabs.mc.rezolve;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 
 public class ShiftedPlayer extends EntityPlayer {

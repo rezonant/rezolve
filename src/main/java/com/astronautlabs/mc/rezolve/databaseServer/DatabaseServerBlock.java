@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
-import com.astronautlabs.mc.rezolve.common.BlockBase;
 import com.astronautlabs.mc.rezolve.common.TileBlockBase;
 import com.astronautlabs.mc.rezolve.common.TileEntityBase;
 import com.google.common.base.Predicate;

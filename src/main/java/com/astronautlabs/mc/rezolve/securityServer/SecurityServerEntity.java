@@ -5,9 +5,6 @@ import java.util.UUID;
 
 import com.astronautlabs.mc.rezolve.RezolvePacketHandler;
 import com.astronautlabs.mc.rezolve.common.MachineEntity;
-import com.astronautlabs.mc.rezolve.common.TileEntityBase;
-import com.astronautlabs.mc.rezolve.securityServer.SecurityServerEntity.Rule;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
