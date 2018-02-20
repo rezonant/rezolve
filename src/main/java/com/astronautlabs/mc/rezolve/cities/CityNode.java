@@ -100,27 +100,30 @@ public class CityNode {
 		return this.getParameter(name, 0);
 	}
 
-	public boolean containsChunk(int chunkX, int chunkZ) {
+	public boolean containsChunk(World world, int chunkX, int chunkZ) {
+
+		if (!CityBiome.isCity(world, new ChunkPos(chunkX, chunkZ)))
+			return false;
 		return this.chunkX <= chunkX
 			&& chunkX < this.chunkX + this.spanX
 			&& this.chunkZ <= chunkZ
 			&& chunkZ < this.chunkZ + this.spanZ;
 	}
 
-	public boolean connectsNorth(ChunkPos chunk) {
-		return this.containsChunk(chunk.chunkXPos, chunk.chunkZPos - 1);
+	public boolean connectsNorth(World world, ChunkPos chunk) {
+		return this.containsChunk(world, chunk.chunkXPos, chunk.chunkZPos - 1);
 	}
 
-	public boolean connectsSouth(ChunkPos chunk) {
-		return this.containsChunk(chunk.chunkXPos, chunk.chunkZPos + 1);
+	public boolean connectsSouth(World world, ChunkPos chunk) {
+		return this.containsChunk(world, chunk.chunkXPos, chunk.chunkZPos + 1);
 	}
 
-	public boolean connectsWest(ChunkPos chunk) {
-		return this.containsChunk(chunk.chunkXPos - 1, chunk.chunkZPos);
+	public boolean connectsWest(World world, ChunkPos chunk) {
+		return this.containsChunk(world,chunk.chunkXPos - 1, chunk.chunkZPos);
 	}
 
-	public boolean connectsEast(ChunkPos chunk) {
-		return this.containsChunk(chunk.chunkXPos + 1, chunk.chunkZPos);
+	public boolean connectsEast(World world, ChunkPos chunk) {
+		return this.containsChunk(world,chunk.chunkXPos + 1, chunk.chunkZPos);
 	}
 
 	private void prepareSpace(World world, ChunkPos chunk, int groundY, IBlockState groundBlock) {
@@ -138,7 +141,7 @@ public class CityNode {
 					IBlockState block = null;
 
 					if (y > groundY) {
-						block = Blocks.AIR.getDefaultState();
+						//block = Blocks.AIR.getDefaultState();
 					} else if (y == groundY)
 						block = groundBlock;
 
@@ -158,10 +161,10 @@ public class CityNode {
 
 	private void drawRoad(World world, ChunkPos chunk, int groundY) {
 
-		boolean connectsNorth = this.connectsNorth(chunk);
-		boolean connectsSouth = this.connectsSouth(chunk);
-		boolean connectsEast = this.connectsEast(chunk);
-		boolean connectsWest = this.connectsWest(chunk);
+		boolean connectsNorth = this.connectsNorth(world, chunk);
+		boolean connectsSouth = this.connectsSouth(world, chunk);
+		boolean connectsEast = this.connectsEast(world, chunk);
+		boolean connectsWest = this.connectsWest(world, chunk);
 
 		for (int x = 0, maxX = 16; x < maxX; ++x) {
 			for (int z = 0, maxZ = 16; z < maxZ; ++z) {
@@ -206,10 +209,10 @@ public class CityNode {
 
 	private void drawSidewalk(World world, ChunkPos chunk, int groundY) {
 
-		boolean connectsNorth = this.connectsNorth(chunk);
-		boolean connectsSouth = this.connectsSouth(chunk);
-		boolean connectsEast = this.connectsEast(chunk);
-		boolean connectsWest = this.connectsWest(chunk);
+		boolean connectsNorth = this.connectsNorth(world, chunk);
+		boolean connectsSouth = this.connectsSouth(world, chunk);
+		boolean connectsEast = this.connectsEast(world, chunk);
+		boolean connectsWest = this.connectsWest(world, chunk);
 
 		// Draw the north/south sidewalks
 
@@ -293,10 +296,10 @@ public class CityNode {
 
 		int floors = this.getParameter("building.floors");
 
-		boolean connectsNorth = this.connectsNorth(chunk);
-		boolean connectsSouth = this.connectsSouth(chunk);
-		boolean connectsEast = this.connectsEast(chunk);
-		boolean connectsWest = this.connectsWest(chunk);
+		boolean connectsNorth = this.connectsNorth(world, chunk);
+		boolean connectsSouth = this.connectsSouth(world, chunk);
+		boolean connectsEast = this.connectsEast(world, chunk);
+		boolean connectsWest = this.connectsWest(world, chunk);
 
 		boolean roundedCorners = this.getParameter("building.roundedCorners") == 1;
 		boolean tallWindows = this.getParameter("building.tallWindows") == 1;
@@ -351,7 +354,7 @@ public class CityNode {
 						boolean inWindowRange = xWall != zWall;
 
 						if (tallWindows) {
-							isWindow = inWindowRange && y % floorHeight != floorHeight - 1;
+							isWindow = inWindowRange && y % floorHeight != 1;
 						} else {
 							int floorBlock = y % floorHeight;
 							isWindow = inWindowRange && floorBlock >= 1 && floorBlock < floorHeight - 2;
@@ -384,7 +387,11 @@ public class CityNode {
 					);
 				}
 
-				for (int y = -1; y < towerHeight; y += floorHeight) {
+				int floor = 1;
+
+				for (int y = 0; y < towerHeight; y += floorHeight) {
+
+
 					world.setBlockState(
 							chunk.getBlock(x, groundY + y, z),
 							floorMaterial,
@@ -399,9 +406,9 @@ public class CityNode {
 
 		int groundY = world.getSeaLevel() + 2;
 
+
 		switch (feature) {
 			case BUILDING:
-				this.prepareSpace(world, chunk, groundY, Blocks.STONE.getDefaultState());
 				this.drawRoad(world, chunk, groundY);
 				this.drawSidewalk(world, chunk, groundY);
 				this.drawBuilding(world, chunk, groundY);
@@ -423,7 +430,9 @@ public class CityNode {
 		COMPOSITE,
 		PARK,
 		BUILDING,
-		MAX
+		MAX,
+
+		RESERVED
 	}
 
 	public enum Material {
@@ -576,17 +585,42 @@ public class CityNode {
 	public void populate() {
 
 		Random random = this.randomSource();
-		int subdivide = random.nextInt(10);
+		int subdivide = random.nextInt(100);
 
-		if (subdivide < 4 && this.spanX > 1) {
+		float spanFactor = (spanX + spanZ) / 16.0f;
+		float subdivideWeight = spanFactor * 0.9f;
+
+		boolean subdividePrimary = subdivide < 80 * subdivideWeight;
+		boolean subdivideSecondary = subdivide >= 80 * subdivideWeight && subdivide < 100 * subdivideWeight;
+		boolean subdivideX;
+		boolean subdivideZ;
+
+		if (spanZ > spanX) {
+			subdivideZ = subdividePrimary;
+			subdivideX = subdivideSecondary;
+		} else if (spanX > spanZ) {
+			subdivideX = subdividePrimary;
+			subdivideZ = subdivideSecondary;
+		} else {
+			subdivideX = subdivide < 50 * subdivideWeight;
+			subdivideZ = subdivide >= 50 * subdivideWeight && subdivide < 100 * subdivideWeight;
+		}
+
+		if (subdivideX && this.spanX > 1) {
+			int minSplit = Math.max(1, this.spanX / 2 - 1);
+			int maxSplit = Math.min(this.spanX - 1, this.spanX / 2 + 1);
+
 			// Subdivide vertically into 2 features
-			int node1Width = random.nextInt(this.spanX - 1) + 1;
+			int node1Width = minSplit + (maxSplit - minSplit <= 0 ? 0 : random.nextInt(maxSplit - minSplit));
 			this.children.add(new CityNode(this, this.world, chunkX, chunkY, chunkZ, node1Width, this.spanY, this.spanZ));
 			this.children.add(new CityNode(this, this.world, chunkX + node1Width, chunkY, chunkZ, this.spanX - node1Width, this.spanY, this.spanZ));
 
-		} else if (subdivide < 7 && this.spanZ > 1) {
+		} else if (subdivideZ && this.spanZ > 1) {
+			int minSplit = Math.max(1, this.spanZ / 2 - 1);
+			int maxSplit = Math.min(this.spanZ - 1, this.spanZ / 2 + 1);
+
 			// Subdivide horizontally
-			int node1Width = random.nextInt(this.spanZ - 1) + 1;
+			int node1Width = minSplit + (maxSplit - minSplit <= 0 ? 0 : random.nextInt(maxSplit - minSplit));
 			this.children.add(new CityNode(this, this.world, chunkX, chunkY, chunkZ, this.spanX, this.spanY, node1Width));
 			this.children.add(new CityNode(this, this.world, chunkX, chunkY, chunkZ + node1Width, this.spanX, this.spanY, this.spanZ - node1Width));
 		} else {
@@ -605,7 +639,25 @@ public class CityNode {
 		switch (this.feature) {
 			case BUILDING:
 
-				this.params.put("building.floors", BUILDING_MIN_FLOORS + random.nextInt(BUILDING_MAX_FLOORS - BUILDING_MIN_FLOORS));
+				int minFloors = BUILDING_MIN_FLOORS;
+				int maxFloors = BUILDING_MAX_FLOORS;
+
+				int area = this.spanX * this.spanZ;
+
+				if (area == 1) {
+					minFloors = 1;
+					maxFloors = 4;
+				} else if (area <= 4) {
+					minFloors = 2;
+					maxFloors = 8;
+				} else if (area < 9) {
+					minFloors = 4;
+					maxFloors = 20;
+				} else {
+					minFloors = 6;
+				}
+
+				this.params.put("building.floors", minFloors + random.nextInt(maxFloors - minFloors));
 				this.params.put("building.floorMaterial", random.nextInt(FLOOR_MATERIALS.length));
 				this.params.put("building.wallMaterial", random.nextInt(BUILDING_MATERIALS.length));
 				this.params.put("building.glassMaterial", random.nextInt(GLASS_MATERIALS.length));

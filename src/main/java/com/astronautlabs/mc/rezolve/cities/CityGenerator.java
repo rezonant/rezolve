@@ -16,23 +16,8 @@ public class CityGenerator implements IWorldGenerator {
 	public void generate(Random rand, int chunkX, int chunkZ, World world, IChunkGenerator chunkGenerator,
 			IChunkProvider chunkProvider) {
 
-		boolean isCity = false;
+		boolean isCity = CityBiome.isCity(world, new ChunkPos(chunkX, chunkZ));
 
-		if (!isCity && RezolveMod.CITY_BIOME == world.getBiome(new BlockPos(chunkX * 16 + 8, 128, chunkZ * 16 + 8)))
-			isCity = true;
-
-		if (!isCity && RezolveMod.CITY_BIOME == world.getBiome(new BlockPos(chunkX * 16 + 1, 128, chunkZ * 16 + 1)))
-			isCity = true;
-		
-		if (!isCity && RezolveMod.CITY_BIOME == world.getBiome(new BlockPos(chunkX * 16 + 15, 128, chunkZ * 16 + 15)))
-			isCity = true;
-		
-		if (!isCity && RezolveMod.CITY_BIOME == world.getBiome(new BlockPos(chunkX * 16 + 15, 128, chunkZ * 16 + 1)))
-			isCity = true;
-		
-		if (!isCity && RezolveMod.CITY_BIOME == world.getBiome(new BlockPos(chunkX * 16 + 1, 128, chunkZ * 16 + 15)))
-			isCity = true;
-		
 		if (!isCity)
 			return;
 

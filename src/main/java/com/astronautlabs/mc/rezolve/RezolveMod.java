@@ -1,11 +1,19 @@
 package com.astronautlabs.mc.rezolve;
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
+import com.astronautlabs.mc.rezolve.mapgen.MapGenCave;
+import com.astronautlabs.mc.rezolve.mapgen.MapGenRavine;
+import com.astronautlabs.mc.rezolve.mapgen.MapGenScatteredFeature;
+import com.google.common.eventbus.Subscribe;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.gen.structure.MapGenVillage;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.terraingen.InitMapGenEvent;
+import net.minecraftforge.event.terraingen.PopulateChunkEvent;
+import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,6 +51,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import scala.tools.nsc.backend.icode.TypeKinds;
 
 @Mod(modid = RezolveMod.MODID, version = RezolveMod.VERSION, name = "Rezolve", dependencies = "after:Waila;after:EnderIO")
 public class RezolveMod {
@@ -331,6 +340,36 @@ public class RezolveMod {
 		this.registerItemBlock(SECURITY_SERVER_BLOCK);
 	}
 
+	@SubscribeEvent
+	public void initMapGen(InitMapGenEvent ev) {
+		if (ev.getType() == InitMapGenEvent.EventType.RAVINE) {
+			ev.setNewGen(new MapGenRavine());
+		} else if (ev.getType() == InitMapGenEvent.EventType.SCATTERED_FEATURE) {
+			ev.setNewGen(new MapGenScatteredFeature());
+		} else if (ev.getType() == InitMapGenEvent.EventType.VILLAGE) {
+			ev.setNewGen(new MapGenVillage());
+		} else if (ev.getType() == InitMapGenEvent.EventType.CAVE) {
+			ev.setNewGen(new MapGenCave());
+		}
+	}
+
+	@SubscribeEvent
+	public void populateChunk(PopulateChunkEvent.Populate ev) {
+
+		List<PopulateChunkEvent.Populate.EventType> typesToBlock = Arrays.asList(
+				PopulateChunkEvent.Populate.EventType.ANIMALS,
+				PopulateChunkEvent.Populate.EventType.LAKE,
+				PopulateChunkEvent.Populate.EventType.LAVA
+				);
+
+		if (typesToBlock.indexOf(ev.getType()) >= 0) {
+
+			ChunkPos chunk = new ChunkPos(ev.getChunkX(), ev.getChunkZ());
+			if (CityBiome.isCity(ev.getWorld(), chunk))
+				ev.setResult(Event.Result.DENY);
+		}
+	}
+
 	/**
 	 * Register items!
 	 */
@@ -355,10 +394,12 @@ public class RezolveMod {
 
 	public static final CityBiome CITY_BIOME = new CityBiome();
 	public static final CityGenerator CITY_GENERATOR = new CityGenerator();
-	
+
 	@EventHandler
 	public void preinit(FMLPreInitializationEvent event) {
-		
+		MinecraftForge.EVENT_BUS.register(this);
+		MinecraftForge.TERRAIN_GEN_BUS.register(this);
+
 		System.out.println("Starting Rezolve @VERSION@...");
 
 		boolean enabled = true;
@@ -369,7 +410,7 @@ public class RezolveMod {
 			
 			BiomeProvider.allowedBiomes.clear();
 			
-			int cityWeight = 3;
+			int cityWeight = 4;
 			
 			//cityWeight = 999999;
 			BiomeManager.addBiome(BiomeType.DESERT, new BiomeEntry(CITY_BIOME, cityWeight));
