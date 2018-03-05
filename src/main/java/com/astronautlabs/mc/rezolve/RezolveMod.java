@@ -3,17 +3,24 @@ package com.astronautlabs.mc.rezolve;
 import java.lang.reflect.Constructor;
 import java.util.*;
 
+import com.astronautlabs.mc.rezolve.cities.CityNode;
 import com.astronautlabs.mc.rezolve.mapgen.MapGenCave;
 import com.astronautlabs.mc.rezolve.mapgen.MapGenRavine;
 import com.astronautlabs.mc.rezolve.mapgen.MapGenScatteredFeature;
 import com.google.common.eventbus.Subscribe;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.MapGenVillage;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.terraingen.InitMapGenEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -367,6 +374,64 @@ public class RezolveMod {
 			ChunkPos chunk = new ChunkPos(ev.getChunkX(), ev.getChunkZ());
 			if (CityBiome.isCity(ev.getWorld(), chunk))
 				ev.setResult(Event.Result.DENY);
+		}
+	}
+
+	@SideOnly(Side.CLIENT)
+	@SubscribeEvent
+	public void handleOverlay(RenderGameOverlayEvent.Text ev) {
+		if (ev.getType() == RenderGameOverlayEvent.ElementType.TEXT) {
+			if (Minecraft.getMinecraft().gameSettings.showDebugInfo) {
+				return;
+			}
+
+			World world = Minecraft.getMinecraft().theWorld;
+			EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
+			ChunkPos chunkPos = new ChunkPos(new BlockPos((int)player.posX, (int)player.posY, (int)player.posZ));
+
+			if (!CityBiome.isCity(world, chunkPos))
+				return;
+
+			ev.getLeft().clear();
+			ev.getRight().clear();
+
+
+			CityNode cityNode = CityNode.cityBlockFor(world, (int)player.posX, (int)player.posZ);
+
+			ev.getLeft().add(String.format("City (%sc, %sc)", cityNode.getOriginX(), cityNode.getOriginZ()));
+			cityNode.trace(ev.getLeft());
+
+			// current node
+
+			CityNode node = CityNode.nodeFor(world, (int)player.posX, (int)player.posY, (int)player.posZ);
+
+			ev.getRight().add(String.format(
+				"%s [%d, %d, %d] (%d, %d, %d)",
+				node.getFeature().toString(),
+				node.getSpanX(),
+				node.getSpanY(),
+				node.getSpanZ(),
+				node.getOriginX(),
+				node.getOriginY(),
+				node.getOriginZ()
+			));
+
+			ev.getRight().add(String.format(
+					"connects[north:%s, south:%s, east:%s, west:%s] - ",
+					node.connectsNorth(world, chunkPos),
+					node.connectsSouth(world, chunkPos),
+					node.connectsEast(world, chunkPos),
+					node.connectsWest(world, chunkPos)
+			));
+
+			ev.getRight().add("metadata - ");
+			HashMap<String,Integer> params = node.getParameters();
+			for (String key : params.keySet()) {
+				int value = params.get(key);
+
+				ev.getRight().add(value+" :"+key+" *    ");
+			}
+
 		}
 	}
 

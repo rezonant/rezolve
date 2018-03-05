@@ -22,7 +22,6 @@ public class CityGenerator implements IWorldGenerator {
 			return;
 
 
-		System.out.println("Generating city chunk "+chunkX+", "+chunkZ);
 		CityNode node = CityNode.nodeFor(world, chunkX * 16, 0, chunkZ * 16);
 
 		if (node == null) {

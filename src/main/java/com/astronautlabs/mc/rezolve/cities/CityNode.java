@@ -1,8 +1,11 @@
 package com.astronautlabs.mc.rezolve.cities;
 
+import net.minecraft.block.BlockDoor;
 import net.minecraft.block.IGrowable;
+import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
@@ -10,24 +13,36 @@ import net.minecraft.world.World;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 public class CityNode {
-	public CityNode(CityNode parent, World world, int chunkX, int chunkY, int chunkZ, int spanX, int spanY, int spanZ) {
-		this(world, chunkX, chunkY, chunkZ, spanX, spanY, spanZ);
-		this.parent = parent;
+
+	public enum Feature {
+		COMPOSITE,
+		PARK,
+		BUILDING,
+		MAX,
+
+		RESERVED
 	}
 
-	public CityNode(World world, int chunkX, int chunkY, int chunkZ, int spanX, int spanY, int spanZ) {
-		this.world = world;
-		this.chunkX = chunkX;
-		this.chunkY = chunkY;
-		this.chunkZ = chunkZ;
-		this.spanX = spanX;
-		this.spanZ = spanZ;
-		this.spanY = spanY;
+	public enum Material {
+		QUARTZ,
+		STONE,
+		STONE_BRICKS,
+
+		MAX
 	}
 
+	public enum ChunkSide {
+		NORTH,
+		SOUTH,
+		EAST,
+		WEST
+	}
+
+	public static final int CITY_BLOCK_SIZE = 8;
 	public static IBlockState[] BUILDING_MATERIALS = new IBlockState[] {
 			Blocks.QUARTZ_BLOCK.getDefaultState(),		// quartz
 			Blocks.QUARTZ_BLOCK.getStateFromMeta(2),	// quartz pillar
@@ -75,6 +90,88 @@ public class CityNode {
 			Blocks.STONE.getStateFromMeta(6), // polished andesite
 	};
 
+	/**
+	 * Holds a cache of the city blocks generated
+	 */
+	private static HashMap<ChunkPos, SoftReference<CityNode>> generatedBlocks = new HashMap<ChunkPos, SoftReference<CityNode>>();
+
+	/**
+	 * Retrieve the top-level city block for the given chunk.
+	 * @param world
+	 * @param x Block X position
+	 * @param z Block Z position
+	 * @return
+	 */
+	public static CityNode cityBlockFor(World world, int x, int z) {
+		ChunkPos cityBlockPos = cityBlockPosFor(x, z);
+
+		if (generatedBlocks.containsKey(cityBlockPos)) {
+			CityNode cachedNode = generatedBlocks.get(cityBlockPos).get();
+			if (cachedNode != null)
+				return cachedNode;
+		}
+
+		long startedAt = System.currentTimeMillis();
+
+		CityNode blockNode = new CityNode(world, cityBlockPos.chunkXPos, 0, cityBlockPos.chunkZPos, CITY_BLOCK_SIZE, 16, CITY_BLOCK_SIZE);
+		blockNode.populate();
+
+		System.out.println("("+x+", "+z+") Generated city block in "+(System.currentTimeMillis() - startedAt)+"ms");
+		generatedBlocks.put(cityBlockPos, new SoftReference<CityNode>(blockNode));
+
+		return blockNode;
+	}
+
+	/**
+	 * Retrieve the leaf node for the given block position.
+	 * @param world
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
+	public static CityNode nodeFor(World world, int x, int y, int z) {
+		CityNode cityNode = cityBlockFor(world, x, z);
+		return cityNode.getLeafFor(x, y, z);
+	}
+
+	/**
+	 * Construct a new City node with the given parent
+	 * @param parent
+	 * @param world
+	 * @param chunkX
+	 * @param chunkY
+	 * @param chunkZ
+	 * @param spanX
+	 * @param spanY
+	 * @param spanZ
+	 */
+	public CityNode(CityNode parent, World world, int chunkX, int chunkY, int chunkZ, int spanX, int spanY, int spanZ) {
+		this(world, chunkX, chunkY, chunkZ, spanX, spanY, spanZ);
+		this.parent = parent;
+	}
+
+	/**
+	 * Construct a new City node
+	 *
+	 * @param world
+	 * @param chunkX
+	 * @param chunkY
+	 * @param chunkZ
+	 * @param spanX
+	 * @param spanY
+	 * @param spanZ
+	 */
+	public CityNode(World world, int chunkX, int chunkY, int chunkZ, int spanX, int spanY, int spanZ) {
+		this.world = world;
+		this.chunkX = chunkX;
+		this.chunkY = chunkY;
+		this.chunkZ = chunkZ;
+		this.spanX = spanX;
+		this.spanZ = spanZ;
+		this.spanY = spanY;
+	}
+
 	private World world;
 	private Feature feature = Feature.COMPOSITE;
 	private int chunkX;
@@ -84,6 +181,8 @@ public class CityNode {
 	private int spanY;
 	private int spanZ;
 	private HashMap<String,Integer> params = new HashMap<String,Integer>();
+	private ArrayList<CityNode> children = new ArrayList<CityNode>();
+	private CityNode parent = null;
 
 	public static final int BUILDING_MIN_FLOORS = 1;
 	public static final int BUILDING_MAX_FLOORS = 40;
@@ -114,8 +213,22 @@ public class CityNode {
 		return this.containsChunk(world, chunk.chunkXPos, chunk.chunkZPos - 1);
 	}
 
+	public boolean connectsNorthWest(World world, ChunkPos chunk) {
+		return this.containsChunk(world, chunk.chunkXPos - 1, chunk.chunkZPos - 1);
+	}
+
+	public boolean connectsNorthEast(World world, ChunkPos chunk) {
+		return this.containsChunk(world, chunk.chunkXPos + 1, chunk.chunkZPos - 1);
+	}
+
 	public boolean connectsSouth(World world, ChunkPos chunk) {
 		return this.containsChunk(world, chunk.chunkXPos, chunk.chunkZPos + 1);
+	}
+	public boolean connectsSouthEast(World world, ChunkPos chunk) {
+		return this.containsChunk(world, chunk.chunkXPos + 1, chunk.chunkZPos + 1);
+	}
+	public boolean connectsSouthWest(World world, ChunkPos chunk) {
+		return this.containsChunk(world, chunk.chunkXPos - 1, chunk.chunkZPos + 1);
 	}
 
 	public boolean connectsWest(World world, ChunkPos chunk) {
@@ -165,6 +278,10 @@ public class CityNode {
 		boolean connectsSouth = this.connectsSouth(world, chunk);
 		boolean connectsEast = this.connectsEast(world, chunk);
 		boolean connectsWest = this.connectsWest(world, chunk);
+		boolean connectsNorthEast = this.connectsNorthEast(world, chunk);
+		boolean connectsNorthWest = this.connectsNorthWest(world, chunk);
+		boolean connectsSouthEast = this.connectsSouthEast(world, chunk);
+		boolean connectsSouthWest = this.connectsSouthWest(world, chunk);
 
 		for (int x = 0, maxX = 16; x < maxX; ++x) {
 			for (int z = 0, maxZ = 16; z < maxZ; ++z) {
@@ -185,6 +302,24 @@ public class CityNode {
 
 				if (connectsWest && x < 2)
 					xRoads = false;
+
+				if (connectsNorth && connectsWest && !connectsNorthWest) {
+					if (x < 2 && z < 2)
+						zRoads = true;
+				}
+				if (connectsNorth && connectsEast && !connectsNorthEast) {
+					if (x > 13 && z < 2)
+						zRoads = true;
+				}
+
+				if (connectsSouth && connectsWest && !connectsSouthWest) {
+					if (x < 2 && z > 13)
+						zRoads = true;
+				}
+				if (connectsSouth && connectsEast && !connectsSouthEast) {
+					if (x > 13 && z > 13)
+						zRoads = true;
+				}
 
 				if (xRoads || zRoads) {
 					world.setBlockState(
@@ -214,6 +349,11 @@ public class CityNode {
 		boolean connectsEast = this.connectsEast(world, chunk);
 		boolean connectsWest = this.connectsWest(world, chunk);
 
+		boolean connectsNorthWest = this.connectsNorthWest(world, chunk);
+		boolean connectsNorthEast = this.connectsNorthEast(world, chunk);
+		boolean connectsSouthWest = this.connectsSouthWest(world, chunk);
+		boolean connectsSouthEast = this.connectsSouthEast(world, chunk);
+
 		// Draw the north/south sidewalks
 
 		int swX = 2;
@@ -230,14 +370,15 @@ public class CityNode {
 			swSX += 2;
 		}
 
+		IBlockState slabBlock = Blocks.STONE_SLAB.getDefaultState();
 		if (!connectsNorth)
-			this.fill(world, chunk, swX, groundY + 1, swZ, swSX, 1, swSZ, Blocks.STONE_SLAB.getDefaultState());
+			this.fill(world, chunk, swX, groundY + 1, swZ, swSX, 1, swSZ, slabBlock);
 
 		// South
 
 		swZ = 12;
 		if (!connectsSouth)
-			this.fill(world, chunk, swX, groundY + 1, swZ, swSX, 1, swSZ, Blocks.STONE_SLAB.getDefaultState());
+			this.fill(world, chunk, swX, groundY + 1, swZ, swSX, 1, swSZ, slabBlock);
 
 
 		// West
@@ -256,14 +397,35 @@ public class CityNode {
 		}
 
 		if (!connectsWest)
-			this.fill(world, chunk, swX, groundY + 1, swZ, swSX, 1, swSZ, Blocks.STONE_SLAB.getDefaultState());
+			this.fill(world, chunk, swX, groundY + 1, swZ, swSX, 1, swSZ, slabBlock);
 
 		// West
 
 		swX = 12;
 		if (!connectsEast)
-			this.fill(world, chunk, swX, groundY + 1, swZ, swSX, 1, swSZ, Blocks.STONE_SLAB.getDefaultState());
+			this.fill(world, chunk, swX, groundY + 1, swZ, swSX, 1, swSZ, slabBlock);
 
+		// Corners
+
+		if (connectsNorth && connectsWest && !connectsNorthWest) {
+			this.fill(world, chunk, 2, groundY + 1, 0, 2, 1, 4, slabBlock);
+			this.fill(world, chunk, 0, groundY + 1, 2, 2, 1, 2, slabBlock);
+		}
+
+		if (connectsNorth && connectsEast && !connectsNorthEast) {
+			this.fill(world, chunk, 12, groundY + 1, 0, 2, 1, 4, slabBlock);
+			this.fill(world, chunk, 14, groundY + 1, 2, 2, 1, 2, slabBlock);
+		}
+
+		if (connectsSouth && connectsWest && !connectsSouthWest) {
+			this.fill(world, chunk, 2, groundY + 1, 12, 2, 1, 4, slabBlock);
+			this.fill(world, chunk, 0, groundY + 1, 12, 2, 1, 2, slabBlock);
+		}
+
+		if (connectsSouth && connectsEast && !connectsSouthEast) {
+			this.fill(world, chunk, 12, groundY + 1, 12, 2, 1, 4, slabBlock);
+			this.fill(world, chunk, 14, groundY + 1, 12, 2, 1, 2, slabBlock);
+		}
 	}
 
 	private void drawPark(World world, ChunkPos chunk, int groundY) {
@@ -300,6 +462,10 @@ public class CityNode {
 		boolean connectsSouth = this.connectsSouth(world, chunk);
 		boolean connectsEast = this.connectsEast(world, chunk);
 		boolean connectsWest = this.connectsWest(world, chunk);
+		boolean connectsNorthWest = this.connectsNorthWest(world, chunk);
+		boolean connectsNorthEast = this.connectsNorthEast(world, chunk);
+		boolean connectsSouthWest = this.connectsSouthWest(world, chunk);
+		boolean connectsSouthEast = this.connectsSouthEast(world, chunk);
 
 		boolean roundedCorners = this.getParameter("building.roundedCorners") == 1;
 		boolean tallWindows = this.getParameter("building.tallWindows") == 1;
@@ -317,32 +483,164 @@ public class CityNode {
 		int sizeX = 16;
 		int sizeZ = 16;
 
-		int southWall = connectsSouth ? -1 : 4;
 		int northWall = connectsNorth ? -1 : 4;
+		int southWall = connectsSouth ? -1 : sizeZ - 1 - 4;
 		int westWall = connectsWest ? -1 : 4;
-		int eastWall = connectsEast ? -1 : 4;
+		int eastWall = connectsEast ? -1 : sizeX - 1 - 4 ;
+
+		System.out.println("World seed: "+world.getSeed());
 
 		for (int x = 0; x < sizeX; ++x) {
 			for (int z = 0; z < sizeZ; ++z) {
 
-				if (z < northWall || z >= sizeZ - southWall)
+				if (z < northWall || (southWall >= 0 && z > southWall))
 					continue;
 
-				if (x < westWall || x >= sizeX - eastWall)
+				if (x < westWall || (eastWall >= 0 && x > eastWall))
 					continue;
 
 				int edgeX = (x > sizeX / 2) ? sizeX - 1 - x : x;
 				int edgeZ = (z > sizeZ / 2) ? sizeZ - 1 - z : z;
-				boolean xWall = edgeX == westWall || edgeX == eastWall;
-				boolean zWall = edgeZ == northWall || edgeZ == southWall;
+				boolean xWall = x == westWall || x == eastWall;
+				boolean zWall = z == northWall || z == southWall;
+
+				if (connectsNorth && connectsWest && !connectsNorthWest) {
+					if (x == 4 && z <= 4)
+						xWall = true;
+					if (z == 4 && x <= 4)
+						zWall = true;
+
+					if (z < 4 && x < 4)
+						continue;
+				}
+
+				if (connectsNorth && connectsEast && !connectsNorthEast) {
+					if (x == 11 && z <= 4)
+						xWall = true;
+					if (z == 4 && x >= 11)
+						zWall = true;
+
+					if (x > 11 && z < 4)
+						continue;
+				}
+
+				if (connectsSouth && connectsWest && !connectsSouthWest) {
+					if (x == 4 && z >= 11)
+						xWall = true;
+					if (z == 11 && x <= 4)
+						zWall = true;
+
+					if (z > 11 && x < 4)
+						continue;
+				}
+
+				if (connectsSouth && connectsEast && !connectsSouthEast) {
+					if (x == 11 && z >= 11)
+						xWall = true;
+					if (z == 11 && x >= 11)
+						zWall = true;
+
+					if (z > 11 && x > 11)
+						continue;
+				}
+
 				boolean isWall = xWall || zWall;
 
 				// Skip drawing the edges if we are the corners and rounded corners is on
 				if (roundedCorners && xWall && zWall)
 					xWall = zWall = false;
 
+				// Doors
+
+				boolean door = false;
+				boolean doorFrame = false;
+				boolean leftDoor = false;
+
+				if (xWall) {
+					int middle = sizeZ / 2;
+
+					door = (middle - 1 == z || z == middle);
+					leftDoor = x < 8 ? (middle - 1 == z) : middle == z;
+					doorFrame = middle - 2 == z || z == middle + 1;
+
+				} else if (zWall) {
+					int middle = sizeX / 2;
+
+					door = (middle - 1 == x || x == middle);
+					doorFrame = middle - 2 == x || x == middle + 1;
+					leftDoor = z < 8 ? (middle == x) : middle - 1 == x;
+
+				}
+
+				// Walls
+
 				if (xWall || zWall) {
 					for (int y = 0; y < towerHeight; ++y) {
+
+						if (y >= 1 && y < 4) {
+							if (door) {
+								Rotation doorRot = xWall ? Rotation.CLOCKWISE_90 : Rotation.CLOCKWISE_180;
+
+								if (xWall && x > 8) {
+									doorRot = Rotation.COUNTERCLOCKWISE_90;
+								} else if (xWall) {
+									//leftDoor = !leftDoor;
+								}
+
+								if (zWall && z > 8) {
+									doorRot = Rotation.NONE;
+									// leftDoor = !leftDoor; // ?
+								} else if (zWall) {
+								}
+
+								// -6042638055931638963
+								IBlockState doorBlock = Blocks.DARK_OAK_DOOR
+									.getDefaultState()
+									.withRotation(doorRot)
+									.withProperty(BlockDoor.OPEN, false)
+									.withProperty(BlockDoor.HINGE,
+											leftDoor ? BlockDoor.EnumHingePosition.LEFT
+													: BlockDoor.EnumHingePosition.RIGHT)
+								;
+
+								if (y == 1) {
+									// Block below the door
+									world.setBlockState(
+											chunk.getBlock(x, groundY + y, z),
+											buildingMaterial,
+											2
+									);
+								}
+
+								if (y == 2) {
+									// Lower door
+									world.setBlockState(
+											chunk.getBlock(x, groundY + y, z),
+											doorBlock,
+											2
+									);
+								}
+
+								if (y == 3) {
+									// Upper door
+									world.setBlockState(
+											chunk.getBlock(x, groundY + y, z),
+											doorBlock.withProperty(BlockDoor.HALF, BlockDoor.EnumDoorHalf.UPPER),
+											2
+									);
+								}
+								continue;
+							}
+
+							if (doorFrame) {
+								world.setBlockState(
+									chunk.getBlock(x, groundY + y, z),
+									buildingMaterial,
+									2
+								);
+								continue;
+							}
+						}
 
 						IBlockState wallMaterial = buildingMaterial;
 						boolean isWindow = false;
@@ -357,7 +655,7 @@ public class CityNode {
 							isWindow = inWindowRange && y % floorHeight != 1;
 						} else {
 							int floorBlock = y % floorHeight;
-							isWindow = inWindowRange && floorBlock >= 1 && floorBlock < floorHeight - 2;
+							isWindow = inWindowRange && floorBlock >= 2 && floorBlock < floorHeight - 1;
 						}
 
 						if (isWindow) {
@@ -376,8 +674,12 @@ public class CityNode {
 				if (isWall)
 					continue;
 
-				// Handle floors
+				// Everything below is building interior.
+				// We've already established that this X/Z coordinate is part of the
+				// building after considering connections with other chunks, so draw
+				// away.
 
+				// Handle floors
 
 				if (false && tallWindows && (edgeX == 0 || edgeZ == 0)) {
 					world.setBlockState(
@@ -390,8 +692,6 @@ public class CityNode {
 				int floor = 1;
 
 				for (int y = 0; y < towerHeight; y += floorHeight) {
-
-
 					world.setBlockState(
 							chunk.getBlock(x, groundY + y, z),
 							floorMaterial,
@@ -426,57 +726,8 @@ public class CityNode {
 
 	}
 
-	public enum Feature {
-		COMPOSITE,
-		PARK,
-		BUILDING,
-		MAX,
-
-		RESERVED
-	}
-
-	public enum Material {
-		QUARTZ,
-		STONE,
-		STONE_BRICKS,
-
-		MAX
-	}
-
-	public enum ChunkSide {
-		NORTH,
-		SOUTH,
-		EAST,
-		WEST
-	}
-
-	private ArrayList<CityNode> children = new ArrayList<CityNode>();
-	private CityNode parent = null;
-
-	public static final int CITY_BLOCK_SIZE = 8;
-	private static HashMap<ChunkPos, SoftReference<CityNode>> generatedBlocks = new HashMap<ChunkPos, SoftReference<CityNode>>();
-
-	public static CityNode cityBlockFor(World world, int x, int z) {
-		ChunkPos cityBlockPos = cityBlockPosFor(x, z);
-
-		if (generatedBlocks.containsKey(cityBlockPos)) {
-			CityNode cachedNode = generatedBlocks.get(cityBlockPos).get();
-			if (cachedNode != null)
-				return cachedNode;
-		}
-
-		//System.out.println("Populating city block "+cityBlockPos.chunkXPos+", "+cityBlockPos.chunkZPos);
-		CityNode blockNode = new CityNode(world, cityBlockPos.chunkXPos, 0, cityBlockPos.chunkZPos, CITY_BLOCK_SIZE, 16, CITY_BLOCK_SIZE);
-		blockNode.populate();
-
-		generatedBlocks.put(cityBlockPos, new SoftReference<CityNode>(blockNode));
-
-		return blockNode;
-	}
-
-	public static CityNode nodeFor(World world, int x, int y, int z) {
-		CityNode cityNode = cityBlockFor(world, x, z);
-		return cityNode.getLeafFor(x, y, z);
+	public HashMap<String,Integer> getParameters() {
+		return (HashMap<String,Integer>)this.params.clone();
 	}
 
 	public int getOriginBlockX() {
@@ -538,6 +789,14 @@ public class CityNode {
 		return child.getLeafFor(x, y, z);
 	}
 
+	/**
+	 * Convert block X/Z position to a chunk position which represents the top-level city block
+	 * (usually 8x8 chunks).
+	 *
+	 * @param x
+	 * @param z
+	 * @return
+	 */
 	public static ChunkPos cityBlockPosFor(int x, int z) {
 		int chunkX = (int)Math.floor(x / 16.0f);
 		int chunkZ = (int)Math.floor(z / 16.0f);
@@ -548,6 +807,10 @@ public class CityNode {
 		return new ChunkPos(blockX, blockZ);
 	}
 
+	/**
+	 * Retrieve the top-level city block for this node.
+	 * @return
+	 */
 	public CityNode rootNode() {
 		if (this.parent == null)
 			return this;
@@ -555,33 +818,74 @@ public class CityNode {
 		return this.parent.rootNode();
 	}
 
-	public void trace() {
-		this.trace(0);
+	/**
+	 * Put debug information about this node into the given string list.
+	 * @param output
+	 */
+	public void trace(List<String> output) {
+		this.trace(0, output);
 	}
 
-	protected void trace(int depth) {
-		indentPrint(depth, String.format("%s [%d, %d, %d]", this.getFeature().toString(), this.spanX, this.spanY, this.spanZ));
+	/**
+	 * Trace debug information about this node to System.out.
+	 */
+	public void trace() {
+		ArrayList<String> output = new ArrayList<String>();
+
+		this.trace(output);
+
+		for (String line : output)
+			System.out.println(line);
+	}
+
+	/**
+	 * Trace debug information about this node to the given output list,
+	 * given that this node is the given amount of depth levels into a larger
+	 * trace (controls indent).
+	 *
+	 * @param depth
+	 * @param output
+	 */
+	protected void trace(int depth, List<String> output) {
+		indentPrint(depth, output, String.format("%s [%d, %d, %d]", this.getFeature().toString(), this.spanX, this.spanY, this.spanZ));
 		for (CityNode child : children) {
-			child.trace(depth + 1);
+			child.trace(depth + 1, output);
 		}
 	}
 
-	private void indentPrint(int indent, String message) {
+	/**
+	 * Print an indented line into the given string list.
+	 * @param indent
+	 * @param output
+	 * @param message
+	 */
+	private void indentPrint(int indent, List<String> output, String message) {
 		String indentStr = "";
 		for (int i = 0; i < indent; ++i)
 			indentStr += "  ";
 
-		System.out.println(indentStr+message);
+		output.add(indentStr+message);
 	}
 
+	/**
+	 * Get a random source that is seeded specific to this node
+	 * @return
+	 */
 	public Random randomSource() {
 		return new Random(world.getSeed() + chunkX * 13 + chunkY * 19 + chunkZ * 31 + spanX * 17 + spanY * 19 + spanZ * 37);
 	}
 
+	/**
+	 * Return an array of the child nodes for this node.
+	 * @return
+	 */
 	public CityNode[] getChildren() {
 		return this.children.toArray(new CityNode[this.children.size()]);
 	}
 
+	/**
+	 * Populate this node with child nodes or a feature identity.
+	 */
 	public void populate() {
 
 		Random random = this.randomSource();
@@ -635,6 +939,10 @@ public class CityNode {
 
 	}
 
+	/**
+	 * Populate the parameters of this node based on it's feature and the given seeded random source.
+	 * @param random
+	 */
 	private void populateParameters(Random random) {
 		switch (this.feature) {
 			case BUILDING:
