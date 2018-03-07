@@ -1,15 +1,13 @@
 package com.astronautlabs.mc.rezolve.bundler;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
-import com.astronautlabs.mc.rezolve.common.Machine;
-import com.astronautlabs.mc.rezolve.common.TileEntityBase;
+import com.astronautlabs.mc.rezolve.common.*;
 
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -26,7 +24,7 @@ public class BundlerBlock extends Machine {
 	@Override
 	public void registerRecipes() {
 
-		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
+		if (ItemUtil.registered("enderio:itemAlloy")) {
 			RezolveMod.addRecipe(
 				new ItemStack(this.itemBlock), 
 				"VSV",
@@ -55,15 +53,4 @@ public class BundlerBlock extends Machine {
 			);
 		}
 	}
-	
-	@Override
-	public GuiContainer createClientGui(EntityPlayer player, World world, int x, int y, int z) {
-		return new BundlerGuiContainer(player.inventory, (BundlerEntity) world.getTileEntity(new BlockPos(x, y, z)));
-	}
-	
-	@Override
-	public Container createServerGui(EntityPlayer player, World world, int x, int y, int z) {
-		return new BundlerContainer(player.inventory, (BundlerEntity) world.getTileEntity(new BlockPos(x, y, z)));
-	}
-	
 }

@@ -35,20 +35,9 @@ public class BundleBuilderContainer extends ContainerBase<BundleBuilderEntity> {
 
 		int playerInvOffsetX = 29;
 		int playerInvOffsetY = 131;
-		
-	    // Player Inventory, Slot 9-35, Slot IDs 9-35
-	    for (int y = 0; y < 3; ++y) {
-	        for (int x = 0; x < 9; ++x) {
-	            this.addSlotToContainer(new Slot(playerInv, 9 + x + y * 9, playerInvOffsetX + x * invSlotSize, playerInvOffsetY + y * invSlotSize));
-	        }
-	    }
+		int playerHotbarOffsetX = 29;
+		int playerHotbarOffsetY = 189;
 
-	    int playerHotbarOffsetX = 29;
-	    int playerHotbarOffsetY = 189;
-	    
-	    // Player Inventory, Slot 0-8, Slot IDs 36-44
-	    for (int x = 0; x < 9; ++x) {
-	        this.addSlotToContainer(new Slot(playerInv, x, playerHotbarOffsetX + x * 18, playerHotbarOffsetY));
-	    }
+		this.addPlayerSlots(playerInv, playerInvOffsetX, playerInvOffsetY, invSlotSize, playerHotbarOffsetX, playerHotbarOffsetY);
 	}
 }

@@ -96,14 +96,16 @@ public class RezolveMod {
 		// Security check
 		
 		
-		if (container.canInteractWith(player))
+		if (container.canInteractWith(player)) {
 			return true;
+		}
 		
 		// Container is rejecting player, override if available
 		
 		synchronized (playerOverridePositions) {
-			if (!playerOverridePositions.containsKey(player.getUniqueID().toString()))
+			if (!playerOverridePositions.containsKey(player.getUniqueID().toString())) {
 				return false;
+			}
 
 			BlockPos overriddenPosition = playerOverridePositions.get(player.getUniqueID().toString());
 			boolean result = container.canInteractWith(new ShiftedPlayer(player, overriddenPosition));

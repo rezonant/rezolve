@@ -4,11 +4,9 @@ import java.util.ArrayList;
 
 import com.astronautlabs.mc.rezolve.BundleItem;
 import com.astronautlabs.mc.rezolve.RezolveMod;
-import com.astronautlabs.mc.rezolve.common.RezolveNBT;
-import com.astronautlabs.mc.rezolve.common.MachineEntity;
-import com.astronautlabs.mc.rezolve.common.Operation;
-import com.astronautlabs.mc.rezolve.common.VirtualInventory;
+import com.astronautlabs.mc.rezolve.common.*;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -35,6 +33,11 @@ public class BundlerEntity extends MachineEntity {
 	@Override
 	public int getSizeInventory() {
 		return 27;
+	}
+
+	@Override
+	public Class<? extends MachineGui> getGuiClass() {
+		return BundlerGui.class;
 	}
 
 	public boolean isOutputSlot(int index) {

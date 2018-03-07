@@ -21,13 +21,16 @@ public class CityGenerator implements IWorldGenerator {
 		if (!isCity)
 			return;
 
-
 		CityNode node = CityNode.nodeFor(world, chunkX * 16, 0, chunkZ * 16);
 
 		if (node == null) {
 			System.out.println("ERROR: NULL node for city chunk "+chunkX+", "+chunkZ);
 		} else {
+			long startedAt = System.currentTimeMillis();
+
 			node.drawChunk(world, new ChunkPos(chunkX, chunkZ));
+
+			System.out.println("City chunk ("+chunkX+","+chunkZ+") drawn in " + (System.currentTimeMillis() - startedAt) + "ms");
 
 		}
 

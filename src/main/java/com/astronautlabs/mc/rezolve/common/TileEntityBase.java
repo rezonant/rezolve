@@ -38,7 +38,24 @@ public class TileEntityBase extends TileEntity  {
 		
 		return super.writeToNBT(compound);
 	}
-	
+
+	@Override
+	public void readFromNBT(NBTTagCompound compound) {
+
+		if (compound.hasKey("CustomName", 8)) {
+			this.setCustomName(compound.getString("CustomName"));
+		}
+
+		if (compound.hasKey("RF"))
+			this.storedEnergy = compound.getInteger("RF");
+
+		if (this instanceof IInventory) {
+			RezolveNBT.readInventory(compound, (IInventory)this);
+		}
+
+		super.readFromNBT(compound);
+	}
+
 	protected int storedEnergy = -1;
 	
 	protected void notifyUpdate() {
@@ -64,23 +81,6 @@ public class TileEntityBase extends TileEntity  {
 		this.writeToNBT(tagCompound);
 		return tagCompound;
     }
-    
-	@Override
-	public void readFromNBT(NBTTagCompound compound) {
-
-	    if (compound.hasKey("CustomName", 8)) {
-	        this.setCustomName(compound.getString("CustomName"));
-	    }
-	    
-	    if (compound.hasKey("RF"))
-	    	this.storedEnergy = compound.getInteger("RF");
-	    
-		if (this instanceof IInventory) {
-			RezolveNBT.readInventory(compound, (IInventory)this);
-		}
-		
-		super.readFromNBT(compound);
-	}
 
     private String customName;
     

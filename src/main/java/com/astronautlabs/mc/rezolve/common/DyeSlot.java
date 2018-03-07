@@ -9,12 +9,11 @@ public class DyeSlot extends GhostSlot {
 
 	public DyeSlot(IInventory inventoryIn, int index, int xPosition, int yPosition) {
 		super(inventoryIn, index, xPosition, yPosition, true);
-		// TODO Auto-generated constructor stub
 	}
 	
 	@Override
 	public boolean isItemValid(ItemStack stack) {
-		return RezolveMod.instance().isDye(stack.getItem());
+		return stack == null || stack.stackSize == 0 || stack.getItem() == null || RezolveMod.instance().isDye(stack.getItem());
 	}
 
 }

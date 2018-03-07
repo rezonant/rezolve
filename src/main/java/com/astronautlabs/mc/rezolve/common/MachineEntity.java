@@ -4,6 +4,7 @@ import com.astronautlabs.mc.rezolve.RezolveMod;
 
 import cofh.api.energy.IEnergyReceiver;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -15,6 +16,10 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.items.CapabilityItemHandler;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class MachineEntity extends TileEntityBase
 		implements IInventory, ITickable, IEnergyReceiver, IMachineInventory, ICapabilityProvider {
@@ -101,7 +106,6 @@ public class MachineEntity extends TileEntityBase
 
 	@Override
 	public ItemStack removeStackFromSlot(int index) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -126,6 +130,7 @@ public class MachineEntity extends TileEntityBase
 
 		this.inventory[index] = stack;
 		this.markDirty();
+		this.notifyUpdate();
 	}
 
 	@Override
@@ -146,6 +151,69 @@ public class MachineEntity extends TileEntityBase
 	@Override
 	public void closeInventory(EntityPlayer player) {
 
+	}
+
+	public Class<? extends MachineGui> getGuiClass() {
+		return null;
+	}
+
+	public ContainerBase<?> createContainerFor(EntityPlayer player) {
+		Class<? extends MachineGui> guiClass = getGuiClass();
+
+		if (guiClass == null)
+			return null;
+
+		// String.class here is the parameter type, that might not be the case with you
+		try {
+			Method method = guiClass.getMethod("createContainerFor", EntityPlayer.class, MachineEntity.class);
+			return (ContainerBase<?>)method.invoke(null, player, this);
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Error: Machine GUI "+guiClass.getCanonicalName()+" does not have a public static createContainerFor() method.", e);
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Error: Machine GUI "+guiClass.getCanonicalName()+" has a non-public createContainerFor() method.", e);
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+			throw new RuntimeException("This was unexpected", e);
+		}
+	}
+
+	public GuiContainerBase createGuiFor(EntityPlayer player) {
+		Class<? extends MachineGui> guiClass = getGuiClass();
+
+		if (guiClass == null)
+			return null;
+
+		MachineGui gui;
+		try {
+			gui = guiClass.newInstance();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Error: Machine GUI "+guiClass.getCanonicalName()+": Failed to instantiate Gui subclass (must have parameterless constructor)", e);
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Error: Machine GUI "+guiClass.getCanonicalName()+": Illegal access", e);
+		}
+
+		try {
+
+
+			Method method = guiClass.getMethod("initialize", EntityPlayer.class, MachineEntity.class);
+			method.setAccessible(true);
+			method.invoke(gui, player, this);
+
+			return gui;
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Error: Machine GUI "+guiClass.getCanonicalName()+" must have initialize(EntityPlayer player, MachineEntity entity)", e);
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 
 	@Override
@@ -393,7 +461,6 @@ public class MachineEntity extends TileEntityBase
 
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
 		if (this.currentOperation != null) {
 			nbt.setBoolean("HasOp", true);
 			this.currentOperation.writeNBT(nbt);

@@ -14,11 +14,7 @@ public class BundlePatternSlot extends Slot {
 
 	@Override
 	public boolean isItemValid(ItemStack stack) {
-
-		if (stack.getItem() != RezolveMod.BUNDLE_PATTERN_ITEM)
-			return false;
-
-		return super.isItemValid(stack);
+		return stack.getItem() == null || stack.stackSize == 0 || stack.getItem() == RezolveMod.BUNDLE_PATTERN_ITEM;
 	}
 
 }

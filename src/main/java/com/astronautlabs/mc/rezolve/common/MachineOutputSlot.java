@@ -13,7 +13,7 @@ public class MachineOutputSlot extends Slot {
 
 	@Override
 	public boolean isItemValid(ItemStack stack) {
-		return false;
+		return stack.getItem() == null || stack.stackSize == 0;
 	}
 	
 	@Override

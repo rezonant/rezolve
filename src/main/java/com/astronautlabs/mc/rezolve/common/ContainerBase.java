@@ -7,6 +7,8 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 
+import java.util.HashMap;
+
 public abstract class ContainerBase<T extends TileEntity> extends Container {
 
 	public ContainerBase(T entity) {
@@ -22,6 +24,33 @@ public abstract class ContainerBase<T extends TileEntity> extends Container {
 	
 	public T getEntity() {
 		return this.entity;
+	}
+
+	private HashMap<String, Slot> namedSlots = new HashMap<String, Slot>();
+
+	public void addNamedSlot(String name, Slot slot) {
+		this.namedSlots.put(name, slot);
+		this.addSlotToContainer(slot);
+	}
+
+	public Slot getNamedSlot(String name) {
+		return this.namedSlots.get(name);
+	}
+
+	public void addPlayerSlots(IInventory playerInv, int playerInvOffsetX, int playerInvOffsetY, int invSlotSize) {
+		this.addPlayerSlots(playerInv, playerInvOffsetX, playerInvOffsetY, invSlotSize, 47, 189);
+	}
+
+	public void addPlayerSlots(IInventory playerInv, int playerInvOffsetX, int playerInvOffsetY, int invSlotSize, int playerHotbarOffsetX, int playerHotbarOffsetY) {
+		// Player Inventory, slots 9-35
+		for (int y = 0; y < 3; ++y) {
+			for (int x = 0; x < 9; ++x)
+				this.addSlotToContainer(new Slot(playerInv, 9 + x + y * 9, playerInvOffsetX + x * invSlotSize, playerInvOffsetY + y * invSlotSize));
+		}
+
+		// Player Hotbar, slots 0-8
+		for (int x = 0; x < 9; ++x)
+			this.addSlotToContainer(new Slot(playerInv, x, playerHotbarOffsetX + x * 18, playerHotbarOffsetY));
 	}
 
 	@Override
@@ -62,5 +91,12 @@ public abstract class ContainerBase<T extends TileEntity> extends Container {
 	        slot.onPickupFromSlot(playerIn, current);
 	    }
 	    return previous;
+	}
+
+	@Override
+	public void onContainerClosed(EntityPlayer playerIn) {
+		super.onContainerClosed(playerIn);
+		if (this.entity instanceof IInventory)
+			((IInventory)this.entity).closeInventory(playerIn);
 	}
 }

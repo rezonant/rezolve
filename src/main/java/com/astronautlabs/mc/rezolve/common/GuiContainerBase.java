@@ -3,6 +3,8 @@ package com.astronautlabs.mc.rezolve.common;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.astronautlabs.mc.rezolve.bundler.BundlerEntity;
+import net.minecraft.entity.player.EntityPlayer;
 import org.lwjgl.input.Keyboard;
 
 import com.astronautlabs.mc.rezolve.RezolvePacketHandler;
@@ -24,8 +26,17 @@ import net.minecraft.util.ResourceLocation;
 
 public abstract class GuiContainerBase extends GuiContainer {
 
-	public GuiContainerBase(ContainerBase<? extends TileEntity> inventorySlotsIn, String guiBackgroundResource, int width, int height) {
+	public GuiContainerBase() {
+		super(null);
+		throw new RuntimeException("Must provide a Container");
+	}
+
+	public GuiContainerBase(ContainerBase<? extends TileEntity> inventorySlotsIn) {
 		super(inventorySlotsIn);
+	}
+
+	public GuiContainerBase(ContainerBase<? extends TileEntity> inventorySlotsIn, String guiBackgroundResource, int width, int height) {
+		this(inventorySlotsIn);
 		this.container = inventorySlotsIn;
 		this.guiBackgroundResource = guiBackgroundResource;
 		this.xSize = width;
@@ -37,8 +48,8 @@ public abstract class GuiContainerBase extends GuiContainer {
 		this.controls.clear();
 	};
 	
-	ContainerBase<? extends TileEntity> container;
-	String guiBackgroundResource;
+	protected ContainerBase<? extends TileEntity> container;
+	protected String guiBackgroundResource;
 
 	protected void drawSubWindows(int mouseX, int mouseY) {
 		
@@ -100,8 +111,7 @@ public abstract class GuiContainerBase extends GuiContainer {
 				return;
 			}
 		}
-		
-		// TODO Auto-generated method stub
+
 		super.mouseReleased(mouseX, mouseY, state);
 	}
 	
@@ -141,8 +151,7 @@ public abstract class GuiContainerBase extends GuiContainer {
 				return;
 			}
 		}
-		
-		// TODO Auto-generated method stub
+
 		super.mouseClicked(mouseX, mouseY, mouseButton);
 	}
 	

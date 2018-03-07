@@ -12,7 +12,7 @@ public class RezolveNBT {
 	
 	public static void writeInventory(NBTTagCompound nbt, IInventory inventory, int startSlot, int slotCount) {
 	    NBTTagList list = new NBTTagList();
-	    for (int i = startSlot; i < slotCount; ++i) {
+	    for (int i = startSlot; i < startSlot + slotCount; ++i) {
 	        if (inventory.getStackInSlot(i) != null) {
 	            NBTTagCompound stackTag = new NBTTagCompound();
 	            stackTag.setByte("Slot", (byte) i);

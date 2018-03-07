@@ -97,10 +97,18 @@ public abstract class Machine extends TileBlockBase implements IGuiProvider {
 	        player.openGui(this.mod, this.guiId, world, pos.getX(), pos.getY(), pos.getZ());
 	    }
 	}
-	
-	@Override
-	public abstract Container createServerGui(EntityPlayer player, World world, int x, int y, int z);
+
+	private MachineEntity machineEntityAt(World world, int x, int y, int z) {
+		return (MachineEntity)world.getTileEntity(new BlockPos(x, y, z));
+	}
 
 	@Override
-	public abstract GuiContainer createClientGui(EntityPlayer player, World world, int x, int y, int z);
+	public Container createServerGui(EntityPlayer player, World world, int x, int y, int z) {
+		return this.machineEntityAt(world, x, y, z).createContainerFor(player);
+	}
+
+	@Override
+	public GuiContainer createClientGui(EntityPlayer player, World world, int x, int y, int z) {
+		return this.machineEntityAt(world, x, y, z).createGuiFor(player);
+	}
 }
