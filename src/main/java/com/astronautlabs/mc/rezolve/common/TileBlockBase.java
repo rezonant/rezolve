@@ -24,10 +24,9 @@ public abstract class TileBlockBase extends BlockBase implements ITileEntityProv
 		RezolveMod.instance().registerTileEntity(this.getTileEntityClass());
 	}
 
-
 	public abstract Class<? extends TileEntityBase> getTileEntityClass();
 
-    /**
+	/**
      * Returns a new instance of a block's tile entity class. Called on placing the block.
      * 
      * PERFORMANCE NOTE: Default implementation relies on reflection, if performance is an issue (due to lots of 

@@ -1,11 +1,11 @@
 package com.astronautlabs.mc.rezolve.unbundler;
 
-import com.astronautlabs.mc.rezolve.bundler.BundleSlot;
+import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.ContainerBase;
 import com.astronautlabs.mc.rezolve.common.MachineOutputSlot;
 
+import com.astronautlabs.mc.rezolve.common.ValidatedSlot;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
 
 public class UnbundlerContainer extends ContainerBase<UnbundlerEntity> {
 	
@@ -25,7 +25,13 @@ public class UnbundlerContainer extends ContainerBase<UnbundlerEntity> {
 		
 	    for (int y = 0; y < inputItemsHeight; ++y) {
 	        for (int x = 0; x < inputItemsWidth; ++x) {
-	            this.addSlotToContainer(new BundleSlot(te, firstInputItemSlot + x + y * inputItemsWidth, inputItemsOffsetX + x * invSlotSize, inputItemsOffsetY + y * invSlotSize));
+				this.addSlotToContainer(new ValidatedSlot(
+					te,
+					firstInputItemSlot + x + y * inputItemsWidth,
+					inputItemsOffsetX + x * invSlotSize,
+					inputItemsOffsetY + y * invSlotSize,
+					stack -> stack.getItem() == RezolveMod.BUNDLE_ITEM
+				));
 	        }
 	    }
 	    

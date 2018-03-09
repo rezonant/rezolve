@@ -6,6 +6,8 @@ import java.util.List;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.RezolvePacketHandler;
+import com.astronautlabs.mc.rezolve.cable.CableNetwork;
+import com.astronautlabs.mc.rezolve.cable.ICableEndpoint;
 import com.astronautlabs.mc.rezolve.common.MachineEntity;
 import com.astronautlabs.mc.rezolve.databaseServer.DatabaseServerEntity;
 

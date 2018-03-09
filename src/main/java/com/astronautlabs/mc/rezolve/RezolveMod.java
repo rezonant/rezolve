@@ -4,10 +4,10 @@ import java.lang.reflect.Constructor;
 import java.util.*;
 
 import com.astronautlabs.mc.rezolve.cities.CityNode;
+import com.astronautlabs.mc.rezolve.common.*;
 import com.astronautlabs.mc.rezolve.mapgen.MapGenCave;
 import com.astronautlabs.mc.rezolve.mapgen.MapGenRavine;
 import com.astronautlabs.mc.rezolve.mapgen.MapGenScatteredFeature;
-import com.google.common.eventbus.Subscribe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.math.ChunkPos;
@@ -29,12 +29,8 @@ import com.astronautlabs.mc.rezolve.bundleBuilder.BundlePatternItem;
 import com.astronautlabs.mc.rezolve.bundler.BundlerBlock;
 import com.astronautlabs.mc.rezolve.cities.CityBiome;
 import com.astronautlabs.mc.rezolve.cities.CityGenerator;
-import com.astronautlabs.mc.rezolve.common.BlockBase;
-import com.astronautlabs.mc.rezolve.common.GhostSlotUpdateMessageHandler;
-import com.astronautlabs.mc.rezolve.common.ItemBase;
-import com.astronautlabs.mc.rezolve.common.TileEntityBase;
 import com.astronautlabs.mc.rezolve.databaseServer.DatabaseServerBlock;
-import com.astronautlabs.mc.rezolve.remoteShell.EthernetCableBlock;
+import com.astronautlabs.mc.rezolve.cable.EthernetCableBlock;
 import com.astronautlabs.mc.rezolve.remoteShell.RemoteShellBlock;
 import com.astronautlabs.mc.rezolve.securityServer.SecurityServerBlock;
 import com.astronautlabs.mc.rezolve.unbundler.UnbundlerBlock;
@@ -58,7 +54,6 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import scala.tools.nsc.backend.icode.TypeKinds;
 
 @Mod(modid = RezolveMod.MODID, version = RezolveMod.VERSION, name = "Rezolve", dependencies = "after:Waila;after:EnderIO")
 public class RezolveMod {

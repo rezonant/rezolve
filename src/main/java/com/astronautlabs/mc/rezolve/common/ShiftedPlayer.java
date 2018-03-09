@@ -1,4 +1,4 @@
-package com.astronautlabs.mc.rezolve;
+package com.astronautlabs.mc.rezolve.common;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;

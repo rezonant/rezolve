@@ -14,8 +14,8 @@ public class ValidatedSlot extends Slot {
 		this.validator = validator;
 	}
 
-	public static abstract class Validator {
-		public abstract boolean validate(ItemStack stack);
+	public interface Validator {
+		boolean validate(ItemStack stack);
 	}
 
 	private Validator validator;

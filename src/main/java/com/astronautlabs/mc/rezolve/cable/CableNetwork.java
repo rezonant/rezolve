@@ -1,7 +1,8 @@
-package com.astronautlabs.mc.rezolve.remoteShell;
+package com.astronautlabs.mc.rezolve.cable;
 
 import java.util.ArrayList;
 
+import com.astronautlabs.mc.rezolve.cable.CableBlock;
 import com.astronautlabs.mc.rezolve.databaseServer.DatabaseServerEntity;
 import com.astronautlabs.mc.rezolve.securityServer.SecurityServerEntity;
 

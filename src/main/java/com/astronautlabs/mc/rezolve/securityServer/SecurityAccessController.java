@@ -1,7 +1,7 @@
 package com.astronautlabs.mc.rezolve.securityServer;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
-import com.astronautlabs.mc.rezolve.remoteShell.CableNetwork;
+import com.astronautlabs.mc.rezolve.cable.CableNetwork;
 
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.MinecraftForge;

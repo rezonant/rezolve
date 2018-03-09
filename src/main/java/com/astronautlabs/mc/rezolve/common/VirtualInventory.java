@@ -1,6 +1,7 @@
 package com.astronautlabs.mc.rezolve.common;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -11,7 +12,7 @@ import net.minecraft.util.text.TextComponentString;
 
 public class VirtualInventory implements IInventory {
 
-	Hashtable<Integer, ItemStack> slots = new Hashtable<Integer, ItemStack>();
+	HashMap<Integer, ItemStack> slots = new HashMap<Integer, ItemStack>();
 	
 	public Collection<ItemStack> getStacks() {
 		return this.slots.values();

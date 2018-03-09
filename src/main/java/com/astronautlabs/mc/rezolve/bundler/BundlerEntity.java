@@ -6,7 +6,6 @@ import com.astronautlabs.mc.rezolve.BundleItem;
 import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.*;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -27,8 +26,6 @@ public class BundlerEntity extends MachineEntity {
 		public int index;
 		public ItemStack stack;
 	}
-	
-    private int bundleEnergyCost = 1000;
     
 	@Override
 	public int getSizeInventory() {
@@ -184,7 +181,6 @@ public class BundlerEntity extends MachineEntity {
 
 	private boolean startProducing(ItemStack pattern) {
 		if (!pattern.hasTagCompound()) {
-			System.out.println("Bundler: Invalid pattern: No NBT...");
 			return false;
 		}
 		
@@ -195,15 +191,47 @@ public class BundlerEntity extends MachineEntity {
 			return false;
 		}
 
-		this.startOperation(new BundlerOperation(this, pattern));
+		this.startOperation(
+			this.operation()
+				.withItems(0, pattern)
+				.requiresEnergy(BundleItem.getBundleCost(pattern))
+				.requiresSeconds(3)
+				.build());
 		return true;
 	}
 
 	@Override
 	public Operation<BundlerEntity> createOperation() {
-		return new BundlerOperation(this);
+		return this.operation().build();
 	}
-	
+
+	private MachineOperation.Builder<BundlerEntity> operation() {
+		return MachineOperation.create(this)
+			.validWhile(op -> this.hasPattern(op.getStackInSlot(0)) && this.hasItemsFor(op.getStackInSlot(0)))
+			.completesWith(op -> this.completeOperation(op));
+	}
+
+	public boolean completeOperation(MachineOperation<BundlerEntity> bundlerOperation) {
+
+		// If there's no space, we'll just hold the operation up until there is space...
+
+		if (!this.storeBundle(this.makeBundleStack(bundlerOperation.getStackInSlot(0)), true))
+			return false;
+
+		ArrayList<ItemMemo> selectedItems = this.selectItemsFor(bundlerOperation.getStackInSlot(0));
+		// OK, remove the source materials
+
+		for (ItemMemo selectedItem : selectedItems) {
+			selectedItem.stack.stackSize -= 1;
+			if (selectedItem.stack.stackSize <= 0) {
+				this.setInventorySlotContents(selectedItem.index, null);
+			}
+		}
+
+		ItemStack bundleStack = this.makeBundleStack(bundlerOperation.getStackInSlot(0));
+		this.storeBundle(bundleStack, false);
+		return true;
+	}
 	public ItemStack makeBundleStack(ItemStack pattern) {
 		
 		int dye = 0;
@@ -385,22 +413,5 @@ public class BundlerEntity extends MachineEntity {
 	public boolean hasItemsFor(ItemStack pattern) {
 		ArrayList<ItemMemo> selectedItems = this.selectItemsFor(pattern);
 		return selectedItems != null;
-	}
-
-	public void completeOperation(BundlerOperation bundlerOperation) {
-		
-		ArrayList<ItemMemo> selectedItems = this.selectItemsFor(bundlerOperation.getPattern());
-		// OK, remove the source materials
-		
-		for (ItemMemo selectedItem : selectedItems) {
-			selectedItem.stack.stackSize -= 1;
-			if (selectedItem.stack.stackSize <= 0) {
-				this.setInventorySlotContents(selectedItem.index, null);
-			}
-		}
-		
-		ItemStack bundleStack = this.makeBundleStack(bundlerOperation.getPattern());
-		this.storeBundle(bundleStack, false);
-		
 	}
 }
