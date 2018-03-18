@@ -2,9 +2,8 @@ package com.astronautlabs.mc.rezolve.cable;
 
 import java.util.ArrayList;
 
-import com.astronautlabs.mc.rezolve.cable.CableBlock;
-import com.astronautlabs.mc.rezolve.databaseServer.DatabaseServerEntity;
-import com.astronautlabs.mc.rezolve.securityServer.SecurityServerEntity;
+import com.astronautlabs.mc.rezolve.machines.databaseServer.DatabaseServerEntity;
+import com.astronautlabs.mc.rezolve.machines.securityServer.SecurityServerEntity;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;

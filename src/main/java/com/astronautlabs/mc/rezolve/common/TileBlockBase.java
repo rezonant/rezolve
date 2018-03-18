@@ -2,6 +2,7 @@ package com.astronautlabs.mc.rezolve.common;
 
 import java.lang.reflect.Constructor;
 
+import com.astronautlabs.mc.rezolve.ModBase;
 import com.astronautlabs.mc.rezolve.RezolveMod;
 
 import net.minecraft.block.ITileEntityProvider;
@@ -19,7 +20,7 @@ public abstract class TileBlockBase extends BlockBase implements ITileEntityProv
 	}
 	
 	@Override
-	public void init(RezolveMod mod) {
+	public void init(ModBase mod) {
 		super.init(mod);
 		RezolveMod.instance().registerTileEntity(this.getTileEntityClass());
 	}

@@ -1,5 +1,6 @@
 package com.astronautlabs.mc.rezolve.common;
 
+import com.astronautlabs.mc.rezolve.ModBase;
 import com.astronautlabs.mc.rezolve.RezolveMod;
 
 import net.minecraft.block.Block;
@@ -33,10 +34,10 @@ public class BlockBase extends Block {
     public BlockBase(String unlocalizedName) {
         this(unlocalizedName, 2.0f, 10.0f);
     }
-    
-    protected RezolveMod mod;
-    
-    public void init(RezolveMod mod) {
+
+    protected ModBase mod;
+
+    public void init(ModBase mod) {
     	this.mod = mod;
     }
     

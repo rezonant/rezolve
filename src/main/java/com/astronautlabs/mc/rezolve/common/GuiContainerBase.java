@@ -3,12 +3,12 @@ package com.astronautlabs.mc.rezolve.common;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.astronautlabs.mc.rezolve.bundler.BundlerEntity;
-import net.minecraft.entity.player.EntityPlayer;
+import com.astronautlabs.mc.rezolve.inventory.GhostSlot;
+import com.astronautlabs.mc.rezolve.inventory.GhostSlotUpdateMessage;
+import com.astronautlabs.mc.rezolve.machines.bundler.BundlerEntity;
 import org.lwjgl.input.Keyboard;
 
 import com.astronautlabs.mc.rezolve.RezolvePacketHandler;
-import com.astronautlabs.mc.rezolve.bundleBuilder.BundleBuilderContainer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;

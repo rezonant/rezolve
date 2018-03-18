@@ -1,5 +1,8 @@
 package com.astronautlabs.mc.rezolve.common;
 
+import com.astronautlabs.mc.rezolve.inventory.GhostSlot;
+import com.astronautlabs.mc.rezolve.inventory.ValidatedSlot;
+import com.astronautlabs.mc.rezolve.machines.MachineOutputSlot;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.tileentity.TileEntity;

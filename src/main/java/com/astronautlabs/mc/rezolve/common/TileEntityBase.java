@@ -1,5 +1,6 @@
 package com.astronautlabs.mc.rezolve.common;
 
+import com.astronautlabs.mc.rezolve.util.RezolveNBT;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;

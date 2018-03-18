@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.astronautlabs.mc.rezolve.common.RezolveNBT;
+import com.astronautlabs.mc.rezolve.util.ItemUtil;
+import com.astronautlabs.mc.rezolve.util.RezolveNBT;
 import com.astronautlabs.mc.rezolve.common.ITooltipHint;
 import com.astronautlabs.mc.rezolve.common.MetaItemBase;
-import com.astronautlabs.mc.rezolve.common.VirtualInventory;
+import com.astronautlabs.mc.rezolve.inventory.VirtualInventory;
 
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -34,10 +35,10 @@ public class BundleItem extends MetaItemBase implements ITooltipHint {
 	public String getUnlocalizedName(ItemStack stack) {
 		// TODO Auto-generated method stub
 		
-		if (stack.getMetadata() == 0 || stack.getMetadata() >= RezolveMod.DYES.length)
+		if (stack.getMetadata() == 0 || stack.getMetadata() >= ItemUtil.DYES.length)
 			return this.getUnlocalizedName();
 		
-		return this.getUnlocalizedName()+"_"+RezolveMod.DYES[stack.getMetadata()];
+		return this.getUnlocalizedName()+"_"+ItemUtil.DYES[stack.getMetadata()];
 	}
 	
 	@Override

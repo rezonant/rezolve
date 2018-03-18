@@ -7,6 +7,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
 
 public class MessageHandler<TMessage extends IMessage, TResponse extends IMessage> implements IMessageHandler<TMessage, TResponse> {
 	
@@ -37,21 +38,18 @@ public class MessageHandler<TMessage extends IMessage, TResponse extends IMessag
 		// Schedule an opportunity to handle this message in game
 		
 		final MessageHandler<TMessage, TResponse> self = this;
-		final World world = ctx.getServerHandler().playerEntity.worldObj;
+		World world;
 		IThreadListener listener = null;
-		
-		if (world.isRemote) {
-			listener = (WorldServer)world; 
+
+		if (ctx.side == Side.SERVER) {
+			world = ctx.getServerHandler().playerEntity.worldObj;
+			listener = (WorldServer)world;
 		} else {
+			world = Minecraft.getMinecraft().theWorld;
 			listener = Minecraft.getMinecraft();
 		}
-		
-		listener.addScheduledTask(new Runnable() {
-			@Override
-			public void run() {	
-				self.handleInGame(message, world);
-			}
-		});
+
+		listener.addScheduledTask(() -> self.handleInGame(message, world));
 		
 		// Return our response, if any
 		

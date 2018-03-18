@@ -102,7 +102,7 @@ public class EntityPlayerTransformer implements IClassTransformer {
 				m.instructions.insertBefore(
 					targetNode,
 					new MethodInsnNode(Opcodes.INVOKESTATIC, 
-						"com/astronautlabs/mc/rezolve/RezolveMod", 
+						"com/astronautlabs/mc/rezolve/core/OverridePlayerPosition",
 						"canInteractWith", 
 						Type.getMethodDescriptor(
 							Type.BOOLEAN_TYPE, 

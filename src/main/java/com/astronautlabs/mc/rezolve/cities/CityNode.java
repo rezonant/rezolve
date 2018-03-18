@@ -185,7 +185,7 @@ public class CityNode {
 	private CityNode parent = null;
 
 	public static final int BUILDING_MIN_FLOORS = 1;
-	public static final int BUILDING_MAX_FLOORS = 40;
+	public static final int BUILDING_MAX_FLOORS = 30;
 	public static final int BUILDING_FLOOR_HEIGHT = 7;
 
 	public int getParameter(String name, int defaultValue) {
@@ -470,8 +470,8 @@ public class CityNode {
 		boolean roundedCorners = this.getParameter("building.roundedCorners") == 1;
 		boolean tallWindows = this.getParameter("building.tallWindows") == 1;
 		boolean flushWindows = this.getParameter("building.flushWindows") == 1;
-		int floorHeight = 4;
-		int towerHeight = floors * 4;
+		int floorHeight = BUILDING_FLOOR_HEIGHT;
+		int towerHeight = floors * floorHeight;
 
 		roundedCorners = false;
 		tallWindows = false;
@@ -957,10 +957,10 @@ public class CityNode {
 					maxFloors = 4;
 				} else if (area <= 4) {
 					minFloors = 2;
-					maxFloors = 8;
+					maxFloors = 6;
 				} else if (area < 9) {
 					minFloors = 4;
-					maxFloors = 20;
+					maxFloors = 10;
 				} else {
 					minFloors = 6;
 				}

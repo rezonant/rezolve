@@ -2,6 +2,7 @@ package com.astronautlabs.mc.rezolve.cable;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
 
+import com.astronautlabs.mc.rezolve.util.RecipeUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockStateContainer;
@@ -51,7 +52,7 @@ public class EthernetCableBlock extends CableBlock {
 		);
 		
 		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
-			RezolveMod.addRecipe(
+			RecipeUtil.add(
 				new ItemStack(this.itemBlock), 
 				"pWp",
 				"WRW",
@@ -62,7 +63,7 @@ public class EthernetCableBlock extends CableBlock {
 				'R', redstoneBundle
 			);
 		} else {
-			RezolveMod.addRecipe(
+			RecipeUtil.add(
 				new ItemStack(this.itemBlock), 
 				"IWI",
 				"WRW",

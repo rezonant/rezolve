@@ -1,5 +1,6 @@
 package com.astronautlabs.mc.rezolve.common;
 
+import com.astronautlabs.mc.rezolve.machines.MachineEntity;
 import net.minecraft.nbt.NBTTagCompound;
 
 public abstract class Operation<T extends MachineEntity> {
