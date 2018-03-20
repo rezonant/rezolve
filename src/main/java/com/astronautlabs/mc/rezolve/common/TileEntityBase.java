@@ -60,8 +60,10 @@ public class TileEntityBase extends TileEntity  {
 	protected int storedEnergy = -1;
 	
 	protected void notifyUpdate() {
-		IBlockState state = this.worldObj.getBlockState(pos);
-		this.worldObj.notifyBlockUpdate(this.pos, state, state, 3);
+		if (this.worldObj != null) {
+			IBlockState state = this.worldObj.getBlockState(pos);
+			this.worldObj.notifyBlockUpdate(this.pos, state, state, 3);
+		}
 	}
 
     @Override

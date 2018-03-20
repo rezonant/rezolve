@@ -23,7 +23,16 @@ public class DiskItem extends MetaItemBase implements ITooltipHint {
 	@Override
 	public String getTooltipHint(ItemStack itemStack) {
 
-		return "There's some stuff on this, I think.";
+		DiskAccessor.DiskStatus status = DiskAccessor.getDiskStatus(itemStack);
+
+		if (status == null)
+			return "This disk is corrupted.";
+
+		if (status.spaceUsed > 0) {
+			return String.format("%s / %s items stored (%s%%)", status.spaceUsed, status.size, (int) ((float) status.spaceUsed / status.size * 100.0f));
+		} else {
+			return "This disk is empty.";
+		}
 	}
 
 	@Override

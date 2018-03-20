@@ -11,7 +11,7 @@ import com.astronautlabs.mc.rezolve.machines.bundler.BundlerBlock;
 import com.astronautlabs.mc.rezolve.machines.databaseServer.DatabaseServerBlock;
 import com.astronautlabs.mc.rezolve.machines.diskBay.DiskBayBlock;
 import com.astronautlabs.mc.rezolve.machines.diskBay.DiskItem;
-import com.astronautlabs.mc.rezolve.machines.diskManipulator.DiskManipulatorBlock;
+import com.astronautlabs.mc.rezolve.machines.diskManipulator.*;
 import com.astronautlabs.mc.rezolve.machines.remoteShell.RemoteShellBlock;
 import com.astronautlabs.mc.rezolve.machines.securityServer.SecurityServerBlock;
 import com.astronautlabs.mc.rezolve.machines.unbundler.UnbundlerBlock;
@@ -148,6 +148,10 @@ public class RezolveMod extends ModBase {
 
 		GhostSlotUpdateMessageHandler.register();
 		DragonUpdateMessageHandler.register();
+		StorageViewMessageHandler.register();
+		StorageViewRequestMessageHandler.register();
+		StorageViewResponseMessageHandler.register();
+		StorageViewStateMessageHandler.register();
 	}
 
 	@Override

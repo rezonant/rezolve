@@ -44,6 +44,7 @@ public abstract class MachineGui<T extends MachineEntity> extends GuiContainerBa
 
 	@Override
 	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+		super.drawGuiContainerForegroundLayer(mouseX, mouseY);
 		//String s = this.entity.getDisplayName().getUnformattedText();
 		//this.fontRendererObj.drawString(s, 88 - this.fontRendererObj.getStringWidth(s) / 2, 6, 4210752);            //#404040
 		//this.fontRendererObj.drawString(this.playerInv.getDisplayName().getUnformattedText(), 8, 72, 4210752);      //#404040

@@ -47,7 +47,15 @@ public abstract class GuiContainerBase extends GuiContainer {
 		super.initGui();
 		this.controls.clear();
 	};
-	
+
+	public int getX() {
+		return this.guiLeft;
+	}
+
+	public int getY() {
+		return this.guiTop;
+	}
+
 	protected ContainerBase<? extends TileEntity> container;
 	protected String guiBackgroundResource;
 
@@ -194,6 +202,11 @@ public abstract class GuiContainerBase extends GuiContainer {
 	
 	@Override
 	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+		this.drawControls(mouseX, mouseY);
+		super.drawGuiContainerForegroundLayer(mouseX, mouseY);
+	}
+
+	protected void drawControls(int mouseX, int mouseY) {
 
 	    GlStateManager.pushMatrix();
     		GlStateManager.translate(-guiLeft, -guiTop, 0);
@@ -204,8 +217,6 @@ public abstract class GuiContainerBase extends GuiContainer {
 					((GuiButton)control).drawButton(this.mc, mouseX, mouseY);
 				}
 			}
-    	GlStateManager.popMatrix();		
-		
-		super.drawGuiContainerForegroundLayer(mouseX, mouseY);
+    	GlStateManager.popMatrix();
 	}
 }
