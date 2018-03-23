@@ -1,5 +1,7 @@
 
 # rezolve
+
+[![Join the chat at https://gitter.im/astronautlabs/rezolve](https://badges.gitter.im/astronautlabs/rezolve.svg)](https://gitter.im/astronautlabs/rezolve?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![CircleCI](https://circleci.com/gh/astronautlabs/rezolve/tree/master.svg?style=shield)](https://circleci.com/gh/astronautlabs/rezolve/tree/master)
 
 This is a Minecraft mod which simplifies automation and provides tools to help you manage complex modded Minecraft bases.
