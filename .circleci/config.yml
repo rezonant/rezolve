@@ -32,6 +32,9 @@ jobs:
           key: v1-dependencies-{{ checksum "build.gradle" }}
       - run: ./gradlew reobfJar
       - run: ./gradlew uploadArchives
+notify:
+  webhooks:
+    - url: https://webhooks.gitter.im/e/908bd7a6f5e52495c0b3
 
 
 
