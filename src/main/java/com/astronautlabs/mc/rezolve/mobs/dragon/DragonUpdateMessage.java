@@ -1,16 +1,7 @@
-package com.astronautlabs.mc.rezolve.inventory;
+package com.astronautlabs.mc.rezolve.core.inventory;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.Packet;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-
-import java.io.IOException;
 
 public class DragonUpdateMessage implements IMessage {
 	public DragonUpdateMessage() { }

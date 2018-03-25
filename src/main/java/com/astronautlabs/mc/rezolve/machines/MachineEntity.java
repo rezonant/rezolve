@@ -1,10 +1,9 @@
 package com.astronautlabs.mc.rezolve.machines;
 
-import com.astronautlabs.mc.rezolve.RezolveMod;
-
 import cofh.api.energy.IEnergyReceiver;
 import com.astronautlabs.mc.rezolve.common.*;
-import com.astronautlabs.mc.rezolve.inventory.InventorySnapshot;
+import com.astronautlabs.mc.rezolve.core.inventory.InventorySnapshot;
+import com.astronautlabs.mc.rezolve.util.ItemStackUtil;
 import com.astronautlabs.mc.rezolve.util.ItemUtil;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -85,19 +84,17 @@ public class MachineEntity extends TileEntityBase
 			if (this.getStackInSlot(index).stackSize <= count) {
 				itemstack = this.getStackInSlot(index);
 				this.setInventorySlotContents(index, null);
-				this.markDirty();
 				return itemstack;
 			} else {
-				itemstack = this.getStackInSlot(index).splitStack(count);
+				ItemStack remainingItems = ItemStackUtil.cloneStack(this.getStackInSlot(index));
+				itemstack = remainingItems.splitStack(count);
 
 				if (this.getStackInSlot(index).stackSize <= 0) {
 					this.setInventorySlotContents(index, null);
 				} else {
-					// Just to show that changes happened
-					this.setInventorySlotContents(index, this.getStackInSlot(index));
+					this.setInventorySlotContents(index, remainingItems);
 				}
 
-				this.markDirty();
 				return itemstack;
 			}
 		} else {
@@ -129,9 +126,18 @@ public class MachineEntity extends TileEntityBase
 		if (stack != null && stack.stackSize == 0)
 			stack = null;
 
-		this.inventory[index] = stack;
-		this.markDirty();
-		this.notifyUpdate();
+		ItemStack originalStack = this.inventory[index];
+
+		if (!ItemStack.areItemStackTagsEqual(originalStack, stack) || !ItemStack.areItemStacksEqual(originalStack, stack)) {
+			this.inventory[index] = stack;
+			this.onSlotChanged(index, stack);
+			this.markDirty();
+			this.notifyUpdate();
+		}
+	}
+
+	public void onSlotChanged(int index, ItemStack stack) {
+
 	}
 
 	@Override

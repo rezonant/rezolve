@@ -2,7 +2,7 @@ package com.astronautlabs.mc.rezolve.machines;
 
 import com.astronautlabs.mc.rezolve.common.Operation;
 import com.astronautlabs.mc.rezolve.util.RezolveNBT;
-import com.astronautlabs.mc.rezolve.inventory.VirtualInventory;
+import com.astronautlabs.mc.rezolve.core.inventory.VirtualInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 

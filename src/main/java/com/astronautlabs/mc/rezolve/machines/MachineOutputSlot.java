@@ -15,7 +15,14 @@ public class MachineOutputSlot extends Slot {
 	public boolean isItemValid(ItemStack stack) {
 		return stack.getItem() == null || stack.stackSize == 0;
 	}
-	
+
+	@Override
+	public ItemStack decrStackSize(int amount) {
+		ItemStack stack = this.getStack();
+		this.inventory.setInventorySlotContents(this.getSlotIndex(), null);
+		return stack;
+	}
+
 	@Override
 	public void onPickupFromSlot(EntityPlayer playerIn, ItemStack stack) {
 		

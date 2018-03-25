@@ -2,6 +2,8 @@ package com.astronautlabs.mc.rezolve.machines;
 
 import com.astronautlabs.mc.rezolve.ModBase;
 import com.astronautlabs.mc.rezolve.RezolveMod;
+import com.astronautlabs.mc.rezolve.network.cable.CableNetwork;
+import com.astronautlabs.mc.rezolve.network.cable.ICableCompatible;
 import com.astronautlabs.mc.rezolve.common.IGuiProvider;
 import com.astronautlabs.mc.rezolve.common.TileBlockBase;
 import com.astronautlabs.mc.rezolve.common.TileEntityBase;
@@ -19,14 +21,61 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public abstract class Machine extends TileBlockBase implements IGuiProvider {
+public abstract class Machine extends TileBlockBase implements IGuiProvider, ICableCompatible {
 	public Machine(String registryName) {
 		super(registryName);
 		this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
 	}
-	
+
+
+	@Override
+	public void onNeighborChange(IBlockAccess blockAccess, BlockPos pos, BlockPos neighbor) {
+		super.onNeighborChange(blockAccess, pos, neighbor);
+
+		if (!(blockAccess instanceof World))
+			return;
+
+		World world = (World)blockAccess;
+
+		// Update the cable network if we're on the server
+
+		if (!world.isRemote) {
+			CableNetwork network = CableNetwork.networkAt(world, pos, RezolveMod.ETHERNET_CABLE_BLOCK);
+			if (network != null)
+				network.endpointChanged(world, pos, neighbor);
+		}
+	}
+
+	@Override
+	public void onBlockDestroyedByPlayer(World world, BlockPos pos, IBlockState state) {
+		// Update the cable network if we're on the server
+
+		if (!world.isRemote) {
+			CableNetwork network = CableNetwork.networkAt(world, pos, RezolveMod.ETHERNET_CABLE_BLOCK);
+			if (network != null)
+				network.cableRemoved(world, pos);
+		}
+
+		super.onBlockDestroyedByPlayer(world, pos, state);
+	}
+
+	@Override
+	public void onBlockDestroyedByExplosion(World world, BlockPos pos, Explosion explosionIn) {
+		// Update the cable network if we're on the server
+
+		if (!world.isRemote) {
+			CableNetwork network = CableNetwork.networkAt(world, pos, RezolveMod.ETHERNET_CABLE_BLOCK);
+			if (network != null)
+				network.cableRemoved(world, pos);
+		}
+
+		super.onBlockDestroyedByExplosion(world, pos, explosionIn);
+	}
+
 	public static final PropertyDirection FACING = PropertyDirection.create("facing", new Predicate<EnumFacing>() {
 		@Override
 		public boolean apply(EnumFacing input) {

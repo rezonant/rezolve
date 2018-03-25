@@ -8,7 +8,7 @@ import com.astronautlabs.mc.rezolve.util.ItemUtil;
 import com.astronautlabs.mc.rezolve.util.RezolveNBT;
 import com.astronautlabs.mc.rezolve.common.ITooltipHint;
 import com.astronautlabs.mc.rezolve.common.MetaItemBase;
-import com.astronautlabs.mc.rezolve.inventory.VirtualInventory;
+import com.astronautlabs.mc.rezolve.core.inventory.VirtualInventory;
 
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;

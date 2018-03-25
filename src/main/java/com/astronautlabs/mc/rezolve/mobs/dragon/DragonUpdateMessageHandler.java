@@ -1,20 +1,11 @@
 package com.astronautlabs.mc.rezolve.mobs.dragon;
 
-import java.util.UUID;
-
 import com.astronautlabs.mc.rezolve.MessageHandler;
 import com.astronautlabs.mc.rezolve.RezolvePacketHandler;
 
-import com.astronautlabs.mc.rezolve.common.IGuiProvider;
-import com.astronautlabs.mc.rezolve.inventory.DragonUpdateMessage;
-import net.minecraft.block.Block;
+import com.astronautlabs.mc.rezolve.core.inventory.DragonUpdateMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.relauncher.Side;

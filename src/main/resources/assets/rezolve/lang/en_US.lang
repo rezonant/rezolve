@@ -5,6 +5,7 @@ tile.rezolve:block_disk_bay.name=Disk Bay
 tile.rezolve:block_unbundler.name=Unbundler
 tile.rezolve:block_bundle_builder.name=Bundle Pattern Builder
 tile.rezolve:block_disk_manipulator.name=Disk Manipulator
+tile.rezolve:block_storage_shell.name=Storage Shell
 item.rezolve:item_bundle.name=Bundle
 
 item.rezolve:item_bundle_black.name=Bundle (Black)

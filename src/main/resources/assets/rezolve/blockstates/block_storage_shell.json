@@ -1,0 +1,17 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "model": "rezolve:block_storage_shell"
+  },
+  "variants": {
+    "normal": [{}],
+    "inventory": [{}],
+    
+    "facing=up": [{}],
+    "facing=down": [{}],
+    "facing=north": [{}],
+    "facing=south": [{ "y": 180 }],
+    "facing=west": [{ "y": 270 }],
+    "facing=east": [{ "y": 90 }]
+  }
+}

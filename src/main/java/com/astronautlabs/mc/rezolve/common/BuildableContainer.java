@@ -1,7 +1,7 @@
 package com.astronautlabs.mc.rezolve.common;
 
-import com.astronautlabs.mc.rezolve.inventory.GhostSlot;
-import com.astronautlabs.mc.rezolve.inventory.ValidatedSlot;
+import com.astronautlabs.mc.rezolve.core.inventory.GhostSlot;
+import com.astronautlabs.mc.rezolve.core.inventory.ValidatedSlot;
 import com.astronautlabs.mc.rezolve.machines.MachineOutputSlot;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
@@ -54,6 +54,11 @@ public class BuildableContainer<T extends TileEntity & IInventory> extends Conta
 
 		public Builder addOutputSlot(IInventory inventory, int index, int xPosition, int yPosition) {
 			this.slots.add(new MachineOutputSlot(inventory, index, xPosition, yPosition));
+			return this;
+		}
+
+		public Builder addOutputSlot(int index, int xPosition, int yPosition) {
+			this.slots.add(new MachineOutputSlot(this.entity, index, xPosition, yPosition));
 			return this;
 		}
 

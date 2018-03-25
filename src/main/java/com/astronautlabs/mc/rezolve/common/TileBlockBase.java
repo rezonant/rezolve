@@ -6,6 +6,7 @@ import com.astronautlabs.mc.rezolve.ModBase;
 import com.astronautlabs.mc.rezolve.RezolveMod;
 
 import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryHelper;
@@ -18,7 +19,17 @@ public abstract class TileBlockBase extends BlockBase implements ITileEntityProv
 		super(registryName);
         this.isBlockContainer = true;
 	}
-	
+
+	public TileBlockBase(String registryName, Material material, float hardness, float resistance) {
+		super(registryName, material, hardness, resistance);
+		this.isBlockContainer = true;
+	}
+
+	public TileBlockBase(String unlocalizedName, float hardness, float resistance) {
+		super(unlocalizedName, hardness, resistance);
+		this.isBlockContainer = true;
+	}
+
 	@Override
 	public void init(ModBase mod) {
 		super.init(mod);

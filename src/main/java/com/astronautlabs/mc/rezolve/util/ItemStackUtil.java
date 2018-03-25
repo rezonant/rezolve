@@ -1,6 +1,5 @@
 package com.astronautlabs.mc.rezolve.util;
 
-import com.astronautlabs.mc.rezolve.machines.diskBay.DiskAccessor;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.item.ItemStack;
@@ -50,9 +49,18 @@ public class ItemStackUtil {
 
 	public static ItemStack getStackSized(ItemStack stack, int amount) {
 		ItemStack newStack = new ItemStack(stack.getItem(), amount, stack.getMetadata());
-		newStack.setTagCompound(stack.getTagCompound());
+
+		if (stack.getTagCompound() != null)
+			newStack.setTagCompound(stack.getTagCompound().copy());
 
 		return newStack;
 	}
 
+	public static ItemStack cloneStack(ItemStack stack) {
+		ItemStack clone = new ItemStack(stack.getItem(), stack.stackSize, stack.getMetadata());
+		if (stack.getTagCompound() != null)
+			clone.setTagCompound(stack.getTagCompound().copy());
+
+		return clone;
+	}
 }

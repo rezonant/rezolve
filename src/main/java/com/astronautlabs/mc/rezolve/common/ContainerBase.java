@@ -1,9 +1,13 @@
 package com.astronautlabs.mc.rezolve.common;
 
-import com.astronautlabs.mc.rezolve.machines.diskManipulator.IItemStorage;
-import com.astronautlabs.mc.rezolve.machines.diskManipulator.StorageViewRequestMessage;
-import com.astronautlabs.mc.rezolve.machines.diskManipulator.StorageViewSession;
-import com.astronautlabs.mc.rezolve.machines.diskManipulator.StorageViewStateMessage;
+import com.astronautlabs.mc.rezolve.storage.IItemStorage;
+import com.astronautlabs.mc.rezolve.storage.IStorageAccessor;
+import com.astronautlabs.mc.rezolve.storage.IStorageTileEntity;
+import com.astronautlabs.mc.rezolve.storage.gui.StorageViewRecipeRequestMessage;
+import com.astronautlabs.mc.rezolve.storage.gui.StorageViewRequestMessage;
+import com.astronautlabs.mc.rezolve.storage.gui.StorageViewSession;
+import com.astronautlabs.mc.rezolve.storage.gui.StorageViewStateMessage;
+import com.astronautlabs.mc.rezolve.storage.machines.storageShell.StorageShellEntity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
@@ -13,7 +17,9 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public abstract class ContainerBase<T extends TileEntity> extends Container {
 
@@ -35,18 +41,23 @@ public abstract class ContainerBase<T extends TileEntity> extends Container {
 	private HashMap<String, Slot> namedSlots = new HashMap<String, Slot>();
 	private HashMap<String, StorageViewSession> storageViewSessions = new HashMap<>();
 
-	private IItemStorage itemStorage;
+	private IStorageTileEntity itemStorage;
 	private boolean _isStorageCapabilityTested = false;
 
-	private boolean isStorageCapable() {
+	public boolean isStorageCapable() {
 		if (this._isStorageCapabilityTested)
 			return this.itemStorage != null;
 
 		this._isStorageCapabilityTested = true;
-		if (this.entity instanceof IItemStorage)
-			this.itemStorage = (IItemStorage) this.entity;
+		if (this.entity instanceof IStorageTileEntity) {
+			itemStorage = (IStorageTileEntity)this.entity;
+		}
 
 		return this.itemStorage != null;
+	}
+
+	public IStorageTileEntity getStorageTileEntity() {
+		return this.itemStorage;
 	}
 
 
@@ -59,7 +70,8 @@ public abstract class ContainerBase<T extends TileEntity> extends Container {
 				// Hello player! Let's add you a StorageViewSession
 				EntityPlayerMP player = (EntityPlayerMP) listener;
 
-				this.storageViewSessions.put(player.getUniqueID().toString(), new StorageViewSession(this.itemStorage, player));
+				if (this.itemStorage.hasView())
+					this.storageViewSessions.put(player.getUniqueID().toString(), new StorageViewSession(this.itemStorage, player));
 			}
 		}
 	}
@@ -70,7 +82,7 @@ public abstract class ContainerBase<T extends TileEntity> extends Container {
 
 		if (this.isStorageCapable()) {
 			if (listener instanceof EntityPlayerMP) {
-				// Hello player! Let's add you a StorageViewSession
+				// Hello player! Let's remove you a StorageViewSession
 				EntityPlayerMP player = (EntityPlayerMP) listener;
 				this.storageViewSessions.remove(player.getUniqueID().toString());
 			}
@@ -148,8 +160,13 @@ public abstract class ContainerBase<T extends TileEntity> extends Container {
 
 			if (this.isStorageCapable()) {
 				// Send the item into storage instead of whatever slot
-				ItemStack remainingItems = this.itemStorage.giveItemStack(current, false);
-				current.stackSize = remainingItems.stackSize;
+				IStorageAccessor accessor = this.itemStorage.getStorageAccessor();
+
+				if (accessor != null) {
+					ItemStack remainingItems = accessor.giveItemStack(current, null, false);
+					current.stackSize = remainingItems.stackSize;
+				}
+
 			} else {
 				if (!this.mergeItemStack(current, 0, 9, false))
 					return null;
@@ -162,7 +179,7 @@ public abstract class ContainerBase<T extends TileEntity> extends Container {
 		}
 
 		if (current.stackSize == 0)
-			slot.putStack((ItemStack) null);
+			slot.putStack(null);
 		else
 			slot.onSlotChanged();
 
@@ -191,5 +208,82 @@ public abstract class ContainerBase<T extends TileEntity> extends Container {
 			return;
 
 		session.handleStorageState(player, message);
+	}
+
+	public void handleRecipeRequest(EntityPlayerMP player, StorageViewRecipeRequestMessage message) {
+
+		Container container = player.openContainer;
+
+		if (!(container instanceof ContainerBase))
+			return;
+
+		ContainerBase containerBase = (ContainerBase) container;
+
+		if (!containerBase.isStorageCapable())
+			return;
+
+		IStorageTileEntity storageTileEntity = containerBase.getStorageTileEntity();
+		IStorageAccessor accessor = storageTileEntity.getStorageAccessor();
+
+		if (!(storageTileEntity instanceof StorageShellEntity))
+			return;
+
+		StorageShellEntity storageShell = (StorageShellEntity)storageTileEntity;
+
+		if (accessor == null)
+			return;
+
+		if (!storageShell.clearCraftingGrid())
+			return;
+
+
+		List<ItemStack> ingredients = new ArrayList<>();
+
+		boolean first = true;
+
+		for (StorageViewRecipeRequestMessage.SlotOptions slot : message.slots) {
+
+			if (first) {
+				first = false;
+				continue;
+			}
+
+			boolean found = false;
+
+			if (slot.itemOptions.size() == 0) {
+				ingredients.add(null);
+				continue;
+			}
+
+			for (ItemStack option : slot.itemOptions) {
+				ItemStack optionTaken = accessor.takeItemStack(option, null, true);
+
+				if (optionTaken != null && optionTaken.stackSize == option.stackSize) {
+					ingredients.add(optionTaken);
+					found = true;
+					break;
+				}
+			}
+
+			if (!found)
+				return;
+		}
+
+		int i = 0;
+		for (ItemStack ingredient : ingredients) {
+			ItemStack taken = null;
+
+			if (ingredient != null) {
+				taken = accessor.takeItemStack(ingredient, null, false);
+
+				if (taken.stackSize < ingredient.stackSize) {
+					accessor.giveItemStack(taken, null, false);
+					return;
+				}
+			}
+
+			storageShell.setInventorySlotContents(i, taken);
+			i += 1;
+		}
 	}
 }

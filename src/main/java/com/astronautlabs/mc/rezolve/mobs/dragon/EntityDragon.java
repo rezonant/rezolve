@@ -1,8 +1,7 @@
 package com.astronautlabs.mc.rezolve.mobs.dragon;
 
-import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.RezolvePacketHandler;
-import com.astronautlabs.mc.rezolve.inventory.DragonUpdateMessage;
+import com.astronautlabs.mc.rezolve.core.inventory.DragonUpdateMessage;
 import net.minecraft.entity.*;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -20,7 +19,6 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.end.DragonFightManager;

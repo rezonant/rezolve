@@ -1,24 +1,27 @@
 package com.astronautlabs.mc.rezolve;
 
-import com.astronautlabs.mc.rezolve.cable.EthernetCableBlock;
-import com.astronautlabs.mc.rezolve.cities.CityBiome;
-import com.astronautlabs.mc.rezolve.cities.CityGenerator;
-import com.astronautlabs.mc.rezolve.cities.CityMapGen;
-import com.astronautlabs.mc.rezolve.inventory.GhostSlotUpdateMessageHandler;
-import com.astronautlabs.mc.rezolve.machines.bundleBuilder.BundleBuilderBlock;
-import com.astronautlabs.mc.rezolve.machines.bundleBuilder.BundlePatternItem;
-import com.astronautlabs.mc.rezolve.machines.bundler.BundlerBlock;
-import com.astronautlabs.mc.rezolve.machines.databaseServer.DatabaseServerBlock;
-import com.astronautlabs.mc.rezolve.machines.diskBay.DiskBayBlock;
-import com.astronautlabs.mc.rezolve.machines.diskBay.DiskItem;
-import com.astronautlabs.mc.rezolve.machines.diskManipulator.*;
-import com.astronautlabs.mc.rezolve.machines.remoteShell.RemoteShellBlock;
-import com.astronautlabs.mc.rezolve.machines.securityServer.SecurityServerBlock;
-import com.astronautlabs.mc.rezolve.machines.unbundler.UnbundlerBlock;
+import com.astronautlabs.mc.rezolve.network.cable.EthernetCableBlock;
+import com.astronautlabs.mc.rezolve.storage.gui.*;
+import com.astronautlabs.mc.rezolve.storage.machines.storageShell.StorageShellBlock;
+import com.astronautlabs.mc.rezolve.worlds.cities.CityBiome;
+import com.astronautlabs.mc.rezolve.worlds.cities.CityGenerator;
+import com.astronautlabs.mc.rezolve.worlds.cities.CityMapGen;
+import com.astronautlabs.mc.rezolve.core.inventory.GhostSlotUpdateMessageHandler;
+import com.astronautlabs.mc.rezolve.bundles.machines.bundleBuilder.BundleBuilderBlock;
+import com.astronautlabs.mc.rezolve.bundles.machines.bundleBuilder.BundlePatternItem;
+import com.astronautlabs.mc.rezolve.bundles.machines.bundler.BundlerBlock;
+import com.astronautlabs.mc.rezolve.network.machines.databaseServer.DatabaseServerBlock;
+import com.astronautlabs.mc.rezolve.storage.machines.diskBay.DiskBayBlock;
+import com.astronautlabs.mc.rezolve.storage.machines.diskBay.DiskItem;
+import com.astronautlabs.mc.rezolve.storage.machines.diskManipulator.*;
+import com.astronautlabs.mc.rezolve.network.machines.remoteShell.RemoteShellBlock;
+import com.astronautlabs.mc.rezolve.network.machines.securityServer.SecurityServerBlock;
+import com.astronautlabs.mc.rezolve.bundles.machines.unbundler.UnbundlerBlock;
 import com.astronautlabs.mc.rezolve.mobs.dragon.DragonUpdateMessageHandler;
 import com.astronautlabs.mc.rezolve.mobs.dragon.EntityDragon;
 import com.astronautlabs.mc.rezolve.mobs.dragon.RenderDragon;
 import com.astronautlabs.mc.rezolve.terrain.StonelessWorldType;
+import mezz.jei.api.IJeiRuntime;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.init.Biomes;
 import net.minecraftforge.fml.common.Mod;
@@ -54,6 +57,7 @@ public class RezolveMod extends ModBase {
 	public static final SecurityServerBlock SECURITY_SERVER_BLOCK = new SecurityServerBlock();
 	public static final DiskBayBlock DISK_BAY_BLOCK = new DiskBayBlock();
 	public static final DiskManipulatorBlock DISK_MANIPULATOR_BLOCK = new DiskManipulatorBlock();
+	public static final StorageShellBlock STORAGE_SHELL_BLOCK = new StorageShellBlock();
 
 
 	// Items
@@ -97,6 +101,7 @@ public class RezolveMod extends ModBase {
 		this.registerItemBlock(RezolveMod.SECURITY_SERVER_BLOCK);
 		this.registerItemBlock(RezolveMod.DISK_BAY_BLOCK);
 		this.registerItemBlock(RezolveMod.DISK_MANIPULATOR_BLOCK);
+		this.registerItemBlock(RezolveMod.STORAGE_SHELL_BLOCK);
 	}
 
 	/**
@@ -152,6 +157,7 @@ public class RezolveMod extends ModBase {
 		StorageViewRequestMessageHandler.register();
 		StorageViewResponseMessageHandler.register();
 		StorageViewStateMessageHandler.register();
+		StorageViewRecipeRequestMessageHandler.register();
 	}
 
 	@Override
@@ -160,5 +166,15 @@ public class RezolveMod extends ModBase {
 
 		new StonelessWorldType();
 
+	}
+
+	private IJeiRuntime jeiRuntime = null;
+
+	public void setJeiRuntime(IJeiRuntime jeiRuntime) {
+		this.jeiRuntime = jeiRuntime;
+	}
+
+	public IJeiRuntime getJeiRuntime() {
+		return this.jeiRuntime;
 	}
 }

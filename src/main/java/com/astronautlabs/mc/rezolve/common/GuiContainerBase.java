@@ -3,9 +3,8 @@ package com.astronautlabs.mc.rezolve.common;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.astronautlabs.mc.rezolve.inventory.GhostSlot;
-import com.astronautlabs.mc.rezolve.inventory.GhostSlotUpdateMessage;
-import com.astronautlabs.mc.rezolve.machines.bundler.BundlerEntity;
+import com.astronautlabs.mc.rezolve.core.inventory.GhostSlot;
+import com.astronautlabs.mc.rezolve.core.inventory.GhostSlotUpdateMessage;
 import org.lwjgl.input.Keyboard;
 
 import com.astronautlabs.mc.rezolve.RezolvePacketHandler;
@@ -45,6 +44,8 @@ public abstract class GuiContainerBase extends GuiContainer {
 	
 	public void initGui() {
 		super.initGui();
+
+		// Clear the controls (during screen resize, initGui() is run again)
 		this.controls.clear();
 	};
 
@@ -122,7 +123,18 @@ public abstract class GuiContainerBase extends GuiContainer {
 
 		super.mouseReleased(mouseX, mouseY, state);
 	}
-	
+
+	@Override
+	public void handleMouseInput() throws IOException {
+		super.handleMouseInput();
+
+		for (Gui control : this.controls) {
+			if (control instanceof GuiControl) {
+				((GuiControl)control).handleMouseInput();
+			}
+		}
+	}
+
 	@Override
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
 
@@ -130,6 +142,8 @@ public abstract class GuiContainerBase extends GuiContainer {
 			if (control instanceof GuiTextField) {
 				GuiTextField textField = (GuiTextField)control;
 				textField.mouseClicked(mouseX, mouseY, mouseButton);
+			} else if (control instanceof GuiControl) {
+				((GuiControl)control).onClick(mouseX, mouseY, mouseButton);
 			}
 		}
 		
@@ -211,6 +225,9 @@ public abstract class GuiContainerBase extends GuiContainer {
 	    GlStateManager.pushMatrix();
     		GlStateManager.translate(-guiLeft, -guiTop, 0);
 			for (Gui control : this.controls) {
+				if (control instanceof GuiControl) {
+					((GuiControl)control).render(mouseX, mouseY);
+				}
 				if (control instanceof GuiTextField) {
 					((GuiTextField)control).drawTextBox();
 				} else if (control instanceof GuiButton) {
