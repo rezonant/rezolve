@@ -10,6 +10,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomePlains;
 import net.minecraft.world.chunk.ChunkPrimer;
+import net.minecraft.world.gen.structure.MapGenVillage;
 
 public class CityBiome extends BiomePlains {
 
@@ -108,5 +109,4 @@ public class CityBiome extends BiomePlains {
 
 		//super.genTerrainBlocks(worldIn, rand, chunkPrimer, chunkX, chunkZ, noiseVal);
 	}
-
 }

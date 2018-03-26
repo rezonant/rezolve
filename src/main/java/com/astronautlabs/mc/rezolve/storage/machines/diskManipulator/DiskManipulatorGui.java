@@ -9,6 +9,7 @@ import com.astronautlabs.mc.rezolve.machines.MachineGui;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 
 public class DiskManipulatorGui extends MachineGui<DiskManipulatorEntity> implements IStorageViewContainer {
@@ -73,6 +74,12 @@ public class DiskManipulatorGui extends MachineGui<DiskManipulatorEntity> implem
 
 
 		this.storageView.setQuery(this.searchField.getText());
+
+		ItemStack diskInSlot = this.entity.getStackInSlot(0);
+		if (diskInSlot == null)
+			this.storageView.setNoConnectionMessage("Please insert a disk");
+		else
+			this.storageView.setNoConnectionMessage("Please wait...");
 
 	}
 }

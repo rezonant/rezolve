@@ -198,6 +198,12 @@ public class StorageView extends GuiControl {
 		return true;
 	}
 
+	private String noConnectionMessage = "Please wait...";
+
+	public void setNoConnectionMessage(String message) {
+		this.noConnectionMessage = message;
+	}
+
 	@Override
 	public void render(int mouseX, int mouseY) {
 		GL11.glPushMatrix();
@@ -239,7 +245,7 @@ public class StorageView extends GuiControl {
 				}
 
 			} else {
-				this.fontRenderer.drawString("Please wait...", 7, 30, 0xFFFFFFFF);
+				this.fontRenderer.drawString(noConnectionMessage, 7, 30, 0xFFFFFFFF);
 			}
 		} finally {
 			GL11.glPopMatrix();

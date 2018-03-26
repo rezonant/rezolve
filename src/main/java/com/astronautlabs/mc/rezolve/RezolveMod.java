@@ -21,9 +21,11 @@ import com.astronautlabs.mc.rezolve.mobs.dragon.DragonUpdateMessageHandler;
 import com.astronautlabs.mc.rezolve.mobs.dragon.EntityDragon;
 import com.astronautlabs.mc.rezolve.mobs.dragon.RenderDragon;
 import com.astronautlabs.mc.rezolve.terrain.StonelessWorldType;
+import com.astronautlabs.mc.rezolve.worlds.cities.TownBiome;
 import mezz.jei.api.IJeiRuntime;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.init.Biomes;
+import net.minecraft.world.biome.Biome;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -35,6 +37,7 @@ import org.apache.logging.log4j.Logger;
 
 @Mod(modid = RezolveMod.MODID, version = RezolveMod.VERSION, name = "Rezolve", dependencies = "after:Waila;after:EnderIO")
 public class RezolveMod extends ModBase {
+
 	public RezolveMod() {
 		_instance = this;
 	}
@@ -68,6 +71,7 @@ public class RezolveMod extends ModBase {
 	@SidedProxy(clientSide = "com.astronautlabs.mc.rezolve.ClientProxy", serverSide = "com.astronautlabs.mc.rezolve.ServerProxy")
 	public static CommonProxy proxy;
 
+	public static final Biome TOWN_BIOME = new TownBiome();
 	public static final CityBiome CITY_BIOME = new CityBiome();
 	public static final CityGenerator CITY_GENERATOR = new CityGenerator();
 

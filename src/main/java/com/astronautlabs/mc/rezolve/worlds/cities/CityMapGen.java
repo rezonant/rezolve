@@ -30,18 +30,29 @@ public class CityMapGen {
 		MinecraftForge.TERRAIN_GEN_BUS.register(this);
 
 		GameRegistry.register(RezolveMod.CITY_BIOME);
+		GameRegistry.register(RezolveMod.TOWN_BIOME);
 		GameRegistry.registerWorldGenerator(RezolveMod.CITY_GENERATOR, Integer.MAX_VALUE);
 
 		BiomeProvider.allowedBiomes.clear();
 
 		int cityWeight = 4;
+		int townWeight = 8;
+
+		BiomeManager.addVillageBiome(RezolveMod.TOWN_BIOME, true);
 
 		//cityWeight = 999999;
 		BiomeManager.addBiome(BiomeManager.BiomeType.DESERT, new BiomeManager.BiomeEntry(RezolveMod.CITY_BIOME, cityWeight));
 		BiomeManager.addBiome(BiomeManager.BiomeType.WARM, new BiomeManager.BiomeEntry(RezolveMod.CITY_BIOME, cityWeight));
 		BiomeManager.addBiome(BiomeManager.BiomeType.COOL, new BiomeManager.BiomeEntry(RezolveMod.CITY_BIOME, cityWeight));
 		BiomeManager.addBiome(BiomeManager.BiomeType.ICY, new BiomeManager.BiomeEntry(RezolveMod.CITY_BIOME, cityWeight));
+
+		BiomeManager.addBiome(BiomeManager.BiomeType.DESERT, new BiomeManager.BiomeEntry(RezolveMod.TOWN_BIOME, townWeight));
+		BiomeManager.addBiome(BiomeManager.BiomeType.WARM, new BiomeManager.BiomeEntry(RezolveMod.TOWN_BIOME, townWeight));
+		BiomeManager.addBiome(BiomeManager.BiomeType.COOL, new BiomeManager.BiomeEntry(RezolveMod.TOWN_BIOME, townWeight));
+		BiomeManager.addBiome(BiomeManager.BiomeType.ICY, new BiomeManager.BiomeEntry(RezolveMod.TOWN_BIOME, townWeight));
+
 		BiomeManager.addSpawnBiome(RezolveMod.CITY_BIOME);
+		BiomeManager.addSpawnBiome(RezolveMod.TOWN_BIOME);
 	}
 
 	@SubscribeEvent
@@ -51,7 +62,7 @@ public class CityMapGen {
 		} else if (ev.getType() == InitMapGenEvent.EventType.SCATTERED_FEATURE) {
 			ev.setNewGen(new CityMapGenScatteredFeature());
 		} else if (ev.getType() == InitMapGenEvent.EventType.VILLAGE) {
-			ev.setNewGen(new MapGenVillage());
+			ev.setNewGen(new CityMapGenVillage());
 		} else if (ev.getType() == InitMapGenEvent.EventType.CAVE) {
 			ev.setNewGen(new CityMapGenCave());
 		}

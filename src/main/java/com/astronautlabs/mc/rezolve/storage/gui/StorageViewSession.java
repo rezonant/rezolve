@@ -8,6 +8,8 @@ import com.astronautlabs.mc.rezolve.util.ItemStackUtil;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 
+import java.util.ArrayList;
+
 public class StorageViewSession {
 	public StorageViewSession(IStorageTileEntity storage, EntityPlayerMP player) {
 		this.storage = storage;
@@ -22,14 +24,19 @@ public class StorageViewSession {
 
 	public void sendUpdate() {
 		IStorageAccessor accessor = this.storage.getStorageAccessor();
-		if (accessor == null)
-			return;
-
 		StorageViewMessage message = new StorageViewMessage();
-		message.totalItemsCount = accessor.getTotalItems();
-		message.totalStackCount = accessor.getTotalStacks();
-		message.startIndex = this.offset;
-		message.setItems(accessor.readItems(this.query, this.offset, this.limit));
+
+		if (accessor != null) {
+			message.totalItemsCount = accessor.getTotalItems();
+			message.totalStackCount = accessor.getTotalStacks();
+			message.startIndex = this.offset;
+			message.setItems(accessor.readItems(this.query, this.offset, this.limit));
+		} else {
+			message.totalItemsCount = 0;
+			message.totalStackCount = 0;
+			message.startIndex = 0;
+			message.setItems(new ArrayList<>());
+		}
 
 		this.player.connection.sendPacket(RezolvePacketHandler.INSTANCE.getPacketFrom(message));
 	}
