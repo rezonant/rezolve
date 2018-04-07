@@ -1,13 +1,12 @@
 
-# rezolve
+# ✹ rezolve 
 [![CircleCI](https://circleci.com/gh/astronautlabs/rezolve/tree/master.svg?style=shield)](https://circleci.com/gh/astronautlabs/rezolve/tree/master)
 
 This is a Minecraft mod which simplifies automation and provides tools to help you manage complex modded Minecraft bases.
 
 ## Can I put this in a modpack?
 
-Yes, you are free to include this mod in a pack or use it on your server without stipulations, but we'd love it if you 
-sent us a note about how you've used it so far. Hearing that you are enjoying this mod keeps us motivated to improve it!
+Since the entire mod is MIT licensed, **yes**, you may include this mod in a pack or use it on your server without stipulations.
 
 ## State of the Mod / Balance
 
@@ -16,6 +15,13 @@ all recipes and energy costs are expected to change in upcoming releases. We are
 (or lack thereof) of using the mod relative to other mods, because this is intended to be used in a tech-heavy modpack, so it should
 ideally fit in with the balance of other common mods like EnderIO, Tinkers Construct, Buildcraft, Mekanism, etc. Please let us know 
 your thoughts on how this mod interacts with other mods and how it affects your playthrough.   
+
+## ⚑ Translations
+
+Currently, Rezolve only has official translations for English. We are looking for help to add new official translations.
+Rezolve does however ship with automatic translations for all languages that Minecraft itself supports via Google Translate. 
+All automatic translations are marked with the ⚑ character in-game. These automatic translations are regular `.lang` files
+within the repository, see `src/main/resources/assets/rezolve/lang`. If you'd like to improve them, send a PR! 
 
 ## Where do I report bugs?
 
@@ -36,9 +42,18 @@ Yes, all in good time! For now this mod is in the early stages and we feel it's 
 That being said, official play-ready builds for this mod can be found on CurseForge:
 https://minecraft.curseforge.com/projects/rezolve
 
-## Features 
+## Ores
 
-For recipes, please consult NEI. Note that recipes change depending on whether you have EnderIO loaded.
+Rezolve adds Copper, Tin, and Lead ore as well as the corresponding ingots and nuggets. These are ore dictionary compatible, can be disabled in the configuration, and Rezolve will intelligently disable them if another mod provides compatible versions of these ores.
+
+
+## Omnicable
+
+Rezolve provides a cable, called Omnicable. The cable's primary use is to connect Rezolve machines together into a network. It will also transfer RF or Forge energy.
+
+## Machines
+
+For recipes, please consult NEI. 
 
 ### Bundler 
 
@@ -65,30 +80,38 @@ The Bundle Pattern Builder requires RF to work, but it is a small static fee of 
 
 You can reconstitute the component items of a bundle using an Unbundler. Unbundlers require RF just like Bundlers, and the cost is the same as creating the bundle. 
 
-### Ethernet Cables
-
-Some machines in this mod must be connected via Ethernet Cable. Ethernet cable works like any other cable, connect it to the Rezolve machine you wish to use. 
-
 ### Remote Shell
 
 The Remote Shell lets you access any machine remotely. This includes vanilla machines, Rezolve machines, and machines from other mods. 
-Simply connect the Remote Shell to an Ethernet Cable network which is itself connected to a machine you wish to access remotely, and make sure to provide RF energy to the Remote Shell. Note that accessing a remote machine will require an opening RF fee as well as a continuous drain on RF as long as you have the remote machine open. Also, any items you transfer in and out of the machine (including due to automation inputs/outputs) will drain the RF within the Remote Shell and may cause disconnects. You are shown the current RF available within the Remote Shell while you have a remote machine's UI open.
+Simply connect the Remote Shell to an Omni-Cable network which is itself connected to a machine you wish to access remotely, and make sure to provide RF energy to the Remote Shell. Note that accessing a remote machine will require an opening RF fee as well as a continuous drain on RF as long as you have the remote machine open. Also, any items you transfer in and out of the machine (including due to automation inputs/outputs) will drain the RF within the Remote Shell and may cause disconnects. You are shown the current RF available within the Remote Shell while you have a remote machine's UI open.
 
 By default the Remote Shell only shows the type of machine and it's position in the world within it's available machines list. You can however name each machine if you have a Database Server connected to your Ethernet Cable network. 
 
 ### Database Server
 
-The Database Server provides a common data storage solution for Ethernet networks. It is currently only used by the Remote Shell to store the custom names you assign to machines on an Ethernet Cable network. 
+The Database Server provides a common data storage solution for Ethernet networks. It is currently only used by the Remote Shell to store the custom names you assign to machines on an Omni-Cable network. 
 
 ### Security Server
 
-You can also use Ethernet to restrict access to any machine, vanilla, Rezolve, or one from another mod. Simply connect a machine to an Ethernet network and then connect a Security Server block to that Ethernet network. Security Servers do not require RF to work at this time. You can set default rules for machines and players, as well as provide a user level for specific players by typing their Minecraft usernames. This mechanism works by controlling user interface access to the machine on both the client and the server. Note that accessing the contents of a machine may still be possible by an unauthorized user by placing piping/automation blocks nearby the controlled machine. This will be handled in an upcoming version of Rezolve.
+You can also use Omni-Cable to restrict access to any machine, whether from vanilla, Rezolve, or another mod. Simply connect a machine to an Omni-Cable network and then connect a Security Server block to that Omni-Cable network. Security Servers do not require RF to work at this time. You can set default rules for machines and players, as well as provide a user level for specific players by typing their Minecraft usernames. This mechanism works by controlling user interface access to the machine on both the client and the server. Note that accessing the contents of a machine may still be possible by an unauthorized user by placing piping/automation blocks nearby the controlled machine. This will be handled in an upcoming version of Rezolve.
+
+### Disk Manipulator
+
+Insert a disk to view and modify it's contents. 
+
+### Disk Bay 
+
+Insert one or many disks to make them available to the Omnicable network.
+
+### Storage Shell
+
+Connect the storage shell to an Omnicable network which has some storage on it to extract/insert items from that storage.
 
 ## Developers
 
 ### Getting Started
 
-Add this folder within an Eclipse workspace folder and run:
+IntelliJ IDEA is recommended, but it should be possible to work with the codebase using most Gradle-capable Java IDEs.
 
 ```
 gradlew setupDecompWorkspace
@@ -131,10 +154,10 @@ Absolutely! This process should work for any Minecraft developer. Please reach o
 
 ## Credits 
 
-This mod was started by William Lahti (rezonant on github/twitter, rezonaut on Minecraft, minor contributor to EnderIO), along with design input from the ever-talented Maxillaria. We are looking for more contributors, so please come talk to us in the Gitter.im room for this project if you want to help! Let's make an amazing mod!
+This mod was started by William Lahti (rezonant on github/twitter, rezonaut on Minecraft, minor contributor to EnderIO), along with design from the ever-talented Maxillaria. We are looking for more contributors, so please come talk to us in the Gitter.im room for this project if you want to help! Let's make an amazing mod!
 
 We have also looked heavily upon the work done by the Sleepy Trousers team (EnderIO) as well as other mods around the community. 
 
 ## License 
 
-This mod, including all its code and graphics, are licensed under the 2-clause BSD license. Feel free to use code you find in this repository for your mod for any purpose, just be sure to attribute us in some reasonable fashion and if you can, let us know how you used the code!
+This mod, including all its code and graphics, are licensed under the MIT license. 
