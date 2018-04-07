@@ -213,11 +213,16 @@ public abstract class GuiContainerBase extends GuiContainer {
 			}
 		}
 	}
-	
+
+	protected void render(int mouseX, int mouseY) {
+
+	}
+
 	@Override
-	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+	protected final void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
 		this.drawControls(mouseX, mouseY);
-		super.drawGuiContainerForegroundLayer(mouseX, mouseY);
+		this.render(mouseX, mouseY);
+		this.drawControlOverlays(mouseX, mouseY);
 	}
 
 	protected void drawControls(int mouseX, int mouseY) {
@@ -235,5 +240,17 @@ public abstract class GuiContainerBase extends GuiContainer {
 				}
 			}
     	GlStateManager.popMatrix();
+	}
+
+	protected void drawControlOverlays(int mouseX, int mouseY) {
+
+		GlStateManager.pushMatrix();
+		GlStateManager.translate(-guiLeft, -guiTop, 0);
+		for (Gui control : this.controls) {
+			if (control instanceof GuiControl) {
+				((GuiControl)control).renderOverlay(mouseX, mouseY);
+			}
+		}
+		GlStateManager.popMatrix();
 	}
 }

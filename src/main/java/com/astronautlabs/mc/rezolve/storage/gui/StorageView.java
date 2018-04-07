@@ -6,10 +6,14 @@ import com.astronautlabs.mc.rezolve.common.GuiControl;
 import com.astronautlabs.mc.rezolve.util.ItemStackUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
@@ -22,19 +26,22 @@ public class StorageView extends GuiControl {
 
 		super(screen, x, y, width, height);
 
-		this.windowColumnCount = (int)(this.width / this.itemSize);
-		this.windowRowCount = (int)(this.height / this.itemSize);
+		this.mc = Minecraft.getMinecraft();
+		this.windowColumnCount = this.width / this.itemSize;
+		this.windowRowCount = this.height / this.itemSize;
 
 		this.fontRenderer = Minecraft.getMinecraft().fontRendererObj;
 		this.sendStateToServer();
 	}
 
+	private Minecraft mc;
 	private FontRenderer fontRenderer;
 	private List<StorageViewMessage.ItemEntry> visibleItems;
 	private int displayedOffset;
 	private int offset;
 	private int totalItemCount;
 	private int totalStackCount;
+	private int windowTotalRowCount;
 	private int itemSize = 18;
 
 
@@ -49,6 +56,7 @@ public class StorageView extends GuiControl {
 		this.totalStackCount = updateMessage.totalStackCount;
 		this.displayedOffset = updateMessage.startIndex;
 		this.visibleItems = updateMessage.itemEntries;
+		this.windowTotalRowCount = (int)Math.ceil((float)this.totalStackCount / this.windowColumnCount);
 
 		//System.out.println("Visible items:");
 		//for (ItemStack stack : this.visibleItems) {
@@ -66,6 +74,10 @@ public class StorageView extends GuiControl {
 	 */
 	private void drawItemStack(ItemStack stack, int x, int y, String altText)
 	{
+		GlStateManager.disableLighting();
+		GlStateManager.disableDepth();
+		GlStateManager.disableBlend();
+
 		GlStateManager.translate(0.0F, 0.0F, 1);
 
 		net.minecraft.client.gui.FontRenderer font = null;
@@ -90,7 +102,7 @@ public class StorageView extends GuiControl {
 			GlStateManager.disableDepth();
 			GlStateManager.disableBlend();
 			this.fontRenderer.drawStringWithShadow(altText, 0, 0, 16777215);
-			GlStateManager.enableLighting();
+			//GlStateManager.enableLighting();
 			//GlStateManager.enableDepth();
 			// Fixes opaque cooldown overlay a bit lower
 			// TODO: check if enabled blending still screws things up down the line.
@@ -205,9 +217,23 @@ public class StorageView extends GuiControl {
 	}
 
 	@Override
+	public void renderOverlay(int mouseX, int mouseY) {
+
+		boolean inFrame = (mouseX > this.x && mouseX < this.x + this.width && mouseY > this.y && mouseY < this.y + this.height);
+
+		if (this.hoveredItem != null && inFrame)
+			this.renderToolTip(hoveredItem.stack, mouseX, mouseY);
+	}
+
+	private StorageViewMessage.ItemEntry hoveredItem;
+
+	@Override
 	public void render(int mouseX, int mouseY) {
 		GL11.glPushMatrix();
 		GL11.glTranslatef(this.x, this.y, 0);
+
+		int localMouseX = mouseX - this.x;
+		int localMouseY = mouseY - this.y;
 
 		ScaledResolution resolution = new ScaledResolution(Minecraft.getMinecraft());
 
@@ -228,10 +254,17 @@ public class StorageView extends GuiControl {
 				int x = this.displayedOffset % this.windowColumnCount;
 				int y = this.displayedOffset / this.windowColumnCount;
 
+				StorageViewMessage.ItemEntry hoveredItem = null;
+
 				for (StorageViewMessage.ItemEntry item : this.visibleItems) {
 
 					int slotPosX = this.itemSize*x;
 					int slotPosY = this.itemSize*y + this.scrollOffset;
+
+					if (slotPosY < localMouseY && slotPosX < localMouseX && slotPosY + this.itemSize > localMouseY && slotPosX + this.itemSize > localMouseX) {
+						// mouse is on the thing
+						hoveredItem = item;
+					}
 
 					if (slotPosY + this.itemSize >= 0 && slotPosY < this.height && slotPosX >= 0 && slotPosX < this.width) {
 						this.drawItemStack(item.stack, slotPosX, slotPosY, this.shortenCount(item.amount));
@@ -244,12 +277,130 @@ public class StorageView extends GuiControl {
 					}
 				}
 
+				this.hoveredItem = hoveredItem;
+
+
+
+				int scrollBarX = this.width - 1;
+				int scrollBarY = 2;
+				int scrollBarHeight = this.height - 4;
+				int scrollBarWidth = 1;
+				int scrollableRowCount = Math.max(0, this.windowTotalRowCount - this.windowRowCount);
+				float scrollSpaceFactor = (float)this.windowRowCount / this.windowTotalRowCount;
+				int puckHeight = (int)Math.max(10, scrollSpaceFactor * scrollBarHeight);
+				float scrollFactor = -(float)this.scrollOffset / (this.itemSize*scrollableRowCount);
+				int puckPosition = (int)(scrollFactor * (scrollBarHeight - puckHeight));
+
+				if (puckPosition < 0)
+					puckPosition = 0;
+
+				Gui.drawRect(scrollBarX, scrollBarY, scrollBarX + scrollBarWidth, scrollBarY + scrollBarHeight, 0x44000000);
+				Gui.drawRect(scrollBarX, scrollBarY + puckPosition, scrollBarX + scrollBarWidth, scrollBarY + puckPosition + puckHeight, 0x88FFFFFF);
+
 			} else {
 				this.fontRenderer.drawString(noConnectionMessage, 7, 30, 0xFFFFFFFF);
 			}
 		} finally {
 			GL11.glPopMatrix();
 			GL11.glDisable(GL11.GL_SCISSOR_TEST);
+		}
+	}
+
+	protected void renderToolTip(ItemStack stack, int x, int y)
+	{
+		List<String> list = stack.getTooltip(this.mc.thePlayer, this.mc.gameSettings.advancedItemTooltips);
+
+		for (int i = 0; i < list.size(); ++i)
+		{
+			if (i == 0)
+			{
+				list.set(i, stack.getRarity().rarityColor + (String)list.get(i));
+			}
+			else
+			{
+				list.set(i, TextFormatting.GRAY + (String)list.get(i));
+			}
+		}
+
+		FontRenderer font = stack.getItem().getFontRenderer(stack);
+		net.minecraftforge.fml.client.config.GuiUtils.preItemToolTip(stack);
+		this.drawHoveringText(list, x, y, (font == null ? fontRenderer : font));
+		net.minecraftforge.fml.client.config.GuiUtils.postItemToolTip();
+	}
+
+	protected void drawHoveringText(List<String> textLines, int x, int y, FontRenderer font)
+	{
+		net.minecraftforge.fml.client.config.GuiUtils.drawHoveringText(textLines, x, y, this.screen.width, this.screen.height, -1, font);
+		if (false && !textLines.isEmpty())
+		{
+			GlStateManager.disableRescaleNormal();
+			RenderHelper.disableStandardItemLighting();
+			GlStateManager.disableLighting();
+			GlStateManager.disableDepth();
+			int i = 0;
+
+			for (String s : textLines) {
+				int j = this.fontRenderer.getStringWidth(s);
+
+				if (j > i) {
+					i = j;
+				}
+			}
+
+			int l1 = x + 12;
+			int i2 = y - 12;
+			int k = 8;
+
+			if (textLines.size() > 1)
+			{
+				k += 2 + (textLines.size() - 1) * 10;
+			}
+
+			if (l1 + i > this.width)
+			{
+				l1 -= 28 + i;
+			}
+
+			if (i2 + k + 6 > this.height)
+			{
+				i2 = this.height - k - 6;
+			}
+
+			RenderItem itemRender = Minecraft.getMinecraft().getRenderItem();
+			this.zLevel = 300.0F;
+			itemRender.zLevel = 300.0F;
+			int l = -267386864;
+			this.drawGradientRect(l1 - 3, i2 - 4, l1 + i + 3, i2 - 3, -267386864, -267386864);
+			this.drawGradientRect(l1 - 3, i2 + k + 3, l1 + i + 3, i2 + k + 4, -267386864, -267386864);
+			this.drawGradientRect(l1 - 3, i2 - 3, l1 + i + 3, i2 + k + 3, -267386864, -267386864);
+			this.drawGradientRect(l1 - 4, i2 - 3, l1 - 3, i2 + k + 3, -267386864, -267386864);
+			this.drawGradientRect(l1 + i + 3, i2 - 3, l1 + i + 4, i2 + k + 3, -267386864, -267386864);
+			int i1 = 1347420415;
+			int j1 = 1344798847;
+			this.drawGradientRect(l1 - 3, i2 - 3 + 1, l1 - 3 + 1, i2 + k + 3 - 1, 1347420415, 1344798847);
+			this.drawGradientRect(l1 + i + 2, i2 - 3 + 1, l1 + i + 3, i2 + k + 3 - 1, 1347420415, 1344798847);
+			this.drawGradientRect(l1 - 3, i2 - 3, l1 + i + 3, i2 - 3 + 1, 1347420415, 1347420415);
+			this.drawGradientRect(l1 - 3, i2 + k + 2, l1 + i + 3, i2 + k + 3, 1344798847, 1344798847);
+
+			for (int k1 = 0; k1 < textLines.size(); ++k1)
+			{
+				String s1 = (String)textLines.get(k1);
+				this.fontRenderer.drawStringWithShadow(s1, (float)l1, (float)i2, -1);
+
+				if (k1 == 0)
+				{
+					i2 += 2;
+				}
+
+				i2 += 10;
+			}
+
+			this.zLevel = 0.0F;
+			itemRender.zLevel = 0.0F;
+			GlStateManager.enableLighting();
+			GlStateManager.enableDepth();
+			RenderHelper.enableStandardItemLighting();
+			GlStateManager.enableRescaleNormal();
 		}
 	}
 
@@ -275,7 +426,17 @@ public class StorageView extends GuiControl {
 	@Override
 	public void handleMouseInput() {
 		super.handleMouseInput();
-		this.handleMouseWheel(Mouse.getDWheel());
+
+		ScaledResolution resolution = new ScaledResolution(Minecraft.getMinecraft());
+		int mouseX = Mouse.getX() / resolution.getScaleFactor();
+		int mouseY = (Minecraft.getMinecraft().displayHeight - Mouse.getY()) / resolution.getScaleFactor();
+
+		boolean inFrame = (mouseX > this.x && mouseX < this.x + this.width && mouseY > this.y && mouseY < this.y + this.height);
+
+		int wheelDist = Mouse.getDWheel();
+		if (inFrame) {
+			this.handleMouseWheel(wheelDist);
+		}
 	}
 
 
@@ -286,6 +447,8 @@ public class StorageView extends GuiControl {
 		this.scrollOffset += dWheel / this.scrollSpeed;
 		if (this.scrollOffset > 0)
 			this.scrollOffset = 0;
+		else if (this.scrollOffset < Math.min(0, -(this.windowTotalRowCount - this.windowRowCount) * this.itemSize))
+			this.scrollOffset = Math.min(0, -(this.windowTotalRowCount - this.windowRowCount) * this.itemSize);
 
 		int desiredOffset = Math.max(0, -this.scrollOffset) / this.itemSize * this.windowColumnCount;
 

@@ -1,7 +1,6 @@
 package com.astronautlabs.mc.rezolve.common;
 
-import com.astronautlabs.mc.rezolve.ModBase;
-import com.astronautlabs.mc.rezolve.RezolveMod;
+import com.astronautlabs.mc.rezolve.core.ModBase;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -40,6 +39,9 @@ public class BlockBase extends Block {
     public void init(ModBase mod) {
     	this.mod = mod;
     }
+
+    public void initClient(ModBase mod) {
+	}
     
     public void registerRecipes() {
     	

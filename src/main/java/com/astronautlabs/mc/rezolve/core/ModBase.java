@@ -1,18 +1,23 @@
-package com.astronautlabs.mc.rezolve;
+package com.astronautlabs.mc.rezolve.core;
 
+import com.astronautlabs.mc.rezolve.IItemBlockProvider;
 import com.astronautlabs.mc.rezolve.common.BlockBase;
 import com.astronautlabs.mc.rezolve.common.ItemBase;
 import com.astronautlabs.mc.rezolve.common.TileEntityBase;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemBlock;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 public class ModBase {
@@ -22,6 +27,83 @@ public class ModBase {
 	private int nextEntityID = 1;
 
 	ModGuiHandler guiHandler;
+
+	private Configuration config;
+
+	public final void readConfig(File file) {
+		this.config = new Configuration(file);
+		this.config.load();
+
+		try {
+			for (Field field : this.getClass().getDeclaredFields()) {
+				field.setAccessible(true);
+
+				ConfigProperty prop = field.getAnnotation(ConfigProperty.class);
+				if (prop == null)
+					continue;
+
+				try {
+					Object defaultValue = field.get(this);
+					Property.Type propertyType = this.getTypeOfValue(defaultValue);
+					Property property = config.get(prop.category(), field.getName(), defaultValue == null ? null : defaultValue.toString(), prop.comment(), propertyType);
+
+					if (!property.getType().equals(propertyType))
+						throw new RuntimeException("Config file has invalid type for field '"+property.getName()+"'. Expected "+propertyType+", found "+property.getType());
+
+					field.set(this, this.getValueOfProperty(property));
+				} catch (IllegalAccessException e) {
+					e.printStackTrace(System.err);
+					System.err.println("Error: Failed to access @ConfigProperty field "+field.getName()+" on class "+this.getClass().getCanonicalName());
+				}
+			}
+		} finally {
+			if (this.config.hasChanged())
+				this.config.save();
+		}
+	}
+
+	private Property.Type getTypeOfValue(Object obj) {
+		if (obj instanceof String)
+			return Property.Type.STRING;
+		if (obj instanceof Boolean)
+			return Property.Type.BOOLEAN;
+		if (obj instanceof Integer)
+			return Property.Type.INTEGER;
+		if (obj instanceof Double)
+			return Property.Type.DOUBLE;
+
+		return Property.Type.STRING;
+
+		// ???
+
+		//if (obj instanceof Color)
+		//	return Property.Type.COLOR;
+		//if (obj instanceof String)
+		//	return Property.Type.MOD_ID;
+	}
+
+	private Object getValueOfProperty(Property prop) {
+		Object returnValue = null;
+		switch (prop.getType()) {
+			case BOOLEAN:
+				returnValue = prop.getBoolean();
+				break;
+			case STRING:
+				returnValue = prop.getString();
+				break;
+			case COLOR:
+				returnValue = null; // TODO
+				break;
+			case DOUBLE:
+				returnValue = prop.getDouble();
+				break;
+			case INTEGER:
+				returnValue = prop.getInt();
+				break;
+		}
+
+		return returnValue;
+	}
 
 	public ModGuiHandler getGuiHandler() {
 		return this.guiHandler;
@@ -47,7 +129,13 @@ public class ModBase {
 	public void registerItemBlock(BlockBase block) {
 		this.registerBlock(block);
 
-		ItemBlock item = new ItemBlock(block);
+		ItemBlock item;
+
+		if (block instanceof IItemBlockProvider)
+			item = ((IItemBlockProvider) block).getItemBlock();
+		else
+			item = new ItemBlock(block);
+
 		item.setRegistryName(block.getRegistryName());
 		GameRegistry.register(item);
 
@@ -234,9 +322,15 @@ public class ModBase {
 
 	@Mod.EventHandler
 	public void preinit(FMLPreInitializationEvent ev) {
+		this.readConfig(ev.getSuggestedConfigurationFile());
+
 		MinecraftForge.EVENT_BUS.register(this);
 		this.guiHandler = new ModGuiHandler();
 
+		this.register();
+	}
+
+	public void register() {
 		this.registerBlocks();
 		this.registerItems();
 		this.registerEntities();

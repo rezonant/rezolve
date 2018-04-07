@@ -1,0 +1,14 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "model": "rezolve:block_metal_ore"
+  },
+  "variants": {
+    "normal": [{}],
+    "inventory": [{}],
+    "type=0": [{}],
+    "type=1": [{}],
+    "type=2": [{}],
+    "type=3": [{}]
+  }
+}

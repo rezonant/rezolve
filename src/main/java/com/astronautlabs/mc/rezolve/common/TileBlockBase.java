@@ -2,7 +2,7 @@ package com.astronautlabs.mc.rezolve.common;
 
 import java.lang.reflect.Constructor;
 
-import com.astronautlabs.mc.rezolve.ModBase;
+import com.astronautlabs.mc.rezolve.core.ModBase;
 import com.astronautlabs.mc.rezolve.RezolveMod;
 
 import net.minecraft.block.ITileEntityProvider;

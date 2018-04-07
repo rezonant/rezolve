@@ -1,10 +1,12 @@
 package com.astronautlabs.mc.rezolve.bundles.machines.bundler;
 
+import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.*;
 
 import com.astronautlabs.mc.rezolve.machines.Machine;
 import com.astronautlabs.mc.rezolve.util.ItemUtil;
 import com.astronautlabs.mc.rezolve.util.RecipeUtil;
+import com.astronautlabs.mc.rezolve.worlds.ores.Metal;
 import net.minecraft.item.ItemStack;
 
 public class BundlerBlock extends Machine {
@@ -19,34 +21,17 @@ public class BundlerBlock extends Machine {
 	
 	@Override
 	public void registerRecipes() {
+		RecipeUtil.add(
+			new ItemStack(this.itemBlock),
+			"cSc",
+			"CMC",
+			"cFc",
 
-		if (ItemUtil.registered("enderio:itemAlloy")) {
-			RecipeUtil.add(
-				new ItemStack(this.itemBlock), 
-				"VSV",
-				"CMC",
-				"VFV", 
-				
-				'V', "item|enderio:itemAlloy|2",
-				'S', "block|minecraft:sticky_piston",
-				'C', "block|minecraft:chest",
-				'M', "item|enderio:itemMachinePart|0",
-				'F', "item|enderio:itemBasicFilterUpgrade"
-			);
-			
-		} else {
-			RecipeUtil.add(
-				new ItemStack(this.itemBlock), 
-				"IMI",
-				"CSC",
-				"IHI", 
-				
-				'I', "item|minecraft:iron_block",
-				'M', "item|minecraft:minecart",
-				'C', "item|minecraft:chest",
-				'S', "item|minecraft:sticky_piston",
-				'H', "item|minecraft:hopper"
-			);
-		}
+			'c', RezolveMod.METAL_INGOT_ITEM.getStackOf(Metal.COPPER),
+			'S', "mc:sticky_piston",
+			'C', "mc:chest",
+			'M', "block_machine_frame",
+			'F', "item_machine_part|integrated_circuit"
+		);
 	}
 }

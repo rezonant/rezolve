@@ -240,8 +240,7 @@ public class SecurityServerGuiContainer extends GuiContainerBase {
 	boolean mouseDown = false;
 	
 	@Override
-	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
-		super.drawGuiContainerForegroundLayer(mouseX, mouseY);
+	protected void render(int mouseX, int mouseY) {
 		
 		// Handle a clicked button.
 		

@@ -56,6 +56,10 @@ public abstract class ContainerBase<T extends TileEntity> extends Container {
 		return this.itemStorage != null;
 	}
 
+	public boolean hasStorageView() {
+		return this.isStorageCapable() && this.itemStorage.hasView();
+	}
+
 	public IStorageTileEntity getStorageTileEntity() {
 		return this.itemStorage;
 	}
@@ -158,7 +162,7 @@ public abstract class ContainerBase<T extends TileEntity> extends Container {
 		if (slot.inventory == playerIn.inventory) {
 			// From Player Inventory to TE Inventory
 
-			if (this.isStorageCapable()) {
+			if (this.hasStorageView()) {
 				// Send the item into storage instead of whatever slot
 				IStorageAccessor accessor = this.itemStorage.getStorageAccessor();
 

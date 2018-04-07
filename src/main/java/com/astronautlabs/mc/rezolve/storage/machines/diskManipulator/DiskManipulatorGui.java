@@ -56,9 +56,7 @@ public class DiskManipulatorGui extends MachineGui<DiskManipulatorEntity> implem
 	private StorageView storageView;
 
 	@Override
-	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
-
-		this.drawControls(mouseX, mouseY);
+	protected void render(int mouseX, int mouseY) {
 
 		//String s = this.entity.getDisplayName().getUnformattedText();
 		//this.fontRendererObj.drawString(s, 88 - this.fontRendererObj.getStringWidth(s) / 2, 6, 4210752);            //#404040

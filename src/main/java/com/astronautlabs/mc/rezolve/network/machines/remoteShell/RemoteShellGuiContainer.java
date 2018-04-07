@@ -360,10 +360,8 @@ public class RemoteShellGuiContainer extends GuiContainerBase {
     }
     
 	@Override
-	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+	protected void render(int mouseX, int mouseY) {
 
-	    super.drawGuiContainerForegroundLayer(mouseX, mouseY);
-	    
 	    int rfBarX = 231;
 	    int rfBarY = 20;
 	    int rfBarHeight = 88;

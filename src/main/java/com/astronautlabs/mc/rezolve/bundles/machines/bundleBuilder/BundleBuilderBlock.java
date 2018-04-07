@@ -1,22 +1,20 @@
 package com.astronautlabs.mc.rezolve.bundles.machines.bundleBuilder;
 
-import com.astronautlabs.mc.rezolve.ModBase;
+import com.astronautlabs.mc.rezolve.core.ModBase;
+import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.ITooltipHint;
 import com.astronautlabs.mc.rezolve.machines.Machine;
 import com.astronautlabs.mc.rezolve.common.TileEntityBase;
 
 import com.astronautlabs.mc.rezolve.util.RecipeUtil;
+import com.astronautlabs.mc.rezolve.worlds.ores.Metal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -38,31 +36,17 @@ public class BundleBuilderBlock extends Machine implements ITooltipHint {
 	
 	@Override
 	public void registerRecipes() {
-		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
-			RecipeUtil.add(new ItemStack(this.itemBlock),
-				"RCR",
-				"FMF",
-				"RcR", 
+		RecipeUtil.add(new ItemStack(this.itemBlock),
+			"cCc",
+			"FMF",
+			"cic",
 
-				'R', "item|enderio:itemAlloy|3",
-				'C', Items.COMPARATOR,
-				'F', "item|enderio:itemBasicFilterUpgrade",
-				'M', "item|enderio:itemMachinePart|0",
-				'c', "item|enderio:itemBasicCapacitor|2"
-			);
-		} else {
-			RecipeUtil.add(new ItemStack(this.itemBlock),
-				"QEQ",
-				"CRC",
-				"QNQ", 
-				
-				'Q', Blocks.QUARTZ_BLOCK,
-				'E', Blocks.ENCHANTING_TABLE,
-				'C', Blocks.CRAFTING_TABLE,
-				'R', Items.COMPARATOR,
-				'N', Items.NETHER_STAR
-			);
-		}
+			'c', RezolveMod.METAL_INGOT_ITEM.getStackOf(Metal.COPPER),
+			'C', "mc:comparator",
+			'F', "item_bundle_pattern|blank",
+			'M', "block_machine_frame",
+			'i', "item_machine_part|integrated_circuit"
+		);
 	}
 	
 	@Override

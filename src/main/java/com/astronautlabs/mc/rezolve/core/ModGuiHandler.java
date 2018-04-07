@@ -1,4 +1,4 @@
-package com.astronautlabs.mc.rezolve;
+package com.astronautlabs.mc.rezolve.core;
 
 import java.util.ArrayList;
 
@@ -17,7 +17,7 @@ import net.minecraftforge.fml.common.network.IGuiHandler;
 
 public class ModGuiHandler implements IGuiHandler {
 
-	ModGuiHandler() {
+	public ModGuiHandler() {
 		MinecraftForge.EVENT_BUS.register(this);
 		mc = Minecraft.getMinecraft();
 	}

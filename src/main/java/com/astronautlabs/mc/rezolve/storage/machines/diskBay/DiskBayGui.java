@@ -1,11 +1,13 @@
 package com.astronautlabs.mc.rezolve.storage.machines.diskBay;
 
+import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.BuildableContainer;
 import com.astronautlabs.mc.rezolve.common.ContainerBase;
 import com.astronautlabs.mc.rezolve.machines.MachineEntity;
 import com.astronautlabs.mc.rezolve.machines.MachineGui;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 
 public class DiskBayGui extends MachineGui<DiskBayEntity> {
@@ -13,11 +15,18 @@ public class DiskBayGui extends MachineGui<DiskBayEntity> {
 		return BuildableContainer
 			.withEntity(entity)
 			.slotSize(18)
-			.addSlotGrid(0, 47, 45, 9, 3)
+			.addValidatedSlotGrid(0, (ItemStack stack) -> isValidDisk(stack), 47, 45, 9, 3)
 			.addPlayerSlots(player.inventory, 47, 131)
 			.build();
 	}
 
+	private static boolean isValidDisk(ItemStack stack) {
+		return (
+			stack == null
+			|| stack.stackSize == 0
+			|| (stack.stackSize == 1 && stack.getItem() == RezolveMod.DISK_ITEM)
+		);
+	}
 
 	@Override
 	public void setup() {
@@ -27,7 +36,7 @@ public class DiskBayGui extends MachineGui<DiskBayEntity> {
 	}
 
 	@Override
-	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+	protected void render(int mouseX, int mouseY) {
 		//String s = this.entity.getDisplayName().getUnformattedText();
 		//this.fontRendererObj.drawString(s, 88 - this.fontRendererObj.getStringWidth(s) / 2, 6, 4210752);            //#404040
 		//this.fontRendererObj.drawString(this.playerInv.getDisplayName().getUnformattedText(), 8, 72, 4210752);      //#404040

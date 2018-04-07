@@ -1,7 +1,9 @@
 package com.astronautlabs.mc.rezolve.storage.machines.diskBay;
 
+import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.ITooltipHint;
 import com.astronautlabs.mc.rezolve.common.MetaItemBase;
+import com.astronautlabs.mc.rezolve.util.RecipeUtil;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -13,11 +15,6 @@ public class DiskItem extends MetaItemBase implements ITooltipHint {
 
 	public DiskItem() {
 		super("item_disk");
-	}
-
-	@Override
-	public String getItemStackDisplayName(ItemStack stack) {
-		return super.getItemStackDisplayName(stack);
 	}
 
 	@Override
@@ -70,5 +67,203 @@ public class DiskItem extends MetaItemBase implements ITooltipHint {
 	@Override
 	public String getUnlocalizedName(ItemStack stack) {
 		return this.getUnlocalizedName()+"_"+stack.getMetadata();
+	}
+
+	@Override
+	public void registerRecipes() {
+
+		RecipeUtil.add(
+			new ItemStack(RezolveMod.DISK_ITEM, 1, 0),
+			"SgS",
+			"gig",
+			"SsS",
+
+			'S', "mc:slime_ball",
+			'g', "mc:gold_nugget",
+			'i', "item_machine_part|integrated_circuit",
+			's', "item_storage_part|0"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(RezolveMod.DISK_ITEM, 1, 1),
+			"SgS",
+			"gig",
+			"SsS",
+
+			'S', "mc:slime_ball",
+			'g', "mc:gold_nugget",
+			'i', "item_machine_part|integrated_circuit",
+			's', "item_storage_part|1"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(RezolveMod.DISK_ITEM, 1, 2),
+			"SgS",
+			"gig",
+			"SsS",
+
+			'S', "mc:slime_ball",
+			'g', "mc:gold_nugget",
+			'i', "item_machine_part|integrated_circuit",
+			's', "item_storage_part|2"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(RezolveMod.DISK_ITEM, 1, 3),
+			"SgS",
+			"gig",
+			"SsS",
+
+			'S', "mc:slime_ball",
+			'g', "mc:gold_nugget",
+			'i', "item_machine_part|integrated_circuit",
+			's', "item_storage_part|3"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(RezolveMod.DISK_ITEM, 1, 4),
+			"SgS",
+			"gig",
+			"SsS",
+
+			'S', "mc:slime_ball",
+			'g', "mc:gold_nugget",
+			'i', "item_machine_part|integrated_circuit",
+			's', "item_storage_part|4"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(RezolveMod.DISK_ITEM, 1, 5),
+			"SgS",
+			"gig",
+			"SsS",
+
+			'S', "mc:slime_ball",
+			'g', "mc:gold_nugget",
+			'i', "item_machine_part|integrated_circuit",
+			's', "item_storage_part|5"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(RezolveMod.DISK_ITEM, 1, 6),
+			"SgS",
+			"gig",
+			"SsS",
+
+			'S', "mc:slime_ball",
+			'g', "mc:gold_nugget",
+			'i', "item_machine_part|integrated_circuit",
+			's', "item_storage_part|6"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(RezolveMod.DISK_ITEM, 1, 7),
+			"SgS",
+			"gig",
+			"SsS",
+
+			'S', "mc:slime_ball",
+			'g', "mc:gold_nugget",
+			'i', "item_machine_part|integrated_circuit",
+			's', "item_storage_part|7"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(RezolveMod.DISK_ITEM, 1, 8),
+			"SgS",
+			"gig",
+			"SsS",
+
+			'S', "mc:slime_ball",
+			'g', "mc:gold_nugget",
+			'i', "item_machine_part|integrated_circuit",
+			's', "item_storage_part|8"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(RezolveMod.DISK_ITEM, 1, 9),
+			"SgS",
+			"gig",
+			"SsS",
+
+			'S', "mc:slime_ball",
+			'g', "mc:gold_nugget",
+			'i', "item_machine_part|integrated_circuit",
+			's', "item_storage_part|9"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(RezolveMod.DISK_ITEM, 1, 10),
+			"SgS",
+			"gig",
+			"SsS",
+
+			'S', "mc:slime_ball",
+			'g', "mc:gold_nugget",
+			'i', "item_machine_part|integrated_circuit",
+			's', "item_storage_part|10"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(RezolveMod.DISK_ITEM, 1, 11),
+			"SgS",
+			"gig",
+			"SsS",
+
+			'S', "mc:slime_ball",
+			'g', "mc:gold_nugget",
+			'i', "item_machine_part|integrated_circuit",
+			's', "item_storage_part|11"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(RezolveMod.DISK_ITEM, 1, 12),
+			"SgS",
+			"gig",
+			"SsS",
+
+			'S', "mc:slime_ball",
+			'g', "mc:gold_nugget",
+			'i', "item_machine_part|integrated_circuit",
+			's', "item_storage_part|12"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(RezolveMod.DISK_ITEM, 1, 13),
+			"SgS",
+			"gig",
+			"SsS",
+
+			'S', "mc:slime_ball",
+			'g', "mc:gold_nugget",
+			'i', "item_machine_part|integrated_circuit",
+			's', "item_storage_part|13"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(RezolveMod.DISK_ITEM, 1, 14),
+			"SgS",
+			"gig",
+			"SsS",
+
+			'S', "mc:slime_ball",
+			'g', "mc:gold_nugget",
+			'i', "item_machine_part|integrated_circuit",
+			's', "item_storage_part|14"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(RezolveMod.DISK_ITEM, 1, 15),
+			"SgS",
+			"gig",
+			"SsS",
+
+			'S', "mc:slime_ball",
+			'g', "mc:gold_nugget",
+			'i', "item_machine_part|integrated_circuit",
+			's', "item_storage_part|15"
+		);
+
+
 	}
 }

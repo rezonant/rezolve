@@ -27,7 +27,7 @@ public class CityMapGenVillage extends net.minecraft.world.gen.structure.MapGenV
 		Biome biome = this.worldObj.getBiome(new BlockPos(chunkX * 16 + 8, 128, chunkZ * 16 + 8));
 
 		if (biome instanceof com.astronautlabs.mc.rezolve.worlds.cities.TownBiome)
-			size = 4;
+			size = 6;
 
 		return new MapGenVillage.Start(this.worldObj, this.rand, chunkX, chunkZ, size);
 	}

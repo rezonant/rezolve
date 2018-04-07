@@ -10,6 +10,7 @@ import com.astronautlabs.mc.rezolve.core.inventory.VirtualInventory;
 
 import com.astronautlabs.mc.rezolve.util.ItemUtil;
 import com.astronautlabs.mc.rezolve.util.RecipeUtil;
+import com.astronautlabs.mc.rezolve.worlds.ores.Metal;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -26,33 +27,17 @@ public class BundlePatternItem extends MetaItemBase implements ITooltipHint {
 	@Override
 	public void registerRecipes() {
 
-		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
+		RecipeUtil.add(
+			this.blank(),
+			"tGt",
+			"GCG",
+			"tIt",
 
-			RecipeUtil.add(
-				this.blank(), 
-				"PSP",
-				"GFG",
-				"PSP", 
-				
-				'P', "item|enderio:itemAlloy|5",
-				'S', "item|enderio:itemMaterial",
-				'G', Items.GLOWSTONE_DUST,
-				'F', "item|enderio:itemBasicFilterUpgrade"
-			);
-			
-		} else {
-			RecipeUtil.add(
-				this.blank(), 
-				"OSO",
-				"GIG",
-				"OSO", 
-				
-				'O', Blocks.OBSIDIAN,
-				'S', Items.SLIME_BALL,
-				'G', Items.GLOWSTONE_DUST,
-				'I', Items.ITEM_FRAME
-			);
-		}
+			't', RezolveMod.METAL_NUGGET_ITEM.getStackOf(Metal.TIN),
+			'I', "mc:item_frame",
+			'G', "mc:glass",
+			'C', RezolveMod.METAL_INGOT_ITEM.getStackOf(Metal.COPPER)
+		);
 	}
 	
 	@Override

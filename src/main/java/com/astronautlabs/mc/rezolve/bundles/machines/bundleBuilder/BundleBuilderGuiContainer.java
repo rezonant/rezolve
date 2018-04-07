@@ -41,7 +41,7 @@ public class BundleBuilderGuiContainer extends GuiContainerBase {
 	}
 	
 	@Override
-	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+	protected void render(int mouseX, int mouseY) {
 	    //String s = this.entity.getDisplayName().getUnformattedText();
 	    //this.fontRendererObj.drawString(s, 88 - this.fontRendererObj.getStringWidth(s) / 2, 6, 4210752);            //#404040
 	    //this.fontRendererObj.drawString(this.playerInv.getDisplayName().getUnformattedText(), 8, 72, 4210752);      //#404040
@@ -54,7 +54,5 @@ public class BundleBuilderGuiContainer extends GuiContainerBase {
 	    int usedHeight = (int)(this.entity.getEnergyStored(EnumFacing.DOWN) / (double)this.entity.getMaxEnergyStored(EnumFacing.DOWN) * rfBarHeight);
 	    Gui.drawRect(rfBarX, rfBarY, rfBarX + rfBarWidth, rfBarY + rfBarHeight, 0xFF000000);
 	    Gui.drawRect(rfBarX, rfBarY + rfBarHeight - usedHeight, rfBarX + rfBarWidth, rfBarY + rfBarHeight, 0xFFFF0000);
-
-	    super.drawGuiContainerForegroundLayer(mouseX, mouseY);
 	}
 }

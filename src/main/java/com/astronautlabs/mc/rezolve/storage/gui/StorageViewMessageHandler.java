@@ -27,7 +27,10 @@ public class StorageViewMessageHandler extends MessageHandler<StorageViewMessage
 			StorageView storageView = ((IStorageViewContainer) screen).getStorageView();
 			storageView.handleUpdate(message);
 		} else {
-			System.out.println("No active storage veiw container, the storage view update must be late. Discarding.");
+			// When JEI is activated when the storage view is active, this message floods.
+			// Not sure of a good way to filter this out so that the message still has some use for debugging.
+
+			//System.out.println("No active storage veiw container, the storage view update must be late. Discarding.");
 			return;
 		}
 	}

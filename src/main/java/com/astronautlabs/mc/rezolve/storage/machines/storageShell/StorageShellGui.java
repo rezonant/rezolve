@@ -1,16 +1,22 @@
 package com.astronautlabs.mc.rezolve.storage.machines.storageShell;
 
+import com.astronautlabs.mc.rezolve.RezolvePacketHandler;
 import com.astronautlabs.mc.rezolve.common.BuildableContainer;
 import com.astronautlabs.mc.rezolve.common.ContainerBase;
 import com.astronautlabs.mc.rezolve.storage.gui.IStorageViewContainer;
+import com.astronautlabs.mc.rezolve.storage.gui.StorageShellClearCrafterMessage;
 import com.astronautlabs.mc.rezolve.storage.gui.StorageView;
 import com.astronautlabs.mc.rezolve.machines.MachineEntity;
 import com.astronautlabs.mc.rezolve.machines.MachineGui;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.SlotCrafting;
 import net.minecraft.util.EnumFacing;
+import org.lwjgl.input.Mouse;
+
+import java.io.IOException;
 
 public class StorageShellGui extends MachineGui<StorageShellEntity> implements IStorageViewContainer {
 	public static ContainerBase<?> createContainerFor(EntityPlayer player, MachineEntity entity) {
@@ -32,6 +38,7 @@ public class StorageShellGui extends MachineGui<StorageShellEntity> implements I
 	}
 
 	public int SEARCH_FIELD = 1;
+	public int CLEAR_CRAFTING_GRID_BTN = 2;
 
 	@Override
 	public void setup() {
@@ -44,7 +51,7 @@ public class StorageShellGui extends MachineGui<StorageShellEntity> implements I
 	public void initGui() {
 		super.initGui();
 
-		this.searchField = new GuiTextField(SEARCH_FIELD, this.fontRendererObj, this.guiLeft + 7, this.guiTop + 5, 240, 13);
+		this.searchField = new GuiTextField(SEARCH_FIELD, this.fontRendererObj, this.guiLeft + 6, this.guiTop + 5, 243, 13);
 		this.searchField.setVisible(true);
 		this.searchField.setText("");
 		this.searchField.setEnableBackgroundDrawing(true);
@@ -54,27 +61,46 @@ public class StorageShellGui extends MachineGui<StorageShellEntity> implements I
 
 		this.storageView = new StorageView(this, this.guiLeft + 7, this.guiTop + 20, 240, 90);
 		this.addControl(this.storageView);
+
+		this.clearCraftingGridBtn = new GuiButton(CLEAR_CRAFTING_GRID_BTN, this.guiLeft + 51, this.guiTop + 122, 7, 7, "×");
+
+		this.addControl(this.clearCraftingGridBtn);
 	}
 
 	private GuiTextField searchField;
+	private GuiButton clearCraftingGridBtn;
 	private StorageView storageView;
 
 	@Override
-	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+		super.mouseClicked(mouseX, mouseY, mouseButton);
 
-		this.drawControls(mouseX, mouseY);
+		boolean onSearch = mouseX >= this.searchField.xPosition && mouseX < this.searchField.xPosition + this.searchField.width && mouseY >= this.searchField.yPosition && mouseY < this.searchField.yPosition + this.searchField.height;
+
+		if (onSearch && mouseButton == 1) {
+			this.searchField.setText("");
+		}
+
+		if (this.clearCraftingGridBtn.mousePressed(this.mc, mouseX, mouseY)) {
+			RezolvePacketHandler.INSTANCE.sendToServer(new StorageShellClearCrafterMessage(this.mc.thePlayer));
+		}
+	}
+
+	@Override
+	protected void render(int mouseX, int mouseY) {
 
 		//String s = this.entity.getDisplayName().getUnformattedText();
 		//this.fontRendererObj.drawString(s, 88 - this.fontRendererObj.getStringWidth(s) / 2, 6, 4210752);            //#404040
 		//this.fontRendererObj.drawString(this.playerInv.getDisplayName().getUnformattedText(), 8, 72, 4210752);      //#404040
 
 		int rfBarX = 250;
-		int rfBarY = 3;
-		int rfBarHeight = 111;
+		int rfBarY = 4;
+		int rfBarHeight = 107;
 		int rfBarWidth = 3;
 
 		int usedHeight = (int)(this.entity.getEnergyStored(EnumFacing.DOWN) / (double)this.entity.getMaxEnergyStored(EnumFacing.DOWN) * rfBarHeight);
 		Gui.drawRect(rfBarX, rfBarY, rfBarX + rfBarWidth, rfBarY + rfBarHeight - usedHeight, 0xFF000000);
+
 
 
 		this.storageView.setQuery(this.searchField.getText());

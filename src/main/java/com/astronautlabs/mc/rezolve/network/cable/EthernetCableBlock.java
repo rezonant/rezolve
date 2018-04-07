@@ -3,6 +3,7 @@ package com.astronautlabs.mc.rezolve.network.cable;
 import com.astronautlabs.mc.rezolve.RezolveMod;
 
 import com.astronautlabs.mc.rezolve.util.RecipeUtil;
+import com.astronautlabs.mc.rezolve.worlds.ores.Metal;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockStateContainer;
@@ -38,42 +39,16 @@ public class EthernetCableBlock extends CableBlock {
 
 	@Override
 	public void registerRecipes() {
-		ItemStack redstoneBundle = RezolveMod.BUNDLE_ITEM.withContents(
-			1,
-			new ItemStack(Items.REDSTONE, 1),
-			new ItemStack(Items.REDSTONE, 1),
-			new ItemStack(Items.REDSTONE, 1),
-			new ItemStack(Items.REDSTONE, 1),
-			new ItemStack(Items.REDSTONE, 1),
-			new ItemStack(Items.REDSTONE, 1),
-			new ItemStack(Items.REDSTONE, 1),
-			new ItemStack(Items.REDSTONE, 1),
-			new ItemStack(Items.REDSTONE, 1)
+		RecipeUtil.add(
+			new ItemStack(this.itemBlock, 4),
+			"tWt",
+			"WCW",
+			"tWt",
+
+			't', RezolveMod.METAL_NUGGET_ITEM.getStackOf(Metal.TIN),
+			'W', Blocks.WOOL,
+			'C', RezolveMod.METAL_INGOT_ITEM.getStackOf(Metal.COPPER)
 		);
-		
-		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
-			RecipeUtil.add(
-				new ItemStack(this.itemBlock), 
-				"pWp",
-				"WRW",
-				"pWp", 
-				
-				'p', new ItemStack(Item.REGISTRY.getObject(new ResourceLocation("enderio:itemMaterial")), 1, 3),
-				'W', Blocks.WOOL,
-				'R', redstoneBundle
-			);
-		} else {
-			RecipeUtil.add(
-				new ItemStack(this.itemBlock), 
-				"IWI",
-				"WRW",
-				"IWI", 
-				
-				'I', Items.IRON_INGOT,
-				'W', Blocks.WOOL,
-				'R', redstoneBundle
-			);
-		}
 	}
 	
 	float radius = 3f / 16f;
@@ -153,11 +128,6 @@ public class EthernetCableBlock extends CableBlock {
 	public static final PropertyBool SOUTH = PropertyBool.create("south");
 	public static final PropertyBool UP = PropertyBool.create("up");
 	public static final PropertyBool WEST = PropertyBool.create("west");
-
-	@Override
-	public IBlockState getStateFromMeta(int p_getStateFromMeta_1_) {
-		return this.getDefaultState();
-	}
 	
 	@Override
 	public int getMetaFromState(IBlockState p_getMetaFromState_1_) {

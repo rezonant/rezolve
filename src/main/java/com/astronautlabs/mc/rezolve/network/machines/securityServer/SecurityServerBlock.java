@@ -1,6 +1,6 @@
 package com.astronautlabs.mc.rezolve.network.machines.securityServer;
 
-import com.astronautlabs.mc.rezolve.ModBase;
+import com.astronautlabs.mc.rezolve.core.ModBase;
 import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.machines.Machine;
 import com.astronautlabs.mc.rezolve.common.TileEntityBase;

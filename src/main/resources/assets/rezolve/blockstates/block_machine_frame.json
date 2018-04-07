@@ -1,0 +1,10 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "model": "rezolve:block_machine_frame"
+  },
+  "variants": {
+    "normal": [{}],
+    "inventory": [{}]
+  }
+}

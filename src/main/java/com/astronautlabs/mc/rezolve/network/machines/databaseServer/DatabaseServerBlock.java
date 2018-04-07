@@ -35,36 +35,19 @@ public class DatabaseServerBlock extends TileBlockBase {
 
 	@Override
 	public void registerRecipes() {
-		
-		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
-			RecipeUtil.add(
-				new ItemStack(this.itemBlock), 
-				"nen",
-				"CMC",
-				"cac", 
+		RecipeUtil.add(
+			new ItemStack(this.itemBlock),
+			"nen",
+			"CMC",
+			"cac",
 
-				'n', Items.NAME_TAG,
-				'e', Items.ENDER_EYE,
-				'C', Blocks.CHEST,
-				'M', Item.REGISTRY.getObject(new ResourceLocation("enderio:itemMachinePart")),
-				'c', RezolveMod.ETHERNET_CABLE_BLOCK,
-				'a', Blocks.ANVIL
-			);
-		} else {
-			RecipeUtil.add(
-				new ItemStack(this.itemBlock), 
-				"ene",
-				"CpC",
-				"cac", 
-				
-				'e', Items.ENDER_EYE,
-				'n', Items.NAME_TAG,
-				'C', Blocks.CHEST,
-				'p', Items.PRISMARINE_SHARD,
-				'c', RezolveMod.ETHERNET_CABLE_BLOCK,
-				'a', Blocks.ANVIL
-			);
-		}
+			'n', "item|minecraft:name_tag",
+			'e', "item|minecraft:ender_eye",
+			'C', "item|minecraft:chest",
+			'M', "item|rezolve:block_machine_frame",
+			'c', "item|rezolve:block_ethernet_cable",
+			'a', "item|minecraft:anvil"
+		);
 	}
 	
 	@Override

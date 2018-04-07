@@ -28,36 +28,18 @@ public class UnbundlerBlock extends Machine {
 	
 	@Override
 	public void registerRecipes() {
+		RecipeUtil.add(
+			new ItemStack(this.itemBlock),
+			"PcP",
+			"CMC",
+			"PHP",
 
-		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
-
-			RecipeUtil.add(
-				new ItemStack(this.itemBlock), 
-				"BCB",
-				"EME",
-				"BcB", 
-				
-				'B', RezolveMod.BUNDLE_PATTERN_ITEM.blank(),
-				'C', "block|enderio:blockCapBank",
-				'E', "item|enderio:itemMagnet",
-				'M', "item|enderio:itemMachinePart|0",
-				'c', "item|enderio:itemItemConduit"
-			);
-			
-		} else {
-			RecipeUtil.add(
-				new ItemStack(this.itemBlock), 
-				"PcP",
-				"CpC",
-				"PHP", 
-				
-				'P', RezolveMod.BUNDLE_PATTERN_ITEM.blank(),
-				'c', Blocks.CRAFTING_TABLE,
-				'C', Blocks.CHEST,
-				'p', Blocks.PISTON,
-				'H', Blocks.HOPPER
-			);
-		}
+			'P', "item_bundle_pattern|blank",
+			'c', "mc:crafting_table",
+			'C', "mc:chest",
+			'M', "block_machine_frame",
+			'H', "mc:hopper"
+		);
 	}
 	
 	@Override

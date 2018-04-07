@@ -2,9 +2,13 @@ package com.astronautlabs.mc.rezolve.util;
 
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RecipeUtil {
 
@@ -49,28 +53,99 @@ public class RecipeUtil {
 				}
 			}
 
+			Object resolvedParam = param;
+
 			if (param instanceof String) {
-				Object resolvedParam = null;
-				String identifier = (String)param;
+				String identifier = (String) param;
 				ResourceLocation resloc = null;
-				String[] parts = identifier.split("\\|");
+				String partType = "item";
+				String partRef = null;
+				String partMetadata = null;
 
-				if ("item".equals(parts[0]))
-					resolvedParam = Item.REGISTRY.getObject(resloc = new ResourceLocation(parts[1]));
-				else if ("block".equals(parts[0]))
-					resolvedParam = Block.REGISTRY.getObject(resloc = new ResourceLocation(parts[1]));
-				else
-					throw new RuntimeException("Invalid recipe identifier: "+identifier);
+				{
+					String[] parts = identifier.split("\\|");
 
-				if (parts.length > 2) {
-					// Metadata
+
+					if (parts.length == 3) {
+						// type|ref|meta
+
+						partType = parts[0];
+						partRef = parts[1];
+						partMetadata = parts[2];
+					} else if (parts.length == 2) {
+
+						if ("block".equals(parts[0]) || "item".equals(parts[0])) {
+							// type|ref
+							partType = parts[0];
+							partRef = parts[1];
+						} else {
+							// ref|meta
+							partRef = parts[0];
+							partMetadata = parts[1];
+						}
+					} else if (parts.length == 1) {
+						// ref
+						partRef = parts[0];
+					} else {
+						throw new RuntimeException("Malformed recipe string (must be 1-3 parts separated by '|'): " + identifier);
+					}
+				}
+
+				if (!partRef.contains(":"))
+					partRef = "rezolve:" + partRef;
+
+				if (partRef.startsWith("mc:"))
+					partRef = partRef.replace("mc:", "minecraft:");
+
+				if ("item".equals(partType)) {
+					resolvedParam = Item.REGISTRY.getObject(resloc = new ResourceLocation(partRef));
+				} else if ("block".equals(partType)) {
+					resolvedParam = Block.REGISTRY.getObject(resloc = new ResourceLocation(partRef));
+				} else {
+					// Assume they meant "item" since it works for anything anyway.
+					resolvedParam = Item.REGISTRY.getObject(resloc = new ResourceLocation(partRef));
+				}
+
+				if (resolvedParam == null)
+					throw new RuntimeException("No such " + partType + " '" + partRef + "'");
+
+				// Normalize a Block reference into an ItemBlock one.
+				if (resolvedParam instanceof Block)
+					resolvedParam = ItemBlock.getItemFromBlock((Block) resolvedParam);
+
+
+				if (partMetadata != null) {
+
+					int metadata = -1;
+
+					if (resolvedParam instanceof Item) {
+						Item item = (Item) resolvedParam;
+						if (item.getHasSubtypes()) {
+							List<ItemStack> subItems = new ArrayList<>();
+							item.getSubItems(item, null, subItems);
+							String localizedName = item.getUnlocalizedName();
+
+							for (ItemStack subItem : subItems) {
+								String adjustedName = item.getUnlocalizedName(subItem);
+
+								if (adjustedName.startsWith(localizedName+"_"))
+									adjustedName = adjustedName.substring(localizedName.length() + 1);
+
+								if (partMetadata.equals(adjustedName)) {
+									metadata = subItem.getMetadata();
+									break;
+								}
+							}
+						}
+					}
+
+					if (metadata < 0)
+						metadata = Integer.parseInt(partMetadata);
 
 					if (resolvedParam instanceof Item)
-						resolvedParam = new ItemStack((Item)resolvedParam, 1, Integer.parseInt(parts[2]));
-					else if (resolvedParam instanceof Block)
-						resolvedParam = new ItemStack((Block)resolvedParam, 1, Integer.parseInt(parts[2]));
+						resolvedParam = new ItemStack((Item) resolvedParam, 1, metadata);
 					else
-						throw new RuntimeException("Resolved parameter is not a block or item, cannot create an ItemStack from it.");
+						resolvedParam = new ItemStack((Block) resolvedParam, 1, metadata);
 				}
 
 				if (resolvedParam == null) {
@@ -99,9 +174,9 @@ public class RecipeUtil {
 							+ "and include the versions of Rezolve and the other mod."
 					);
 				}
-
-				resolvedParams[thisIndex] = resolvedParam;
 			}
+
+			resolvedParams[thisIndex] = resolvedParam;
 		}
 
 		GameRegistry.addRecipe(output, resolvedParams);

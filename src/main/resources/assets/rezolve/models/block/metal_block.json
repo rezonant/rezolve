@@ -1,0 +1,6 @@
+{
+    "parent": "rezolve:block/simple_cube",
+    "textures": {
+        "all": "rezolve:blocks/block_copper_block"
+    }
+}

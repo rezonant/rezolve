@@ -76,11 +76,13 @@ public class ClientProxy extends CommonProxy {
 		
 		if (item instanceof ITooltipHint) {
 			String hint = ((ITooltipHint)item).getTooltipHint(stack);
-			
-			String[] strs = hint.split("\n");
-			
-			for (String line : strs)
-				event.getToolTip().add(line);
+
+			if (hint != null) {
+				String[] strs = hint.split("\n");
+
+				for (String line : strs)
+					event.getToolTip().add(line);
+			}
 		}
 	}
 	

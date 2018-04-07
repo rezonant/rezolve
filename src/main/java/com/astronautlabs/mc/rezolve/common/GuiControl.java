@@ -50,4 +50,8 @@ public class GuiControl extends Gui {
 	public void resize(int width, int height) {
 		this.moveAndResize(this.x, this.y, width, height);
 	}
+
+	public void renderOverlay(int mouseX, int mouseY) {
+
+	}
 }

@@ -1,6 +1,6 @@
 package com.astronautlabs.mc.rezolve.machines;
 
-import com.astronautlabs.mc.rezolve.ModBase;
+import com.astronautlabs.mc.rezolve.core.ModBase;
 import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.network.cable.CableNetwork;
 import com.astronautlabs.mc.rezolve.network.cable.ICableCompatible;

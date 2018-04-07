@@ -105,7 +105,11 @@ public class RemoteShellEntity extends MachineEntity implements IContainerListen
 		this.notifyUpdate();
 
 		CableNetwork network = CableNetwork.networkAt(this.worldObj, pos, RezolveMod.ETHERNET_CABLE_BLOCK);
-		this.connectedMachines = new ArrayList<BlockPos>(Arrays.asList(network.getEndpointBlocks()));
+
+		if (network == null)
+			this.connectedMachines = new ArrayList<>();
+		else
+			this.connectedMachines = new ArrayList<>(Arrays.asList(network.getEndpointBlocks()));
 
 	}
 
