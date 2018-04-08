@@ -26,19 +26,19 @@ import java.util.List;
 public class CityMapGen {
 
 	public CityMapGen() {
+
+	}
+
+	public void registerCities() {
 		MinecraftForge.EVENT_BUS.register(this);
 		MinecraftForge.TERRAIN_GEN_BUS.register(this);
 
 		GameRegistry.register(RezolveMod.CITY_BIOME);
-		GameRegistry.register(RezolveMod.TOWN_BIOME);
 		GameRegistry.registerWorldGenerator(RezolveMod.CITY_GENERATOR, Integer.MAX_VALUE);
 
 		BiomeProvider.allowedBiomes.clear();
 
 		int cityWeight = 4;
-		int townWeight = 8;
-
-		BiomeManager.addVillageBiome(RezolveMod.TOWN_BIOME, true);
 
 		//cityWeight = 999999;
 		BiomeManager.addBiome(BiomeManager.BiomeType.DESERT, new BiomeManager.BiomeEntry(RezolveMod.CITY_BIOME, cityWeight));
@@ -46,12 +46,21 @@ public class CityMapGen {
 		BiomeManager.addBiome(BiomeManager.BiomeType.COOL, new BiomeManager.BiomeEntry(RezolveMod.CITY_BIOME, cityWeight));
 		BiomeManager.addBiome(BiomeManager.BiomeType.ICY, new BiomeManager.BiomeEntry(RezolveMod.CITY_BIOME, cityWeight));
 
+		BiomeManager.addSpawnBiome(RezolveMod.CITY_BIOME);
+	}
+
+	public void registerTowns() {
+		// ---
+
+		GameRegistry.register(RezolveMod.TOWN_BIOME);
+		int townWeight = 8;
+
+		BiomeManager.addVillageBiome(RezolveMod.TOWN_BIOME, true);
 		BiomeManager.addBiome(BiomeManager.BiomeType.DESERT, new BiomeManager.BiomeEntry(RezolveMod.TOWN_BIOME, townWeight));
 		BiomeManager.addBiome(BiomeManager.BiomeType.WARM, new BiomeManager.BiomeEntry(RezolveMod.TOWN_BIOME, townWeight));
 		BiomeManager.addBiome(BiomeManager.BiomeType.COOL, new BiomeManager.BiomeEntry(RezolveMod.TOWN_BIOME, townWeight));
 		BiomeManager.addBiome(BiomeManager.BiomeType.ICY, new BiomeManager.BiomeEntry(RezolveMod.TOWN_BIOME, townWeight));
 
-		BiomeManager.addSpawnBiome(RezolveMod.CITY_BIOME);
 		BiomeManager.addSpawnBiome(RezolveMod.TOWN_BIOME);
 	}
 

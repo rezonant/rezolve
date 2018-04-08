@@ -34,6 +34,7 @@ import com.astronautlabs.mc.rezolve.worlds.ores.*;
 import mezz.jei.api.IJeiRuntime;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.init.Biomes;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.config.Configuration;
@@ -100,9 +101,6 @@ public class RezolveMod extends ModBase {
 	@ConfigProperty(comment = "Make new stone (diorite, etc) usable for crafting stone tools")
 	protected boolean makeNewStoneUseful = false;
 
-	@ConfigProperty(comment = "Improved death messages")
-	protected boolean youDed = true;
-
 	@ConfigProperty(comment = "Enable the City biome.")
 	protected boolean enableCities = true;
 
@@ -118,6 +116,12 @@ public class RezolveMod extends ModBase {
 
 		this.cityMapGen = new CityMapGen();
 		this.oreGenerator = new OreGenerator();
+
+		if (this.enableCities)
+			this.cityMapGen.registerCities();
+
+		if (this.enableTowns)
+			this.cityMapGen.registerTowns();
 
 		proxy.init(this);
 
@@ -208,19 +212,22 @@ public class RezolveMod extends ModBase {
 				.build()
 		);
 
-		EntityRegistry.addSpawn(
-			EntityDragon.class,
-			1,
-			1, 1,
-			EnumCreatureType.CREATURE,
 
-			Biomes.EXTREME_HILLS,
-			Biomes.DESERT,
-			Biomes.EXTREME_HILLS_WITH_TREES,
-			Biomes.HELL,
-			Biomes.DEEP_OCEAN,
-			Biomes.ICE_MOUNTAINS
-		);
+		if (this.enableDragons) {
+			EntityRegistry.addSpawn(
+				EntityDragon.class,
+				1,
+				1, 1,
+				EnumCreatureType.CREATURE,
+
+				Biomes.EXTREME_HILLS,
+				Biomes.DESERT,
+				Biomes.EXTREME_HILLS_WITH_TREES,
+				Biomes.HELL,
+				Biomes.DEEP_OCEAN,
+				Biomes.ICE_MOUNTAINS
+			);
+		}
 	}
 
 	@Override
@@ -237,10 +244,93 @@ public class RezolveMod extends ModBase {
 		StorageShellClearCrafterMessageHandler.register();
 	}
 
+	/**
+	 * Register stone tools recipes for newer Minecraft stones like Diorite, Granite, and Andesite which
+	 * are otherwise useless outside of decorative purposes.
+	 */
+	private void registerNewStoneRecipes() {
+		if (!this.makeNewStoneUseful)
+			return;
+
+		this.registerStoneToolsRecipesFor("mc:stone|5");
+		this.registerStoneToolsRecipesFor("mc:stone|1");
+		this.registerStoneToolsRecipesFor("mc:stone|3");
+	}
+
+	private void registerStoneToolsRecipesFor(String stoneType)
+	{
+		RecipeUtil.add(
+			new ItemStack(Items.STONE_PICKAXE),
+
+			"SSS",
+			" s ",
+			" s ",
+
+			'S', stoneType,
+			's', "mc:stick"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(Items.STONE_SHOVEL),
+
+			" S ",
+			" s ",
+			" s ",
+
+			'S', stoneType,
+			's', "mc:stick"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(Items.STONE_AXE),
+
+			"SS ",
+			"Ss ",
+			" s ",
+
+			'S', stoneType,
+			's', "mc:stick"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(Items.STONE_AXE),
+
+			"SSS",
+			" sS",
+			" s ",
+
+			'S', stoneType,
+			's', "mc:stick"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(Items.STONE_HOE),
+
+			"SS ",
+			" s ",
+			" s ",
+
+			'S', stoneType,
+			's', "mc:stick"
+		);
+
+		RecipeUtil.add(
+			new ItemStack(Items.STONE_HOE),
+
+			" SS",
+			" s ",
+			" s ",
+
+			'S', stoneType,
+			's', "mc:stick"
+		);
+	}
+
 	@Override
 	public void registerItemRecipes() {
 		super.registerItemRecipes();
 
+		this.registerNewStoneRecipes();
 
 		RecipeUtil.add(
 			new ItemStack(MACHINE_PART_ITEM, 1, MACHINE_PART_ITEM.metadataFor("activator")),
