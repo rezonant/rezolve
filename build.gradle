@@ -101,10 +101,10 @@ dependencies {
     
     compile "mcp.mobius.waila:Waila:${waila_version}"
 
-    deobfProvided "mezz.jei:jei_${minecraft_version}:${jei_version}:api"
-    runtime "mezz.jei:jei_${minecraft_version}:${jei_version}"
+    //deobfProvided "mezz.jei:jei_${minecraft_version}:${jei_version}:api"
+    //runtime "mezz.jei:jei_${minecraft_version}:${jei_version}"
 
-    //compile "mezz.jei:jei_${minecraft_version}:${jei_version}"
+    compile "mezz.jei:jei_${minecraft_version}:${jei_version}"
 
     compile "com.enderio.core:EnderCore:${endercore_version}"
     compile "com.enderio:EnderIO:${enderio_version}"
