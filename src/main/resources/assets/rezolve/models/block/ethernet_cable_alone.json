@@ -1,0 +1,7 @@
+ {
+	"parent": "rezolve:block/cable_alone",
+	"textures": {
+		"texture": "minecraft:block/iron_block",
+        "particle": "minecraft:block/iron_block"
+	}
+}

@@ -2,40 +2,37 @@ package com.astronautlabs.mc.rezolve.common;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
-import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.DeferredRegister;
 
 public class BlockBase extends Block {
-	public BlockBase(String registryName, Material material, float hardness, float resistance) {
-		super(material);
-
-    	this.setRegistryName(registryName);
-    	this.setUnlocalizedName(this.getRegistryName().toString());
-
-    	System.out.println("Creating block " + this.getRegistryName().toString());
-    	
-		this.setHardness(hardness);
-		this.setResistance(resistance);
-		this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+	public BlockBase(BlockBehaviour.Properties properties) {
+		super(properties);
 	}
 
-	public ItemBlock itemBlock;
-	
-    public BlockBase(String unlocalizedName, float hardness, float resistance) {
-        this(unlocalizedName, Material.ROCK, hardness, resistance);
+    public void register(DeferredRegister<Block> registry) {
+        registry.register(this.getRegistryName(), () -> this);
     }
 
-    public BlockBase(String unlocalizedName) {
-        this(unlocalizedName, 2.0f, 10.0f);
+    protected String registryName;
+
+    protected void setRegistryName(String name) {
+        this.registryName = name;
     }
-    
+
+    public String getRegistryName() {
+        return this.registryName;
+    }
+
+	public BlockItem itemBlock;
     protected RezolveMod mod;
     
     public void init(RezolveMod mod) {
@@ -45,8 +42,13 @@ public class BlockBase extends Block {
     public void registerRecipes() {
     	
     }
-    
-    public void registerRenderer() {
-        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(this), 0, new ModelResourceLocation(getRegistryName(), "inventory"));
+
+    @Override
+    public void fillItemCategory(CreativeModeTab pTab, NonNullList<ItemStack> pItems) {
+        super.fillItemCategory(pTab, pItems);
     }
+
+    //    public void registerRenderer() {
+//        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(this), 0, new ModelResourceLocation(getRegistryName(), "inventory"));
+//    }
 }

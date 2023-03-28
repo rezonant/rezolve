@@ -1,30 +1,35 @@
 package com.astronautlabs.mc.rezolve.bundleBuilder;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
-import com.astronautlabs.mc.rezolve.RezolvePacketHandler;
-import com.astronautlabs.mc.rezolve.common.RezolveNBT;
-import com.astronautlabs.mc.rezolve.common.VirtualInventory;
-import com.astronautlabs.mc.rezolve.common.MachineEntity;
-
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import com.astronautlabs.mc.rezolve.common.*;
+import com.astronautlabs.mc.rezolve.registry.RezolveRegistry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.DyeItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class BundleBuilderEntity extends MachineEntity {
-	public BundleBuilderEntity() {
-		super("bundle_builder_tile_entity");
-		
-		maxEnergyStored = 20000;
-	}
-	
     public static final int PATTERN_INPUT_SLOT = 0;
     public static final int PATTERN_OUTPUT_SLOT = 1;
     public static final int DYE_SLOT = 2;
-    
-	@Override
-	public int getSizeInventory() {
-		return 12;
+	public static final String ID = "bundle_builder";
+
+	public BundleBuilderEntity(BlockEntityType<?> pType, BlockPos pPos, BlockState pBlockState) {
+		super(pType, pPos, pBlockState);
+		maxEnergyStored = 20000;
+
+		addSlot(new BundlePatternSlot(this, PATTERN_INPUT_SLOT, 0, 0));
+		addSlot(new OutputSlot(this, PATTERN_OUTPUT_SLOT, 0, 0));
+		addSlot(new DyeSlot(this, DYE_SLOT, 0, 0));
+
+		// Item inventory
+		for (int i = this.getSlotCount(), max = 9; i < 0; ++i)
+			addSlot(new Slot(this, i, 0, 0));
+
 	}
 
 	public void updateOutputSlot() { 
@@ -44,11 +49,11 @@ public class BundleBuilderEntity extends MachineEntity {
 		
 		// Make sure we have enough power to produce a pattern 
 		
-		if (this.storedEnergy < this.energyCost)
+		if (this.getStoredEnergy() < this.energyCost)
 			clearOutputSlot = true;
 		
 		if (clearOutputSlot) {
-			this.setInventorySlotContents(PATTERN_OUTPUT_SLOT, null);
+			this.setItem(PATTERN_OUTPUT_SLOT, null);
 		} else {
 			this.producePattern();
 		}
@@ -58,36 +63,36 @@ public class BundleBuilderEntity extends MachineEntity {
 	private int energyCost = 100;
 	
 	private void producePattern() {
+		ItemStack stack = new ItemStack(RezolveRegistry.item(BundlePatternItem.class), 1);
+		CompoundTag nbt = new CompoundTag();
 		
-		ItemStack stack = new ItemStack(RezolveMod.BUNDLE_PATTERN_ITEM, 1, 0);
-		NBTTagCompound nbt = new NBTTagCompound();
-		
-		RezolveNBT.writeInventory(nbt, this, 3, 9);
+		RezolveNBT.writeInventory(nbt, this.itemHandler, 3, 9);
 		
 		if (this.patternName != null)
-			nbt.setString("Name", this.patternName);
+			nbt.putString("Name", this.patternName);
 		
 		int dye = this.dyeValue();
 		if (dye != 0)
-			nbt.setInteger("Color", this.dyeValue());
+			nbt.putInt("Color", this.dyeValue());
 		
-		stack.setTagCompound(nbt);
-		this.setInventorySlotContents(PATTERN_OUTPUT_SLOT, stack);
+		stack.setTag(nbt);
+
+		this.setItem(PATTERN_OUTPUT_SLOT, stack);
 	}
 	
 	public int dyeValue() {
 		ItemStack stack = this.getStackInSlot(DYE_SLOT);
 		
-		if (stack == null || stack.stackSize == 0)
+		if (stack == null || stack.getCount() == 0)
 			return -1;
 		
 		return stack.getItem().getDamage(stack);
 	}
 	
 	public boolean hasInputItems() {
-		for (int i = 3, max = this.getSizeInventory(); i < max; ++i) {
+		for (int i = 3, max = this.getSlotCount(); i < max; ++i) {
 			ItemStack stack = this.getStackInSlot(i);
-			if (stack != null && stack.stackSize > 0)
+			if (stack != null && stack.getCount() > 0)
 				return true;
 		}
 		
@@ -100,68 +105,64 @@ public class BundleBuilderEntity extends MachineEntity {
 		if (inputStack == null)
 			return false;
 		
-		if (inputStack.stackSize == 0)
+		if (inputStack.getCount() == 0)
 			return false;
 		
 		return true;
 	}
 
 	@Override
-	public void setInventorySlotContents(int index, ItemStack stack) {
-	    
-	    if (index == PATTERN_INPUT_SLOT) {
-	    	// Check if its not a blank pattern
-	    	
-	    	if (stack != null && !RezolveMod.BUNDLE_PATTERN_ITEM.isBlank(stack)) {
-	    		// A non-blank pattern was put into the input slot.
-	    		// Transform it into a blank slot and set up the other inventory slots according to the pattern.
-	    		
-	    		// Clear existing items
-	    		for (int i = 0, max = this.getSizeInventory(); i < max; ++i) {
-	    			if (i == PATTERN_INPUT_SLOT || i == PATTERN_OUTPUT_SLOT || i == DYE_SLOT)
-	    				continue;
-	    			
-	    			this.setInventorySlotContents(i, null);
-	    		}
-	    		
-	    		if (stack.hasTagCompound()) {
-		    		VirtualInventory vinv = new VirtualInventory();
-		    		RezolveNBT.readInventory(stack.getTagCompound(), vinv);
-		    		
-		    		int slot = 0;
-		    		for (ItemStack patternStack : vinv.getStacks()) {
-		    			if (patternStack == null)
-			    			System.out.println("Handling a stack of NULL");
-		    			else
-		    				System.out.println("Handling a stack of "+patternStack.getItem().getRegistryName());
-		    			this.setInventorySlotContents(3 + slot++, patternStack);
-		    		}
+	public ItemStack insertItem(int slotId, ItemStack stack, boolean simulate) {
+		if (simulate)
+			return super.insertItem(slotId, stack, simulate);
 
-		    		int dyeValue = stack.getTagCompound().getInteger("Color");
-		    		
-		    		if (dyeValue >= 0)
-		    			this.setInventorySlotContents(DYE_SLOT, new ItemStack(Items.DYE, 1, dyeValue));
-		    		else 
-		    			this.setInventorySlotContents(DYE_SLOT, null);
-	    		}
-	    		
-	    		stack = RezolveMod.BUNDLE_PATTERN_ITEM.blank(stack.stackSize);
-	    	}
-	    }
+		if (slotId == PATTERN_INPUT_SLOT) {
 
-	    super.setInventorySlotContents(index, stack);
-	    
-	    if (index != PATTERN_OUTPUT_SLOT) {
-	    	this.updateOutputSlot();
-	    }
-	}
+			if (stack != null && !RezolveRegistry.item(BundlePatternItem.class).isBlank(stack)) {
+				// A non-blank pattern was put into the input slot.
+				// Transform it into a blank slot and set up the other inventory slots according to the pattern.
 
-	@Override
-	public boolean isItemValidForSlot(int index, ItemStack stack) {
-		if (index == PATTERN_INPUT_SLOT)
-			return stack.getItem() == RezolveMod.BUNDLE_PATTERN_ITEM;
-		
-		return false;
+				// Clear existing items
+				for (int i = 0, max = this.getSlotCount(); i < max; ++i) {
+					if (i == PATTERN_INPUT_SLOT || i == PATTERN_OUTPUT_SLOT || i == DYE_SLOT)
+						continue;
+
+					this.setItem(i, null);
+				}
+
+				if (stack.hasTag()) {
+					VirtualInventory vinv = new VirtualInventory();
+					RezolveNBT.readInventory(stack.getTag(), vinv);
+
+					int slot = 0;
+					for (ItemStack patternStack : vinv.getStacks()) {
+						if (patternStack == null)
+							System.out.println("Handling a stack of NULL");
+						else
+							System.out.println("Handling a stack of "+patternStack.getItem().toString());
+
+						this.setItem(3 + slot++, patternStack);
+					}
+
+					int dyeValue = stack.getTag().getInt("Color");
+
+					if (dyeValue >= 0)
+						this.setItem(DYE_SLOT, new ItemStack(DyeItem.byColor(DyeColor.byId(dyeValue)), 1));
+					else
+						this.setItem(DYE_SLOT, null);
+				}
+
+				stack = RezolveRegistry.item(BundlePatternItem.class).blank(stack.getCount());
+			}
+		}
+
+		ItemStack result = super.insertItem(slotId, stack, simulate);
+
+		if (slotId != PATTERN_OUTPUT_SLOT) {
+			this.updateOutputSlot();
+		}
+
+		return result;
 	}
 
 	@Override
@@ -178,10 +179,10 @@ public class BundleBuilderEntity extends MachineEntity {
 		if (inputStack == null) {
 			return;
 		}
-	
-		storedEnergy -= energyCost;
-		inputStack.stackSize -= 1;
-		this.setInventorySlotContents(PATTERN_INPUT_SLOT, inputStack);
+
+		this.energy.extractEnergy(energyCost, true); // TODO: negative
+		inputStack.setCount(inputStack.getCount() - 1);
+		this.setItem(PATTERN_INPUT_SLOT, inputStack);
 		
 	}
 
@@ -201,7 +202,7 @@ public class BundleBuilderEntity extends MachineEntity {
 		this.patternName = text;
 		this.updateOutputSlot();
 		
-		if (this.worldObj.isRemote)
-			RezolvePacketHandler.INSTANCE.sendToServer(new BundleBuilderUpdateMessage(this));
+//		if (this.level.isClientSide)
+//			RezolvePacketHandler.INSTANCE.sendToServer(new BundleBuilderUpdateMessage(this));
 	}
 }

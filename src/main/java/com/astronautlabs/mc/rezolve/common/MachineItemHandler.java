@@ -1,7 +1,8 @@
 package com.astronautlabs.mc.rezolve.common;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
+import org.jetbrains.annotations.NotNull;
 
 public class MachineItemHandler implements IItemHandler {
 	public MachineItemHandler(MachineEntity entity) {
@@ -12,7 +13,7 @@ public class MachineItemHandler implements IItemHandler {
 
 	@Override
 	public int getSlots() {
-		return this.entity.getSlots();
+		return this.entity.getSlotCount();
 	}
 
 	@Override
@@ -28,5 +29,24 @@ public class MachineItemHandler implements IItemHandler {
 	@Override
 	public ItemStack extractItem(int slot, int amount, boolean simulate) {
 		return this.entity.extractItem(slot, amount, simulate);
+	}
+
+	@Override
+	public int getSlotLimit(int slotId) {
+		var slot = this.entity.getSlot(slotId);
+		if (slot == null)
+			return 0;
+
+		return slot.getMaxStackSize();
+	}
+
+	@Override
+	public boolean isItemValid(int slotId, @NotNull ItemStack stack) {
+		var slot = this.entity.getSlot(slotId);
+
+		if (slot == null)
+			return false;
+
+		return slot.mayPlace(stack);
 	}
 }

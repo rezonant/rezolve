@@ -1,6 +1,6 @@
 package com.astronautlabs.mc.rezolve.common;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundTag;
 
 public abstract class Operation<T extends MachineEntity> {
 	public Operation(T machine) {
@@ -13,8 +13,8 @@ public abstract class Operation<T extends MachineEntity> {
 		return this.machine;
 	}
 	
-	public abstract void writeNBT(NBTTagCompound nbt);
-	public abstract void readNBT(NBTTagCompound nbt);
+	public abstract void writeNBT(CompoundTag nbt);
+	public abstract void readNBT(CompoundTag nbt);
 	public abstract int getPercentage();
 	
 	/**

@@ -6,41 +6,42 @@ import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.databaseServer.DatabaseServerEntity;
 import com.astronautlabs.mc.rezolve.securityServer.SecurityServerEntity;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
 
 public class CableNetwork {
-	public CableNetwork(IBlockAccess world, BlockPos startingPoint, CableBlock cableType) {
+	public CableNetwork(BlockGetter world, BlockPos startingPoint, CableBlock cableType) {
 		this.world = world;
 		this.startingPoint = startingPoint;
 		this.cableType = cableType;
 	}
 	
-	private IBlockAccess world;
+	private BlockGetter world;
 	private BlockPos startingPoint;
 	private CableBlock cableType;
 	
-	private EnumFacing[] getSurroundingPositions() {
-		return new EnumFacing[] {
-			EnumFacing.NORTH,
-			EnumFacing.EAST,
-			EnumFacing.WEST,
-			EnumFacing.DOWN,
-			EnumFacing.UP,
-			EnumFacing.SOUTH
+	private Direction[] getSurroundingPositions() {
+		return new Direction[] {
+			Direction.NORTH,
+			Direction.EAST,
+			Direction.WEST,
+			Direction.DOWN,
+			Direction.UP,
+			Direction.SOUTH
 		};
 	}
 	
-	public BlockPos[] getNextCables(IBlockAccess world, BlockPos pos, BlockPos fromBlock) {
-		IBlockState thisBlock = world.getBlockState(pos);
+	public BlockPos[] getNextCables(BlockGetter world, BlockPos pos, BlockPos fromBlock) {
+		BlockState thisBlock = world.getBlockState(pos);
 		
 		ArrayList<BlockPos> viableCables = new ArrayList<BlockPos>();
-		for (EnumFacing dir : this.getSurroundingPositions()) {
-			BlockPos adj = pos.offset(dir);
+		for (Direction dir : this.getSurroundingPositions()) {
+			BlockPos adj = pos.relative(dir);
 			
 			if (fromBlock != null && adj.equals(fromBlock))
 				continue;
@@ -60,7 +61,7 @@ public class CableNetwork {
 	
 	public SecurityServerEntity getSecurityServer(BlockPos[] endpoints) {
 		for (BlockPos pos : endpoints) {
-			TileEntity entity = this.world.getTileEntity(pos);
+			BlockEntity entity = this.world.getBlockEntity(pos);
 			
 			if (entity instanceof SecurityServerEntity) 
 				return (SecurityServerEntity)entity;
@@ -75,7 +76,7 @@ public class CableNetwork {
 	
 	public DatabaseServerEntity getDatabaseServer(BlockPos[] endpoints) {
 		for (BlockPos pos : endpoints) {
-			TileEntity entity = this.world.getTileEntity(pos);
+			BlockEntity entity = this.world.getBlockEntity(pos);
 			
 			if (entity instanceof DatabaseServerEntity) 
 				return (DatabaseServerEntity)entity;
@@ -106,7 +107,7 @@ public class CableNetwork {
 				visited.add(source);
 				
 				for (BlockPos cable : cables) {
-					IBlockState cableBlockState = this.world.getBlockState(cable);
+					BlockState cableBlockState = this.world.getBlockState(cable);
 					
 					if (cableBlockState.getBlock() != this.cableType) {
 						if (!endpoints.contains(cable))

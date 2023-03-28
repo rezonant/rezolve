@@ -1,9 +1,8 @@
 package com.astronautlabs.mc.rezolve.common;
 
-import net.minecraftforge.client.event.GuiScreenEvent.MouseInputEvent;
-import net.minecraftforge.client.event.MouseEvent;
+import net.minecraftforge.client.event.InputEvent;
 
 public interface IOverlay {
 	void draw();
-	void onMouseEvent(MouseEvent evt);
+	void onMouseEvent(InputEvent evt);
 }

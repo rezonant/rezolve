@@ -1,22 +1,16 @@
 package com.astronautlabs.mc.rezolve;
 
-import io.netty.buffer.ByteBuf;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.BlockPos;
 
 public class RezolveByteBufUtils {
-	public static void writeBlockPos(ByteBuf buf, BlockPos pos) {
-		buf.writeInt(pos.getX());
-		buf.writeInt(pos.getY());
-		buf.writeInt(pos.getZ());
+	@Deprecated
+	public static void writeBlockPos(FriendlyByteBuf buf, BlockPos pos) {
+		buf.writeBlockPos(pos);
 	}
-	
-	public static BlockPos readBlockPos(ByteBuf buf) {
-		int x, y, z;
-		
-		x = buf.readInt();
-		y = buf.readInt();
-		z = buf.readInt();
-		
-		return new BlockPos(x, y, z);
+
+	@Deprecated
+	public static BlockPos readBlockPos(FriendlyByteBuf buf) {
+		return buf.readBlockPos();
 	}
 }

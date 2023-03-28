@@ -1,0 +1,7 @@
+ {
+	"parent": "rezolve:block/cable_ns",
+	"textures": {
+		"texture": "block/iron_block",
+        "particle": "block/iron_block"
+	}
+}

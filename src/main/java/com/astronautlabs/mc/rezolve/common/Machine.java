@@ -1,108 +1,76 @@
 package com.astronautlabs.mc.rezolve.common;
 
-import java.lang.reflect.Constructor;
-
-import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.google.common.base.Predicate;
 
-import net.minecraft.block.properties.PropertyDirection;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.*;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.network.NetworkHooks;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
-public abstract class Machine extends TileBlockBase implements IGuiProvider {
-	public Machine(String registryName) {
-		super(registryName);
-		this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
-	}
-	
-	public static final PropertyDirection FACING = PropertyDirection.create("facing", new Predicate<EnumFacing>() {
+public abstract class Machine extends EntityBlockBase {
+	private static final Logger LOGGER = LogManager.getLogger();
+	public static final DirectionProperty FACING = DirectionProperty.create("facing", new Predicate<Direction>() {
 		@Override
-		public boolean apply(EnumFacing input) {
-			return input != EnumFacing.DOWN && input != EnumFacing.UP;
+		public boolean apply(Direction input) {
+			return input != Direction.DOWN && input != Direction.UP;
 		}
 	});
-	
-	public int getMetaFromState(IBlockState state) {
-		return state.getValue(FACING).ordinal();
-	};
-	
+
+	public Machine(Properties properties) {
+		super(properties);
+		this.registerDefaultState(this.getStateDefinition().any().setValue(FACING, Direction.NORTH));
+	}
+
 	@Override
-	public IBlockState getStateFromMeta(int meta) {
-		EnumFacing facing = EnumFacing.VALUES[meta];
-		
-		if (!FACING.getAllowedValues().contains(facing)) {
-			for (EnumFacing value : FACING.getAllowedValues()) {
-				facing = value;
-				break;
-			}
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+		pBuilder.add(FACING);
+	}
+
+	@Nullable
+	@Override
+	public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+		return defaultBlockState().setValue(FACING, pContext.getNearestLookingDirection().getOpposite());
+	}
+
+	@Override
+	public void setPlacedBy(Level pLevel, BlockPos pPos, BlockState pState, @Nullable LivingEntity pPlacer, ItemStack pStack) {
+		if (pStack.hasCustomHoverName()) {
+			BlockEntity entity = pLevel.getBlockEntity(pPos);
+			if (entity != null && entity instanceof BlockEntityBase)
+				((MachineEntity)entity).setCustomName(pStack.getHoverName().getString());
 		}
-		
-		return this.blockState.getBaseState()
-			.withProperty(FACING, facing);
-	}
-	
-	@Override
-	public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ,
-			int meta, EntityLivingBase placer) {
-		return getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite());
-	}
-	
-	@Override
-	protected BlockStateContainer createBlockState() {
-		return new BlockStateContainer(this, FACING);
-	}
-	
-	@Override()
-	public void init(RezolveMod mod) {
-		super.init(mod);
-		this.guiId = mod.getGuiHandler().registerGui(this);
-	}
-	
-	private int guiId = -1;
-	
-	@Override
-	public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-		if (stack.hasDisplayName()) {
-	        TileEntity entity = worldIn.getTileEntity(pos);
-	        if (entity != null && entity instanceof TileEntityBase)
-	        		((TileEntityBase)entity).setCustomName(stack.getDisplayName());
-	    }
-		
-		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
-	}
-	
-	
-	@Override
-	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player,
-			EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ) {
 
-		if (!world.isRemote) {
-	        player.openGui(this.mod, this.guiId, world, pos.getX(), pos.getY(), pos.getZ());
-	    }
-		
-	    return true;
+		super.setPlacedBy(pLevel, pPos, pState, pPlacer, pStack);
 	}
-	
-	public void openGui(World world, BlockPos pos, EntityPlayer player)
-	{
-		if (!world.isRemote) {
-	        player.openGui(this.mod, this.guiId, world, pos.getX(), pos.getY(), pos.getZ());
-	    }
-	}
-	
+
+	@Nullable
 	@Override
-	public abstract Container createServerGui(EntityPlayer player, World world, int x, int y, int z);
+	public MenuProvider getMenuProvider(BlockState pState, Level pLevel, BlockPos pPos) {
+		var entity = ((MachineEntity)pLevel.getBlockEntity(pPos));
+		return new SimpleMenuProvider(
+				(containerId, playerInventory, player) -> createMenu(containerId, playerInventory, entity),
+				entity.getMenuTitle()
+		);
+	}
 
 	@Override
-	public abstract GuiContainer createClientGui(EntityPlayer player, World world, int x, int y, int z);
+	public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
+		this.openMenu(pState, pLevel, pPos, pPlayer);
+		return InteractionResult.sidedSuccess(pLevel.isClientSide);
+	}
 }

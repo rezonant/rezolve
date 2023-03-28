@@ -1,0 +1,9 @@
+{
+  "forge_marker": 1,
+  "variants": {
+    "facing=north": { "model": "rezolve:block/bundler" },
+    "facing=south": { "model": "rezolve:block/bundler", "y": 180 },
+    "facing=west": { "model": "rezolve:block/bundler", "y": 270 },
+    "facing=east": { "model": "rezolve:block/bundler", "y": 90 }
+  }
+}

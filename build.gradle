@@ -1,36 +1,31 @@
-    
-apply plugin: 'maven'
-
-configurations {
-    deployerJars
-}
-
-dependencies {
-	deployerJars "io.packagecloud.maven.wagon:maven-packagecloud-wagon:0.0.4"
-}
-
-uploadArchives {
-    repositories.mavenDeployer {
-        configuration = configurations.deployerJars
-        repository(url: "packagecloud+https://packagecloud.io/rezonant/rezolve") {
-            authentication(password: project.hasProperty('rezolveMavenPassword') ? rezolveMavenPassword : '')
-        }
-    }
-}
-
 buildscript {
     repositories {
         jcenter()
-        maven { url = "http://files.minecraftforge.net/maven" }
+        maven { url = "https://maven.minecraftforge.net" }
+        maven { url = 'https://maven.parchmentmc.org' }
+        maven { url = 'https://maven.moddingx.org' }
+
     }
-	
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+        classpath 'org.spongepowered:mixingradle:0.7.+'
+        classpath 'org.moddingx:ModGradle:3.0.+'
     }
 }
 
+plugins {
+    id "com.modrinth.minotaur" version "2.+"
+    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+}
 
-apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.parchmentmc.librarian.forgegradle'
+apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'org.moddingx.modgradle.mapping'
+
+configurations {
+    compile.extendsFrom exportedCompile
+}
 
 ext.buildnumber = 0
 if (System.getenv('BUILD_NUMBER') != null) {
@@ -47,128 +42,102 @@ if (System.getenv('BUILD_NUMBER') != null) {
 }
 
 version = "${mod_version}.${buildnumber}"
-group = "com.astronautlabs.mc.rezolve" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = "dev.rezonant.rezolve" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "Rezolve-${minecraft_version}"
 
-sourceCompatibility = targetCompatibility = "1.6" // Need this here so eclipse task generates correctly.
-compileJava {
-    sourceCompatibility = targetCompatibility = "1.6"
-}
-
-minecraft {
-    version = "1.10.2-12.18.3.2316"
-    runDir = "run"
-    
-    // the mappings can be changed at any time, and must be in the following format.
-    // snapshot_YYYYMMDD   snapshot are built nightly.
-    // stable_#            stables are built at the discretion of the MCP team.
-    // Use non-default mappings at your own risk. they may not allways work.
-    // simply re-run your setup task after changing the mappings to update your workspace.
-    mappings = "snapshot_20161111"
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
-    
-    replace "@VERSION@", project.version
-}
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
 repositories {
-    mavenCentral()
-    maven { url = "http://chickenbones.net/maven" }
-    maven { url = "http://mobiusstrip.eu/maven" }
-    maven { url = "http://dl.tsr.me/artifactory/libs-release-local" }
-    maven { url = "http://maven.tterrag.com" }
-    maven { url = "http://dvs1.progwml6.com/files/maven" } 
-    maven { url = "http://files.minecraftforge.net/maven" }
-    maven { url = "http://maven.cil.li/" }
-    maven { url = "http://maven.ic2.player.to" }
-    maven { url = "http://maven.epoxide.xyz" }
-    maven { url = "https://www.curseforge.com/api/maven/?token=99cbb405-a0ae-4a7f-87dc-24ab55a44b4b" }
-    ivy {
-        url "http://ae-mod.info/builds"
-        layout "pattern", {
-            artifact "[module]-[revision](-[classifier])(.[ext])"
+    maven { url = "https://maven.minecraftforge.net" } // Forge
+    maven { url "https://dvs1.progwml6.com/files/maven" } // JEI
+    maven { url = "https://modmaven.dev/" } // AE2
+
+
+    // Temp for TOP, https://github.com/McJtyMods/TheOneProbe/issues/506
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
         }
     }
+
+//    maven { url = "http://chickenbones.net/maven" }
+//    maven { url = "http://mobiusstrip.eu/maven" }
+//    maven { url = "http://dl.tsr.me/artifactory/libs-release-local" }
+//    maven { url = "http://maven.tterrag.com" }
+//    maven { url = "http://dvs1.progwml6.com/files/maven" }
+//    maven { url = "http://maven.cil.li/" }
+//    maven { url = "http://maven.ic2.player.to" }
+//    maven { url = "http://maven.epoxide.xyz" }
     mavenLocal()
 }
 
+jarJar.enable()
 
 dependencies {
-    // you may put jars on which you depend on in ./libs
-    // or you may define them like so..
-    //compile "some.group:artifact:version:classifier"
-    //compile "some.group:artifact:version"
-      
-    // compile "com.mod-buildcraft:buildcraft:${buildcraft_version}:api"
-    
-    compile "mcp.mobius.waila:Waila:${waila_version}"
-    compile "mezz.jei:jei_${minecraft_version}:${jei_version}"
-    compile "com.enderio.core:EnderCore:${endercore_version}"
-    compile "com.enderio:EnderIO:${enderio_version}"
-    compile "appeng:appliedenergistics2:${ae_version}:api"
-    compile "net.darkhax.tesla:Tesla:${tesla_version}"
-    // deobfCompile "cofhcore:CoFHCore-1.10.2:release:universal"
-    
-    // real examples
-    //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
-    //compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-    // the 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
-    //provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+    // JEI
+    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
+    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
+    runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common:${jei_version}")
+    runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
 
-    // the deobf configurations:  'deobfCompile' and 'deobfProvided' are the same as the normal compile and provided,
-    // except that these dependencies get remapped to your current MCP mappings
-    //deobfCompile 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-    //deobfProvided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+    // AIE
+    compileOnly "appeng:appliedenergistics2:12.7.0:api"
+    //runtimeOnly fg.deobf("appeng:appliedenergistics2:12.7.0")
 
-    // for more info...
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+    // The One Probe
+//    implementation fg.deobf("mcjty.theoneprobe:TheOneProbe:${minecraft_version}-${top_version}")
+    implementation fg.deobf("curse.maven:the-one-probe-245211:${top_version}")
 
+    // Patchouli
+    compileOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}:api")
+    runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
+
+    // While we don't have conduits etc.
+    runtimeOnly fg.deobf("curse.maven:mekanism-268560:${mekanism_version}")
+
+    // Jetbrains annotations
+    compileOnly 'org.jetbrains:annotations:23.0.0'
 }
 
-sourceSets {
-    main {
-        java {
-            srcDir 'src/main/java'
-            srcDir 'ext/cofhlib/src/main/java'
-            exclude '**/cofh/lib/**'
-            exclude '**/IGeneratorParser.java'
-        }
-        resources {
-            srcDir 'src/main/resources'
-        }
-    }
-    
-    cofh {
-        java {
-            // Note: If this doesn't work in Eclipse, add those as Resource Filters to the package, not as filters to the source set...
-        }
-    }
-}
+minecraft {
+    mappings channel: mappings_channel, version: mappings_version
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
-processResources
-{
-    // this will ensure that this task is redone when the versions change.
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug' // https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
 
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-                
-        // replace version and mcversion
-        expand 'version':project.version, 'mcversion':project.minecraft.version
-    }
-        
-    // copy everything else, thats not the mcmod.info
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
+            mods {
+                rezolve {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                rezolve {
+                    source sourceSets.main
+                }
+            }
+        }
     }
 }
 
 jar {
     manifest {
-        attributes 'FMLCorePlugin': 'com.astronautlabs.mc.rezolve.core.RezolveLoadingPlugin'
-		attributes 'FMLCorePluginContainsFMLMod': 'true'
+//        attributes 'FMLCorePlugin': 'com.astronautlabs.mc.rezolve.core.RezolveLoadingPlugin'
+//		attributes 'FMLCorePluginContainsFMLMod': 'true'
     }
 }

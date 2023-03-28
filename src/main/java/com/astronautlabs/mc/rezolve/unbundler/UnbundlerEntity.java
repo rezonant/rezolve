@@ -2,36 +2,35 @@ package com.astronautlabs.mc.rezolve.unbundler;
 
 import com.astronautlabs.mc.rezolve.BundleItem;
 import com.astronautlabs.mc.rezolve.RezolveMod;
-import com.astronautlabs.mc.rezolve.common.RezolveNBT;
-import com.astronautlabs.mc.rezolve.common.InventorySnapshot;
-import com.astronautlabs.mc.rezolve.common.MachineEntity;
-import com.astronautlabs.mc.rezolve.common.Operation;
-import com.astronautlabs.mc.rezolve.common.VirtualInventory;
+import com.astronautlabs.mc.rezolve.common.*;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import com.astronautlabs.mc.rezolve.registry.RezolveRegistry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class UnbundlerEntity extends MachineEntity {
-	public UnbundlerEntity() {
-		super("unbundler_tile_entity");
-		
-		this.updateInterval = 5;
-		this.maxEnergyStored = 50000;
-	}
-	
+	public static final String ID = "unbundler";
     private int unbundleEnergyCost = 1000;
 
-	@Override
-	public int getSizeInventory() {
-		return 25;
-	}
-	
-	@Override
-	public boolean isItemValidForSlot(int index, ItemStack stack) {
-		if (this.isInputSlot(index))
-			return stack.getItem() == RezolveMod.BUNDLE_ITEM;
-		
-		return false;
+	public UnbundlerEntity(BlockPos pPos, BlockState pBlockState) {
+		super(RezolveRegistry.blockEntityType(UnbundlerEntity.class), pPos, pBlockState);
+
+		this.updateInterval = 5;
+		this.maxEnergyStored = 50000;
+
+		// 25 slots expected
+
+		int nextSlotId = 0;
+		for (int i = 0, max = 9; i < max; ++i)
+			this.addSlot(new BundleSlot(this, nextSlotId++, 0, 0));
+
+		for (int i = 0, max = 16; i < max; ++i)
+			this.addSlot(new OutputSlot(this, nextSlotId++, 0, 0));
+
 	}
 	
 	public boolean isOutputSlot(int index) {
@@ -55,7 +54,7 @@ public class UnbundlerEntity extends MachineEntity {
 			
 			// Find a slot with an existing stack to join this stack into
 			
-			for (int i = 0, max = this.getSizeInventory(); i < max; ++i) {
+			for (int i = 0, max = this.getSlotCount(); i < max; ++i) {
 				if (!this.isOutputSlot(i))
 					continue;
 				
@@ -67,17 +66,17 @@ public class UnbundlerEntity extends MachineEntity {
 				if (!RezolveMod.areStacksSame(existingStack, stack))
 					continue;
 				
-				int maxStackSize = stack.getItem().getItemStackLimit(stack);
+				int maxStackSize = stack.getItem().getMaxStackSize(stack);
 				
-				if (existingStack.stackSize + stack.stackSize > maxStackSize) {
-					stack.stackSize = existingStack.stackSize + stack.stackSize - maxStackSize;
-					existingStack.stackSize = maxStackSize;
+				if (existingStack.getCount() + stack.getCount() > maxStackSize) {
+					stack.setCount(existingStack.getCount() + stack.getCount() - maxStackSize);
+					existingStack.setCount(maxStackSize);
 					
 					// Try to reassign the rest in the next pass
 					reassignRest = true;
 					break;
 				} else {
-					existingStack.stackSize += stack.stackSize;
+					existingStack.setCount(existingStack.getCount() + stack.getCount());
 				}
 				
 				// We have assigned the entirety of the stack
@@ -90,18 +89,18 @@ public class UnbundlerEntity extends MachineEntity {
 			
 			// Find an empty slot for the stack
 			
-			for (int i = 0, max = this.getSizeInventory(); i < max; ++i) {
+			for (int i = 0, max = this.getSlotCount(); i < max; ++i) {
 				if (!this.isOutputSlot(i))
 					continue;
 				
 				ItemStack existingStack = this.getStackInSlot(i);
 				
-				if (existingStack != null && existingStack.stackSize > 0)
+				if (existingStack != null && existingStack.getCount() > 0)
 					continue;
 				
 				// TODO: should we bother checking getItemStackLimit() here? 
 				
-				this.setInventorySlotContents(i, stack);
+				this.setItem(i, stack);
 				
 				// We have assigned the entirety of the stack
 				return true;
@@ -123,16 +122,16 @@ public class UnbundlerEntity extends MachineEntity {
 		if (this.hasCurrentOperation())
 			return;
 		
-		if (this.storedEnergy < this.unbundleEnergyCost)
+		if (this.getStoredEnergy() < this.unbundleEnergyCost)
 			return;
 		
-		for (int i = 0, max = this.getSizeInventory(); i < max; ++i) {
+		for (int i = 0, max = this.getSlotCount(); i < max; ++i) {
 			if (!this.isInputSlot(i))
 				continue;
 		
 			ItemStack inputStack = this.getStackInSlot(i);
 			
-			if (inputStack == null || inputStack.stackSize == 0) {
+			if (inputStack == null || inputStack.getCount() == 0) {
 				continue;
 			}
 		
@@ -143,7 +142,7 @@ public class UnbundlerEntity extends MachineEntity {
 	}
 	
 	public int getSlotWithBundle(ItemStack bundle) {
-		for (int i = 0, max = this.getSizeInventory(); i < max; ++i) {
+		for (int i = 0, max = this.getSlotCount(); i < max; ++i) {
 			if (!this.isInputSlot(i))
 				continue;
 			
@@ -170,23 +169,23 @@ public class UnbundlerEntity extends MachineEntity {
 		
 		ItemStack realStack = this.getStackInSlot(slot);
 		
-		if (!bundle.hasTagCompound()) {
+		if (!bundle.hasTag()) {
 			// This implies we have a bundle that has no items in it. 
 			// In some respects the correct action is to consume the bundle.
 			// Also, because this should never happen and the user may have cheated in the bundle 
 			// to fuck with us, we're just gonna take it.
-			realStack.stackSize -= 1;
+			realStack.setCount(realStack.getCount() - 1);
 			
-			if (realStack.stackSize <= 0) {
-				this.setInventorySlotContents(slot, null);
+			if (realStack.getCount() <= 0) {
+				this.setItem(slot, null);
 			}
 			
 			return true;
 		}
 		
-		NBTTagCompound nbt = bundle.getTagCompound();
+		CompoundTag nbt = bundle.getTag();
 
-		this.dummyInventory.clear();
+		this.dummyInventory.clearContent();
 		RezolveNBT.readInventory(nbt, this.dummyInventory);
 		
 		// Take a snapshot of the inventory, in the case where we cannot 
@@ -213,9 +212,9 @@ public class UnbundlerEntity extends MachineEntity {
 		
 		// Consume the bundle
 		
-		realStack.stackSize -= 1;
-		if (realStack.stackSize == 0)
-			this.setInventorySlotContents(slot, null);
+		realStack.setCount(realStack.getCount() - 1);
+		if (realStack.getCount() == 0)
+			this.setItem(slot, null);
 		
 		return true;
 	}
@@ -231,7 +230,7 @@ public class UnbundlerEntity extends MachineEntity {
 	}
 	
 	public boolean hasBundle(ItemStack bundle) {
-		for (int i = 0, max = this.getSizeInventory(); i < max; ++i) {
+		for (int i = 0, max = this.getSlotCount(); i < max; ++i) {
 			if (!this.isInputSlot(i))
 				continue;
 		

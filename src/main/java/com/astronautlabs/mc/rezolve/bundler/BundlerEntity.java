@@ -4,24 +4,34 @@ import java.util.ArrayList;
 
 import com.astronautlabs.mc.rezolve.BundleItem;
 import com.astronautlabs.mc.rezolve.RezolveMod;
-import com.astronautlabs.mc.rezolve.bundleBuilder.BundlePatternItem;
-import com.astronautlabs.mc.rezolve.bundler.BundlerEntity.ItemMemo;
-import com.astronautlabs.mc.rezolve.common.RezolveNBT;
-import com.astronautlabs.mc.rezolve.common.MachineEntity;
-import com.astronautlabs.mc.rezolve.common.Operation;
-import com.astronautlabs.mc.rezolve.common.VirtualInventory;
+import com.astronautlabs.mc.rezolve.bundleBuilder.BundlePatternSlot;
+import com.astronautlabs.mc.rezolve.common.*;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.items.IItemHandler;
+import com.astronautlabs.mc.rezolve.registry.RezolveRegistry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.registries.RegistryObject;
 
 public class BundlerEntity extends MachineEntity {
-	public BundlerEntity() {
-		super("bundler_tile_entity");
-	    this.updateInterval = 5;
-	    this.maxEnergyStored = 50000;
-	    
+	public BundlerEntity(BlockPos pPos, BlockState pBlockState) {
+		super(RezolveRegistry.blockEntityType(BundlerEntity.class), pPos, pBlockState);
+		this.updateInterval = 5;
+		this.maxEnergyStored = 50000;
+
+		int nextSlotNumber = 0;
+
+		for (int i = 0, max = 9; i < max; ++i)
+			addSlot(new Slot(this, nextSlotNumber++, 0, 0));
+
+		for (int i = 0, max = 9; i < max; ++i)
+			addSlot(new BundlePatternSlot(this, nextSlotNumber++, 0, 0));
+
+		for (int i = 0, max = 9; i < max; ++i)
+			addSlot(new OutputSlot(this, nextSlotNumber++, 0, 0));
 	}
 
 	class ItemMemo {
@@ -35,18 +45,21 @@ public class BundlerEntity extends MachineEntity {
 	}
 	
     private int bundleEnergyCost = 1000;
-    
-	@Override
-	public int getSizeInventory() {
-		return 27;
-	}
 
 	public boolean isOutputSlot(int index) {
-		return index >= 18 && index <= 26;
+		var slot = this.getSlot(index);
+		if (slot == null)
+			return false;
+
+		return slot instanceof OutputSlot;
 	}
 	
 	public boolean isPatternSlot(int index) {
-		return index >= 9 && index <= 17;
+		var slot = this.getSlot(index);
+		if (slot == null)
+			return false;
+
+		return slot instanceof BundlePatternSlot;
 	}
 	
 	public boolean isInputSlot(int index) {
@@ -57,7 +70,7 @@ public class BundlerEntity extends MachineEntity {
 	{
 		ArrayList<ItemStack> availableMaterials = new ArrayList<ItemStack>();
 		
-		for (int i = 0, max = this.getSlots(); i < max; ++i) {
+		for (int i = 0, max = this.getSlotCount(); i < max; ++i) {
 			if (!this.isInputSlot(i))
 				continue;
 			
@@ -78,7 +91,7 @@ public class BundlerEntity extends MachineEntity {
 				materialStack = ingredient.copy();
 				availableMaterials.add(materialStack);
 			} else {
-				materialStack.stackSize += ingredient.stackSize;
+				materialStack.setCount(materialStack.getCount() + ingredient.getCount());
 			}	
 		}
 
@@ -89,7 +102,7 @@ public class BundlerEntity extends MachineEntity {
 	{
 		ArrayList<ItemStack> neededMaterials = new ArrayList<ItemStack>();
 		
-		for (int i = 0, max = this.getSlots(); i < max; ++i) {
+		for (int i = 0, max = this.getSlotCount(); i < max; ++i) {
 			if (!this.isPatternSlot(i))
 				continue;
 			
@@ -98,7 +111,7 @@ public class BundlerEntity extends MachineEntity {
 			if (pattern == null)
 				continue;
 			
-			for (ItemStack ingredient : RezolveMod.instance().BUNDLE_ITEM.getItemsFromBundle(pattern)) {
+			for (ItemStack ingredient : RezolveRegistry.item(BundleItem.class).getItemsFromBundle(pattern)) {
 				
 				ItemStack materialStack = null;
 				for (ItemStack potentialMaterialStack : neededMaterials) {
@@ -112,7 +125,7 @@ public class BundlerEntity extends MachineEntity {
 					materialStack = ingredient.copy();
 					neededMaterials.add(materialStack);
 				} else {
-					materialStack.stackSize += ingredient.stackSize;
+					materialStack.setCount(materialStack.getCount() + ingredient.getCount());
 				}
 			}	
 		}
@@ -120,8 +133,8 @@ public class BundlerEntity extends MachineEntity {
 		return neededMaterials.toArray(new ItemStack[neededMaterials.size()]);
 	}
 	
-	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-		if (!this.isInputSlot(slot) || stack == null || stack.stackSize == 0)
+	public ItemStack insertItem(int slotId, ItemStack stack, boolean simulate) {
+		if (!this.isInputSlot(slotId) || stack == null || stack.getCount() == 0)
 			return stack;
 		
 		ItemStack[] neededMaterials = this.getNeededMaterials();
@@ -149,42 +162,28 @@ public class BundlerEntity extends MachineEntity {
 		int availableItemCount = 0;
 		
 		if (availableMaterialStack != null)
-			availableItemCount = availableMaterialStack.stackSize;
+			availableItemCount = availableMaterialStack.getCount();
 		
-		if (availableItemCount >= neededMaterialStack.stackSize)
+		if (availableItemCount >= neededMaterialStack.getCount())
 			return stack;
 		
-		if (availableItemCount + stack.stackSize > neededMaterialStack.stackSize) {
+		if (availableItemCount + stack.getCount() > neededMaterialStack.getCount()) {
 			stack = stack.copy();
-			ItemStack remainder = stack.splitStack(stack.stackSize - (neededMaterialStack.stackSize - availableItemCount));
-			ItemStack secondRemainder = super.insertItem(slot, stack, simulate);
+			ItemStack remainder = stack.split(stack.getCount() - (neededMaterialStack.getCount() - availableItemCount));
+			ItemStack secondRemainder = super.insertItem(slotId, stack, simulate);
 			
 			if (secondRemainder != null) {
-				remainder.stackSize += secondRemainder.stackSize;
+				remainder.setCount(remainder.getCount() + secondRemainder.getCount());
 			}
 			
 			return remainder;
 		} else {
-			return super.insertItem(slot, stack, simulate);
+			return super.insertItem(slotId, stack, simulate);
 		}
-	}
-	
-	@Override
-	public boolean isItemValidForSlot(int index, ItemStack stack) {
-		if (this.isInputSlot(index))
-			return true;
-	
-		if (this.isOutputSlot(index))
-			return false; 
-	
-		if (this.isPatternSlot(index))
-			return false; // TODO: we could probably allow this
-		
-		return true;
 	}
 
 	private boolean startProducing(ItemStack pattern) {
-		if (!pattern.hasTagCompound()) {
+		if (!pattern.hasTag()) {
 			System.out.println("Bundler: Invalid pattern: No NBT...");
 			return false;
 		}
@@ -207,15 +206,20 @@ public class BundlerEntity extends MachineEntity {
 	
 	public ItemStack makeBundleStack(ItemStack pattern) {
 		
-		int dye = 0;
-		if (pattern.hasTagCompound()) {
-			NBTTagCompound nbt = pattern.getTagCompound();
-			if (nbt.hasKey("Color"))
-				dye = nbt.getInteger("Color") + 1;
+		String dye = null;
+		ItemStack bundleStack;
+		if (pattern.hasTag()) {
+			CompoundTag nbt = pattern.getTag();
+			if (nbt.contains("Color"))
+				dye = nbt.getString("Color") + 1;
 		}
-		
-		ItemStack bundleStack = new ItemStack(RezolveMod.BUNDLE_ITEM, 1, dye);
-		bundleStack.setTagCompound(pattern.getTagCompound());
+
+		if (dye != null)
+			bundleStack = new ItemStack(BundleItem.withColor(dye), 1);
+		else
+			bundleStack = new ItemStack(RezolveRegistry.item(BundleItem.class), 1);
+
+		bundleStack.setTag(pattern.getTag());
 		return bundleStack;
 	}
 
@@ -225,12 +229,12 @@ public class BundlerEntity extends MachineEntity {
 		if (this.hasCurrentOperation())
 			return;
 		
-    	for (int i = 0, max = this.getSizeInventory(); i < max; ++i) {
+    	for (int i = 0, max = this.getSlotCount(); i < max; ++i) {
     		if (!this.isPatternSlot(i))
     			continue;
     		
     		ItemStack pattern = this.getStackInSlot(i);
-    		if (pattern == null || pattern.stackSize == 0)
+    		if (pattern == null || pattern.getCount() == 0)
     			continue;
     		
     		boolean started = this.startProducing(pattern);
@@ -245,7 +249,7 @@ public class BundlerEntity extends MachineEntity {
 		ItemStack existingOutputStack = null;
 		int firstEmptySlot = -1;
 		
-		for (int j = 0, maxJ = this.getSizeInventory(); j < maxJ; ++j) {
+		for (int j = 0, maxJ = this.getSlotCount(); j < maxJ; ++j) {
 			if (!this.isOutputSlot(j))
 				continue;
 			
@@ -269,12 +273,12 @@ public class BundlerEntity extends MachineEntity {
 				return false;
 			} else {
 				if (!simulate)
-					this.setInventorySlotContents(firstEmptySlot, bundle);
+					this.setItem(firstEmptySlot, bundle);
 				return true;
 			}
 		} else {
 			if (!simulate)
-				existingOutputStack.stackSize += 1;
+				existingOutputStack.setCount(existingOutputStack.getCount() + 1);
 			
 			return true;
 		}
@@ -287,23 +291,20 @@ public class BundlerEntity extends MachineEntity {
 	}
 
 	@Override
-	public int getSlots() {
-		return this.getSizeInventory();
-	}
-
 	protected boolean allowedToPullFrom(int slot) {
 		return this.isOutputSlot(slot);
 	}
-	
-	protected boolean allowedToPushTo(int slot) {
+
+	@Override
+	protected boolean allowedToPushTo(int slot, ItemStack stack) {
 		return this.isInputSlot(slot);
 	}
 
 	public boolean hasPattern(ItemStack pattern) {
-		for (int i = 0, max = this.getSizeInventory(); i < max; ++i) {
+		for (int i = 0, max = this.getSlotCount(); i < max; ++i) {
 			ItemStack slotStack = this.getStackInSlot(i);
 			
-			if (slotStack == null || slotStack.stackSize <= 0)
+			if (slotStack == null || slotStack.getCount() <= 0)
 				continue;
 			
 			if (RezolveMod.areStacksSame(slotStack, pattern))
@@ -317,7 +318,7 @@ public class BundlerEntity extends MachineEntity {
 
 		ArrayList<ItemMemo> availableItems = new ArrayList<ItemMemo>();
 
-		for (int i = 0, max = this.getSizeInventory(); i < max; ++i) {
+		for (int i = 0, max = this.getSlotCount(); i < max; ++i) {
 			if (!this.isInputSlot(i))
 				continue;
 			
@@ -326,7 +327,7 @@ public class BundlerEntity extends MachineEntity {
 			if (slotStack == null)
 				continue;
 			
-			for (int j = 0, maxJ = slotStack.stackSize; j < maxJ; ++j)
+			for (int j = 0, maxJ = slotStack.getCount(); j < maxJ; ++j)
 				availableItems.add(new ItemMemo(i, slotStack));
 		}
 		
@@ -335,9 +336,9 @@ public class BundlerEntity extends MachineEntity {
 	
 	protected ArrayList<ItemMemo> selectItemsFor(ItemStack pattern) {
 
-		this.dummyInventory.clear();
+		this.dummyInventory.clearContent();
 
-		NBTTagCompound nbt = pattern.getTagCompound();
+		CompoundTag nbt = pattern.getTag();
 		RezolveNBT.readInventory(nbt, this.dummyInventory);
 		
 		ArrayList<ItemMemo> availableItems = this.getAvailableItems();
@@ -347,16 +348,16 @@ public class BundlerEntity extends MachineEntity {
 		int bundleDepth = 0;
 		
 		for (ItemStack requestedItem : this.dummyInventory.getStacks()) {
-			if (requestedItem == null || requestedItem.stackSize == 0)
+			if (requestedItem == null || requestedItem.getCount() == 0)
 				continue;
 		
-			if (requestedItem.getItem() == RezolveMod.BUNDLE_ITEM)
+			if (requestedItem.getItem() == RezolveRegistry.item(BundleItem.class))
 				bundleDepth = Math.max(bundleDepth, BundleItem.getBundleDepth(requestedItem));
 			
-			int missing = requestedItem.stackSize;
+			int missing = requestedItem.getCount();
 			requestedItemCount += missing;
 			
-			for (int i = 0, max = requestedItem.stackSize; i < max; ++i) {
+			for (int i = 0, max = requestedItem.getCount(); i < max; ++i) {
 				for (int j = 0, maxJ = availableItems.size(); j < maxJ; ++j) {
 					ItemMemo availableItem = availableItems.get(j);
 					
@@ -394,9 +395,9 @@ public class BundlerEntity extends MachineEntity {
 		// OK, remove the source materials
 		
 		for (ItemMemo selectedItem : selectedItems) {
-			selectedItem.stack.stackSize -= 1;
-			if (selectedItem.stack.stackSize <= 0) {
-				this.setInventorySlotContents(selectedItem.index, null);
+			selectedItem.stack.setCount(selectedItem.stack.getCount() - 1);
+			if (selectedItem.stack.getCount() <= 0) {
+				this.setItem(selectedItem.index, null);
 			}
 		}
 		

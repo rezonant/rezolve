@@ -2,31 +2,30 @@ package com.astronautlabs.mc.rezolve.securityServer;
 
 import java.util.ArrayList;
 import java.util.UUID;
-
-import com.astronautlabs.mc.rezolve.RezolvePacketHandler;
 import com.astronautlabs.mc.rezolve.common.MachineEntity;
-import com.astronautlabs.mc.rezolve.common.TileEntityBase;
-import com.astronautlabs.mc.rezolve.securityServer.SecurityServerEntity.Rule;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.util.Constants.NBT;
+import com.astronautlabs.mc.rezolve.registry.RezolveRegistry;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class SecurityServerEntity extends MachineEntity {
+	public static final String ID = "security_server";
 
-	public SecurityServerEntity() {
-		super("security_server_tile_entity");
+	public SecurityServerEntity(BlockPos pPos, BlockState pBlockState) {
+		super(RezolveRegistry.blockEntityType(SecurityServerEntity.class), pPos, pBlockState);
+
 		this.rules = new ArrayList<Rule>();
 		this.rules.add(new Rule("<machines>", Rule.MODE_OPEN));
 		this.rules.add(new Rule("<players>", Rule.MODE_RESTRICTED));
 	}
-	
-	void setRootUser(EntityLivingBase player) {
-		this.rootUser = player.getName();
+
+	void setRootUser(LivingEntity player) {
+		this.rootUser = player.getUUID().toString();
 		
 		Rule playerRule = this.getRuleByNameInternal(this.rootUser);
 		
@@ -93,18 +92,18 @@ public class SecurityServerEntity extends MachineEntity {
 	String rootUser = null;
 	
 	public void addRule(String name, int mode) {
-		if (this.getWorld().isRemote) {
+		if (this.getLevel().isClientSide) {
 			
-			RezolvePacketHandler.INSTANCE.sendToServer(new RuleModificationMessage(
-				Minecraft.getMinecraft().thePlayer, 
-				this, "", name, mode
-			));
+//			RezolvePacketHandler.INSTANCE.sendToServer(new RuleModificationMessage(
+//				Minecraft.getInstance().thePlayer,
+//				this, "", name, mode
+//			));
 			
 			return;
 		}
 		
 		this.rules.add(new Rule(name, mode));
-		this.notifyUpdate();
+		this.setChanged();
 	}
 
 	public Rule getRuleById(String id) {
@@ -131,11 +130,11 @@ public class SecurityServerEntity extends MachineEntity {
 		if (rule == null)
 			return false;
 		
-		if (this.getWorld().isRemote) {
-			RezolvePacketHandler.INSTANCE.sendToServer(new RuleModificationMessage(
-				Minecraft.getMinecraft().thePlayer, 
-				this, id, name, mode
-			));
+		if (this.getLevel().isClientSide) {
+//			RezolvePacketHandler.INSTANCE.sendToServer(new RuleModificationMessage(
+//				Minecraft.getInstance().thePlayer,
+//				this, id, name, mode
+//			));
 				
 			return true;
 		}
@@ -145,7 +144,7 @@ public class SecurityServerEntity extends MachineEntity {
 		}
 		
 		rule.mode = mode;
-		this.notifyUpdate();
+		this.setChanged();
 		
 		return true;
 	}
@@ -157,53 +156,54 @@ public class SecurityServerEntity extends MachineEntity {
 		
 		return ruleCopies.toArray(new Rule[this.rules.size()]);
 	}
-	
+
 	@Override
-	public void readFromNBT(NBTTagCompound compound) {
-		
-		if (compound.hasKey("RootUser")) {
+	public void deserializeNBT(CompoundTag compound) {
+		super.deserializeNBT(compound);
+
+		if (compound.contains("RootUser")) {
 			this.rootUser = compound.getString("RootUser");
 		}
-		
-		if (compound.hasKey("Rules")) {
-			NBTTagList rulesList = compound.getTagList("Rules", NBT.TAG_COMPOUND);
+
+		if (compound.contains("Rules")) {
+			ListTag rulesList = compound.getList("Rules", Tag.TAG_COMPOUND);
 			this.rules = new ArrayList<Rule>();
-			
-			for (int i = 0, max = rulesList.tagCount(); i < max; ++i) {
-				NBTTagCompound ruleNBT = (NBTTagCompound)rulesList.get(i);
-				this.rules.add(new Rule(ruleNBT.getString("ID"), ruleNBT.getString("Name"), ruleNBT.getInteger("Mode")));
+
+			for (int i = 0, max = rulesList.size(); i < max; ++i) {
+				CompoundTag ruleNBT = (CompoundTag)rulesList.get(i);
+				this.rules.add(new Rule(ruleNBT.getString("ID"), ruleNBT.getString("Name"), ruleNBT.getInt("Mode")));
 			}
 		}
-		
+
 		if (this.rules == null || this.rules.size() == 0) {
 			// Reset rules.
 			this.rules = new ArrayList<Rule>();
 			this.rules.add(new Rule("<machines>", Rule.MODE_OPEN));
 			this.rules.add(new Rule("<players>", Rule.MODE_RESTRICTED));
 		}
-		
-		super.readFromNBT(compound);
 	}
-	
+
 	@Override
-	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+	public CompoundTag serializeNBT() {
+		var compound = super.serializeNBT();
 
 		if (this.rootUser != null) {
-			compound.setString("RootUser", this.rootUser);
+			compound.putString("RootUser", this.rootUser);
 		}
-		
-		NBTTagList rulesList = new NBTTagList();
-		
+
+		ListTag rulesList = new ListTag();
+
 		for (Rule rule : this.rules) {
-			NBTTagCompound ruleNBT = new NBTTagCompound();
-			ruleNBT.setString("ID", rule.id);
-			ruleNBT.setString("Name", rule.name);
-			ruleNBT.setInteger("Mode", rule.mode);
-			rulesList.appendTag(ruleNBT);
+			CompoundTag ruleNBT = new CompoundTag();
+			ruleNBT.putString("ID", rule.id);
+			ruleNBT.putString("Name", rule.name);
+			ruleNBT.putInt("Mode", rule.mode);
+			rulesList.add(ruleNBT);
 		}
-		
-		compound.setTag("Rules", rulesList);
-		return super.writeToNBT(compound);
+
+		compound.put("Rules", rulesList);
+
+		return compound;
 	}
 
 	public void removeRule(String id) {
@@ -214,12 +214,12 @@ public class SecurityServerEntity extends MachineEntity {
 		if (selectedRule == null)
 			return;
 		
-		if (this.getWorld().isRemote) {
+		if (this.getLevel().isClientSide) {
 
-			RezolvePacketHandler.INSTANCE.sendToServer(new RuleModificationMessage(
-				Minecraft.getMinecraft().thePlayer, 
-				this, selectedRule.getId(), "", -2
-			));
+//			RezolvePacketHandler.INSTANCE.sendToServer(new RuleModificationMessage(
+//				Minecraft.getInstance().thePlayer,
+//				this, selectedRule.getId(), "", -2
+//			));
 			
 			return;
 		}
@@ -234,7 +234,7 @@ public class SecurityServerEntity extends MachineEntity {
 			return;
 		
 		this.rules.remove(ruleToRemove);
-		this.notifyUpdate();
+		this.setChanged();
 	}
 
 	public Rule getRuleByName(String name) {
@@ -255,7 +255,7 @@ public class SecurityServerEntity extends MachineEntity {
 		return null;
 	}
 
-	public boolean canPlayerOpen(EntityPlayer player) {
+	public boolean canPlayerOpen(Player player) {
 
 		if (this.rootUser != null && this.rootUser.equals(player.getName())) 
 			return true;
@@ -267,7 +267,7 @@ public class SecurityServerEntity extends MachineEntity {
 		return false;
 	}
 	
-	public int getPlayerAccess(EntityPlayer player) {
+	public int getPlayerAccess(Player player) {
 
 		int playerAccess = Rule.MODE_RESTRICTED;
 
@@ -286,7 +286,7 @@ public class SecurityServerEntity extends MachineEntity {
 		return playerAccess;
 	}
 	
-	public boolean canPlayerUse(EntityPlayer entityPlayer, BlockPos pos) {
+	public boolean canPlayerUse(Player entityPlayer, BlockPos pos) {
 
 		int playerAccess = this.getPlayerAccess(entityPlayer);
 		

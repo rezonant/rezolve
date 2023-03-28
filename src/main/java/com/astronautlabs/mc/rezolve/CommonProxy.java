@@ -1,22 +1,23 @@
 package com.astronautlabs.mc.rezolve;
 
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class CommonProxy {
 	public CommonProxy() {
 	}
 
 	protected RezolveMod mod;
-	
+
+	private static final Logger LOGGER = LogManager.getLogger();
 	protected void log(String message) {
-		this.mod.log(message);
+		LOGGER.info(message);
 	}
 	public void init(RezolveMod mod) {
 		this.mod = mod;
     	this.log("Initializing common proxy...");
-    	
-        NetworkRegistry.INSTANCE.registerGuiHandler(mod, mod.getGuiHandler());
+
+        //NetworkRegistry.INSTANCE.registerGuiHandler(mod, mod.getGuiHandler());
 
 	}
 }

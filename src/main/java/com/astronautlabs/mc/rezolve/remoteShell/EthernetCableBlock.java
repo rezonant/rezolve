@@ -1,126 +1,135 @@
 package com.astronautlabs.mc.rezolve.remoteShell;
 
+import com.astronautlabs.mc.rezolve.BundleItem;
 import com.astronautlabs.mc.rezolve.RezolveMod;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.properties.PropertyBool;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.multiplayer.WorldClient;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ChunkCache;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldType;
+import com.astronautlabs.mc.rezolve.registry.RezolveRegistry;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 public class EthernetCableBlock extends CableBlock {
+	public static final String ID = "ethernet_cable";
+	public static final BooleanProperty DOWN = BooleanProperty.create("down");
+	public static final BooleanProperty EAST = BooleanProperty.create("east");
+	public static final BooleanProperty NORTH = BooleanProperty.create("north");
+	public static final BooleanProperty SOUTH = BooleanProperty.create("south");
+	public static final BooleanProperty UP = BooleanProperty.create("up");
+	public static final BooleanProperty WEST = BooleanProperty.create("west");
 
 	public EthernetCableBlock() {
-		super("block_ethernet_cable");
-		
-		this.setDefaultState(
-			this.getDefaultState()
-				.withProperty(DOWN, false)
-				.withProperty(EAST, false)
-				.withProperty(NORTH, false)
-				.withProperty(SOUTH, false)
-				.withProperty(UP, false)
-				.withProperty(WEST, false)
+		super(
+				BlockBehaviour.Properties.of(Material.WOOL)
+					.isViewBlocking((state, level, pos) -> false)
+				// TODO: no torches
+
+		);
+
+		this.registerDefaultState(
+				this.defaultBlockState()
+						.setValue(DOWN, false)
+						.setValue(EAST, false)
+						.setValue(NORTH, false)
+						.setValue(SOUTH, false)
+						.setValue(UP, false)
+						.setValue(WEST, false)
 		);
 	}
 
-	@Override
-	public void registerRecipes() {
-		ItemStack redstoneBundle = RezolveMod.BUNDLE_ITEM.withContents(
-			1,
-			new ItemStack(Items.REDSTONE, 1),
-			new ItemStack(Items.REDSTONE, 1),
-			new ItemStack(Items.REDSTONE, 1),
-			new ItemStack(Items.REDSTONE, 1),
-			new ItemStack(Items.REDSTONE, 1),
-			new ItemStack(Items.REDSTONE, 1),
-			new ItemStack(Items.REDSTONE, 1),
-			new ItemStack(Items.REDSTONE, 1),
-			new ItemStack(Items.REDSTONE, 1)
-		);
-		
-		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
-			RezolveMod.addRecipe(
-				new ItemStack(this.itemBlock), 
-				"pWp",
-				"WRW",
-				"pWp", 
-				
-				'p', new ItemStack(Item.REGISTRY.getObject(new ResourceLocation("enderio:itemMaterial")), 1, 3),
-				'W', Blocks.WOOL,
-				'R', redstoneBundle
-			);
-		} else {
-			RezolveMod.addRecipe(
-				new ItemStack(this.itemBlock), 
-				"IWI",
-				"WRW",
-				"IWI", 
-				
-				'I', Items.IRON_INGOT,
-				'W', Blocks.WOOL,
-				'R', redstoneBundle
-			);
-		}
-	}
+//	@Override
+//	public void registerRecipes() {
+//		ItemStack redstoneBundle = RezolveMod.BUNDLE_ITEM.withContents(
+//			1,
+//			new ItemStack(Items.REDSTONE, 1),
+//			new ItemStack(Items.REDSTONE, 1),
+//			new ItemStack(Items.REDSTONE, 1),
+//			new ItemStack(Items.REDSTONE, 1),
+//			new ItemStack(Items.REDSTONE, 1),
+//			new ItemStack(Items.REDSTONE, 1),
+//			new ItemStack(Items.REDSTONE, 1),
+//			new ItemStack(Items.REDSTONE, 1),
+//			new ItemStack(Items.REDSTONE, 1)
+//		);
+//
+//		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
+//			RezolveMod.addRecipe(
+//				new ItemStack(this.itemBlock),
+//				"pWp",
+//				"WRW",
+//				"pWp",
+//
+//				'p', new ItemStack(Item.REGISTRY.getObject(new ResourceLocation("enderio:itemMaterial")), 1, 3),
+//				'W', Blocks.WOOL,
+//				'R', redstoneBundle
+//			);
+//		} else {
+//			RezolveMod.addRecipe(
+//				new ItemStack(this.itemBlock),
+//				"IWI",
+//				"WRW",
+//				"IWI",
+//
+//				'I', Items.IRON_INGOT,
+//				'W', Blocks.WOOL,
+//				'R', redstoneBundle
+//			);
+//		}
+//	}
 	
 	float radius = 3f / 16f;
 
 	@Override
-	public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn) {
-		this.notifyNetwork(worldIn, pos);
+	public void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pBlock, BlockPos pFromPos, boolean pIsMoving) {
+		super.neighborChanged(pState, pLevel, pPos, pBlock, pFromPos, pIsMoving);
+		this.notifyNetwork(pLevel, pPos);
 	}
-	
+
 	@Override
-	protected BlockStateContainer createBlockState() {
-		return new BlockStateContainer(this, DOWN, EAST, NORTH, SOUTH, UP, WEST);
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
+		pBuilder.add(DOWN).add(EAST).add(NORTH).add(SOUTH).add(UP).add(WEST);
 	}
+
+	// TODO
+//	@Override
+//	public boolean canPlaceBlockOnSide(Level worldIn, BlockPos pos, Direction side) {
+//		this.notifyNetwork(worldIn, pos);
+//		return super.canPlaceBlockOnSide(worldIn, pos, side);
+//	}
+//
+//	@Override
+//	public void onBlockAdded(Level world, BlockPos pos, BlockState state) {
+//		this.notifyNetwork(world, pos);
+//		super.onBlockAdded(world, pos, state);
+//	}
+//
+//	@Override
+//	public void onBlockDestroyedByPlayer(Level world, BlockPos pos, BlockState state) {
+//		this.onBlockDestroyed(world, pos);
+//		super.onBlockDestroyedByPlayer(world, pos, state);
+//	}
+//
+//	@Override
+//	public void onBlockDestroyedByExplosion(Level world, BlockPos pos, Explosion explosionIn) {
+//		this.onBlockDestroyed(world, pos);
+//		super.onBlockDestroyedByExplosion(world, pos, explosionIn);
+//	}
 	
-	@Override
-	public boolean canPlaceTorchOnTop(IBlockState state, IBlockAccess world, BlockPos pos) {
-		return false;
-	}
-	
-	@Override
-	public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side) {
-		this.notifyNetwork(worldIn, pos);
-		return super.canPlaceBlockOnSide(worldIn, pos, side);
-	}
-	
-	@Override
-	public void onBlockAdded(World world, BlockPos pos, IBlockState state) {
-		this.notifyNetwork(world, pos);		
-		super.onBlockAdded(world, pos, state);
-	}
-	
-	@Override
-	public void onBlockDestroyedByPlayer(World world, BlockPos pos, IBlockState state) {
-		this.onBlockDestroyed(world, pos);
-		super.onBlockDestroyedByPlayer(world, pos, state);
-	}
-	
-	@Override
-	public void onBlockDestroyedByExplosion(World world, BlockPos pos, Explosion explosionIn) {
-		this.onBlockDestroyed(world, pos);
-		super.onBlockDestroyedByExplosion(world, pos, explosionIn);
-	}
-	
-	private void onBlockDestroyed(World world, BlockPos pos)
+	private void onBlockDestroyed(Level world, BlockPos pos)
 	{
 		this.notifyNetwork(world, pos);
 	}
@@ -131,16 +140,16 @@ public class EthernetCableBlock extends CableBlock {
 	 * @param world
 	 * @param pos
 	 */
-	private void notifyNetwork(World world, BlockPos pos) {
+	private void notifyNetwork(Level world, BlockPos pos) {
 		// Update the cable network if we're on the server
 		
-		if (world.isRemote)
+		if (world.isClientSide)
 			return;
 		
-		CableNetwork network = new CableNetwork(world, pos, RezolveMod.ETHERNET_CABLE_BLOCK);
+		CableNetwork network = new CableNetwork(world, pos, RezolveRegistry.block(EthernetCableBlock.class));
 		
 		for (BlockPos otherPos : network.getEndpoints()) {
-			TileEntity entity = world.getTileEntity(otherPos);
+			BlockEntity entity = world.getBlockEntity(otherPos);
 			if (entity == null)
 				continue;
 			
@@ -149,114 +158,99 @@ public class EthernetCableBlock extends CableBlock {
 			}
 		}
 	}
-	
-	public static final PropertyBool DOWN = PropertyBool.create("down");
-	public static final PropertyBool EAST = PropertyBool.create("east");
-	public static final PropertyBool NORTH = PropertyBool.create("north");
-	public static final PropertyBool SOUTH = PropertyBool.create("south");
-	public static final PropertyBool UP = PropertyBool.create("up");
-	public static final PropertyBool WEST = PropertyBool.create("west");
+
+//	/**
+//	 * Sets the data values of a BlockState instance to represent this block
+//	 */
+//	@Override
+//	public BlockState getActualState(final BlockState bs, final BlockGetter world, final BlockPos coord) {
+//		BlockState oldBS = bs;
+//		return bs
+//				.withProperty(WEST, this.canConnectTo(world, coord, oldBS, Direction.WEST, coord.west()))
+//				.withProperty(DOWN, this.canConnectTo(world, coord, oldBS, Direction.DOWN, coord.down()))
+//				.withProperty(SOUTH, this.canConnectTo(world, coord, oldBS, Direction.SOUTH, coord.south()))
+//				.withProperty(EAST, this.canConnectTo(world, coord, oldBS, Direction.EAST, coord.east()))
+//				.withProperty(UP, this.canConnectTo(world, coord, oldBS, Direction.UP, coord.up()))
+//				.withProperty(NORTH, this.canConnectTo(world, coord, oldBS, Direction.NORTH, coord.north()));
+//	}
+
 
 	@Override
-	public IBlockState getStateFromMeta(int p_getStateFromMeta_1_) {
-		return this.getDefaultState();
+	public BlockState updateShape(BlockState oldBS, Direction pDirection, BlockState pNeighborState, LevelAccessor level, BlockPos pos, BlockPos pNeighborPos) {
+		return oldBS
+				.setValue(WEST, this.canConnectTo(level, pos, oldBS, Direction.WEST, pos.west()))
+				.setValue(DOWN, this.canConnectTo(level, pos, oldBS, Direction.DOWN, pos.above()))
+				.setValue(SOUTH, this.canConnectTo(level, pos, oldBS, Direction.SOUTH, pos.south()))
+				.setValue(EAST, this.canConnectTo(level, pos, oldBS, Direction.EAST, pos.east()))
+				.setValue(UP, this.canConnectTo(level, pos, oldBS, Direction.UP, pos.below()))
+				.setValue(NORTH, this.canConnectTo(level, pos, oldBS, Direction.NORTH, pos.north()));
 	}
-	
-	@Override
-	public int getMetaFromState(IBlockState p_getMetaFromState_1_) {
-		return 0;
-	}
-	
-	@Override
-	public boolean isOpaqueCube(IBlockState p_isOpaqueCube_1_) {
-		return false;
-	}
-	
-	@Override
-	public boolean isVisuallyOpaque() {
-		return false;
-	}
-	
-	/**
-	 * Sets the data values of a BlockState instance to represent this block
-	 */
-	@Override
-	public IBlockState getActualState(final IBlockState bs, final IBlockAccess world, final BlockPos coord) {
-		IBlockState oldBS = bs;
-		return bs
-				.withProperty(WEST, this.canConnectTo(world, coord, oldBS, EnumFacing.WEST, coord.west()))
-				.withProperty(DOWN, this.canConnectTo(world, coord, oldBS, EnumFacing.DOWN, coord.down()))
-				.withProperty(SOUTH, this.canConnectTo(world, coord, oldBS, EnumFacing.SOUTH, coord.south()))
-				.withProperty(EAST, this.canConnectTo(world, coord, oldBS, EnumFacing.EAST, coord.east()))
-				.withProperty(UP, this.canConnectTo(world, coord, oldBS, EnumFacing.UP, coord.up()))
-				.withProperty(NORTH, this.canConnectTo(world, coord, oldBS, EnumFacing.NORTH, coord.north()));
-	}
-	
-	public boolean canConnectTo(IBlockAccess world, BlockPos pos) {
-		IBlockState st = world.getBlockState(pos);
-		TileEntity te = world.getTileEntity(pos);
+
+	public boolean canConnectTo(BlockGetter world, BlockPos pos) {
+		BlockState st = world.getBlockState(pos);
+		BlockEntity te = world.getBlockEntity(pos);
 		
-		if (st == null || st.getBlock() == null || "enderio:blockConduitBundle".equals(st.getBlock().getRegistryName().toString()))
+		if (st == null || st.getBlock() == null)
 			return false;
 		
-		if (st.getBlock() == RezolveMod.ETHERNET_CABLE_BLOCK || st.getBlock() == Blocks.ANVIL || te != null)
+		if (st.getBlock() == RezolveRegistry.block(EthernetCableBlock.class) || st.getBlock() == Blocks.ANVIL || te != null)
 			return true;
 		
 		return false;
 	}
 
-	public boolean canConnectTo(IBlockAccess w, BlockPos thisBlock, IBlockState bs, EnumFacing face, BlockPos otherBlock) {
+	public boolean canConnectTo(BlockGetter w, BlockPos thisBlock, BlockState bs, Direction face, BlockPos otherBlock) {
 		return this.canConnectTo(w, otherBlock);
 	}
-	
-	/**
-	 * Calculates the collision boxes for this block.
-	 */
-	@Override
-	public AxisAlignedBB getBoundingBox(final IBlockState bs, final IBlockAccess world, final BlockPos coord) {
-		IBlockState oldBS = bs;
-		final boolean connectNorth = this.canConnectTo(world, coord, oldBS, EnumFacing.NORTH, coord.north());
-		final boolean connectSouth = this.canConnectTo(world, coord, oldBS, EnumFacing.SOUTH, coord.south());
-		final boolean connectWest = this.canConnectTo(world, coord, oldBS, EnumFacing.WEST, coord.west());
-		final boolean connectEast = this.canConnectTo(world, coord, oldBS, EnumFacing.EAST, coord.east());
-		final boolean connectUp = this.canConnectTo(world, coord, oldBS, EnumFacing.UP, coord.up());
-		final boolean connectDown = this.canConnectTo(world, coord, oldBS, EnumFacing.DOWN, coord.down());
-		final boolean allFalse = !(connectNorth || connectSouth || connectWest || connectEast || connectUp || connectDown);
 
-		float radius = this.radius;
-		float rminus = 0.5f - radius;
-		float rplus = 0.5f + radius;
-
-		float x1 = rminus;
-		float x2 = rplus;
-		float y1 = rminus;
-		float y2 = rplus;
-		float z1 = rminus;
-		float z2 = rplus;
-		if (connectNorth) {
-			z1 = 0.0f;
-		}
-		if (connectSouth) {
-			z2 = 1.0f;
-		}
-		if (connectWest) {
-			x1 = 0.0f;
-		}
-		if (connectEast) {
-			x2 = 1.0f;
-		}
-		if (connectDown) {
-			y1 = 0.0f;
-		}
-		if (connectUp) {
-			y2 = 1.0f;
-		}
-		if (allFalse) {// Horizontal '+' when making no connections
-			z1 = 0.0f;
-			z2 = 1.0f;
-			x1 = 0.0f;
-			x2 = 1.0f;
-		}
-		return new AxisAlignedBB(x1, y1, z1, x2, y2, z2);
-	}
+//	/**
+//	 * Calculates the collision boxes for this block.
+//	 */
+//	@Override
+//	public AABB getBoundingBox(final BlockState bs, final BlockGetter world, final BlockPos coord) {
+//		BlockState oldBS = bs;
+//		final boolean connectNorth = this.canConnectTo(world, coord, oldBS, Direction.NORTH, coord.north());
+//		final boolean connectSouth = this.canConnectTo(world, coord, oldBS, Direction.SOUTH, coord.south());
+//		final boolean connectWest = this.canConnectTo(world, coord, oldBS, Direction.WEST, coord.west());
+//		final boolean connectEast = this.canConnectTo(world, coord, oldBS, Direction.EAST, coord.east());
+//		final boolean connectUp = this.canConnectTo(world, coord, oldBS, Direction.UP, coord.up());
+//		final boolean connectDown = this.canConnectTo(world, coord, oldBS, Direction.DOWN, coord.down());
+//		final boolean allFalse = !(connectNorth || connectSouth || connectWest || connectEast || connectUp || connectDown);
+//
+//		float radius = this.radius;
+//		float rminus = 0.5f - radius;
+//		float rplus = 0.5f + radius;
+//
+//		float x1 = rminus;
+//		float x2 = rplus;
+//		float y1 = rminus;
+//		float y2 = rplus;
+//		float z1 = rminus;
+//		float z2 = rplus;
+//		if (connectNorth) {
+//			z1 = 0.0f;
+//		}
+//		if (connectSouth) {
+//			z2 = 1.0f;
+//		}
+//		if (connectWest) {
+//			x1 = 0.0f;
+//		}
+//		if (connectEast) {
+//			x2 = 1.0f;
+//		}
+//		if (connectDown) {
+//			y1 = 0.0f;
+//		}
+//		if (connectUp) {
+//			y2 = 1.0f;
+//		}
+//		if (allFalse) {// Horizontal '+' when making no connections
+//			z1 = 0.0f;
+//			z2 = 1.0f;
+//			x1 = 0.0f;
+//			x2 = 1.0f;
+//		}
+//		return new AxisAlignedBB(x1, y1, z1, x2, y2, z2);
+//	}
 }

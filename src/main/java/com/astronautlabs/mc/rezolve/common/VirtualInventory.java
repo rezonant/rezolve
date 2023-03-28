@@ -3,126 +3,77 @@ package com.astronautlabs.mc.rezolve.common;
 import java.util.Collection;
 import java.util.Hashtable;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.items.IItemHandler;
 
-public class VirtualInventory implements IInventory {
+public class VirtualInventory implements Container {
+	protected ContainerItemHandler handler = new ContainerItemHandler(this);
+
+	public IItemHandler getHandler() {
+		return this.handler;
+	}
 
 	Hashtable<Integer, ItemStack> slots = new Hashtable<Integer, ItemStack>();
 	
 	public Collection<ItemStack> getStacks() {
 		return this.slots.values();
 	}
-	
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return "virtual";
-	}
 
 	@Override
-	public boolean hasCustomName() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public ITextComponent getDisplayName() {
-		// TODO Auto-generated method stub
-		return new TextComponentString(this.getName());
-	}
-
-	@Override
-	public int getSizeInventory() {
-		// TODO Auto-generated method stub
+	public int getContainerSize() {
 		return 99;
 	}
 
 	@Override
-	public ItemStack getStackInSlot(int index) {
-		// TODO Auto-generated method stub
-		return this.slots.get(index);
-	}
+	public boolean isEmpty() {
+		for (var pair : slots.entrySet()) {
+			if (pair.getValue() != null && !pair.getValue().isEmpty())
+				return false;
+		}
 
-	@Override
-	public ItemStack decrStackSize(int index, int count) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ItemStack removeStackFromSlot(int index) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setInventorySlotContents(int index, ItemStack stack) {
-		// TODO Auto-generated method stub
-		this.slots.put(index, stack);
-	}
-
-	@Override
-	public int getInventoryStackLimit() {
-		// TODO Auto-generated method stub
-		return 64;
-	}
-
-	@Override
-	public void markDirty() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean isUseableByPlayer(EntityPlayer player) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void openInventory(EntityPlayer player) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void closeInventory(EntityPlayer player) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean isItemValidForSlot(int index, ItemStack stack) {
-		// TODO Auto-generated method stub
 		return true;
 	}
 
 	@Override
-	public int getField(int id) {
-		// TODO Auto-generated method stub
-		return 0;
+	public ItemStack getItem(int pSlot) {
+		return this.slots.get(pSlot).copy();
 	}
 
 	@Override
-	public void setField(int id, int value) {
-		// TODO Auto-generated method stub
-		
+	public ItemStack removeItem(int pSlot, int pAmount) {
+		ItemStack stack = slots.get(pSlot);
+		if (stack == null)
+			return ItemStack.EMPTY.copy();
+
+		return stack.split(pAmount);
 	}
 
 	@Override
-	public int getFieldCount() {
-		// TODO Auto-generated method stub
-		return 0;
+	public ItemStack removeItemNoUpdate(int pSlot) {
+		ItemStack stack = this.slots.get(pSlot);
+		this.slots.remove(pSlot);
+		return stack;
 	}
 
 	@Override
-	public void clear() {
-		// TODO Auto-generated method stub
+	public void setItem(int pSlot, ItemStack pStack) {
+		this.slots.put(pSlot, pStack.copy());
+	}
+
+	@Override
+	public void setChanged() {
+
+	}
+
+	@Override
+	public boolean stillValid(Player pPlayer) {
+		return false;
+	}
+
+	@Override
+	public void clearContent() {
 		this.slots.clear();
 	}
-
 }

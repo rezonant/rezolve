@@ -1,28 +1,19 @@
 package com.astronautlabs.mc.rezolve.common;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
-public class MachineOutputSlot extends Slot {
-
-	public MachineOutputSlot(IInventory inventoryIn, int index, int xPosition, int yPosition) {
+public class MachineOutputSlot extends OutputSlot {
+	public MachineOutputSlot(Container inventoryIn, int index, int xPosition, int yPosition) {
 		super(inventoryIn, index, xPosition, yPosition);
 	}
 
 	@Override
-	public boolean isItemValid(ItemStack stack) {
-		return false;
-	}
-	
-	@Override
-	public void onPickupFromSlot(EntityPlayer playerIn, ItemStack stack) {
-		
-		if (this.inventory instanceof IMachineInventory)
-			((IMachineInventory)this.inventory).outputSlotActivated(this.getSlotIndex());
-		
-		super.onPickupFromSlot(playerIn, stack);
-	}
+	public void onTake(Player pPlayer, ItemStack pStack) {
+		if (this.container instanceof IMachineInventory)
+			((IMachineInventory)this.container).outputSlotActivated(this.getSlotIndex());
 
+		super.onTake(pPlayer, pStack);
+	}
 }

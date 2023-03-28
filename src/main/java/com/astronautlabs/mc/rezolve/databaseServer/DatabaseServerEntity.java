@@ -1,44 +1,46 @@
 package com.astronautlabs.mc.rezolve.databaseServer;
 
-import com.astronautlabs.mc.rezolve.common.TileEntityBase;
-import com.google.common.base.Predicate;
+import com.astronautlabs.mc.rezolve.RezolveMod;
+import com.astronautlabs.mc.rezolve.common.BlockEntityBase;
 
-import net.minecraft.block.properties.PropertyDirection;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
+import com.astronautlabs.mc.rezolve.registry.RezolveRegistry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 
-public class DatabaseServerEntity extends TileEntityBase {
-
-	public DatabaseServerEntity() {
-		super("database_server_tile_entity");
-		this.db = new NBTTagCompound();
+public class DatabaseServerEntity extends BlockEntityBase {
+	public DatabaseServerEntity(BlockPos pPos, BlockState pBlockState) {
+		super(RezolveRegistry.blockEntityType(DatabaseServerEntity.class), pPos, pBlockState);
 	}
 
 	@Override
-	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-		compound.setTag("DB", this.db);
-		return super.writeToNBT(compound);
+	public CompoundTag serializeNBT() {
+		var tag = super.serializeNBT();
+		tag.put("DB", this.db);
+		return tag;
 	}
 	
-	private NBTTagCompound db = null;
+	private CompoundTag db = new CompoundTag();
 	
 	@Override
-	public void readFromNBT(NBTTagCompound compound) {
-		if (compound.hasKey("DB"))
-			this.db = compound.getCompoundTag("DB").copy();
+	public void deserializeNBT(CompoundTag compound) {
+		super.deserializeNBT(compound);
+
+		if (compound.contains("DB"))
+			this.db = compound.getCompound("DB").copy();
 		else 
-			this.db = new NBTTagCompound();
-		
-		super.readFromNBT(compound);
+			this.db = new CompoundTag();
 	}
 	
 	public void setMachineName(BlockPos pos, String name) {
 		String nameTag = "Name_"+pos.getX()+"_"+pos.getY()+"_"+pos.getZ();
 		if (name == null || "".equals(name))
-			this.db.removeTag(nameTag);
+			this.db.remove(nameTag);
 		else
-			this.db.setString(nameTag, name);
+			this.db.putString(nameTag, name);
 		this.commit();
 	}
 	
@@ -46,12 +48,12 @@ public class DatabaseServerEntity extends TileEntityBase {
 		return this.db.getString("Name_"+pos.getX()+"_"+pos.getY()+"_"+pos.getZ());	
 	}
 	
-	public NBTTagCompound getDB() {
+	public CompoundTag getDB() {
 		return this.db;
 	}
 	
 	public void commit() {
-		this.notifyUpdate();
+		this.setChanged();
 	}
 
 }

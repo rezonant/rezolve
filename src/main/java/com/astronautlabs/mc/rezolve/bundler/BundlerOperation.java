@@ -5,10 +5,10 @@ import com.astronautlabs.mc.rezolve.bundler.BundlerEntity.ItemMemo;
 import com.astronautlabs.mc.rezolve.common.MachineEntity;
 import com.astronautlabs.mc.rezolve.common.Operation;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.world.World;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
 
 public class BundlerOperation extends Operation<BundlerEntity> {
 
@@ -21,7 +21,7 @@ public class BundlerOperation extends Operation<BundlerEntity> {
 		this.pattern = pattern;
 		this.energyStored = 0;
 		this.energyRequired = BundleItem.getBundleCost(pattern);
-		this.timeStarted = machine.getWorld().getTotalWorldTime();
+		this.timeStarted = machine.getLevel().getGameTime();
 		this.timeRequired = 3 * 20;
 	}
 
@@ -32,36 +32,35 @@ public class BundlerOperation extends Operation<BundlerEntity> {
 	private long timeStarted = 0;
 	
 	@Override
-	public void writeNBT(NBTTagCompound nbt) {
-		nbt.setInteger("Op_Energy", this.energyStored);
-		nbt.setInteger("Op_EnergyRequired", this.energyRequired);
-		nbt.setLong("Op_TimeRequired", this.timeRequired);
-		nbt.setLong("Op_TimeStarted", this.timeStarted);
+	public void writeNBT(CompoundTag nbt) {
+		nbt.putInt("Op_Energy", this.energyStored);
+		nbt.putInt("Op_EnergyRequired", this.energyRequired);
+		nbt.putLong("Op_TimeRequired", this.timeRequired);
+		nbt.putLong("Op_TimeStarted", this.timeStarted);
 		
 		if (this.pattern != null) {
-			NBTTagCompound stack = new NBTTagCompound();
-			this.pattern.writeToNBT(nbt);		
-			nbt.setTag("Op_Stack", stack);
+			CompoundTag stack = this.pattern.serializeNBT();
+			nbt.put("Op_Stack", stack);
 		}
 		
 	}
 
 	@Override
-	public void readNBT(NBTTagCompound nbt) {
-		energyStored = nbt.getInteger("Op_Energy");
-		energyRequired = nbt.getInteger("Op_EnergyRequired");
-		timeRequired = nbt.getInteger("Op_TimeRequired");
-		timeStarted = nbt.getInteger("Op_TimeStarted");
+	public void readNBT(CompoundTag nbt) {
+		energyStored = nbt.getInt("Op_Energy");
+		energyRequired = nbt.getInt("Op_EnergyRequired");
+		timeRequired = nbt.getInt("Op_TimeRequired");
+		timeStarted = nbt.getInt("Op_TimeStarted");
 		
-		if (nbt.hasKey("Op_Stack"))
-			pattern = ItemStack.loadItemStackFromNBT(nbt.getCompoundTag("Op_Stack"));
+		if (nbt.contains("Op_Stack"))
+			pattern = ItemStack.of(nbt.getCompound("Op_Stack"));
 	}
 
 	@Override
 	public int getPercentage() {
 		// TODO Auto-generated method stub
 		
-		long timeSinceStart = this.getMachine().getWorld().getTotalWorldTime() - this.timeStarted;
+		long timeSinceStart = this.getMachine().getLevel().getGameTime() - this.timeStarted;
 		
 		int timePercentage = (int)(timeSinceStart / (double)this.timeRequired * 100);
 		int energyPercentage = (int)(this.energyStored / (double)this.energyRequired * 100);
@@ -79,7 +78,7 @@ public class BundlerOperation extends Operation<BundlerEntity> {
 	}
 	
 	public boolean timeSatisfied() {
-		long timeSinceStart = this.getMachine().getWorld().getTotalWorldTime() - this.timeStarted;
+		long timeSinceStart = this.getMachine().getLevel().getGameTime() - this.timeStarted;
 		return timeSinceStart >= this.timeRequired;
 	}
 	

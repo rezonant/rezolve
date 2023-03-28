@@ -1,0 +1,10 @@
+{
+    "parent": "block/cube",
+    "textures": {
+        "north": "rezolve:blocks/block_database_server_front",
+        "east": "rezolve:blocks/block_database_server_side",
+        "south": "rezolve:blocks/block_database_server_side",
+        "west": "rezolve:blocks/block_database_server_side",
+        "particle": "blocks/lapis_block"
+    }
+}

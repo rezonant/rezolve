@@ -3,28 +3,20 @@ package com.astronautlabs.mc.rezolve.remoteShell;
 import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.BlockBase;
 
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
 
 public class CableBlock extends BlockBase {
 
-	public CableBlock(String registryName, Material material, float hardness, float resistance) {
-		super(registryName, material, hardness, resistance);
+	public CableBlock(Properties properties) {
+		super(properties.isViewBlocking((state, level, pos) -> false).noOcclusion());
 	}
 
-	public CableBlock(String unlocalizedName, float hardness, float resistance) {
-		super(unlocalizedName, hardness, resistance);
-	}
-
-	public CableBlock(String unlocalizedName) {
-		super(unlocalizedName);
-	}
-	
-	public boolean canConnectTo(IBlockAccess w, BlockPos thisBlock, IBlockState bs, EnumFacing face, BlockPos otherBlock) {
+	public boolean canConnectTo(BlockGetter w, BlockPos thisBlock, BlockState bs, Direction face, BlockPos otherBlock) {
 		return false;
 	}
 }

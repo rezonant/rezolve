@@ -1,65 +1,55 @@
 package com.astronautlabs.mc.rezolve;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
-import com.astronautlabs.mc.rezolve.common.RezolveNBT;
-import com.astronautlabs.mc.rezolve.common.ITooltipHint;
-import com.astronautlabs.mc.rezolve.common.MetaItemBase;
-import com.astronautlabs.mc.rezolve.common.VirtualInventory;
+import com.astronautlabs.mc.rezolve.common.*;
 
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import com.astronautlabs.mc.rezolve.registry.RegistryId;
+import com.astronautlabs.mc.rezolve.registry.RezolveRegistry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.registries.DeferredRegister;
 
-public class BundleItem extends MetaItemBase implements ITooltipHint {
-	public BundleItem(String color) {
-		super("item_bundle_"+color);
-	}
-	
+@RegistryId("bundle")
+public class BundleItem extends ItemBase implements ITooltipHint {
 	public BundleItem() {
-		super("item_bundle");
+		super(
+				new Item.Properties()
+						.stacksTo(1)
+		);
+	}
+
+	public static final Map<String, BundleItem> COLORS = new HashMap<>();
+
+//	static {
+//		for (int i = 0, max = RezolveMod.DYES.length; i < max; ++i)
+//			COLORS.put(RezolveMod.DYES[i], new BundleItem(RezolveMod.DYES[i]));
+//	}
+
+	public static BundleItem withColor(String color) {
+		return COLORS.get(color);
 	}
 
 	@Override
-	public void getSubItems(Item itemIn, CreativeTabs tab, List<ItemStack> subItems) {
-		for (int i = 0, max = 17; i < max; ++i) {
-			subItems.add(new ItemStack(itemIn, 1, i));
-		}
-	}
-	
-	@Override
-	public String getUnlocalizedName(ItemStack stack) {
-		// TODO Auto-generated method stub
-		
-		if (stack.getMetadata() == 0 || stack.getMetadata() >= RezolveMod.DYES.length)
-			return this.getUnlocalizedName();
-		
-		return this.getUnlocalizedName()+"_"+RezolveMod.DYES[stack.getMetadata()];
-	}
-	
-	@Override
-	public String getItemStackDisplayName(ItemStack stack) {
-		
-		String localizedName = super.getItemStackDisplayName(stack);
-		NBTTagCompound nbt = stack.getTagCompound();
-		
-		if (nbt == null || !nbt.hasKey("Items")) {
+	public Component getName(ItemStack pStack) {
+		Component localizedName = super.getName(pStack);
+		CompoundTag nbt = pStack.getTag();
+
+		if (nbt == null || !nbt.contains("Items")) {
 			return localizedName;
 		}
-		
-		if (nbt != null && nbt.hasKey("Name")) {
+
+		if (nbt != null && nbt.contains("Name")) {
 
 			String name = nbt.getString("Name");
-			
+
 			if (!"".equals(name))
-				return localizedName + " (" + name + ")";
+				return Component.literal(localizedName + " (" + name + ")");
 		}
-		
-		
+
+
 		return localizedName;
 	}
 
@@ -70,10 +60,10 @@ public class BundleItem extends MetaItemBase implements ITooltipHint {
 	 * @return
 	 */
 	public static int countBundleItems(ItemStack bundleOrPattern) {
-		if (!bundleOrPattern.hasTagCompound())
+		if (!bundleOrPattern.hasTag())
 			return 0;
 		
-		NBTTagCompound nbt = bundleOrPattern.getTagCompound();
+		CompoundTag nbt = bundleOrPattern.getTag();
 		VirtualInventory vinv = new VirtualInventory();
 		RezolveNBT.readInventory(nbt, vinv);
 		
@@ -83,10 +73,10 @@ public class BundleItem extends MetaItemBase implements ITooltipHint {
 			if (stack == null)
 				continue;
 			
-			if (stack.getItem() == RezolveMod.BUNDLE_ITEM)
+			if (stack.getItem() == RezolveRegistry.item(BundleItem.class))
 				itemCount += countBundleItems(stack);
 			
-			itemCount += stack.stackSize;
+			itemCount += stack.getCount();
 		}
 		
 		return itemCount;
@@ -110,10 +100,10 @@ public class BundleItem extends MetaItemBase implements ITooltipHint {
 	
 	public static Collection<ItemStack> getItemsFromBundle(ItemStack bundleOrPattern) {
 		
-		if (!bundleOrPattern.hasTagCompound())
+		if (!bundleOrPattern.hasTag())
 			return new ArrayList<ItemStack>();
 		
-		NBTTagCompound nbt = bundleOrPattern.getTagCompound();
+		CompoundTag nbt = bundleOrPattern.getTag();
 		VirtualInventory vinv = new VirtualInventory();
 		
 		RezolveNBT.readInventory(nbt, vinv);
@@ -132,7 +122,7 @@ public class BundleItem extends MetaItemBase implements ITooltipHint {
 			if (stack == null)
 				continue;
 			
-			if (stack.getItem() == RezolveMod.BUNDLE_ITEM) {
+			if (stack.getItem() == RezolveRegistry.item(BundleItem.class)) {
 				int thisSubDepth = getBundleDepth(stack);
 				subdepth = Math.max(subdepth, thisSubDepth);
 			}
@@ -148,9 +138,9 @@ public class BundleItem extends MetaItemBase implements ITooltipHint {
 	}
 	
 	public String describeContents(ItemStack bundleOrPattern, int depth) {
-		NBTTagCompound nbt = bundleOrPattern.getTagCompound();
+		CompoundTag nbt = bundleOrPattern.getTag();
 		
-		if (nbt == null || !nbt.hasKey("Items")) {
+		if (nbt == null || !nbt.contains("Items")) {
 			return "Combines multiple items for automation. See Bundler/Unbundler";
 		}
 		
@@ -162,8 +152,8 @@ public class BundleItem extends MetaItemBase implements ITooltipHint {
 		
 		for (ItemStack stack : getItemsFromBundle(bundleOrPattern)) {
 			Item item = stack.getItem();
-			itemStrings.add(prefix + stack.stackSize+" "+item.getItemStackDisplayName(stack));
-			if (item == RezolveMod.BUNDLE_ITEM) {
+			itemStrings.add(prefix + stack.getCount()+" "+item.getName(stack));
+			if (item == RezolveRegistry.item(BundleItem.class)) {
 				itemStrings.add(describeContents(stack, depth + 1));
 			}
 		}
@@ -177,20 +167,20 @@ public class BundleItem extends MetaItemBase implements ITooltipHint {
 	}
 
 	public ItemStack withContents(int count, ItemStack ...stacks) {
-		ItemStack result = new ItemStack(this, count, 0);
+		ItemStack result = new ItemStack(this, count);
 		
 		VirtualInventory vinv = new VirtualInventory();
 		
 		int slot = 0;
 		for (ItemStack stack : stacks) {
-			vinv.setInventorySlotContents(slot, stack);
+			vinv.setItem(slot, stack);
 			++slot;
 		}
 		
-		NBTTagCompound nbt = new NBTTagCompound();
+		CompoundTag nbt = new CompoundTag();
 		RezolveNBT.writeInventory(nbt, vinv);
 		
-		result.setTagCompound(nbt);
+		result.setTag(nbt);
 		return result;
 	}
 }
