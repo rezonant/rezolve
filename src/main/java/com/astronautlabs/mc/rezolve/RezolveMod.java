@@ -4,24 +4,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.astronautlabs.mc.rezolve.bundleBuilder.BundlePatternItem;
-import com.astronautlabs.mc.rezolve.registry.RezolveRegistry;
-import net.minecraft.client.gui.screens.MenuScreens;
+import com.astronautlabs.mc.rezolve.bundles.BundleItem;
+import com.astronautlabs.mc.rezolve.bundles.bundleBuilder.BundlePatternItem;
+import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.*;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.InterModComms;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.registries.RegisterEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.astronautlabs.mc.rezolve.bundleBuilder.BundleBuilder;
-import com.astronautlabs.mc.rezolve.bundler.Bundler;
-import com.astronautlabs.mc.rezolve.databaseServer.DatabaseServer;
-import com.astronautlabs.mc.rezolve.securityServer.SecurityServer;
-import com.astronautlabs.mc.rezolve.unbundler.Unbundler;
+import com.astronautlabs.mc.rezolve.bundles.bundleBuilder.BundleBuilder;
+import com.astronautlabs.mc.rezolve.bundles.bundler.Bundler;
+import com.astronautlabs.mc.rezolve.thunderbolt.databaseServer.DatabaseServer;
+import com.astronautlabs.mc.rezolve.thunderbolt.securityServer.SecurityServer;
+import com.astronautlabs.mc.rezolve.bundles.unbundler.Unbundler;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.core.BlockPos;
@@ -32,7 +30,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class RezolveMod {
 	public static final String MODID = "rezolve";
-	private static final Logger LOGGER = LogManager.getLogger(RezolveMod.MODID);
+	public static final Logger LOGGER = LogManager.getLogger(RezolveMod.MODID);
 
 	public RezolveMod() {
 		_instance = this;
@@ -211,8 +209,6 @@ public class RezolveMod {
 		return ItemStack.isSame(stackA, stackB);
 	}
 
-	public static CommonProxy proxy = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> ServerProxy::new);
-
 	public boolean isDye(Item item) {
 		return item instanceof DyeItem;
 	}
@@ -254,12 +250,7 @@ public class RezolveMod {
 	@SubscribeEvent
 	public static void interModEnqueue(InterModEnqueueEvent event) {
 		LOGGER.info("Starting Rezolve...");
-
-		//this.guiHandler = new RezolveGuiHandler();
-
 		//GhostSlotUpdateMessageHandler.register();
-		
-		proxy.init(RezolveMod.instance());
 
 		InterModComms.sendTo(RezolveMod.MODID, "waila", "register", () -> "com.astronautlabs.mc.rezolve.waila.WailaCompat.load");
 	}
