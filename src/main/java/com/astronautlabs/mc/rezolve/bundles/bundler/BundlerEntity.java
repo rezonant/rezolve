@@ -226,7 +226,7 @@ public class BundlerEntity extends MachineEntity {
 
 	@Override
 	public Component getMenuTitle() {
-		return Component.literal("Bundler");
+		return Component.translatable("block.rezolve.bundler");
 	}
 
 	private void produceBundles() {

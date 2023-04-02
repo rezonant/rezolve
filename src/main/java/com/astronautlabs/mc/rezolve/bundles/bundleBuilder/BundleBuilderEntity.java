@@ -66,7 +66,7 @@ public class BundleBuilderEntity extends MachineEntity {
 
 	@Override
 	public Component getMenuTitle() {
-		return Component.literal("Bundle Pattern Builder");
+		return Component.translatable("block.rezolve.bundle_builder");
 	}
 
 	private void producePattern() {

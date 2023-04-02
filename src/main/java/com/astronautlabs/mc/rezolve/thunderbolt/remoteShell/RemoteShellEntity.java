@@ -6,6 +6,9 @@ import java.util.List;
 import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.machines.MachineEntity;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
+import com.astronautlabs.mc.rezolve.thunderbolt.cable.CableNetwork;
+import com.astronautlabs.mc.rezolve.thunderbolt.cable.ICableEndpoint;
+import com.astronautlabs.mc.rezolve.thunderbolt.cable.ThunderboltCable;
 import com.astronautlabs.mc.rezolve.thunderbolt.databaseServer.DatabaseServerEntity;
 import com.astronautlabs.mc.rezolve.thunderbolt.remoteShell.packets.RemoteShellStatePacket;
 import net.minecraft.nbt.Tag;
@@ -27,8 +30,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkHooks;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class RemoteShellEntity extends MachineEntity implements ICableEndpoint, ContainerListener {
+	private static final Logger LOGGER = LogManager.getLogger(RezolveMod.ID);
+
 	private ArrayList<BlockPos> connectedMachines = null;
 
 	public RemoteShellEntity(BlockPos pPos, BlockState pBlockState) {
@@ -38,7 +45,7 @@ public class RemoteShellEntity extends MachineEntity implements ICableEndpoint, 
 
 	@Override
 	public Component getMenuTitle() {
-		return Component.literal("Remote Shell");
+		return Component.translatable("block.rezolve.remote_shell");
 	}
 
     @Override
@@ -98,7 +105,7 @@ public class RemoteShellEntity extends MachineEntity implements ICableEndpoint, 
 	}
 
 	public void updateMachines(BlockPos pos) {
-		CableNetwork network = new CableNetwork(this.level, pos, RezolveRegistry.block(EthernetCableBlock.class));
+		CableNetwork network = new CableNetwork(this.level, pos, RezolveRegistry.block(ThunderboltCable.class));
 		this.connectedMachines = new ArrayList<BlockPos>(Arrays.asList(network.getEndpoints()));
 
 		this.setChanged();
@@ -241,14 +248,16 @@ public class RemoteShellEntity extends MachineEntity implements ICableEndpoint, 
 		boolean updateNeeded = false;
 
 		for (BlockPos pos : this.getConnectedMachines()) {
-			if (!RezolveRegistry.block(EthernetCableBlock.class).canConnectTo(this.getLevel(), pos)) {
+			if (!RezolveRegistry.block(ThunderboltCable.class).canInterfaceWith(this.getLevel(), pos)) {
+				LOGGER.info("Remote shell: Block {} ({}) no longer connects to the thunderbolt network.", pos, level.getBlockState(pos));
+
 				updateNeeded = true;
 				break;
 			}
 		}
 
 		if (updateNeeded) {
-			System.out.println("An update to the ethernet network is required. Updating...");
+			LOGGER.info("Remote shell: An update to the thunderbolt network is required. Updating...");
 			this.updateMachines();
 		}
 	}

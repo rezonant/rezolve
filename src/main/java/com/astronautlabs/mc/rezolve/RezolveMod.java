@@ -8,9 +8,11 @@ import com.astronautlabs.mc.rezolve.bundles.BundleItem;
 import com.astronautlabs.mc.rezolve.bundles.bundleBuilder.BundlePatternItem;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
 import com.astronautlabs.mc.rezolve.common.util.ShiftedPlayer;
-import com.astronautlabs.mc.rezolve.thunderbolt.remoteShell.EthernetCableBlock;
-import com.astronautlabs.mc.rezolve.thunderbolt.remoteShell.RemoteShellBlock;
-import net.minecraft.world.Container;
+import com.astronautlabs.mc.rezolve.thunderbolt.cable.BlueThunderboltCable;
+import com.astronautlabs.mc.rezolve.thunderbolt.cable.GreenThunderboltCable;
+import com.astronautlabs.mc.rezolve.thunderbolt.cable.OrangeThunderboltCable;
+import com.astronautlabs.mc.rezolve.thunderbolt.cable.ThunderboltCable;
+import com.astronautlabs.mc.rezolve.thunderbolt.remoteShell.*;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.*;
 import net.minecraftforge.fml.InterModComms;
@@ -46,7 +48,10 @@ public class RezolveMod {
 			BundleBuilder.class,
 			BundleItem.class,
 			BundlePatternItem.class,
-			EthernetCableBlock.class,
+			ThunderboltCable.class,
+//			BlueThunderboltCable.class,
+//			GreenThunderboltCable.class,
+//			OrangeThunderboltCable.class,
 			RemoteShellBlock.class
 		);
 	}

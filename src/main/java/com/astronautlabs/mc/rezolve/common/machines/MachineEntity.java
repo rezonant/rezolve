@@ -105,7 +105,7 @@ public class MachineEntity extends BlockEntityBase implements Container, IMachin
 	}
 
 	public Component getMenuTitle() {
-		return Component.literal("Machine");
+		return Component.translatable("block.rezolve.machine");
 	}
 
 	private long lastUpdate = 0;

@@ -36,6 +36,10 @@ public abstract class Machine extends EntityBlockBase {
 
 	public Machine(Properties properties) {
 		super(properties);
+		setupDefaultState();
+	}
+
+	protected void setupDefaultState() {
 		this.registerDefaultState(this.getStateDefinition().any().setValue(FACING, Direction.NORTH));
 	}
 

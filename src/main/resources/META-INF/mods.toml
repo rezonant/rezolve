@@ -9,7 +9,7 @@ version="${file.jarVersion}"
 displayName="Rezolve"
 logoFile="logo.png"
 displayURL="https://minecraft.curseforge.com/projects/rezolve"
-description="Item bundling, ethernet networking and more"
+description="Item bundling, Thunderbolt cable and more"
 authors="rezonant"
 displayTest="MATCH_VERSION"
 

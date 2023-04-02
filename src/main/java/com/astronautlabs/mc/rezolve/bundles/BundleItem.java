@@ -35,11 +35,11 @@ public class BundleItem extends ItemBase implements ITooltipHint {
 
 	@Override
 	public Component getName(ItemStack pStack) {
-		Component localizedName = super.getName(pStack);
+		Component name = super.getName(pStack);
 		CompoundTag nbt = pStack.getTag();
 
 		if (nbt == null || !nbt.contains("Items")) {
-			return localizedName;
+			return name;
 		}
 
 		if (nbt != null && nbt.contains("Name")) {
@@ -47,11 +47,16 @@ public class BundleItem extends ItemBase implements ITooltipHint {
 			String name = nbt.getString("Name");
 
 			if (!"".equals(name))
-				return Component.literal(localizedName + " (" + name + ")");
+				return Component.empty()
+						.append(name)
+						.append(" (")
+						.append(name)
+						.append(")")
+				;
 		}
 
 
-		return localizedName;
+		return name;
 	}
 
 	/**

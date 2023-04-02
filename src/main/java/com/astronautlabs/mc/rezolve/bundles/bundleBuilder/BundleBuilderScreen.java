@@ -22,16 +22,21 @@ public class BundleBuilderScreen extends MachineScreen<BundleBuilderMenu> {
 		inventoryLabelY = 116;
 		titleLabelX = 10;
 		titleLabelY = 8;
-		nameField = new EditBox(font, leftPos + 83, topPos + 41, 88, 13, Component.literal("Name"));
+		nameField = new EditBox(font, leftPos + 83, topPos + 41, 88, 13, Component.translatable("screens.rezolve.name"));
 		nameField.setMaxLength(23);
 		addRenderableWidget(nameField);
 
-		lockPositions = CycleButton.booleanBuilder(Component.literal("Locked"), Component.literal("Unlocked"))
-			.displayOnlyValue()
-			.create(
-				leftPos + 10, topPos + 94, 54, 20,
-				Component.literal("Positions"), (btn, value) -> menu.setLockPositions(value)
-			)
+		lockPositions = CycleButton
+				.booleanBuilder(
+						Component.translatable("screens.rezolve.locked"),
+						Component.translatable("screens.rezolve.unlocked")
+				)
+				.displayOnlyValue()
+				.create(
+						leftPos + 10, topPos + 94, 54, 20,
+						Component.translatable("screens.rezolve.positions"),
+						(btn, value) -> menu.setLockPositions(value)
+				)
 		;
 
 		this.addRenderableWidget(lockPositions);

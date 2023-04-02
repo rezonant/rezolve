@@ -71,10 +71,20 @@ public class BundlePatternItem extends ItemBase implements ITooltipHint {
 				props.add(colorName);
 			}
 			
-			if (props.size() > 0)
-				return Component.literal(localizedName + " ("+String.join(", ", props)+")");
-			else
-				return Component.literal(localizedName + " (Configured)");
+			if (props.size() > 0) {
+				return Component.empty()
+						.append(localizedName)
+						.append(" (")
+						.append(String.join(", ", props) + ")")
+						;
+			} else {
+				return Component.empty()
+						.append(localizedName)
+						.append(" (")
+						.append(Component.translatable("screens.rezolve.configured"))
+						.append(")")
+						;
+			}
 		}
 		
 		return super.getName(stack);

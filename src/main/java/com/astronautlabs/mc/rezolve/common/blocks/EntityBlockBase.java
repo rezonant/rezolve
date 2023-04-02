@@ -41,7 +41,7 @@ public abstract class EntityBlockBase extends BlockBase implements EntityBlock {
 	public Class<? extends BlockEntity> getBlockEntityClass() {
 		var annotation = this.getClass().getAnnotation(WithBlockEntity.class);
 		if (annotation == null)
-			throw new RuntimeException(String.format("Block %s must either be annotated @WithBlockEntity() or reimplement getBlockEntityClass()."));
+			throw new RuntimeException(String.format("Block %s must either be annotated @WithBlockEntity() or reimplement getBlockEntityClass().", getClass().getCanonicalName()));
 
 		return annotation.value();
 	}

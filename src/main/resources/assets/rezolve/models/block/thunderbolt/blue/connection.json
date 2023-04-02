@@ -1,0 +1,8 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "rezolve:block/thunderbolt/plain/connection",
+	"textures": {
+		"particle": "rezolve:blocks/thunderbolt/blue/blue_thunderbolt_cable",
+		"cable": "rezolve:blocks/thunderbolt/blue/blue_thunderbolt_cable"
+	}
+}

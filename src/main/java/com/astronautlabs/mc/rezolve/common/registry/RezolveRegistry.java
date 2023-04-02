@@ -166,6 +166,8 @@ public class RezolveRegistry {
                         try {
                             return ctor.newInstance(pMenu, pInventory, pTitle);
                         } catch (ReflectiveOperationException e) {
+                            // Must print this error as it gets eaten up the stack.
+                            LOGGER.error("Failed to construct screen {}: {}", screenClass.getCanonicalName(), e.getMessage());
                             throw new RuntimeException(String.format("Failed to construct screen %s", screenClass.getCanonicalName()), e);
                         }
                     }

@@ -1,9 +1,9 @@
 package com.astronautlabs.mc.rezolve.thunderbolt.securityServer;
 
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
-import com.astronautlabs.mc.rezolve.thunderbolt.remoteShell.CableNetwork;
+import com.astronautlabs.mc.rezolve.thunderbolt.cable.CableNetwork;
 
-import com.astronautlabs.mc.rezolve.thunderbolt.remoteShell.EthernetCableBlock;
+import com.astronautlabs.mc.rezolve.thunderbolt.cable.ThunderboltCable;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -29,7 +29,7 @@ public class SecurityAccessController {
 			return;
 		}
 		
-		CableNetwork network = new CableNetwork(evt.getEntity().level, evt.getPos(), RezolveRegistry.block(EthernetCableBlock.class));
+		CableNetwork network = new CableNetwork(evt.getEntity().level, evt.getPos(), RezolveRegistry.block(ThunderboltCable.class));
 		securityServer = network.getSecurityServer();
 		
 		if (securityServer != null) {

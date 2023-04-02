@@ -50,7 +50,7 @@ public class UnbundlerEntity extends MachineEntity {
 
 	@Override
 	public Component getMenuTitle() {
-		return Component.literal("Unbundler");
+		return Component.translatable("block.rezolve.unbundler");
 	}
 
 	private boolean distributeItem(ItemStack stack) {

@@ -28,7 +28,7 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 	protected void init() {
 		super.init();
 		
-		this.searchField = new EditBox(this.font, this.leftPos + 10, this.topPos + 7, 218, 18, Component.literal("Search"));
+		this.searchField = new EditBox(this.font, this.leftPos + 10, this.topPos + 7, 218, 18, Component.translatable("screens.rezolve.search"));
 		this.searchField.setVisible(true);
 		this.searchField.setValue("");
 		this.searchField.setBordered(false);
@@ -40,7 +40,7 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 			this.leftPos + 11,
 			this.topPos + this.listX + this.listHeight + 14,
 			235, 18,
-			Component.literal("Name")
+			Component.translatable("screens.rezolve.name")
 		);
 		this.nameField.setVisible(false);
 		this.nameField.setValue("namen");
@@ -48,7 +48,8 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 		//this.nameField.setTextColor(0x000000);
 		this.addRenderableWidget(this.nameField);
 
-		this.playerModeBtn = new Button(this.leftPos + 44, this.topPos + 166, 90, 20, Component.literal("-Unset-"), (button) -> {
+		this.playerModeBtn = new Button(this.leftPos + 44, this.topPos + 166, 90, 20,
+				Component.translatable("screens.rezolve.unset"), (button) -> {
 
 			// Player mode button clicked
 			if (this.selectedRule != null) {
@@ -66,7 +67,8 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 		this.playerModeBtn.visible = false;
 		this.addRenderableWidget(this.playerModeBtn);
 
-		this.machineModeBtn = new Button(this.leftPos + 44, this.topPos + 166, 90, 20, Component.literal("-Unset-"), (button) -> {
+		this.machineModeBtn = new Button(this.leftPos + 44, this.topPos + 166, 90, 20,
+				Component.translatable("screens.rezolve.unset"), (button) -> {
 
 			if (this.selectedRule != null) {
 				int newMode = this.selectedRule.getMode() + 1;
@@ -81,13 +83,15 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 		this.machineModeBtn.visible = false;
 		this.addRenderableWidget(this.machineModeBtn);
 
-		this.editBtn = new Button(this.leftPos + 218, this.topPos + 167, 30, 20, Component.literal("Edit"), (button) -> {
+		this.editBtn = new Button(this.leftPos + 218, this.topPos + 167, 30, 20,
+				Component.translatable("screens.rezolve.edit"), (button) -> {
 			this.editing = true;
 		});
 		this.editBtn.visible = false;
 		this.addRenderableWidget(this.editBtn);
 		
-		this.removeBtn = new Button(this.leftPos + 167, this.topPos + 167, 45, 20, Component.literal("Remove"), (button) -> {
+		this.removeBtn = new Button(this.leftPos + 167, this.topPos + 167, 45, 20,
+				Component.translatable("screens.rezolve.remove"), (button) -> {
 			if (this.selectedRule != null) {
 				if ("<players>".equals(this.selectedRule.getName()) || "<machines>".equals(this.selectedRule.getName()))
 					return;
@@ -99,7 +103,8 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 		this.removeBtn.visible = false;
 		this.addRenderableWidget(this.removeBtn);
 		
-		this.saveBtn = new Button(this.leftPos + 218, this.topPos + 167, 30, 20, Component.literal("Save"), (button) -> {
+		this.saveBtn = new Button(this.leftPos + 218, this.topPos + 167, 30, 20,
+				Component.translatable("screens.rezolve.save"), (button) -> {
 
 			this.editing = false;
 
@@ -124,7 +129,8 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 		this.saveBtn.visible = false;
 		this.addRenderableWidget(this.saveBtn);
 
-		this.cancelBtn = new Button(this.leftPos + 176, this.topPos + 167, 40, 20, Component.literal("Cancel"), (button) -> {
+		this.cancelBtn = new Button(this.leftPos + 176, this.topPos + 167, 40, 20,
+				Component.translatable("screens.rezolve.cancel"), (button) -> {
 			if (this.selectedRule != null) {
 				if ("<machines>".equals(this.selectedRule.getName())) {
 					this.selectRule(this.entity.getRuleByName("<machines>"));
@@ -137,7 +143,8 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 		this.cancelBtn.visible = false;
 		this.addRenderableWidget(this.cancelBtn);
 		
-		this.addBtn = new Button(this.leftPos + 227, this.topPos + 2, 18, 20, Component.literal("+"), (button) -> {
+		this.addBtn = new Button(this.leftPos + 227, this.topPos + 2, 18, 20,
+				Component.literal("+"), (button) -> {
 			this.selectRule(this.entity.new Rule(null, "", Rule.MODE_ALLOWED));
 			this.editing = true;
 		});
@@ -185,39 +192,48 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 //		this.listScrollPosition = Math.max(Math.min(0, rules.length * this.entryHeight * -1 + this.listHeight), this.listScrollPosition);
 //	}
 	
-	protected String getUserPolicyMode(int mode) {
-		String modeStr = "Unknown ["+mode+"]";
+	protected Component getUserPolicyMode(int mode) {
+		Component modeStr = Component.empty()
+				.append(Component.translatable("screens.rezolve.unknown"))
+				.append(" [")
+				.append(mode + "")
+				.append("]")
+				;
 		
 		switch (mode) {
 		case Rule.MODE_RESTRICTED: 
-			modeStr = "Restricted";
+			modeStr = Component.translatable("screens.rezolve.restricted");
 			break;
 		case Rule.MODE_ALLOWED:
-			modeStr = "Allowed";
+			modeStr = Component.translatable("screens.rezolve.allowed");
 			break;
 		case Rule.MODE_OWNER:
-			modeStr = "Owner";
+			modeStr = Component.translatable("screens.rezolve.owner");
 			break;
 		}
 		
 		return modeStr;
 	}
 	
-	protected String getMachinePolicyMode(int mode) {
-		String modeStr = "Unknown ["+mode+"]";
+	protected Component getMachinePolicyMode(int mode) {
+		Component modeStr = Component.empty()
+				.append(Component.translatable("screens.rezolve.unknown"))
+				.append(" [")
+				.append(mode+"")
+				.append("]");
 		
 		switch (mode) {
 		case Rule.MODE_NONE:
-			modeStr = "None";
+			modeStr = Component.translatable("screens.rezolve.none");
 			break;
-		case Rule.MODE_OPEN: 
-			modeStr = "Open";
+		case Rule.MODE_OPEN:
+			modeStr = Component.translatable("screens.rezolve.open");
 			break;
-		case Rule.MODE_PROTECTED: 
-			modeStr = "Protected";
+		case Rule.MODE_PROTECTED:
+			modeStr = Component.translatable("screens.rezolve.protected");
 			break;
 		case Rule.MODE_OWNER:
-			modeStr = "Owners Only";
+			modeStr = Component.translatable("screens.rezolve.owners_only");
 			break;
 		}
 		
@@ -226,9 +242,9 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 	
 	private void updateModeButtons() {
 		if ("<machines>".equals(this.selectedRule.getName())) {
-			this.machineModeBtn.setMessage(Component.literal(this.getMachinePolicyMode(this.selectedRule.getMode())));
+			this.machineModeBtn.setMessage(this.getMachinePolicyMode(this.selectedRule.getMode()));
 		} else {
-			this.playerModeBtn.setMessage(Component.literal(this.getUserPolicyMode(this.selectedRule.getMode())));
+			this.playerModeBtn.setMessage(this.getUserPolicyMode(this.selectedRule.getMode()));
 		}
 	}
 	
@@ -263,20 +279,25 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 					colorQuad(poseStack, 0xFF999999, x, y, x + listWidth, y + entryHeight);
 				}
 
-				String modeStr = "";
-				String nameStr = rule.getName();
+				Component modeStr = Component.literal("");
+				Component nameStr = Component.literal(rule.getName());
 				
 				modeStr = this.getUserPolicyMode(rule.getMode());
 				
 				if ("<machines>".equals(rule.getName())) {
-					nameStr = "Default Machine Policy";
+					nameStr = Component.translatable("screens.rezolve.default_machine_policy");
 					modeStr = this.getMachinePolicyMode(rule.getMode());
 				} else if ("<players>".equals(rule.getName())) {
-					nameStr = "Default User Policy";
+					nameStr = Component.translatable("screens.rezolve.default_user_policy");
 				}
 				
 				if (this.entity.rootUser != null && this.entity.rootUser.equals(rule.getName())) {
-					modeStr = modeStr + " [root]";
+					modeStr = Component.empty()
+							.append(modeStr)
+							.append(" [")
+							.append(Component.translatable("screens.rezolve.root"))
+							.append("]")
+					;
 				}
 				
 				this.font.draw(

@@ -182,9 +182,9 @@ public class SecurityServerEntity extends MachineEntity {
 
 	@Override
 	protected void saveAdditional(CompoundTag tag) {
-		var compound = super.serializeNBT();
+		super.saveAdditional(tag);
 		if (this.rootUser != null) {
-			compound.putString("RootUser", this.rootUser);
+			tag.putString("RootUser", this.rootUser);
 		}
 
 		ListTag rulesList = new ListTag();
@@ -197,7 +197,7 @@ public class SecurityServerEntity extends MachineEntity {
 			rulesList.add(ruleNBT);
 		}
 
-		compound.put("Rules", rulesList);
+		tag.put("Rules", rulesList);
 	}
 
 	public void removeRule(String id) {

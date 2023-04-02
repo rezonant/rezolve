@@ -47,26 +47,26 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 	protected void init() {
 		super.init();
 
-		this.nameField = new EditBox(this.font, this.leftPos + 11, this.topPos + 120, 211, 18, Component.literal("Name"));
+		this.nameField = new EditBox(this.font, this.leftPos + 11, this.topPos + 120, 211, 18, Component.translatable("screens.rezolve.name"));
 		this.nameField.setMaxLength(23);
 		this.nameField.setValue("");
 		this.nameField.changeFocus(false);
 		this.nameField.setVisible(false);
 		this.addRenderableWidget(this.nameField);
 
-		this.searchField = new EditBox(this.font, this.leftPos + 56, this.topPos + 21, 165, 18, Component.literal("Search"));
+		this.searchField = new EditBox(this.font, this.leftPos + 56, this.topPos + 21, 165, 18, Component.translatable("screens.rezolve.search"));
 		this.searchField.setMaxLength(23);
 		this.searchField.setValue("");
 		this.searchField.changeFocus(true);
 		this.searchField.setVisible(true);
 		this.addRenderableWidget(this.searchField);
 
-		this.securedBtn = new Button(this.leftPos + 50, this.topPos + 167, 100, 18, Component.literal("Not Secured"), (button) -> {
+		this.securedBtn = new Button(this.leftPos + 50, this.topPos + 167, 100, 18, Component.translatable("screens.rezolve.not_secured"), (button) -> {
 
 			if (this.selectedMachineSecure) {
-				this.securedBtn.setMessage(Component.literal("Not Secured"));
+				this.securedBtn.setMessage(Component.translatable("screens.rezolve.secured"));
 			} else {
-				this.securedBtn.setMessage(Component.literal("Secured"));
+				this.securedBtn.setMessage(Component.translatable("screens.rezolve.not_secured"));
 			}
 			this.selectedMachineSecure = !this.selectedMachineSecure;
 		});
@@ -149,7 +149,7 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
     			nameField.setValue("");
 
     		this.nameField.setVisible(menu.hasDatabase);
-    		this.securedBtn.setMessage(Component.literal(this.selectedMachineSecure ? "Secured" : "Not Secured"));
+    		this.securedBtn.setMessage(Component.translatable(this.selectedMachineSecure ? "screens.rezolve.secured" : "screens.rezolve.not_secured"));
 
     		// TODO: need to add Security Server
     		//this.securedBtn.visible = true;
