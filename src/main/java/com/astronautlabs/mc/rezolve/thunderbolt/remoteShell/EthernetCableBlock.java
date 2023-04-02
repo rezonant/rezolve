@@ -268,15 +268,7 @@ public class EthernetCableBlock extends CableBlock {
 
 	public boolean canConnectTo(BlockGetter world, BlockPos pos) {
 		BlockState st = world.getBlockState(pos);
-		BlockEntity te = world.getBlockEntity(pos);
-
-		if (st == null || st.getBlock() == null)
-			return false;
-
-		if (st.getBlock() == RezolveRegistry.block(EthernetCableBlock.class))
-			return true;
-
-		return false;
+		return st != null && st.getBlock() == RezolveRegistry.block(EthernetCableBlock.class);
 	}
 
 	public boolean canInterfaceWith(BlockGetter world, BlockPos pos) {
@@ -292,8 +284,8 @@ public class EthernetCableBlock extends CableBlock {
 		return false;
 	}
 
-	public boolean canConnectTo(BlockGetter w, BlockPos thisBlock, BlockState bs, Direction face, BlockPos otherBlock) {
-		return this.canConnectTo(w, otherBlock);
+	public boolean canNetworkWith(BlockGetter w, BlockPos thisBlock, BlockState bs, Direction face, BlockPos otherBlock) {
+		return this.canConnectTo(w, otherBlock) || this.canInterfaceWith(w, otherBlock);
 	}
 
 	enum ConnectionType {
@@ -303,9 +295,11 @@ public class EthernetCableBlock extends CableBlock {
 	}
 
 	public ConnectionType getConnectionType(BlockGetter w, BlockPos thisBlock, BlockState bs, Direction face, BlockPos otherBlock) {
-		if (this.canConnectTo(w, otherBlock))
+		BlockState st = w.getBlockState(otherBlock);
+
+		if (canConnectTo(w, otherBlock))
 			return ConnectionType.CONNECTS;
-		else if (this.canInterfaceWith(w, otherBlock))
+		else if (canInterfaceWith(w, otherBlock))
 			return ConnectionType.INTERFACES;
 
 		return ConnectionType.NONE;

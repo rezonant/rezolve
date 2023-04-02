@@ -43,7 +43,7 @@ public class CableNetwork {
 			if (fromBlock != null && adj.equals(fromBlock))
 				continue;
 			
-			if (!this.cableType.canConnectTo(world, pos, thisBlock, dir, adj))
+			if (!this.cableType.canNetworkWith(world, pos, thisBlock, dir, adj))
 				continue;
 
 			viableCables.add(adj);
