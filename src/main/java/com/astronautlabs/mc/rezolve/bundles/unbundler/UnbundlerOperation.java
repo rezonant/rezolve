@@ -10,6 +10,10 @@ import net.minecraft.nbt.CompoundTag;
 @RegistryId("unbundler")
 public class UnbundlerOperation extends Operation<UnbundlerEntity> {
 
+	public UnbundlerOperation() {
+		super();
+	}
+
 	public UnbundlerOperation(UnbundlerEntity machine) {
 		super(machine);
 	}
@@ -58,12 +62,11 @@ public class UnbundlerOperation extends Operation<UnbundlerEntity> {
 	}
 
 	@Override
-	public int getPercentage() {
+	public float computeProgress() {
 		long timeSinceStart = this.getMachine().getLevel().getGameTime() - this.timeStarted;
-		int timePercentage = (int)(timeSinceStart / (double)this.timeRequired * 100);
-		int energyPercentage = (int)(this.energyStored / (double)this.energyRequired * 100);
-		
-		return Math.min(100, Math.min(timePercentage, energyPercentage));
+		float timePercentage = timeSinceStart / (float)this.timeRequired;
+		float energyPercentage = this.energyStored / (float)this.energyRequired;
+		return Math.min(1.0f, Math.min(timePercentage, energyPercentage));
 	}
 	
 	private boolean stillValid() {

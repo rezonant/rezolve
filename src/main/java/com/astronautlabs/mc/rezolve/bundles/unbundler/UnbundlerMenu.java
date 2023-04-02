@@ -1,6 +1,7 @@
 package com.astronautlabs.mc.rezolve.bundles.unbundler;
 
 import com.astronautlabs.mc.rezolve.bundles.bundler.BundleSlot;
+import com.astronautlabs.mc.rezolve.common.gui.WithScreen;
 import com.astronautlabs.mc.rezolve.common.machines.MachineMenu;
 import com.astronautlabs.mc.rezolve.common.machines.MachineOutputSlot;
 
@@ -8,6 +9,7 @@ import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 
+@WithScreen(UnbundlerScreen.class)
 public class UnbundlerMenu extends MachineMenu<UnbundlerEntity> {
 	public UnbundlerMenu(int containerId, Inventory playerInv) {
 		this(containerId, playerInv, null);

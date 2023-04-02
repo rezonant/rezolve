@@ -41,7 +41,7 @@ import java.util.List;
 /**
  * Provides an annotation-driven way to register blocks, items, block entities and menus for the Rezolve mod.
  */
-@Mod.EventBusSubscriber(modid = RezolveMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@Mod.EventBusSubscriber(modid = RezolveMod.ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class RezolveRegistry {
     private static final Logger LOGGER = LogManager.getLogger();
     public static Map<Class, Object> registryObjects = new HashMap<>();
@@ -131,6 +131,7 @@ public class RezolveRegistry {
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public static void handleClientSetup(FMLClientSetupEvent event) {
+
         for (var klass : registeredClasses) {
             if (AbstractContainerMenu.class.isAssignableFrom(klass)) {
                 var menuClass = (Class<? extends AbstractContainerMenu>)klass;
@@ -198,7 +199,7 @@ public class RezolveRegistry {
         try {
             var item = itemClass.getDeclaredConstructor().newInstance();
             registryObjects.put(itemClass, item);
-            register.register(ForgeRegistries.Keys.ITEMS, new ResourceLocation(RezolveMod.MODID, requireRegistryId(itemClass)), () -> item);
+            register.register(ForgeRegistries.Keys.ITEMS, new ResourceLocation(RezolveMod.ID, requireRegistryId(itemClass)), () -> item);
         } catch (ReflectiveOperationException e) {
             LOGGER.error("Caught exception while constructing item {}:", itemClass.getCanonicalName());
             LOGGER.error(e);
@@ -215,7 +216,7 @@ public class RezolveRegistry {
             if (register.getRegistryKey() == ForgeRegistries.Keys.BLOCKS) {
                 block = blockClass.getDeclaredConstructor().newInstance();
                 registryObjects.put(blockClass, block);
-                register.register(ForgeRegistries.Keys.BLOCKS, new ResourceLocation(RezolveMod.MODID, id), () -> {
+                register.register(ForgeRegistries.Keys.BLOCKS, new ResourceLocation(RezolveMod.ID, id), () -> {
                     return block;
                 });
             } else {
@@ -225,7 +226,7 @@ public class RezolveRegistry {
             if (register.getRegistryKey() == ForgeRegistries.Keys.ITEMS) {
                 register.register(
                         ForgeRegistries.Keys.ITEMS,
-                        new ResourceLocation(RezolveMod.MODID, id),
+                        new ResourceLocation(RezolveMod.ID, id),
                         () -> new BlockItem(block, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
                 );
             }
@@ -273,12 +274,15 @@ public class RezolveRegistry {
                     return ctor.newInstance(containerId, playerInventory);
 
                 } catch (Exception e) {
+                    // RuntimeExceptions get absorbed somewhere up the stack without being printed, so we need
+                    // to take care to print to the log here for debuggability.
+                    LOGGER.error("Cannot construct {}: {}", menuClass.getCanonicalName(), e.getMessage());
                     throw new RuntimeException("Cannot construct " + menuClass.getCanonicalName(), e);
                 }
             });
 
             registryObjects.put(menuClass, type);
-            register.register(ForgeRegistries.Keys.MENU_TYPES, new ResourceLocation(RezolveMod.MODID, registryId), () -> type);
+            register.register(ForgeRegistries.Keys.MENU_TYPES, new ResourceLocation(RezolveMod.ID, registryId), () -> type);
 
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException("Failed to register Menu class "+menuClass.getCanonicalName()+": "+e.getMessage(), e);
@@ -307,7 +311,7 @@ public class RezolveRegistry {
             }, validBlocks).build(null);
 
             registryObjects.put(entityClass, type);
-            register.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES, new ResourceLocation(RezolveMod.MODID, registryId), () -> type);
+            register.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES, new ResourceLocation(RezolveMod.ID, registryId), () -> type);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException("Failed to register BlockEntity class "+entityClass.getCanonicalName()+": "+e.getMessage(), e);
         }

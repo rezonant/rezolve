@@ -4,12 +4,16 @@ import com.astronautlabs.mc.rezolve.common.inventory.DyeSlot;
 import com.astronautlabs.mc.rezolve.common.inventory.GhostSlot;
 import com.astronautlabs.mc.rezolve.common.machines.MachineMenu;
 import com.astronautlabs.mc.rezolve.common.machines.MachineOutputSlot;
+import com.astronautlabs.mc.rezolve.common.machines.Sync;
+import com.astronautlabs.mc.rezolve.common.network.RezolvePacket;
+import com.astronautlabs.mc.rezolve.common.network.WithPacket;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
 import com.astronautlabs.mc.rezolve.common.gui.WithScreen;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 
 @WithScreen(BundleBuilderScreen.class)
+@WithPacket(SetPatternSettingsPacket.class)
 public class BundleBuilderMenu extends MachineMenu<BundleBuilderEntity> {
 	public BundleBuilderMenu(int containerId, Inventory playerInventory) {
 		this(containerId, playerInventory, null);
@@ -55,5 +59,43 @@ public class BundleBuilderMenu extends MachineMenu<BundleBuilderEntity> {
 	    for (int x = 0; x < 9; ++x) {
 	        this.addSlot(new Slot(playerInventory, x, playerHotbarOffsetX + x * 18, playerHotbarOffsetY));
 	    }
+	}
+
+	@Sync public boolean lockPositions;
+	@Sync public String patternName;
+
+	@Override
+	protected void updateState() {
+		super.updateState();
+		patternName = machine.getPatternName();
+		lockPositions = machine.arePositionsLocked();
+	}
+
+	public void setPatternName(String name) {
+		patternName = name;
+		sendPatternSettings();
+	}
+
+	public void setLockPositions(boolean value) {
+		lockPositions = value;
+		sendPatternSettings();
+	}
+
+	void sendPatternSettings() {
+		var settings = new SetPatternSettingsPacket();
+		settings.setMenu(this);
+		settings.name = patternName;
+		settings.lockPositions = lockPositions;
+		settings.sendToServer();
+	}
+
+	@Override
+	public void receivePacketOnServer(RezolvePacket rezolvePacket) {
+		if (rezolvePacket instanceof SetPatternSettingsPacket settings) {
+			machine.setPatternName(settings.name);
+			machine.setLockedPositions(settings.lockPositions);
+		} else {
+			super.receivePacketOnServer(rezolvePacket);
+		}
 	}
 }

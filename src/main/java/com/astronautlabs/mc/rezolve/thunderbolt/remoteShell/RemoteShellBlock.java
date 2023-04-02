@@ -1,26 +1,25 @@
-//package com.astronautlabs.mc.rezolve.remoteShell;
-//
-//import com.astronautlabs.mc.rezolve.RezolveMod;
-//import com.astronautlabs.mc.rezolve.common.machines.Machine;
-//import com.astronautlabs.mc.rezolve.common.blocks.BlockEntityBase;
-//
-//import net.minecraft.world.entity.player.Player;
-//import net.minecraft.world.item.Items;
-//import net.minecraft.world.Container;
-//import net.minecraft.world.item.ItemStack;
-//import net.minecraft.core.BlockPos;
-//import net.minecraft.world.level.Level;
-//
-//public class RemoteShellBlock extends Machine {
-//	public static final String ID = "remote_shell";
-//
-//	public RemoteShellBlock(Properties properties) {
-//		super(properties);
-//	}
-//
+package com.astronautlabs.mc.rezolve.thunderbolt.remoteShell;
+
+import com.astronautlabs.mc.rezolve.RezolveMod;
+import com.astronautlabs.mc.rezolve.common.blocks.WithBlockEntity;
+import com.astronautlabs.mc.rezolve.common.gui.WithMenu;
+import com.astronautlabs.mc.rezolve.common.machines.Machine;
+import com.astronautlabs.mc.rezolve.common.registry.RegistryId;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.Material;
+
+@RegistryId("remote_shell")
+@WithBlockEntity(RemoteShellEntity.class)
+@WithMenu(RemoteShellMenu.class)
+public class RemoteShellBlock extends Machine {
+	public RemoteShellBlock() {
+		super(Block.Properties.of(Material.METAL));
+	}
+
 //	@Override
 //	public void registerRecipes() {
-//		ItemStack enderPearlBundle = RezolveMod.BUNDLE_ITEM.withContents(
+//		ItemStack enderPearlBundle = RezolveRegistry.item(BundleItem.class).withContents(
 //			1,
 //			new ItemStack(Items.ENDER_PEARL, 16)
 //		);
@@ -54,18 +53,12 @@
 ////			);
 ////		}
 //	}
-//
-//	@Override
-//	public void init(RezolveMod mod) {
-//		super.init(mod);
-////		RemoteShellActivateMessageHandler.register();
-////		RemoteShellReturnMessageHandler.register();
-////		RemoteShellRenameMachineMessageHandler.register();
-//	}
-//
-//	@Override
-//	public Class<? extends BlockEntityBase> getTileEntityClass() {
-//		return RemoteShellEntity.class;
-//	}
-//
-//}
+
+	@Override
+	public void init(RezolveMod mod) {
+		super.init(mod);
+//		RemoteShellActivateMessageHandler.register();
+//		RemoteShellReturnMessageHandler.register();
+//		RemoteShellRenameMachineMessageHandler.register();
+	}
+}

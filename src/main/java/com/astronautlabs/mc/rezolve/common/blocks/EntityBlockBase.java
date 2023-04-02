@@ -33,7 +33,7 @@ public abstract class EntityBlockBase extends BlockBase implements EntityBlock {
 	protected Class<? extends AbstractContainerMenu> getMenuClass() {
 		var annotation = this.getClass().getAnnotation(WithMenu.class);
 		if (annotation == null)
-			throw new RuntimeException(String.format("Block %s must either be annotated @WithMenu() or override getMenuClass()"));
+			throw new RuntimeException(String.format("Block %s must either be annotated @WithMenu() or override getMenuClass()", getClass().getCanonicalName()));
 
 		return annotation.value();
 	}

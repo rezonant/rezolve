@@ -12,6 +12,6 @@ public class BundlePatternSlot extends Slot {
 
 	@Override
 	public boolean mayPlace(ItemStack pStack) {
-		return pStack.getItem() == RezolveRegistry.item(BundlePatternItem.class);
+		return pStack == null || pStack.isEmpty() || pStack.getItem() == RezolveRegistry.item(BundlePatternItem.class);
 	}
 }

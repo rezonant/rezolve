@@ -13,8 +13,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SecurityServerEntity extends MachineEntity {
-	public static final String ID = "security_server";
-
 	public SecurityServerEntity(BlockPos pPos, BlockState pBlockState) {
 		super(RezolveRegistry.blockEntityType(SecurityServerEntity.class), pPos, pBlockState);
 
@@ -157,15 +155,15 @@ public class SecurityServerEntity extends MachineEntity {
 	}
 
 	@Override
-	public void deserializeNBT(CompoundTag compound) {
-		super.deserializeNBT(compound);
+	public void load(CompoundTag tag) {
+		super.load(tag);
 
-		if (compound.contains("RootUser")) {
-			this.rootUser = compound.getString("RootUser");
+		if (tag.contains("RootUser")) {
+			this.rootUser = tag.getString("RootUser");
 		}
 
-		if (compound.contains("Rules")) {
-			ListTag rulesList = compound.getList("Rules", Tag.TAG_COMPOUND);
+		if (tag.contains("Rules")) {
+			ListTag rulesList = tag.getList("Rules", Tag.TAG_COMPOUND);
 			this.rules = new ArrayList<Rule>();
 
 			for (int i = 0, max = rulesList.size(); i < max; ++i) {
@@ -183,9 +181,8 @@ public class SecurityServerEntity extends MachineEntity {
 	}
 
 	@Override
-	public CompoundTag serializeNBT() {
+	protected void saveAdditional(CompoundTag tag) {
 		var compound = super.serializeNBT();
-
 		if (this.rootUser != null) {
 			compound.putString("RootUser", this.rootUser);
 		}
@@ -201,8 +198,6 @@ public class SecurityServerEntity extends MachineEntity {
 		}
 
 		compound.put("Rules", rulesList);
-
-		return compound;
 	}
 
 	public void removeRule(String id) {

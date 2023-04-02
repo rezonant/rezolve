@@ -13,12 +13,15 @@ public class GhostSlot extends Slot {
 	
 	public GhostSlot(Container inventoryIn, int index, int xPosition, int yPosition, boolean singleItemOnly) {
 		super(inventoryIn, index, xPosition, yPosition);
-		
 		this.singleItemOnly = singleItemOnly;
 	}
-	
+
 	private boolean singleItemOnly;
-	
+
+	public boolean isValidItem(ItemStack stack) {
+		return true;
+	}
+
 	public boolean isSingleItemOnly() {
 		return this.singleItemOnly;
 	}

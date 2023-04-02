@@ -233,7 +233,7 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 	}
 	
 	@Override
-	protected void drawSubWindows(PoseStack poseStack, int mouseX, int mouseY) {
+	protected void renderSubWindows(PoseStack poseStack, double mouseX, double mouseY) {
 		
 		int x = this.listX;
 		int y = this.listY + this.listScrollPosition;

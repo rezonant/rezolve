@@ -15,7 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class RezolveMenuPacket extends RezolvePacket {
-    private static Logger LOGGER = LogManager.getLogger(RezolveMod.MODID);
+    private static Logger LOGGER = LogManager.getLogger(RezolveMod.ID);
     public int containerId;
 
     public void setMenu(AbstractContainerMenu menu) {
@@ -58,10 +58,20 @@ public class RezolveMenuPacket extends RezolvePacket {
         }
 
         if (player.containerMenu.containerId != containerId) {
-            LOGGER.warn(
-                    "Received a Menu packet for container #{}, but open container is currently #{}",
-                    containerId, player.containerMenu.containerId
-            );
+            if (containerId == 0) {
+                LOGGER.error(
+                        "Received a Menu packet for container #{}, but open container is currently #{}. "
+                                + "Packet will be ignored. Likely cause: {}'s read/write methods do not call super()",
+                        containerId, player.containerMenu.containerId,
+                        getClass().getCanonicalName()
+                );
+            } else {
+                LOGGER.warn(
+                        "Received a Menu packet for container #{}, but open container is currently #{}. "
+                                + "Packet will be ignored.",
+                        containerId, player.containerMenu.containerId
+                );
+            }
             return;
         }
 

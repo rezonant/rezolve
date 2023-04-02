@@ -14,17 +14,11 @@ public class BundlerScreen extends MachineScreen<BundlerMenu> {
 	public BundlerScreen(BundlerMenu menu, Inventory playerInv, Component title) {
 		super(menu, playerInv, title, "rezolve:textures/gui/container/bundler_gui.png", 255, 212);
 
-		this.playerInv = playerInv;
-		this.entity = entity;
-
 		this.titleLabelX = 8;
 		this.titleLabelY = 6;
 		this.inventoryLabelX = 49;
 		this.inventoryLabelY = 113;
 	}
-	
-	private Inventory playerInv;
-	private BundlerEntity entity;
 
 	@Override
 	public void renderContents(PoseStack pPoseStack, int mouseX, int mouseY, float pPartialTick) {
@@ -39,20 +33,20 @@ public class BundlerScreen extends MachineScreen<BundlerMenu> {
 	    int rfBarHeight = 88;
 	    int rfBarWidth = 14;
 	    
-	    double usedHeight = this.menu.energyStored / (double)this.menu.energyCapacity * rfBarHeight;
+	    double usedHeight = menu.energyStored / (double)menu.energyCapacity * rfBarHeight;
 		colorQuad(pPoseStack, 0, 0, 0, 1, rfBarX, rfBarY, rfBarWidth, rfBarHeight - usedHeight);
 
-	    Operation<BundlerEntity> op = this.menu.currentOperation;
+	    Operation<BundlerEntity> op = this.menu.operation;
 	    String statusStr;
 	    
 	    if (op != null) {
-    		int width = (int)(32 * op.getPercentage() / (double)100);
+			float progress = menu.progress;
+    		int width = (int)(32 * progress);
 
     	    RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-
 			RenderSystem.enableBlend();
-			textureQuad(pPoseStack, new ResourceLocation("rezolve:textures/gui/container/arrow.png"), 133, 54, width, 32);
-    		statusStr = "Operation: "+op.getPercentage()+"%";
+			textureQuad(pPoseStack, new ResourceLocation("rezolve:textures/gui/container/arrow.png"), 133, 54, width, 32, 0, 0, (float)progress, 1);
+    		statusStr = "Operation: "+(Math.floor(progress * 100))+"%";
 	    } else {
 	    	statusStr = "Idle.";
 	    }

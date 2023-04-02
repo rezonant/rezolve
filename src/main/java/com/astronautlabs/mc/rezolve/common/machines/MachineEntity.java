@@ -4,11 +4,10 @@ import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.blocks.BlockEntityBase;
 import com.astronautlabs.mc.rezolve.common.util.RezolveTagUtil;
 import com.astronautlabs.mc.rezolve.common.inventory.InventorySnapshot;
-import com.astronautlabs.mc.rezolve.common.network.RezolvePacket;
 import com.astronautlabs.mc.rezolve.common.network.RezolvePacketReceiver;
-import com.astronautlabs.mc.rezolve.common.network.WithPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
@@ -30,7 +29,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
-@WithPacket(MachineStatePacket.class)
 public class MachineEntity extends BlockEntityBase implements Container, IMachineInventory, ICapabilityProvider, RezolvePacketReceiver {
 	protected Operation currentOperation;
 	protected EnergyStorage energy;
@@ -52,7 +50,7 @@ public class MachineEntity extends BlockEntityBase implements Container, IMachin
 		return this.getEnergyCapacity();
 	}
 
-	protected int getStoredEnergy() {
+	public int getStoredEnergy() {
 		return this.energy.getEnergyStored();
 	}
 
@@ -206,9 +204,10 @@ public class MachineEntity extends BlockEntityBase implements Container, IMachin
 		lastUpdate = currentTime;
 
 		if (this.hasCurrentOperation()) {
+			this.currentOperation.updateProgress();
 			boolean finished = this.currentOperation.update();
 			if (finished) {
-				System.out.println("Operation completed.");
+				LOGGER.info("Operation completed on {}", getClass().getCanonicalName());
 				this.currentOperation = null;
 			}
 			this.setChanged();
@@ -292,6 +291,10 @@ public class MachineEntity extends BlockEntityBase implements Container, IMachin
 			returnStack = keepStack.split(stack.getCount() - itemsToKeep);
 		}
 
+		if (itemsToKeep == 0) {
+			return returnStack;
+		}
+
 		if (existingStack != null)
 			keepStack.setCount(keepStack.getCount() + existingStack.getCount());
 
@@ -299,60 +302,36 @@ public class MachineEntity extends BlockEntityBase implements Container, IMachin
 			this.items.set(slotId, keepStack);
 		}
 
+		fireOnSlotChanged(slot);
+
 		return returnStack;
 	}
 
-	public final Operation createOperation() {
-		var annotation = getClass().getAnnotation(WithOperation.class);
-		if (annotation == null) {
-			throw new RuntimeException(
-				String.format(
-					"Could not create operation, %s is missing @WithOperation() annotation",
-					getClass().getCanonicalName()
-				)
-			);
-		}
+	@Override
+	protected void saveAdditional(CompoundTag tag) {
+		super.saveAdditional(tag);
+		if (this.currentOperation != null)
+			tag.put("op", this.currentOperation.asTag());
 
-		var klass = annotation.value();
-		try {
-			return klass.getDeclaredConstructor(getClass()).newInstance(this);
-		} catch (ReflectiveOperationException e) {
-			throw new RuntimeException(
-				String.format(
-					"Failed to construct operation class %s: %s",
-					klass.getCanonicalName(), e.getMessage()
-				), e
-			);
-		}
+		if (this.customName != null)
+			tag.putString("customName", this.getCustomName());
+
+		tag.put("energy", this.energy.serializeNBT());
+		RezolveTagUtil.writeInventory(tag, this);
 	}
 
 	@Override
-	public CompoundTag serializeNBT() {
-		var tag = super.serializeNBT();
-		if (this.currentOperation != null) {
-			tag.put("Op", this.currentOperation.asTag());
-		}
+	public void load(CompoundTag tag) {
+		currentOperation = Operation.of(tag.getCompound("op"));
 
-		return tag;
-	}
+		if (tag.contains("customName", Tag.TAG_STRING))
+			this.setCustomName(tag.getString("customName"));
 
-	@Override
-	public void deserializeNBT(CompoundTag tag) {
-		currentOperation = Operation.of(tag.getCompound("Op"));
+		if (tag.contains("energy"))
+			this.energy.deserializeNBT(tag.get("energy"));
 
-		if (tag.contains("CustomName", 8)) {
-			this.setCustomName(tag.getString("CustomName"));
-		}
-
-		if (tag.contains("RF"))
-			this.energy.deserializeNBT(tag.get("RF"));
-
-		var itemHandler = this.getCapability(ForgeCapabilities.ITEM_HANDLER);
-		if (itemHandler.isPresent()) {
-			RezolveTagUtil.readInventory(tag, itemHandler.orElse(null));
-		}
-
-		super.deserializeNBT(tag);
+		RezolveTagUtil.readInventory(tag, this);
+		super.load(tag);
 	}
 
 	public ItemStack extractItem(int slot, int amount, boolean simulate) {
@@ -379,36 +358,12 @@ public class MachineEntity extends BlockEntityBase implements Container, IMachin
 		return existingStack;
 	}
 
-	@Override
-	protected void saveAdditional(CompoundTag tag) {
-		super.saveAdditional(tag);
-		if (this.customName != null) {
-			tag.putString("CustomName", this.getCustomName());
-		}
-
-		var itemHandler = this.getCapability(ForgeCapabilities.ITEM_HANDLER);
-		if (itemHandler.isPresent()) {
-			RezolveTagUtil.writeInventory(tag, itemHandler.orElse(null));
-		}
-
-		tag.put("RF", this.energy.serializeNBT());
-	}
-
-	@Override
-	public void handleUpdateTag(CompoundTag tag) {
-		this.deserializeNBT(tag);
-	}
-
-	@Override
-	public CompoundTag getUpdateTag() {
-		return this.serializeNBT();
-	}
-
 	private String customName;
 
 	public String getCustomName() {
 		return this.customName;
 	}
+
 	public void setCustomName(String customName) {
 		this.customName = customName;
 	}
@@ -440,7 +395,11 @@ public class MachineEntity extends BlockEntityBase implements Container, IMachin
 		if (pSlot < 0 || pSlot > this.items.size())
 			return ItemStack.EMPTY.copy();
 
-		var result = getItem(pSlot).split(pAmount);
+		var stack = this.items.get(pSlot);
+		if (stack == null)
+			stack = ItemStack.EMPTY.copy();
+
+		var result = stack.split(pAmount);
 		setChanged();
 		return result;
 	}
@@ -462,7 +421,31 @@ public class MachineEntity extends BlockEntityBase implements Container, IMachin
 
 		if (pStack == null)
 			pStack = ItemStack.EMPTY;
+
 		this.items.set(pSlot, pStack.copy());
+		this.setChanged();
+		fireOnSlotChanged(this.slots.get(pSlot));
+	}
+
+	/**
+	 * Run code when a specific slot changes
+	 * @param slot
+	 */
+	protected void onSlotChanged(Slot slot) {
+
+	}
+
+	private boolean alreadyHandlingSlotChange = false;
+	private void fireOnSlotChanged(Slot slot) {
+		if (alreadyHandlingSlotChange)
+			return;
+
+		try {
+			alreadyHandlingSlotChange = true;
+			onSlotChanged(slot);
+		} finally {
+			alreadyHandlingSlotChange = false;
+		}
 	}
 
 	public boolean isCurrentEntity() {
@@ -480,30 +463,11 @@ public class MachineEntity extends BlockEntityBase implements Container, IMachin
 			this.items.set(i, ItemStack.EMPTY.copy());
 	}
 
-	private float progress = 0;
-
 	public float getProgress() {
-		return progress;
-	}
-
-	protected void setProgress(float progress) {
-		this.progress = progress;
-		this.sendMachineState();
-	}
-
-	private void sendMachineState() {
-		var machineState = new MachineStatePacket();
-		machineState.setBlockEntity(this);
-		machineState.progress = progress;
-		machineState.dimension = getLevel().dimension().location().getPath();
-		machineState.blockPos = getBlockPos();
-		machineState.sendToChunkTrackers(getLevel().getChunkAt(getBlockPos()));
-	}
-
-	@Override
-	public void receivePacketOnClient(RezolvePacket rezolvePacket) {
-		if (rezolvePacket instanceof MachineStatePacket machineState) {
-			this.progress = machineState.progress;
+		if (this.currentOperation != null) {
+			return this.currentOperation.computeProgress();
 		}
+
+		return 0;
 	}
 }

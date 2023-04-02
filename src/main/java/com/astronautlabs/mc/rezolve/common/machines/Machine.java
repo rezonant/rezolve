@@ -2,12 +2,15 @@ package com.astronautlabs.mc.rezolve.common.machines;
 
 import com.astronautlabs.mc.rezolve.common.blocks.BlockEntityBase;
 import com.astronautlabs.mc.rezolve.common.blocks.EntityBlockBase;
+import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
 import com.google.common.base.Predicate;
 
 import net.minecraft.world.*;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -34,6 +37,18 @@ public abstract class Machine extends EntityBlockBase {
 	public Machine(Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.getStateDefinition().any().setValue(FACING, Direction.NORTH));
+	}
+
+	@Nullable
+	@Override
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> pBlockEntityType) {
+		if (pBlockEntityType != RezolveRegistry.blockEntityType(getBlockEntityClass()))
+			return null;
+
+		return (level, pos, state, entity) -> {
+			if (entity instanceof MachineEntity machineEntity)
+			machineEntity.tick();
+		};
 	}
 
 	@Override

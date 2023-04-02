@@ -10,6 +10,10 @@ import net.minecraft.nbt.CompoundTag;
 @RegistryId("bundler")
 public class BundlerOperation extends Operation<BundlerEntity> {
 
+	public BundlerOperation() {
+		super(null);
+	}
+
 	public BundlerOperation(BundlerEntity machine) {
 		super(machine);
 	}
@@ -20,7 +24,7 @@ public class BundlerOperation extends Operation<BundlerEntity> {
 		this.energyStored = 0;
 		this.energyRequired = BundleItem.getBundleCost(pattern);
 		this.timeStarted = machine.getLevel().getGameTime();
-		this.timeRequired = 3 * 20;
+		this.timeRequired = 10;
 	}
 
 	private int energyStored;
@@ -32,10 +36,10 @@ public class BundlerOperation extends Operation<BundlerEntity> {
 	@Override
 	public CompoundTag writeNBT() {
 		var nbt = new CompoundTag();
-		nbt.putInt("Op_Energy", this.energyStored);
-		nbt.putInt("Op_EnergyRequired", this.energyRequired);
-		nbt.putLong("Op_TimeRequired", this.timeRequired);
-		nbt.putLong("Op_TimeStarted", this.timeStarted);
+		nbt.putInt("energyStored", this.energyStored);
+		nbt.putInt("energyRequired", this.energyRequired);
+		nbt.putLong("timeRequired", this.timeRequired);
+		nbt.putLong("timeStarted", this.timeStarted);
 		
 		if (this.pattern != null) {
 			CompoundTag stack = this.pattern.serializeNBT();
@@ -47,21 +51,21 @@ public class BundlerOperation extends Operation<BundlerEntity> {
 
 	@Override
 	protected void readNBT(CompoundTag nbt) {
-		energyStored = nbt.getInt("Op_Energy");
-		energyRequired = nbt.getInt("Op_EnergyRequired");
-		timeRequired = nbt.getInt("Op_TimeRequired");
-		timeStarted = nbt.getInt("Op_TimeStarted");
+		energyStored = nbt.getInt("energyStored");
+		energyRequired = nbt.getInt("energyRequired");
+		timeRequired = nbt.getInt("timeRequired");
+		timeStarted = nbt.getInt("timeStarted");
 		
 		if (nbt.contains("Op_Stack"))
 			pattern = ItemStack.of(nbt.getCompound("Op_Stack"));
 	}
 
 	@Override
-	public int getPercentage() {
+	public float computeProgress() {
 		long timeSinceStart = this.getMachine().getLevel().getGameTime() - this.timeStarted;
-		int timePercentage = (int)(timeSinceStart / (double)this.timeRequired * 100);
-		int energyPercentage = (int)(this.energyStored / (double)this.energyRequired * 100);
-		return Math.min(100, Math.min(timePercentage, energyPercentage));
+		float timePercentage = timeSinceStart / (float)this.timeRequired;
+		float energyPercentage = this.energyStored / (float)this.energyRequired;
+		return Math.min(1.0f, Math.min(timePercentage, energyPercentage));
 	}
 
 	private boolean stillValid() {

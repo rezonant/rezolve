@@ -19,7 +19,6 @@ public class BundleBuilderEntity extends MachineEntity {
     public static final int PATTERN_INPUT_SLOT = 0;
     public static final int PATTERN_OUTPUT_SLOT = 1;
     public static final int DYE_SLOT = 2;
-	public static final String ID = "bundle_builder";
 
 	public BundleBuilderEntity(BlockPos pPos, BlockState pBlockState) {
 		super(RezolveRegistry.blockEntityType(BundleBuilderEntity.class), pPos, pBlockState);
@@ -78,23 +77,23 @@ public class BundleBuilderEntity extends MachineEntity {
 		
 		if (this.patternName != null)
 			nbt.putString("Name", this.patternName);
-		
-		int dye = this.dyeValue();
-		if (dye != 0)
-			nbt.putInt("Color", this.dyeValue());
+
+		String dye = this.dyeValue();
+		if (dye != null)
+			nbt.putString("Color", dye);
 		
 		stack.setTag(nbt);
 
 		this.setItem(PATTERN_OUTPUT_SLOT, stack);
 	}
 	
-	public int dyeValue() {
+	public String dyeValue() {
 		ItemStack stack = this.getStackInSlot(DYE_SLOT);
 		
 		if (stack == null || stack.getCount() == 0)
-			return -1;
+			return null;
 		
-		return stack.getItem().getDamage(stack);
+		return ((DyeItem)stack.getItem()).getDyeColor().getName();
 	}
 	
 	public boolean hasInputItems() {
@@ -125,7 +124,6 @@ public class BundleBuilderEntity extends MachineEntity {
 			return super.insertItem(slotId, stack, simulate);
 
 		if (slotId == PATTERN_INPUT_SLOT) {
-
 			if (stack != null && !RezolveRegistry.item(BundlePatternItem.class).isBlank(stack)) {
 				// A non-blank pattern was put into the input slot.
 				// Transform it into a blank slot and set up the other inventory slots according to the pattern.
@@ -152,10 +150,10 @@ public class BundleBuilderEntity extends MachineEntity {
 						this.setItem(3 + slot++, patternStack);
 					}
 
-					int dyeValue = stack.getTag().getInt("Color");
+					String dyeValue = stack.getTag().getString("Color");
 
-					if (dyeValue >= 0)
-						this.setItem(DYE_SLOT, new ItemStack(DyeItem.byColor(DyeColor.byId(dyeValue)), 1));
+					if (dyeValue != null)
+						this.setItem(DYE_SLOT, new ItemStack(DyeItem.byColor(DyeColor.byName(dyeValue, DyeColor.PINK)), 1));
 					else
 						this.setItem(DYE_SLOT, null);
 				}
@@ -164,13 +162,13 @@ public class BundleBuilderEntity extends MachineEntity {
 			}
 		}
 
-		ItemStack result = super.insertItem(slotId, stack, simulate);
+		return super.insertItem(slotId, stack, simulate);
+	}
 
-		if (slotId != PATTERN_OUTPUT_SLOT) {
-			this.updateOutputSlot();
-		}
-
-		return result;
+	@Override
+	protected void onSlotChanged(Slot slot) {
+		if (slot.index != PATTERN_OUTPUT_SLOT)
+			updateOutputSlot();
 	}
 
 	@Override
@@ -195,6 +193,7 @@ public class BundleBuilderEntity extends MachineEntity {
 	}
 
 	private String patternName = null;
+	private boolean lockPositions = false;
 	
 	public String getPatternName() {
 		return this.patternName;
@@ -212,5 +211,30 @@ public class BundleBuilderEntity extends MachineEntity {
 		
 //		if (this.level.isClientSide)
 //			RezolvePacketHandler.INSTANCE.sendToServer(new BundleBuilderUpdateMessage(this));
+	}
+
+	public boolean arePositionsLocked() {
+		return lockPositions;
+	}
+
+	public void setLockedPositions(boolean value) {
+		lockPositions = value;
+	}
+
+	@Override
+	protected void saveAdditional(CompoundTag tag) {
+		super.saveAdditional(tag);
+
+		if (patternName != null)
+			tag.putString("patternName", patternName);
+		tag.putBoolean("lockPositions", lockPositions);
+	}
+
+	@Override
+	public void load(CompoundTag tag) {
+		super.load(tag);
+
+		patternName = tag.getString("patternName");
+		lockPositions = tag.getBoolean("lockPositions");
 	}
 }

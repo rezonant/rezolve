@@ -1,5 +1,6 @@
 package com.astronautlabs.mc.rezolve.thunderbolt.remoteShell;
 
+import com.astronautlabs.mc.rezolve.common.registry.RegistryId;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -15,8 +16,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.Material;
 
+@RegistryId("ethernet_cable")
 public class EthernetCableBlock extends CableBlock {
-	public static final String ID = "ethernet_cable";
 	public static final BooleanProperty DOWN = BooleanProperty.create("down");
 	public static final BooleanProperty EAST = BooleanProperty.create("east");
 	public static final BooleanProperty NORTH = BooleanProperty.create("north");

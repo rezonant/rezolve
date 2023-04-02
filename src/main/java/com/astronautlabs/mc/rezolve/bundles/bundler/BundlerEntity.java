@@ -210,7 +210,7 @@ public class BundlerEntity extends MachineEntity {
 		if (pattern.hasTag()) {
 			CompoundTag nbt = pattern.getTag();
 			if (nbt.contains("Color"))
-				dye = nbt.getString("Color") + 1;
+				dye = nbt.getString("Color");
 		}
 
 		if (dye != null)
@@ -251,6 +251,7 @@ public class BundlerEntity extends MachineEntity {
     public boolean storeBundle(ItemStack bundle, boolean simulate) {
 
 		ItemStack existingOutputStack = null;
+		int firstExistingSlot = -1;
 		int firstEmptySlot = -1;
 		
 		for (int j = 0, maxJ = this.getSlotCount(); j < maxJ; ++j) {
@@ -258,17 +259,19 @@ public class BundlerEntity extends MachineEntity {
 				continue;
 			
 			ItemStack outputStack = this.getStackInSlot(j);
-			if (outputStack == null) {
+			if (outputStack == null || outputStack.isEmpty()) {
 				if (firstEmptySlot < 0)
 					firstEmptySlot = j;
 				
 				continue;
 			}
 			
-			if (!RezolveMod.areStacksSame(bundle, outputStack))
+			if (!RezolveMod.areStacksSame(bundle, outputStack) || outputStack.getCount() >= outputStack.getMaxStackSize())
 				continue;
-		
+
 			existingOutputStack = outputStack;
+			firstExistingSlot = j;
+			break;
 		}
 		
 		if (existingOutputStack == null) {
@@ -281,8 +284,10 @@ public class BundlerEntity extends MachineEntity {
 				return true;
 			}
 		} else {
-			if (!simulate)
+			if (!simulate) {
 				existingOutputStack.setCount(existingOutputStack.getCount() + 1);
+				this.setItem(firstExistingSlot, existingOutputStack);
+			}
 			
 			return true;
 		}

@@ -1,15 +1,14 @@
 package com.astronautlabs.mc.rezolve.common.machines;
 
 import com.astronautlabs.mc.rezolve.common.inventory.GhostSlot;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -22,8 +21,8 @@ import java.util.ArrayList;
 public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerScreen<MenuT> {
     protected MachineScreen(MenuT menu, Inventory playerInventory, Component pTitle, String guiBackgroundResource, int width, int height) {
         super(menu, playerInventory, pTitle);
-        this.windowWidth = width;
-        this.windowHeight = height;
+        this.imageWidth = width;
+        this.imageHeight = height;
         this.guiBackgroundResource = guiBackgroundResource;
     }
 
@@ -39,7 +38,7 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
         this.controls.clear();
     }
 
-    protected void drawSubWindows(PoseStack poseStack, int mouseX, int mouseY) {
+    protected void renderSubWindows(PoseStack poseStack, double mouseX, double mouseY) {
 
     }
 
@@ -56,7 +55,7 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
 
         this.setBlitOffset(200);
         Font font = this.font;
-        this.itemRenderer.renderAndDecorateItem(stack, x, y);
+        this.itemRenderer.renderAndDecorateItem(stack, leftPos + x, topPos + y);
         //this.itemRenderer.renderItemOverlayIntoGUI(font, stack, x, y, null);
         this.setBlitOffset(0);
         this.itemRenderer.blitOffset = 0.0F;
@@ -92,24 +91,23 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
         Slot slot = this.getSlotUnderMouse();
 
         if (slot != null) {
-            if (slot instanceof GhostSlot) {
-                GhostSlot ghostSlot = (GhostSlot)slot;
-                LocalPlayer player = Minecraft.getInstance().player;
-                ItemStack stack = player.getInventory().getSelected();
-
-                if (stack != null) {
-                    stack = stack.copy();
-
-                    if (ghostSlot.isSingleItemOnly())
-                        stack.setCount(1);
-                }
-
-                slot.set(stack);
+            if (slot instanceof GhostSlot ghostSlot) {
+                menu.setGhostSlot(ghostSlot, menu.getCarried());
                 return true;
             }
         }
 
         return super.mouseClicked(pMouseX, pMouseY, pButton);
+    }
+
+    @Override
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        InputConstants.Key mouseKey = InputConstants.getKey(pKeyCode, pScanCode);
+        if (getFocused() instanceof EditBox && ((EditBox) getFocused()).isFocused() && this.minecraft.options.keyInventory.isActiveAndMatches(mouseKey)) {
+            return false;
+        }
+
+        return super.keyPressed(pKeyCode, pScanCode, pModifiers);
     }
 
     @Override
@@ -133,12 +131,21 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
         return false;
     }
 
+    /**
+     * Responsible for updating UI widgets state based on state changes that happen in the Menu.
+     */
+    public void updateStateFromMenu() {
+
+    }
+
     @Override
     public final void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+        updateStateFromMenu();
+
         super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
 
         pPoseStack.pushPose();
-        pPoseStack.translate(leftPos, topPos, 0);
+        pPoseStack.translate(leftPos, topPos, 1);
         RenderSystem.applyModelViewMatrix();
         renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
         pPoseStack.popPose();
@@ -170,25 +177,23 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
 
         colorQuad(pPoseStack, 0x00000080, 0, 0, width, height);
 
-        // Subwindows
+        // Subwindows. These are drawn _beneath_ the background image to give the illuision that it is a subwindow.
 
         pPoseStack.pushPose();
         pPoseStack.translate(this.leftPos, this.topPos, 0);
         RenderSystem.applyModelViewMatrix();
-        this.drawSubWindows(pPoseStack, pMouseX - this.leftPos, pMouseY - this.topPos);
+        this.renderSubWindows(pPoseStack, (double)(pMouseX - this.leftPos), (double)(pMouseY - this.topPos));
         pPoseStack.popPose();
 
         // Machine UI
 
-        //RenderSystem.disableDepthTest();
-        //RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         textureQuad(
                 pPoseStack,
             new ResourceLocation(this.guiBackgroundResource),
-            this.leftPos, this.topPos, windowWidth, windowHeight,
+                leftPos, topPos, imageWidth, imageHeight,
                 0, 0,
-                windowWidth / (float)backgroundTextureWidth,
-                windowHeight / (float)backgroundTextureHeight
+                imageWidth / (float)backgroundTextureWidth,
+                imageHeight / (float)backgroundTextureHeight
         );
     }
 

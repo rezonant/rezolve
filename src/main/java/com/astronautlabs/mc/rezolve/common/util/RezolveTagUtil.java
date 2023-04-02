@@ -23,7 +23,7 @@ public class RezolveTagUtil {
 
 	public static void writeInventory(CompoundTag nbt, IItemHandler inventory, int startSlot, int slotCount) {
 	    ListTag list = new ListTag();
-	    for (int i = startSlot; i < slotCount; ++i) {
+	    for (int i = startSlot; i < startSlot + slotCount; ++i) {
 	        if (inventory.getStackInSlot(i) != null) {
 	            CompoundTag stackTag = new CompoundTag();
 	            stackTag.putByte("Slot", (byte) i);
@@ -50,7 +50,7 @@ public class RezolveTagUtil {
 	        CompoundTag stackTag = list.getCompound(i);
 	        int slot = stackTag.getByte("Slot") & 255;
 	        
-	        inventory.insertItem(slot, ItemStack.of(stackTag), false);
+	        inventory.insertItem(slot, ItemStack.of(stackTag.getCompound("Stack")), false);
 	    }
 	}
 }

@@ -104,6 +104,11 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:23.0.0'
 }
 
+mixin {
+    add sourceSets.main, 'rezolve.refmap.json'
+    config 'rezolve.mixins.json'
+}
+
 minecraft {
     mappings channel: mappings_channel, version: mappings_version
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')

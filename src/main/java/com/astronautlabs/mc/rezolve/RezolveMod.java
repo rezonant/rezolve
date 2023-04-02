@@ -7,7 +7,10 @@ import java.util.UUID;
 import com.astronautlabs.mc.rezolve.bundles.BundleItem;
 import com.astronautlabs.mc.rezolve.bundles.bundleBuilder.BundlePatternItem;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
+import com.astronautlabs.mc.rezolve.thunderbolt.remoteShell.EthernetCableBlock;
+import com.astronautlabs.mc.rezolve.thunderbolt.remoteShell.RemoteShellBlock;
 import net.minecraft.world.Container;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.*;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
@@ -26,11 +29,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-@Mod(RezolveMod.MODID)
+@Mod(RezolveMod.ID)
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class RezolveMod {
-	public static final String MODID = "rezolve";
-	public static final Logger LOGGER = LogManager.getLogger(RezolveMod.MODID);
+	public static final String ID = "rezolve";
+	public static final Logger LOGGER = LogManager.getLogger(RezolveMod.ID);
 
 	public RezolveMod() {
 		_instance = this;
@@ -41,7 +44,9 @@ public class RezolveMod {
 			DatabaseServer.class,
 			BundleBuilder.class,
 			BundleItem.class,
-			BundlePatternItem.class
+			BundlePatternItem.class,
+			EthernetCableBlock.class,
+			RemoteShellBlock.class
 		);
 	}
 
@@ -67,11 +72,7 @@ public class RezolveMod {
 	 * @param playerObj
 	 * @return
 	 */
-	public static boolean canInteractWith(Object containerObj, Object playerObj) {
-		
-		Container container = (Container)containerObj;
-		Player player = (Player)playerObj;
-		
+	public static boolean stillValid(AbstractContainerMenu container, Player player) {
 		// Security check
 
 		// TODO
@@ -252,7 +253,7 @@ public class RezolveMod {
 		LOGGER.info("Starting Rezolve...");
 		//GhostSlotUpdateMessageHandler.register();
 
-		InterModComms.sendTo(RezolveMod.MODID, "waila", "register", () -> "com.astronautlabs.mc.rezolve.waila.WailaCompat.load");
+		InterModComms.sendTo(RezolveMod.ID, "waila", "register", () -> "com.astronautlabs.mc.rezolve.waila.WailaCompat.load");
 	}
 
 }

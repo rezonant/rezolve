@@ -6,10 +6,19 @@ issueTrackerURL="https://github.com/rezonant/rezolve"
 [[mods]]
 modId="rezolve"
 version="${file.jarVersion}"
-
 displayName="Rezolve"
 logoFile="logo.png"
 displayURL="https://minecraft.curseforge.com/projects/rezolve"
-description=""
+description="Item bundling, ethernet networking and more"
+authors="rezonant"
+displayTest="MATCH_VERSION"
+
+[[mods]]
+modId="rezolvecities"
+version="${file.jarVersion}"
+displayName="Rezolve Cities"
+logoFile="logo.png"
+displayURL="https://minecraft.curseforge.com/projects/rezolve"
+description="Generated cities"
 authors="rezonant"
 displayTest="MATCH_VERSION"

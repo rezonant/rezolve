@@ -19,9 +19,9 @@ import java.util.Optional;
 
 public abstract class RezolvePacket {
 
-    private static final Logger LOGGER = LogManager.getLogger(RezolveMod.MODID);
+    private static final Logger LOGGER = LogManager.getLogger(RezolveMod.ID);
     private static final String PROTOCOL_VERSION = "1";
-    private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(new ResourceLocation(RezolveMod.MODID, "packets"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
+    private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(new ResourceLocation(RezolveMod.ID, "packets"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
 
     public static void init() {
         // No-op, ensures that static members are initialized early.
@@ -64,12 +64,12 @@ public abstract class RezolvePacket {
     }
 
     private final void handleOnServer(NetworkEvent.Context context) {
-        receiveOnServer(context.getSender());
+        context.enqueueWork(() -> receiveOnServer(context.getSender()));
         context.setPacketHandled(true);
     }
 
     private final void handleOnClient(NetworkEvent.Context context) {
-        receiveOnClient();
+        context.enqueueWork(() -> receiveOnClient());
         context.setPacketHandled(true);
     }
 

@@ -16,7 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class RezolveBlockEntityPacket extends RezolvePacket {
-    private static Logger LOGGER = LogManager.getLogger(RezolveMod.MODID);
+    private static Logger LOGGER = LogManager.getLogger(RezolveMod.ID);
     public BlockPos blockPos;
     public String dimension;
 

@@ -1,9 +1,14 @@
 package com.astronautlabs.mc.rezolve.common.machines;
 
+import com.astronautlabs.mc.rezolve.RezolveMod;
+import com.astronautlabs.mc.rezolve.common.inventory.GhostSlot;
+import com.astronautlabs.mc.rezolve.common.inventory.SetGhostSlotPacket;
 import com.astronautlabs.mc.rezolve.common.inventory.VirtualInventory;
 import com.astronautlabs.mc.rezolve.common.network.RezolvePacket;
 import com.astronautlabs.mc.rezolve.common.network.RezolvePacketReceiver;
 import com.astronautlabs.mc.rezolve.common.network.WithPacket;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
@@ -12,63 +17,263 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.util.INBTSerializable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 @WithPacket(MachineMenuStatePacket.class)
+@WithPacket(SetGhostSlotPacket.class)
 public class MachineMenu<MachineT extends MachineEntity> extends AbstractContainerMenu implements RezolvePacketReceiver {
+	private static final Logger LOGGER = LogManager.getLogger(RezolveMod.ID);
+
 	protected MachineMenu(MenuType<?> menuType, int pContainerId, Inventory playerInventory, MachineT machine) {
 		super(menuType, pContainerId);
 
 		this.playerInventory = playerInventory;
 		this.machine = machine;
 		this.container = machine != null ? machine : new VirtualInventory();
+
+		this.setupProperties();
 	}
 
-	public Container container;
+	public final Container container;
 
 	protected MachineMenu(MenuType<MachineMenu> menuType, int pContainerId, Inventory playerInventory) {
-		super(menuType, pContainerId);
-
-		this.playerInventory = playerInventory;
-		this.machine = null;
+		this(menuType, pContainerId, playerInventory, null);
 	}
 
 	protected Inventory playerInventory;
 	protected MachineT machine;
 
+	private record SyncedProperty(String name, Sync annotation, Field field) { }
+
+	private List<SyncedProperty> syncedProperties;
+
+	private void setupProperties() {
+		List<SyncedProperty> props = new ArrayList<>();
+		for (var field : getClass().getFields()) {
+			var annotation = field.getAnnotation(Sync.class);
+			if (annotation != null) {
+				props.add(new SyncedProperty(field.getName(), annotation, field));
+			}
+		}
+
+		this.syncedProperties = props;
+	}
+
+	private boolean instanceOf(Class<?> subclass, Class<?> superclass) {
+		return superclass.isAssignableFrom(subclass);
+	}
+
+	private Map<String, WeakReference<Object>> propertyValueCache = new HashMap<>();
+
+	private CompoundTag gatherPropertyChanges() {
+		var newValues = new HashMap<String, Object>();
+		var newTag = gatherPropertyState(newValues);
+		CompoundTag changes = new CompoundTag();
+
+		for (var key : newTag.getAllKeys()) {
+			var changed = true;
+			if (propertyValueCache.containsKey(key)) {
+				var value = propertyValueCache.get(key).get();
+				changed = !Objects.equals(value, newValues.get(key));
+
+				if (value instanceof Operation) {
+					changed = true;
+				}
+			}
+
+			if (changed) {
+				changes.put(key, newTag.get(key));
+				propertyValueCache.put(key, new WeakReference<>(newValues.get(key)));
+			}
+		}
+
+		return changes;
+	}
+
+	private CompoundTag gatherPropertyState(Map<String, Object> values) {
+		CompoundTag tag = new CompoundTag();
+
+		for (var property : syncedProperties) {
+			Object value;
+			try {
+				value = property.field.get(this);
+				values.put(property.name, value);
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException(String.format("Incorrect access set on %s, must be public or protected.", property.name), e);
+			}
+
+
+			var propertyClass = property.field.getType();
+
+			if (instanceOf(propertyClass, String.class))
+				tag.putString(property.name, value == null ? "<NULL>" : (String)value);
+			else if (instanceOf(propertyClass, int.class))
+				tag.putInt(property.name, (int)value);
+			else if (instanceOf(propertyClass, float.class))
+				tag.putFloat(property.name, (float)value);
+			else if (instanceOf(propertyClass, double.class))
+				tag.putDouble(property.name, (double)value);
+			else if (instanceOf(propertyClass, long.class))
+				tag.putLong(property.name, (long)value);
+			else if (instanceOf(propertyClass, boolean.class))
+				tag.putBoolean(property.name, (boolean)value);
+			else if (instanceOf(propertyClass, CompoundTag.class))
+				tag.put(property.name, (CompoundTag)value);
+			else if (instanceOf(propertyClass, Operation.class))
+				tag.put(property.name, Operation.asTag((Operation) value));
+			else if (instanceOf(propertyClass, INBTSerializable.class)) {
+				if (value == null)
+					tag.putString(property.name, "<NULL>");
+				else
+					tag.put(property.name, ((INBTSerializable) value).serializeNBT());
+			}
+		}
+
+		return tag;
+	}
+
 	@Override
 	public void broadcastChanges() {
 		super.broadcastChanges();
-		sendMachineState();
+		sendMachineStatePacket();
 	}
 
 	@Override
 	public void broadcastFullState() {
 		super.broadcastFullState();
-		sendMachineState();
+		clearStateCache();
+		sendMachineStatePacket();
 	}
 
-	public int energyCapacity;
-	public int energyStored;
-	public float progress;
-	public Operation currentOperation;
+	@Sync public int energyCapacity;
+	@Sync public int energyStored;
+	@Sync public float progress;
+	@Sync public Operation operation;
 
-	void sendMachineState() {
+	protected void updateState() {
+		energyCapacity = this.machine.maxEnergyStored;
+		energyStored = this.machine.getStoredEnergy();
+		progress = this.machine.getProgress();
+		operation = this.machine.getCurrentOperation();
+	}
+
+	private void sendMachineStatePacket() {
+		this.updateState();
+
+		var updates = this.gatherPropertyChanges();
+		if (updates.isEmpty())
+			return;
+
 		var state = new MachineMenuStatePacket();
 		state.setMenu(this);
-		state.energyCapacity = this.machine.maxEnergyStored;
-		state.energyStored = this.machine.getStoredEnergy();
-		state.progress = this.machine.getProgress();
-		state.operation = this.machine.getCurrentOperation();
+		state.properties = updates;
 		state.sendToPlayer((ServerPlayer) this.playerInventory.player);
+	}
+
+	private void clearStateCache() {
+		this.propertyValueCache = new HashMap<>();
 	}
 
 	@Override
 	public void receivePacketOnClient(RezolvePacket rezolvePacket) {
 		if (rezolvePacket instanceof MachineMenuStatePacket state) {
-			energyCapacity = state.energyCapacity;
-			energyStored = state.energyStored;
-			progress = state.progress;
-			currentOperation = state.operation;
+			var tag = state.properties;
+			for (var key : tag.getAllKeys()) {
+				var property = syncedProperties.stream().filter(p -> Objects.equals(p.name, key)).findFirst().orElse(null);
+				if (property == null)
+					continue;
+
+				var propertyClass = property.field.getType();
+				Object value = null;
+
+				if (instanceOf(propertyClass, String.class)) {
+					value = tag.getString(property.name);
+					if (Objects.equals(value, "<NULL>"))
+						value = null;
+				} else if (instanceOf(propertyClass, int.class))
+					value = tag.getInt(property.name);
+				else if (instanceOf(propertyClass, float.class))
+					value = tag.getFloat(property.name);
+				else if (instanceOf(propertyClass, double.class))
+					value = tag.getDouble(property.name);
+				else if (instanceOf(propertyClass, long.class))
+					value = tag.getLong(property.name);
+				else if (instanceOf(propertyClass, boolean.class))
+					value = tag.getBoolean(property.name);
+				else if (instanceOf(propertyClass, CompoundTag.class))
+					value = tag.getCompound(property.name);
+				else if (instanceOf(propertyClass, Operation.class))
+					value = Operation.of(tag.getCompound(property.name));
+				else if (instanceOf(propertyClass, INBTSerializable.class)) {
+					var propTag = tag.get(property.name);
+					if (propTag instanceof StringTag stringTag && Objects.equals("<NULL>", stringTag.getAsString())) {
+						value = null;
+					} else {
+						try {
+							var serializable = (INBTSerializable)propertyClass.getDeclaredConstructor().newInstance();
+							serializable.deserializeNBT(propTag);
+							value = serializable;
+						} catch (ReflectiveOperationException e) {
+							throw new RuntimeException(
+								String.format(
+									"Failed to create instance of NBT-serializable class %s",
+									propertyClass.getCanonicalName()
+								), e
+							);
+						}
+					}
+				}
+
+				try {
+					property.field.set(this, value);
+				} catch (IllegalAccessException e) {
+					throw new RuntimeException(String.format("Incorrect access set on %s, must be public or protected.", property.name), e);
+				}
+			}
+		} else {
+			RezolvePacketReceiver.super.receivePacketOnClient(rezolvePacket);
+		}
+	}
+
+	public void setGhostSlot(GhostSlot slot, ItemStack stack) {
+		var slotUpdate = new SetGhostSlotPacket();
+		slotUpdate.setMenu(this);
+		slotUpdate.setSlot(slot);
+		slotUpdate.stack = stack;
+		slotUpdate.sendToServer();
+	}
+
+	@Override
+	public void receivePacketOnServer(RezolvePacket rezolvePacket) {
+		if (rezolvePacket instanceof SetGhostSlotPacket slotUpdate) {
+			if (slotUpdate.slotId < 0 || slotUpdate.slotId >= slots.size()) {
+				LOGGER.error("Received ghost slot packet for invalid slot ID {}", slotUpdate.slotId);
+				return;
+			}
+
+			var slot = this.getSlot(slotUpdate.slotId);
+			if (slot instanceof GhostSlot ghostSlot) {
+				if (!ghostSlot.isValidItem(slotUpdate.stack))
+					return;
+
+				if (ghostSlot.isSingleItemOnly())
+					slotUpdate.stack.setCount(1);
+
+				ghostSlot.set(slotUpdate.stack);
+			} else {
+				LOGGER.error("Received ghost slot packet for slot ID {} but slot is not a ghost slot (its type is {})", slotUpdate.slotId, slot.getClass().getCanonicalName());
+				return;
+			}
+
+		} else {
+			RezolvePacketReceiver.super.receivePacketOnServer(rezolvePacket);
 		}
 	}
 

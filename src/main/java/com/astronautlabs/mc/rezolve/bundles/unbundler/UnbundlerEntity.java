@@ -2,6 +2,7 @@ package com.astronautlabs.mc.rezolve.bundles.unbundler;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
 
+import com.astronautlabs.mc.rezolve.common.gui.WithMenu;
 import com.astronautlabs.mc.rezolve.common.inventory.InventorySnapshot;
 import com.astronautlabs.mc.rezolve.common.inventory.OutputSlot;
 import com.astronautlabs.mc.rezolve.common.inventory.VirtualInventory;
@@ -15,9 +16,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
 
+@WithMenu(UnbundlerMenu.class)
 @WithOperation(UnbundlerOperation.class)
 public class UnbundlerEntity extends MachineEntity {
-	public static final String ID = "unbundler";
     private int unbundleEnergyCost = 1000;
 
 	public UnbundlerEntity(BlockPos pPos, BlockState pBlockState) {
@@ -127,7 +128,7 @@ public class UnbundlerEntity extends MachineEntity {
 		return this.isInputSlot(slot);
 	}
 	
-	private void unpackBundle() {
+	private void checkForBundlesToUnpack() {
 		if (this.hasCurrentOperation())
 			return;
 		
@@ -227,10 +228,10 @@ public class UnbundlerEntity extends MachineEntity {
 		
 		return true;
 	}
-	
+
 	@Override
 	public void updatePeriodically() {
-		this.unpackBundle();
+		this.checkForBundlesToUnpack();
 	}
 	
 	public boolean hasBundle(ItemStack bundle) {

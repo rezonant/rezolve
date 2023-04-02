@@ -3,15 +3,15 @@ package com.astronautlabs.mc.rezolve.bundles.bundleBuilder;
 import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.ItemBase;
 
+import com.astronautlabs.mc.rezolve.common.registry.RegistryId;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
 
+@RegistryId("blank_pattern")
 public class BlankBundlePatternItem extends ItemBase {
-	public static final String ID = "item_bundle_pattern_blank";
-
 	public BlankBundlePatternItem(Properties properties) {
 		super(properties);
 	}
