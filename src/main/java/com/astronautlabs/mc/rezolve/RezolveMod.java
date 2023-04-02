@@ -7,6 +7,7 @@ import java.util.UUID;
 import com.astronautlabs.mc.rezolve.bundles.BundleItem;
 import com.astronautlabs.mc.rezolve.bundles.bundleBuilder.BundlePatternItem;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
+import com.astronautlabs.mc.rezolve.common.util.ShiftedPlayer;
 import com.astronautlabs.mc.rezolve.thunderbolt.remoteShell.EthernetCableBlock;
 import com.astronautlabs.mc.rezolve.thunderbolt.remoteShell.RemoteShellBlock;
 import net.minecraft.world.Container;
@@ -75,22 +76,18 @@ public class RezolveMod {
 	public static boolean stillValid(AbstractContainerMenu container, Player player) {
 		// Security check
 
-		// TODO
-//		if (container.canInteractWith(player))
-//			return true;
+		if (container.stillValid(player))
+			return true;
 		
 		// Container is rejecting player, override if available
 		
-//		synchronized (playerOverridePositions) {
-//			if (!playerOverridePositions.containsKey(player.getUniqueID().toString()))
-//				return false;
-//
-//			BlockPos overriddenPosition = playerOverridePositions.get(player.getUniqueID().toString());
-//			boolean result = container.canInteractWith(new ShiftedPlayer(player, overriddenPosition));
-//			return result;
-//		}
+		synchronized (playerOverridePositions) {
+			if (!playerOverridePositions.containsKey(player.getStringUUID()))
+				return false;
 
-		return true;
+			BlockPos overriddenPosition = playerOverridePositions.get(player.getStringUUID());
+			return container.stillValid(new ShiftedPlayer(player, overriddenPosition));
+		}
 	}
 
 
@@ -251,8 +248,6 @@ public class RezolveMod {
 	@SubscribeEvent
 	public static void interModEnqueue(InterModEnqueueEvent event) {
 		LOGGER.info("Starting Rezolve...");
-		//GhostSlotUpdateMessageHandler.register();
-
 		InterModComms.sendTo(RezolveMod.ID, "waila", "register", () -> "com.astronautlabs.mc.rezolve.waila.WailaCompat.load");
 	}
 

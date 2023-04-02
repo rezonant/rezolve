@@ -1,7 +1,9 @@
 package com.astronautlabs.mc.rezolve.thunderbolt.remoteShell;
 
+import com.astronautlabs.mc.rezolve.common.blocks.BlockBase;
 import com.astronautlabs.mc.rezolve.common.registry.RegistryId;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -15,33 +17,99 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RegistryId("ethernet_cable")
 public class EthernetCableBlock extends CableBlock {
-	public static final BooleanProperty DOWN = BooleanProperty.create("down");
-	public static final BooleanProperty EAST = BooleanProperty.create("east");
-	public static final BooleanProperty NORTH = BooleanProperty.create("north");
-	public static final BooleanProperty SOUTH = BooleanProperty.create("south");
-	public static final BooleanProperty UP = BooleanProperty.create("up");
-	public static final BooleanProperty WEST = BooleanProperty.create("west");
+	public static final BooleanProperty CONNECTS_DOWN = BooleanProperty.create("down");
+	public static final BooleanProperty CONNECTS_EAST = BooleanProperty.create("east");
+	public static final BooleanProperty CONNECTS_NORTH = BooleanProperty.create("north");
+	public static final BooleanProperty CONNECTS_SOUTH = BooleanProperty.create("south");
+	public static final BooleanProperty CONNECTS_UP = BooleanProperty.create("up");
+	public static final BooleanProperty CONNECTS_WEST = BooleanProperty.create("west");
+
+	public static final BooleanProperty INTERFACES_DOWN = BooleanProperty.create("interfaces_down");
+	public static final BooleanProperty INTERFACES_EAST = BooleanProperty.create("interfaces_east");
+	public static final BooleanProperty INTERFACES_NORTH = BooleanProperty.create("interfaces_north");
+	public static final BooleanProperty INTERFACES_SOUTH = BooleanProperty.create("interfaces_south");
+	public static final BooleanProperty INTERFACES_UP = BooleanProperty.create("interfaces_up");
+	public static final BooleanProperty INTERFACES_WEST = BooleanProperty.create("interfaces_west");
 
 	public EthernetCableBlock() {
 		super(
 				BlockBehaviour.Properties.of(Material.WOOL)
-					.isViewBlocking((state, level, pos) -> false)
+						.isViewBlocking((state, level, pos) -> false)
+						.noOcclusion()
 				// TODO: no torches
 
 		);
 
 		this.registerDefaultState(
 				this.defaultBlockState()
-						.setValue(DOWN, false)
-						.setValue(EAST, false)
-						.setValue(NORTH, false)
-						.setValue(SOUTH, false)
-						.setValue(UP, false)
-						.setValue(WEST, false)
+						.setValue(CONNECTS_DOWN, false)
+						.setValue(CONNECTS_EAST, false)
+						.setValue(CONNECTS_NORTH, false)
+						.setValue(CONNECTS_SOUTH, false)
+						.setValue(CONNECTS_UP, false)
+						.setValue(CONNECTS_WEST, false)
+						.setValue(INTERFACES_DOWN, false)
+						.setValue(INTERFACES_EAST, false)
+						.setValue(INTERFACES_NORTH, false)
+						.setValue(INTERFACES_SOUTH, false)
+						.setValue(INTERFACES_UP, false)
+						.setValue(INTERFACES_WEST, false)
 		);
+	}
+
+
+	private static final VoxelShape CENTER_SHAPE = Block.box(7, 7, 7, 9, 9, 9);
+
+	private static final VoxelShape UP_SHAFT_SHAPE = Block.box(7, 9, 7, 9, 16, 9);
+	private static final VoxelShape DOWN_SHAFT_SHAPE = Block.box(7, 0, 7, 9, 9, 9);
+	private static final VoxelShape EAST_SHAFT_SHAPE = Block.box(7, 7, 7, 16, 9, 9);
+	private static final VoxelShape WEST_SHAFT_SHAPE = Block.box(0, 7, 7, 7, 9, 9);
+	private static final VoxelShape NORTH_SHAFT_SHAPE = Block.box(7, 7, 0, 9, 9, 9);
+	private static final VoxelShape SOUTH_SHAFT_SHAPE = Block.box(7, 7, 7, 9, 9, 16);
+
+	private static final int H_LEFT = 5;
+	private static final int H_RIGHT = 11;
+	private static final int H_TOP = 10;
+	private static final int H_BOTTOM = 6;
+
+	private static final VoxelShape NORTH_PLATE_SHAPE = Block.box(H_LEFT, H_BOTTOM, 0, H_RIGHT, H_TOP, 1);
+	private static final VoxelShape SOUTH_PLATE_SHAPE = Block.box(H_LEFT, H_BOTTOM, 15, H_RIGHT, H_TOP, 16);
+	private static final VoxelShape EAST_PLATE_SHAPE = Block.box(15, H_BOTTOM, H_LEFT, 16, H_TOP, H_RIGHT);
+	private static final VoxelShape WEST_PLATE_SHAPE = Block.box(0, H_BOTTOM, H_LEFT, 1, H_TOP, H_RIGHT);
+	private static final VoxelShape UP_PLATE_SHAPE = Block.box(H_BOTTOM, 15, H_LEFT, H_TOP, 16, H_RIGHT);
+	private static final VoxelShape DOWN_PLATE_SHAPE = Block.box(H_BOTTOM, 0, H_LEFT, H_TOP, 1, H_RIGHT);
+
+	@Override
+	public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+		List<VoxelShape> shapes = new ArrayList<>();
+
+		if (pState.getValue(CONNECTS_UP) || pState.getValue(INTERFACES_UP)) shapes.add(UP_SHAFT_SHAPE);
+		if (pState.getValue(CONNECTS_DOWN) || pState.getValue(INTERFACES_DOWN)) shapes.add(DOWN_SHAFT_SHAPE);
+		if (pState.getValue(CONNECTS_NORTH) || pState.getValue(INTERFACES_NORTH)) shapes.add(NORTH_SHAFT_SHAPE);
+		if (pState.getValue(CONNECTS_SOUTH) || pState.getValue(INTERFACES_SOUTH)) shapes.add(SOUTH_SHAFT_SHAPE);
+		if (pState.getValue(CONNECTS_EAST) || pState.getValue(INTERFACES_EAST)) shapes.add(EAST_SHAFT_SHAPE);
+		if (pState.getValue(CONNECTS_WEST) || pState.getValue(INTERFACES_WEST)) shapes.add(WEST_SHAFT_SHAPE);
+
+		if (pState.getValue(INTERFACES_UP)) shapes.add(UP_PLATE_SHAPE);
+		if (pState.getValue(INTERFACES_DOWN)) shapes.add(DOWN_PLATE_SHAPE);
+		if (pState.getValue(INTERFACES_NORTH)) shapes.add(NORTH_PLATE_SHAPE);
+		if (pState.getValue(INTERFACES_SOUTH)) shapes.add(SOUTH_PLATE_SHAPE);
+		if (pState.getValue(INTERFACES_EAST)) shapes.add(EAST_PLATE_SHAPE);
+		if (pState.getValue(INTERFACES_WEST)) shapes.add(WEST_PLATE_SHAPE);
+
+		VoxelShape[] shapesArray = new VoxelShape[shapes.size()];
+		shapes.toArray(shapesArray);
+		return Shapes.or(CENTER_SHAPE, shapesArray);
 	}
 
 //	@Override
@@ -83,7 +151,7 @@ public class EthernetCableBlock extends CableBlock {
 //			);
 //		}
 //	}
-	
+
 	float radius = 3f / 16f;
 
 	@Override
@@ -94,7 +162,26 @@ public class EthernetCableBlock extends CableBlock {
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
-		pBuilder.add(DOWN).add(EAST).add(NORTH).add(SOUTH).add(UP).add(WEST);
+		pBuilder
+				.add(CONNECTS_DOWN)
+				.add(CONNECTS_EAST)
+				.add(CONNECTS_NORTH)
+				.add(CONNECTS_SOUTH)
+				.add(CONNECTS_UP)
+				.add(CONNECTS_WEST)
+				.add(INTERFACES_DOWN)
+				.add(INTERFACES_EAST)
+				.add(INTERFACES_NORTH)
+				.add(INTERFACES_SOUTH)
+				.add(INTERFACES_UP)
+				.add(INTERFACES_WEST)
+		;
+	}
+
+	@Nullable
+	@Override
+	public BlockState getStateForPlacement(BlockPlaceContext pContext) {
+		return getShapeForPosition(defaultBlockState(), pContext.getClickedPos(), pContext.getLevel());
 	}
 
 	// TODO
@@ -121,74 +208,87 @@ public class EthernetCableBlock extends CableBlock {
 //		this.onBlockDestroyed(world, pos);
 //		super.onBlockDestroyedByExplosion(world, pos, explosionIn);
 //	}
-	
-	private void onBlockDestroyed(Level world, BlockPos pos)
-	{
+
+	private void onBlockDestroyed(Level world, BlockPos pos) {
 		this.notifyNetwork(world, pos);
 	}
-	
+
 	/**
 	 * Update the cable network if we're on the server
-	 * 
+	 *
 	 * @param world
 	 * @param pos
 	 */
 	private void notifyNetwork(Level world, BlockPos pos) {
 		// Update the cable network if we're on the server
-		
+
 		if (world.isClientSide)
 			return;
-		
+
 		CableNetwork network = new CableNetwork(world, pos, RezolveRegistry.block(EthernetCableBlock.class));
-		
+
 		for (BlockPos otherPos : network.getEndpoints()) {
 			BlockEntity entity = world.getBlockEntity(otherPos);
 			if (entity == null)
 				continue;
-			
+
 			if (entity instanceof ICableEndpoint) {
-				((ICableEndpoint)entity).onCableUpdate();
+				((ICableEndpoint) entity).onCableUpdate();
 			}
 		}
 	}
 
-//	/**
-//	 * Sets the data values of a BlockState instance to represent this block
-//	 */
-//	@Override
-//	public BlockState getActualState(final BlockState bs, final BlockGetter world, final BlockPos coord) {
-//		BlockState oldBS = bs;
-//		return bs
-//				.withProperty(WEST, this.canConnectTo(world, coord, oldBS, Direction.WEST, coord.west()))
-//				.withProperty(DOWN, this.canConnectTo(world, coord, oldBS, Direction.DOWN, coord.down()))
-//				.withProperty(SOUTH, this.canConnectTo(world, coord, oldBS, Direction.SOUTH, coord.south()))
-//				.withProperty(EAST, this.canConnectTo(world, coord, oldBS, Direction.EAST, coord.east()))
-//				.withProperty(UP, this.canConnectTo(world, coord, oldBS, Direction.UP, coord.up()))
-//				.withProperty(NORTH, this.canConnectTo(world, coord, oldBS, Direction.NORTH, coord.north()));
-//	}
-
-
 	@Override
 	public BlockState updateShape(BlockState oldBS, Direction pDirection, BlockState pNeighborState, LevelAccessor level, BlockPos pos, BlockPos pNeighborPos) {
-		return oldBS
-				.setValue(WEST, this.canConnectTo(level, pos, oldBS, Direction.WEST, pos.west()))
-				.setValue(DOWN, this.canConnectTo(level, pos, oldBS, Direction.DOWN, pos.above()))
-				.setValue(SOUTH, this.canConnectTo(level, pos, oldBS, Direction.SOUTH, pos.south()))
-				.setValue(EAST, this.canConnectTo(level, pos, oldBS, Direction.EAST, pos.east()))
-				.setValue(UP, this.canConnectTo(level, pos, oldBS, Direction.UP, pos.below()))
-				.setValue(NORTH, this.canConnectTo(level, pos, oldBS, Direction.NORTH, pos.north()));
+		return getShapeForPosition(oldBS, pos, level);
+	}
+
+	private BlockState getShapeForPosition(BlockState baseState, BlockPos pos, LevelAccessor level) {
+		return baseState
+
+				// "connects" properties: true when the cable touches another cable
+
+				.setValue(CONNECTS_WEST, getConnectionType(level, pos, baseState, Direction.WEST, pos.west()) == ConnectionType.CONNECTS)
+				.setValue(CONNECTS_DOWN, getConnectionType(level, pos, baseState, Direction.DOWN, pos.below()) == ConnectionType.CONNECTS)
+				.setValue(CONNECTS_SOUTH, getConnectionType(level, pos, baseState, Direction.SOUTH, pos.south()) == ConnectionType.CONNECTS)
+				.setValue(CONNECTS_EAST, getConnectionType(level, pos, baseState, Direction.EAST, pos.east()) == ConnectionType.CONNECTS)
+				.setValue(CONNECTS_UP, getConnectionType(level, pos, baseState, Direction.UP, pos.above()) == ConnectionType.CONNECTS)
+				.setValue(CONNECTS_NORTH, getConnectionType(level, pos, baseState, Direction.NORTH, pos.north()) == ConnectionType.CONNECTS)
+
+				// "interfaces" properties: true when the cable touches a non-cable block that it can interface with
+
+				.setValue(INTERFACES_WEST, getConnectionType(level, pos, baseState, Direction.WEST, pos.west()) == ConnectionType.INTERFACES)
+				.setValue(INTERFACES_DOWN, getConnectionType(level, pos, baseState, Direction.DOWN, pos.below()) == ConnectionType.INTERFACES)
+				.setValue(INTERFACES_SOUTH, getConnectionType(level, pos, baseState, Direction.SOUTH, pos.south()) == ConnectionType.INTERFACES)
+				.setValue(INTERFACES_EAST, getConnectionType(level, pos, baseState, Direction.EAST, pos.east()) == ConnectionType.INTERFACES)
+				.setValue(INTERFACES_UP, getConnectionType(level, pos, baseState, Direction.UP, pos.above()) == ConnectionType.INTERFACES)
+				.setValue(INTERFACES_NORTH, getConnectionType(level, pos, baseState, Direction.NORTH, pos.north()) == ConnectionType.INTERFACES)
+		;
 	}
 
 	public boolean canConnectTo(BlockGetter world, BlockPos pos) {
 		BlockState st = world.getBlockState(pos);
 		BlockEntity te = world.getBlockEntity(pos);
-		
+
 		if (st == null || st.getBlock() == null)
 			return false;
-		
-		if (st.getBlock() == RezolveRegistry.block(EthernetCableBlock.class) || st.getBlock() == Blocks.ANVIL || te != null)
+
+		if (st.getBlock() == RezolveRegistry.block(EthernetCableBlock.class))
 			return true;
-		
+
+		return false;
+	}
+
+	public boolean canInterfaceWith(BlockGetter world, BlockPos pos) {
+		BlockState st = world.getBlockState(pos);
+		BlockEntity te = world.getBlockEntity(pos);
+
+		if (st == null || st.getBlock() == null)
+			return false;
+
+		if (st.getBlock() == Blocks.ANVIL || te != null)
+			return true;
+
 		return false;
 	}
 
@@ -196,54 +296,18 @@ public class EthernetCableBlock extends CableBlock {
 		return this.canConnectTo(w, otherBlock);
 	}
 
-//	/**
-//	 * Calculates the collision boxes for this block.
-//	 */
-//	@Override
-//	public AABB getBoundingBox(final BlockState bs, final BlockGetter world, final BlockPos coord) {
-//		BlockState oldBS = bs;
-//		final boolean connectNorth = this.canConnectTo(world, coord, oldBS, Direction.NORTH, coord.north());
-//		final boolean connectSouth = this.canConnectTo(world, coord, oldBS, Direction.SOUTH, coord.south());
-//		final boolean connectWest = this.canConnectTo(world, coord, oldBS, Direction.WEST, coord.west());
-//		final boolean connectEast = this.canConnectTo(world, coord, oldBS, Direction.EAST, coord.east());
-//		final boolean connectUp = this.canConnectTo(world, coord, oldBS, Direction.UP, coord.up());
-//		final boolean connectDown = this.canConnectTo(world, coord, oldBS, Direction.DOWN, coord.down());
-//		final boolean allFalse = !(connectNorth || connectSouth || connectWest || connectEast || connectUp || connectDown);
-//
-//		float radius = this.radius;
-//		float rminus = 0.5f - radius;
-//		float rplus = 0.5f + radius;
-//
-//		float x1 = rminus;
-//		float x2 = rplus;
-//		float y1 = rminus;
-//		float y2 = rplus;
-//		float z1 = rminus;
-//		float z2 = rplus;
-//		if (connectNorth) {
-//			z1 = 0.0f;
-//		}
-//		if (connectSouth) {
-//			z2 = 1.0f;
-//		}
-//		if (connectWest) {
-//			x1 = 0.0f;
-//		}
-//		if (connectEast) {
-//			x2 = 1.0f;
-//		}
-//		if (connectDown) {
-//			y1 = 0.0f;
-//		}
-//		if (connectUp) {
-//			y2 = 1.0f;
-//		}
-//		if (allFalse) {// Horizontal '+' when making no connections
-//			z1 = 0.0f;
-//			z2 = 1.0f;
-//			x1 = 0.0f;
-//			x2 = 1.0f;
-//		}
-//		return new AxisAlignedBB(x1, y1, z1, x2, y2, z2);
-//	}
+	enum ConnectionType {
+		NONE,
+		INTERFACES,
+		CONNECTS
+	}
+
+	public ConnectionType getConnectionType(BlockGetter w, BlockPos thisBlock, BlockState bs, Direction face, BlockPos otherBlock) {
+		if (this.canConnectTo(w, otherBlock))
+			return ConnectionType.CONNECTS;
+		else if (this.canInterfaceWith(w, otherBlock))
+			return ConnectionType.INTERFACES;
+
+		return ConnectionType.NONE;
+	}
 }

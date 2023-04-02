@@ -1,7 +1,7 @@
 package com.astronautlabs.mc.rezolve.bundles.bundleBuilder;
 
 import com.astronautlabs.mc.rezolve.common.inventory.DyeSlot;
-import com.astronautlabs.mc.rezolve.common.inventory.GhostSlot;
+import com.astronautlabs.mc.rezolve.common.inventory.IngredientSlot;
 import com.astronautlabs.mc.rezolve.common.machines.MachineMenu;
 import com.astronautlabs.mc.rezolve.common.machines.MachineOutputSlot;
 import com.astronautlabs.mc.rezolve.common.machines.Sync;
@@ -38,7 +38,7 @@ public class BundleBuilderMenu extends MachineMenu<BundleBuilderEntity> {
 		
 	    for (int y = 0; y < invHeight; ++y) {
 	        for (int x = 0; x < invWidth; ++x) {
-	            this.addSlot(new GhostSlot(container, 3 + x + y * invWidth, invOffsetX + x * invSlotSize, invOffsetY + y * invSlotSize, false));
+	            this.addSlot(new IngredientSlot(container, 3 + x + y * invWidth, invOffsetX + x * invSlotSize, invOffsetY + y * invSlotSize, false));
 	        }
 	    }
 

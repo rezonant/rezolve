@@ -1,6 +1,6 @@
 package com.astronautlabs.mc.rezolve.common.jei;
 
-import com.astronautlabs.mc.rezolve.common.inventory.GhostSlot;
+import com.astronautlabs.mc.rezolve.common.inventory.IngredientSlot;
 import com.astronautlabs.mc.rezolve.common.machines.MachineScreen;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import net.minecraft.client.renderer.Rect2i;
@@ -8,7 +8,6 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class RezolveJeiGhostIngredientHandler implements IGhostIngredientHandler<MachineScreen> {
 
@@ -21,7 +20,7 @@ public class RezolveJeiGhostIngredientHandler implements IGhostIngredientHandler
         var stack = (ItemStack)ingredient;
 
         for (var slot : gui.getMenu().slots) {
-            if (slot instanceof GhostSlot) {
+            if (slot instanceof IngredientSlot) {
                 targets.add(new Target<I>() {
                     @Override
                     public Rect2i getArea() {

@@ -3,22 +3,9 @@
 	"parent": "block/block",
 	"ambientocclusion": false,
 	"textures": {
-		"particle": ""
+		"particle": "#particle"
 	},
 	"elements": [
-		{
-			"name": "north-south",
-			"from": [7, 7, 7],
-			"to": [9, 9, 9],
-			"shade": false,
-			"faces": {
-				"east": {"uv": [8, 3, 12, 5], "texture": "#texture"},
-				"south": {"uv": [11, 11, 13, 13], "texture": "#texture"},
-				"west": {"uv": [12, 3, 8, 5], "texture": "#texture"},
-				"up": {"uv": [8, 3, 12, 5], "rotation": 270, "texture": "#texture"},
-				"down": {"uv": [8, 3, 12, 5], "rotation": 90, "texture": "#texture"}
-			}
-		},
 		{
 			"name": "north",
 			"from": [7, 7, 0],

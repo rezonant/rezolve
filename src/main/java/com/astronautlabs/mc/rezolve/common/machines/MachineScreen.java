@@ -1,10 +1,14 @@
 package com.astronautlabs.mc.rezolve.common.machines;
 
-import com.astronautlabs.mc.rezolve.common.inventory.GhostSlot;
+import com.astronautlabs.mc.rezolve.common.inventory.BaseSlot;
+import com.astronautlabs.mc.rezolve.common.inventory.DyeSlot;
+import com.astronautlabs.mc.rezolve.common.inventory.IngredientSlot;
+import com.astronautlabs.mc.rezolve.common.inventory.OutputSlot;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.EditBox;
@@ -17,6 +21,8 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerScreen<MenuT> {
     protected MachineScreen(MenuT menu, Inventory playerInventory, Component pTitle, String guiBackgroundResource, int width, int height) {
@@ -70,7 +76,7 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
         Slot slot = this.getSlotUnderMouse();
 
         if (slot != null) {
-            if (slot instanceof GhostSlot) {
+            if (slot instanceof IngredientSlot) {
                 return true;
             }
         }
@@ -91,8 +97,8 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
         Slot slot = this.getSlotUnderMouse();
 
         if (slot != null) {
-            if (slot instanceof GhostSlot ghostSlot) {
-                menu.setGhostSlot(ghostSlot, menu.getCarried());
+            if (slot instanceof IngredientSlot ingredientSlot) {
+                menu.setIngredient(ingredientSlot, menu.getCarried());
                 return true;
             }
         }
@@ -150,7 +156,6 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
         renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
         pPoseStack.popPose();
         RenderSystem.applyModelViewMatrix();
-        
 //        for (GuiComponent control : this.controls) {
 //            if (control instanceof GuiTextField) {
 //                ((GuiTextField)control).drawTextBox();
@@ -159,6 +164,69 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
 //            }
 //        }
 
+        // Tooltips
+
+        var slot = getSlotUnderMouse();
+        List<Component> tooltipContent = null;
+
+        if (slot != null) {
+            var hasItem = slot.getItem() != null && !slot.getItem().isEmpty();
+            var itemComponent = hasItem ? slot.getItem().getItem().getName(slot.getItem()) : Component.translatable("screens.rezolve.empty");
+            tooltipContent = new ArrayList<>();
+
+            if (hasItem)
+                tooltipContent.add(itemComponent);
+
+            var isCarrying = menu.getCarried() != null && !menu.getCarried().isEmpty();
+
+            if (slot instanceof BaseSlot baseSlot) {
+                if (slot instanceof OutputSlot outputSlot) {
+                    if (isCarrying) {
+                        tooltipContent.add(Component.translatable("screens.rezolve.cannot_drop_into_output").withStyle(ChatFormatting.ITALIC));
+                    }
+                }
+
+                tooltipContent.add(baseSlot.getLabel().copy().withStyle(ChatFormatting.GRAY));
+
+                tooltipContent.add(
+                        Component.empty()
+                        .append(Component.translatable("screens.rezolve.automatable").withStyle(ChatFormatting.GREEN))
+                        .append(
+                                Component.empty()
+                                        .withStyle(ChatFormatting.GRAY)
+                                        .append(", ")
+                                        .append(Component.translatable("screens.rezolve.all_sides").withStyle(ChatFormatting.GRAY))
+                        )
+                );
+
+                tooltipContent.add(
+                        Component.empty()
+                                .withStyle(ChatFormatting.GRAY)
+                                .append(Component.translatable("screens.rezolve.holds_up_to"))
+                                .append(" ")
+                                .append(Component.literal(slot.getMaxStackSize() + "").withStyle(ChatFormatting.WHITE))
+                                .append(" ")
+                                .append(Component.translatable("screens.rezolve.items"))
+                );
+            }
+
+            if (tooltipContent.size() == 0)
+                tooltipContent = null;
+        }
+
+        if (tooltipContent != null) {
+            renderTooltip(
+                    pPoseStack,
+                    tooltipContent,
+                    Optional.empty(),
+                    pMouseX, pMouseY
+            );
+        }
+    }
+
+    @Override
+    protected void renderTooltip(PoseStack pPoseStack, int pX, int pY) {
+        super.renderTooltip(pPoseStack, pX, pY);
     }
 
     protected void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {

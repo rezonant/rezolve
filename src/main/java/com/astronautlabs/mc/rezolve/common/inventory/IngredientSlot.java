@@ -1,19 +1,24 @@
 package com.astronautlabs.mc.rezolve.common.inventory;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
-public class GhostSlot extends Slot {
+public class IngredientSlot extends BaseSlot {
 
-	public GhostSlot(Container inventoryIn, int index, int xPosition, int yPosition) {
+	public IngredientSlot(Container inventoryIn, int index, int xPosition, int yPosition) {
 		this(inventoryIn, index, xPosition, yPosition, true);
 	}
 	
-	public GhostSlot(Container inventoryIn, int index, int xPosition, int yPosition, boolean singleItemOnly) {
+	public IngredientSlot(Container inventoryIn, int index, int xPosition, int yPosition, boolean singleItemOnly) {
 		super(inventoryIn, index, xPosition, yPosition);
 		this.singleItemOnly = singleItemOnly;
+	}
+
+	@Override
+	public Component getLabel() {
+		return Component.translatable("screens.rezolve.ingredient_slot");
 	}
 
 	private boolean singleItemOnly;

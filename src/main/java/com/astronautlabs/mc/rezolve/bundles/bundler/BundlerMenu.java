@@ -1,6 +1,7 @@
 package com.astronautlabs.mc.rezolve.bundles.bundler;
 
 import com.astronautlabs.mc.rezolve.bundles.bundleBuilder.BundlePatternSlot;
+import com.astronautlabs.mc.rezolve.common.machines.InputSlot;
 import com.astronautlabs.mc.rezolve.common.machines.MachineMenu;
 import com.astronautlabs.mc.rezolve.common.machines.MachineOutputSlot;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
@@ -21,6 +22,7 @@ public class BundlerMenu extends MachineMenu<BundlerEntity> {
 		int invSlotSize = 18;
 
 		// Input item slots (0-8)
+
 		int inputItemsOffsetX = 20;
 		int inputItemsOffsetY = 45;
 		int inputItemsWidth = 3;
@@ -29,7 +31,7 @@ public class BundlerMenu extends MachineMenu<BundlerEntity> {
 		
 	    for (int y = 0; y < inputItemsHeight; ++y) {
 	        for (int x = 0; x < inputItemsWidth; ++x) {
-	            this.addSlot(new Slot(container, firstInputItemSlot + x + y * inputItemsWidth, inputItemsOffsetX + x * invSlotSize, inputItemsOffsetY + y * invSlotSize));
+	            this.addSlot(new InputSlot(container, firstInputItemSlot + x + y * inputItemsWidth, inputItemsOffsetX + x * invSlotSize, inputItemsOffsetY + y * invSlotSize));
 	        }
 	    }
 	    

@@ -2,6 +2,7 @@ package com.astronautlabs.mc.rezolve.thunderbolt.databaseServer;
 
 import com.astronautlabs.mc.rezolve.common.blocks.EntityBlockBase;
 import com.astronautlabs.mc.rezolve.common.blocks.BlockEntityBase;
+import com.astronautlabs.mc.rezolve.common.machines.Machine;
 import com.astronautlabs.mc.rezolve.common.registry.RegistryId;
 import com.astronautlabs.mc.rezolve.common.blocks.WithBlockEntity;
 import com.google.common.base.Predicate;
@@ -18,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 @RegistryId("database_server")
 @WithBlockEntity(DatabaseServerEntity.class)
-public class DatabaseServer extends EntityBlockBase {
+public class DatabaseServer extends Machine {
 	public DatabaseServer() {
 		super(BlockBehaviour.Properties.of(Material.METAL));
 		this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH));
@@ -57,29 +58,6 @@ public class DatabaseServer extends EntityBlockBase {
 //			);
 //		}
 //	}
-	
-	@Override
-	public Class<? extends BlockEntityBase> getBlockEntityClass() {
-		return DatabaseServerEntity.class;
-	}
-
-	@Override
-	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
-		pBuilder.add(FACING);
-	}
-
-	public static final DirectionProperty FACING = DirectionProperty.create("facing", new Predicate<Direction>() {
-		@Override
-		public boolean apply(Direction input) {
-			return input != Direction.DOWN && input != Direction.UP;
-		}
-	});
-
-	@Nullable
-	@Override
-	public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-		return defaultBlockState().setValue(FACING, pContext.getNearestLookingDirection().getOpposite());
-	}
 
 //	@Override
 //	public List<ItemStack> getDrops(BlockGetter world, BlockPos pos, BlockState state, int fortune) {

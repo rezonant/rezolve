@@ -1,14 +1,13 @@
 package com.astronautlabs.mc.rezolve.common.inventory;
 
 import com.astronautlabs.mc.rezolve.common.gui.RezolveMenuPacket;
-import com.astronautlabs.mc.rezolve.common.network.RezolvePacket;
 import com.astronautlabs.mc.rezolve.common.registry.RegistryId;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
-@RegistryId("set_ghost_slot")
-public class SetGhostSlotPacket extends RezolveMenuPacket {
+@RegistryId("set_ingredient_slot")
+public class SetIngredientSlotPacket extends RezolveMenuPacket {
     public int slotId;
     public ItemStack stack;
 

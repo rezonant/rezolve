@@ -1,8 +1,8 @@
 package com.astronautlabs.mc.rezolve.common.machines;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
-import com.astronautlabs.mc.rezolve.common.inventory.GhostSlot;
-import com.astronautlabs.mc.rezolve.common.inventory.SetGhostSlotPacket;
+import com.astronautlabs.mc.rezolve.common.inventory.IngredientSlot;
+import com.astronautlabs.mc.rezolve.common.inventory.SetIngredientSlotPacket;
 import com.astronautlabs.mc.rezolve.common.inventory.VirtualInventory;
 import com.astronautlabs.mc.rezolve.common.network.RezolvePacket;
 import com.astronautlabs.mc.rezolve.common.network.RezolvePacketReceiver;
@@ -23,11 +23,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 @WithPacket(MachineMenuStatePacket.class)
-@WithPacket(SetGhostSlotPacket.class)
+@WithPacket(SetIngredientSlotPacket.class)
 public class MachineMenu<MachineT extends MachineEntity> extends AbstractContainerMenu implements RezolvePacketReceiver {
 	private static final Logger LOGGER = LogManager.getLogger(RezolveMod.ID);
 
@@ -242,8 +241,8 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 		}
 	}
 
-	public void setGhostSlot(GhostSlot slot, ItemStack stack) {
-		var slotUpdate = new SetGhostSlotPacket();
+	public void setIngredient(IngredientSlot slot, ItemStack stack) {
+		var slotUpdate = new SetIngredientSlotPacket();
 		slotUpdate.setMenu(this);
 		slotUpdate.setSlot(slot);
 		slotUpdate.stack = stack;
@@ -252,23 +251,23 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 
 	@Override
 	public void receivePacketOnServer(RezolvePacket rezolvePacket) {
-		if (rezolvePacket instanceof SetGhostSlotPacket slotUpdate) {
+		if (rezolvePacket instanceof SetIngredientSlotPacket slotUpdate) {
 			if (slotUpdate.slotId < 0 || slotUpdate.slotId >= slots.size()) {
-				LOGGER.error("Received ghost slot packet for invalid slot ID {}", slotUpdate.slotId);
+				LOGGER.error("Received ingredient slot packet for invalid slot ID {}", slotUpdate.slotId);
 				return;
 			}
 
 			var slot = this.getSlot(slotUpdate.slotId);
-			if (slot instanceof GhostSlot ghostSlot) {
-				if (!ghostSlot.isValidItem(slotUpdate.stack))
+			if (slot instanceof IngredientSlot ingredientSlot) {
+				if (!ingredientSlot.isValidItem(slotUpdate.stack))
 					return;
 
-				if (ghostSlot.isSingleItemOnly())
+				if (ingredientSlot.isSingleItemOnly())
 					slotUpdate.stack.setCount(1);
 
-				ghostSlot.set(slotUpdate.stack);
+				ingredientSlot.set(slotUpdate.stack);
 			} else {
-				LOGGER.error("Received ghost slot packet for slot ID {} but slot is not a ghost slot (its type is {})", slotUpdate.slotId, slot.getClass().getCanonicalName());
+				LOGGER.error("Received ingredient slot packet for slot ID {} but slot is not a ghost slot (its type is {})", slotUpdate.slotId, slot.getClass().getCanonicalName());
 				return;
 			}
 

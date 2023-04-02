@@ -3,6 +3,7 @@ package com.astronautlabs.mc.rezolve.bundles.bundleBuilder;
 import com.astronautlabs.mc.rezolve.common.machines.MachineOutputSlot;
 
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 
@@ -35,6 +36,11 @@ public class BundlePatternOutputSlot extends MachineOutputSlot {
 			return false;
 
 		return true;
+	}
+
+	@Override
+	public Component getLabel() {
+		return Component.translatable("screens.rezolve.bundle_pattern_output_slot");
 	}
 
 }
