@@ -6,6 +6,7 @@ import java.util.List;
 import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.machines.MachineEntity;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
+import com.astronautlabs.mc.rezolve.thunderbolt.cable.CableEndpoint;
 import com.astronautlabs.mc.rezolve.thunderbolt.cable.CableNetwork;
 import com.astronautlabs.mc.rezolve.thunderbolt.cable.ICableEndpoint;
 import com.astronautlabs.mc.rezolve.thunderbolt.cable.ThunderboltCable;
@@ -33,10 +34,8 @@ import net.minecraftforge.network.NetworkHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class RemoteShellEntity extends MachineEntity implements ICableEndpoint, ContainerListener {
+public class RemoteShellEntity extends MachineEntity implements ContainerListener {
 	private static final Logger LOGGER = LogManager.getLogger(RezolveMod.ID);
-
-	private ArrayList<BlockPos> connectedMachines = null;
 
 	public RemoteShellEntity(BlockPos pPos, BlockState pBlockState) {
 		super(RezolveRegistry.blockEntityType(RemoteShellEntity.class), pPos, pBlockState);
@@ -54,74 +53,50 @@ public class RemoteShellEntity extends MachineEntity implements ICableEndpoint, 
 
         ListTag connectedMachinesList = new ListTag();
 
-        if (this.connectedMachines != null) {
-            for (BlockPos pos : this.connectedMachines) {
-
-                CompoundTag posTag = new CompoundTag();
-
-                posTag.putInt("X", pos.getX());
-                posTag.putInt("Y", pos.getY());
-                posTag.putInt("Z", pos.getZ());
-
-                connectedMachinesList.add(posTag);
-            }
-
-            tag.put("Machines", connectedMachinesList);
-        }
+		// TODO
+//        if (this.connectedMachines != null) {
+//            for (BlockPos pos : this.connectedMachines) {
+//
+//                CompoundTag posTag = new CompoundTag();
+//
+//                posTag.putInt("X", pos.getX());
+//                posTag.putInt("Y", pos.getY());
+//                posTag.putInt("Z", pos.getZ());
+//
+//                connectedMachinesList.add(posTag);
+//            }
+//
+//            tag.put("Machines", connectedMachinesList);
+//        }
     }
 
     @Override
     public void load(CompoundTag tag) {
         super.load(tag);
 
-        if (tag.contains("Machines")) {
-            ListTag machineList = tag.getList("Machines", Tag.TAG_COMPOUND);
-
-            this.connectedMachines = new ArrayList<BlockPos>();
-            for (int i = 0, max = machineList.size(); i < max; ++i) {
-                CompoundTag machineNBT = (CompoundTag)machineList.get(i);
-                this.connectedMachines.add(new BlockPos(machineNBT.getInt("X"), machineNBT.getInt("Y"), machineNBT.getInt("Z")));
-            }
-        } else {
-            this.connectedMachines = null;
-        }
-
+//        if (tag.contains("Machines")) {
+//            ListTag machineList = tag.getList("Machines", Tag.TAG_COMPOUND);
+//
+//            this.connectedMachines = new ArrayList<BlockPos>();
+//            for (int i = 0, max = machineList.size(); i < max; ++i) {
+//                CompoundTag machineNBT = (CompoundTag)machineList.get(i);
+//                this.connectedMachines.add(new BlockPos(machineNBT.getInt("X"), machineNBT.getInt("Y"), machineNBT.getInt("Z")));
+//            }
+//        } else {
+//            this.connectedMachines = null;
+//        }
     }
 
-	@Override
-	public void onCableUpdate() {
-		this.updateMachines();
-	}
+	public CableEndpoint[] getConnectedMachines() {
+		List<CableEndpoint> machines = new ArrayList<>();
 
-	public void updateMachinesIfNeeded() {
-		if (this.connectedMachines != null)
-			return;
+		for (var network : getNetworks()) {
+			machines.addAll(List.of(network.getEndpoints()));
+		}
 
-		this.updateMachines();
-	}
+		machines = machines.stream().filter(m -> !m.equals(getBlockPos())).toList();
 
-	public void updateMachines() {
-		updateMachines(this.getBlockPos());
-	}
-
-	public void updateMachines(BlockPos pos) {
-		CableNetwork network = new CableNetwork(this.level, pos, RezolveRegistry.block(ThunderboltCable.class));
-		this.connectedMachines = new ArrayList<BlockPos>(Arrays.asList(network.getEndpoints()));
-
-		this.setChanged();
-	}
-
-	@Override
-	public void tick() {
-		super.tick();
-		this.updateMachinesIfNeeded();
-	}
-
-	public BlockPos[] getConnectedMachines() {
-		if (this.connectedMachines == null)
-			return new BlockPos[0];
-
-		return this.connectedMachines.toArray(new BlockPos[this.connectedMachines.size()]);
+		return machines.toArray(new CableEndpoint[machines.size()]);
 	}
 
 	class PlayerActivationState {
@@ -242,24 +217,6 @@ public class RemoteShellEntity extends MachineEntity implements ICableEndpoint, 
 				this.activatedPlayers.remove(player);
 			}
 		}
-
-		// Update network configuration if needed (ie, a connected machine was destroyed)
-
-		boolean updateNeeded = false;
-
-		for (BlockPos pos : this.getConnectedMachines()) {
-			if (!RezolveRegistry.block(ThunderboltCable.class).canInterfaceWith(this.getLevel(), pos)) {
-				LOGGER.info("Remote shell: Block {} ({}) no longer connects to the thunderbolt network.", pos, level.getBlockState(pos));
-
-				updateNeeded = true;
-				break;
-			}
-		}
-
-		if (updateNeeded) {
-			LOGGER.info("Remote shell: An update to the thunderbolt network is required. Updating...");
-			this.updateMachines();
-		}
 	}
 
 	private void sendPlayerState(PlayerActivationState state) {
@@ -312,15 +269,10 @@ public class RemoteShellEntity extends MachineEntity implements ICableEndpoint, 
 
 	public DatabaseServerEntity getDatabase()
 	{
-		for (BlockPos pos : this.connectedMachines) {
-			BlockEntity entity = this.getLevel().getBlockEntity(pos);
+		if (getNetwork() == null)
+			return null;
 
-			if (entity instanceof DatabaseServerEntity) {
-				return (DatabaseServerEntity)entity;
-			}
-		}
-
-		return null;
+		return getNetwork().getDatabaseServer();
 	}
 
 

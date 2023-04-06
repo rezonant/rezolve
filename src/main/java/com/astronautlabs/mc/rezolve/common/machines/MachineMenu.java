@@ -1,14 +1,18 @@
 package com.astronautlabs.mc.rezolve.common.machines;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
+import com.astronautlabs.mc.rezolve.common.Errors;
 import com.astronautlabs.mc.rezolve.common.inventory.IngredientSlot;
 import com.astronautlabs.mc.rezolve.common.inventory.SetIngredientSlotPacket;
 import com.astronautlabs.mc.rezolve.common.inventory.VirtualInventory;
 import com.astronautlabs.mc.rezolve.common.network.RezolvePacket;
 import com.astronautlabs.mc.rezolve.common.network.RezolvePacketReceiver;
 import com.astronautlabs.mc.rezolve.common.network.WithPacket;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
@@ -70,6 +74,7 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 	}
 
 	private Map<String, WeakReference<Object>> propertyValueCache = new HashMap<>();
+	private Map<String, Tag> propertyTagCache = new HashMap<>();
 
 	private CompoundTag gatherPropertyChanges() {
 		var newValues = new HashMap<String, Object>();
@@ -80,7 +85,23 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 			var changed = true;
 			if (propertyValueCache.containsKey(key)) {
 				var value = propertyValueCache.get(key).get();
-				changed = !Objects.equals(value, newValues.get(key));
+				var newValue = newValues.get(key);
+				changed = !Objects.equals(value, newValue);
+
+				if (newValue instanceof INBTSerializable) {
+					var newNBT = ((INBTSerializable<?>) newValue).serializeNBT();
+
+					if (propertyTagCache.containsKey(key)) {
+						var oldNBT = propertyTagCache.get(key);
+						changed = !Objects.equals(oldNBT.getAsString(), newNBT.getAsString());
+					} else {
+						changed = true;
+					}
+
+					if (changed) {
+						propertyTagCache.put(key, newNBT);
+					}
+				}
 
 				if (value instanceof Operation) {
 					changed = true;
@@ -127,6 +148,8 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 				tag.put(property.name, (CompoundTag)value);
 			else if (instanceOf(propertyClass, Operation.class))
 				tag.put(property.name, Operation.asTag((Operation) value));
+			else if (instanceOf(propertyClass, Direction.class))
+				tag.putString(property.name, ((Direction)value).name());
 			else if (instanceOf(propertyClass, INBTSerializable.class)) {
 				if (value == null)
 					tag.putString(property.name, "<NULL>");
@@ -210,16 +233,20 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 					value = tag.getCompound(property.name);
 				else if (instanceOf(propertyClass, Operation.class))
 					value = Operation.of(tag.getCompound(property.name));
+				else if (instanceOf(propertyClass, Direction.class))
+					value = Direction.valueOf(tag.getString(property.name));
 				else if (instanceOf(propertyClass, INBTSerializable.class)) {
 					var propTag = tag.get(property.name);
 					if (propTag instanceof StringTag stringTag && Objects.equals("<NULL>", stringTag.getAsString())) {
 						value = null;
 					} else {
 						try {
-							var serializable = (INBTSerializable)propertyClass.getDeclaredConstructor().newInstance();
+							var serializable = (INBTSerializable)propertyClass.getConstructor().newInstance();
 							serializable.deserializeNBT(propTag);
 							value = serializable;
 						} catch (ReflectiveOperationException e) {
+							Errors.reportException(Minecraft.getInstance().level, e, "While deserializing %s", propertyClass.getCanonicalName());
+
 							throw new RuntimeException(
 								String.format(
 									"Failed to create instance of NBT-serializable class %s",

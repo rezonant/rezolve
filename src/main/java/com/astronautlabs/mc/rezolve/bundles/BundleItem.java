@@ -44,13 +44,13 @@ public class BundleItem extends ItemBase implements ITooltipHint {
 
 		if (nbt != null && nbt.contains("Name")) {
 
-			String name = nbt.getString("Name");
+			String customName = nbt.getString("Name");
 
 			if (!"".equals(name))
 				return Component.empty()
 						.append(name)
 						.append(" (")
-						.append(name)
+						.append(customName)
 						.append(")")
 				;
 		}

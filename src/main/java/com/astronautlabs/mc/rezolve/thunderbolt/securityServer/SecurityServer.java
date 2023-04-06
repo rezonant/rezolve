@@ -8,6 +8,7 @@ import com.astronautlabs.mc.rezolve.common.registry.RegistryId;
 import com.astronautlabs.mc.rezolve.common.blocks.WithBlockEntity;
 import com.astronautlabs.mc.rezolve.common.gui.WithMenu;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.ItemStack;
@@ -61,9 +62,9 @@ public class SecurityServer extends Machine {
 	@Override
 	public void setPlacedBy(Level pLevel, BlockPos pPos, BlockState pState, @Nullable LivingEntity pPlacer, ItemStack pStack) {
 		BlockEntity entity = pLevel.getBlockEntity(pPos);
-		if (entity != null) {
+		if (pPlacer instanceof Player player) {
 			SecurityServerEntity securityServerEntity = (SecurityServerEntity)entity;
-			securityServerEntity.setRootUser(pPlacer);
+			securityServerEntity.setRootUser(player);
 		}
 
 		super.setPlacedBy(pLevel, pPos, pState, pPlacer, pStack);

@@ -32,6 +32,16 @@
   "item.rezolve.bundle_pattern": "Bundle Pattern",
   "item.rezolve.bundle_pattern_blank": "Blank Bundle Pattern",
 
+  "rezolve.securityserver.access_denied": "You do not have permission to access this block.",
+  "rezolve.securityserver.owned_by": "Owned by",
+
+  "rezolve.directions.north": "North",
+  "rezolve.directions.south": "South",
+  "rezolve.directions.up": "Top",
+  "rezolve.directions.down": "Bottom",
+  "rezolve.directions.east": "East",
+  "rezolve.directions.west": "West",
+
   "screens.rezolve.none": "None",
   "screens.rezolve.open": "Open",
   "screens.rezolve.protected": "Protected",
@@ -40,9 +50,20 @@
   "screens.rezolve.default_user_policy": "Default User Policy",
   "screens.rezolve.root": "root",
 
+  "rezolve.thunderbolt.select_a_side": "Select a side",
+  "rezolve.thunderbolt.transmission_modes.none": "None",
+  "rezolve.thunderbolt.transmission_modes.pull": "Pull",
+  "rezolve.thunderbolt.transmission_modes.push": "Push",
+  "rezolve.thunderbolt.transmission_modes.auto": "Auto",
+  "rezolve.thunderbolt.transmission_modes.unknown": "Unknown",
+
+  "rezolve.thunderbolt.transmission_types.items": "Items",
+  "rezolve.thunderbolt.transmission_types.fluids": "Fluids",
+  "rezolve.thunderbolt.transmission_types.energy": "Energy",
+
   "screens.rezolve.restricted": "Restricted",
   "screens.rezolve.allowed": "Allowed",
-  "screens.rezolve.owner": "RestricteOwner",
+  "screens.rezolve.owner": "Owner",
 
   "screens.rezolve.empty": "Empty",
   "screens.rezolve.unknown": "Unknown",

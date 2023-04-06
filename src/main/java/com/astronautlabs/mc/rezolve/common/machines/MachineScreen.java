@@ -1,5 +1,6 @@
 package com.astronautlabs.mc.rezolve.common.machines;
 
+import com.astronautlabs.mc.rezolve.common.gui.Label;
 import com.astronautlabs.mc.rezolve.common.inventory.BaseSlot;
 import com.astronautlabs.mc.rezolve.common.inventory.DyeSlot;
 import com.astronautlabs.mc.rezolve.common.inventory.IngredientSlot;
@@ -42,6 +43,14 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
     protected void init() {
         super.init();
         this.controls.clear();
+    }
+
+    protected Label addLabel(Component content, int x, int y) {
+        return addLabel(content, x, y, 99999);
+    }
+
+    protected Label addLabel(Component content, int x, int y, int width) {
+        return addRenderableWidget(new Label(font, content, x, y, width));
     }
 
     protected void renderSubWindows(PoseStack poseStack, double mouseX, double mouseY) {

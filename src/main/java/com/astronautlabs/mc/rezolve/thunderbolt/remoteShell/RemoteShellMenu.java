@@ -58,7 +58,8 @@ public class RemoteShellMenu extends MachineMenu<RemoteShellEntity> {
 		var db = this.machine.getDatabase();
 		searchResults.machines.clear();
 
-		for (var machinePos : this.machine.getConnectedMachines()) {
+		for (var endpoint : this.machine.getConnectedMachines()) {
+			var machinePos = endpoint.getPosition();
 			var machineBlockState = this.machine.getLevel().getBlockState(machinePos);
 			var name = machineBlockState.getBlock().getName().getString();
 			if (db != null)

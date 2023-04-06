@@ -1,5 +1,6 @@
 package com.astronautlabs.mc.rezolve;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -8,13 +9,18 @@ import com.astronautlabs.mc.rezolve.bundles.BundleItem;
 import com.astronautlabs.mc.rezolve.bundles.bundleBuilder.BundlePatternItem;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
 import com.astronautlabs.mc.rezolve.common.util.ShiftedPlayer;
-import com.astronautlabs.mc.rezolve.thunderbolt.cable.BlueThunderboltCable;
-import com.astronautlabs.mc.rezolve.thunderbolt.cable.GreenThunderboltCable;
-import com.astronautlabs.mc.rezolve.thunderbolt.cable.OrangeThunderboltCable;
-import com.astronautlabs.mc.rezolve.thunderbolt.cable.ThunderboltCable;
+import com.astronautlabs.mc.rezolve.thunderbolt.cable.*;
 import com.astronautlabs.mc.rezolve.thunderbolt.remoteShell.*;
+import com.astronautlabs.mc.rezolve.thunderbolt.securityServer.SecurityServerEntity;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.*;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.registries.RegisterEvent;
@@ -72,18 +78,13 @@ public class RezolveMod {
 	
 	/**
 	 * Determine if the player is allowed to interact with the given UI container.
-	 * This overrides the Player.onUpdate() check for container.canInteractWith(player).
-	 * 
-	 * @param containerObj
-	 * @param playerObj
-	 * @return
+	 * This override is used whenever container.stillValid(player) is called in Vanilla.
+	 * Its purpose is to enable the Remote Shell.
 	 */
 	public static boolean stillValid(AbstractContainerMenu container, Player player) {
-		// Security check
-
 		if (container.stillValid(player))
 			return true;
-		
+
 		// Container is rejecting player, override if available
 		
 		synchronized (playerOverridePositions) {
@@ -199,7 +200,36 @@ public class RezolveMod {
 //
 //		GameRegistry.addRecipe(output, resolvedParams);
 	}
-	
+
+	public static SecurityServerEntity getGoverningSecurityServer(Level level, BlockPos blockPos) {
+		var networks = CableNetwork.getNetworksForEndpoint(level, blockPos);
+		for (var network : networks) {
+			if (network.getSecurityServer() != null)
+				return network.getSecurityServer();
+		}
+
+		return null;
+	}
+
+	public static InteractionResult useSecurely(Block block, BlockState state, Level level, BlockPos blockPos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+		var securityServer = RezolveMod.getGoverningSecurityServer(level, blockPos);
+		if (securityServer != null && !securityServer.canPlayerUse(player, blockPos)) {
+			if (!level.isClientSide) {
+				player.sendSystemMessage(Component.empty()
+						.append(Component.translatable("rezolve.securityserver.access_denied"))
+						.append(" (")
+						.append(Component.translatable("rezolve.securityserver.owned_by"))
+						.append(" ")
+						.append(securityServer.getRootUser() != null ? securityServer.getRootUser() : "<no one>")
+						.append(")")
+				);
+			}
+			return InteractionResult.CONSUME;
+		}
+
+		return block.use(state, level, blockPos, player, hand, hitResult);
+	}
+
 	public String getColorName(int dye) {
 		if (dye < 0 || dye >= DYE_NAMES.length)
 			return "";

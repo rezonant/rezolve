@@ -5,6 +5,7 @@ import com.astronautlabs.mc.rezolve.common.blocks.BlockEntityBase;
 import com.astronautlabs.mc.rezolve.common.util.RezolveTagUtil;
 import com.astronautlabs.mc.rezolve.common.inventory.InventorySnapshot;
 import com.astronautlabs.mc.rezolve.common.network.RezolvePacketReceiver;
+import com.astronautlabs.mc.rezolve.thunderbolt.cable.CableNetwork;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.Tag;
@@ -66,7 +67,58 @@ public class MachineEntity extends BlockEntityBase implements Container, IMachin
 		return this.energy.extractEnergy(energy, false);
 	}
 
-//	@Override
+	private List<CableNetwork> networks = new ArrayList<>();
+
+	@Override
+	public void setRemoved() {
+		super.setRemoved();
+		if (actsAsCable() && getExistingNetwork() != null)
+			getExistingNetwork().invalidate();
+	}
+
+	/**
+	 * When true, this entity will act as a cable for the purposes of network planning.
+	 * Most machines do not do this, but notably since Thunderbolt cables are machines,
+	 * they do. Machines which act as cable can only be adopted by a single network (getNetworks() always
+	 * returns a single item, and adoptNetwork() will remove the previously adopted networks, even when
+	 * they are still valid), whereas machines that do not act as a cable can be adopted by multiple networks.
+	 * @return
+	 */
+	public boolean actsAsCable() {
+		return false;
+	}
+
+	/**
+	 * Adopt the given network as our own. If this entity acts as a cable, then the attached network is replaced.
+	 * Otherwise, the network is added to the list of valid networks.
+	 * @param network
+	 */
+	public void adoptNetwork(CableNetwork network) {
+		if (actsAsCable())
+			networks.clear();
+		this.networks.add(network);
+	}
+
+	public CableNetwork getExistingNetwork() {
+		return networks.stream().filter(n -> !n.isInvalidated()).findFirst().orElse(null);
+	}
+
+	public CableNetwork[] getNetworks() {
+		var filteredNetworks = networks.stream().filter(n -> !n.isInvalidated()).toList();
+		networks.clear();
+		networks.addAll(filteredNetworks);
+		return networks.toArray(new CableNetwork[networks.size()]);
+	}
+
+	public CableNetwork getNetwork() {
+		CableNetwork network = getExistingNetwork();
+		if (actsAsCable() && network == null)
+			adoptNetwork(network = CableNetwork.boot(level, getBlockPos()));
+
+		return network;
+	}
+
+	//	@Override
 //	public ITextComponent getDisplayName() {
 //		return this.hasCustomName() ? new TextComponentString(this.getName())
 //				: new TextComponentTranslation(this.getName());

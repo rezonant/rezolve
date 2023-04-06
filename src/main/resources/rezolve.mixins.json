@@ -5,7 +5,8 @@
   "mixins": [
     "MixinPlayerMenuReachability",
     "MixinServerPlayerMenuReachability",
-    "MixinMenuPacketReachability"
+    "MixinMenuPacketReachability",
+    "MixinBlockUseSecurity"
   ],
   "minVersion": "0.8"
 }

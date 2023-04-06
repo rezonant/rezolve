@@ -7,7 +7,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
-import com.astronautlabs.mc.rezolve.thunderbolt.securityServer.SecurityServerEntity.Rule;
+import java.util.Locale;
 
 public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 
@@ -15,10 +15,10 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 		super(menu, playerInventory, title, "rezolve:textures/gui/container/security_server_gui.png", 255, 191);
 	}
 	
-	private SecurityServerEntity entity; // TODO
+	//private SecurityServerEntity entity; // TODO
 	
-	public boolean matchesSearch(Rule rule) {
-		if (rule.getName().toLowerCase().contains(this.searchField.getValue()))
+	public boolean matchesSearch(SecurityRule rule) {
+		if (rule.getName().toLowerCase(Locale.ROOT).contains(this.searchField.getValue()))
 			return true;
 		
 		return false;
@@ -54,8 +54,8 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 			// Player mode button clicked
 			if (this.selectedRule != null) {
 				int newMode = this.selectedRule.getMode() + 1;
-				if (newMode > Rule.MODE_OWNER)
-					newMode = Rule.MODE_RESTRICTED;
+				if (newMode > SecurityRule.MODE_OWNER)
+					newMode = SecurityRule.MODE_RESTRICTED;
 
 				this.selectedRule.setMode(newMode);
 
@@ -72,8 +72,8 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 
 			if (this.selectedRule != null) {
 				int newMode = this.selectedRule.getMode() + 1;
-				if (newMode > Rule.MODE_OWNER)
-					newMode = Rule.MODE_OPEN;
+				if (newMode > SecurityRule.MODE_OWNER)
+					newMode = SecurityRule.MODE_OPEN;
 
 				this.selectedRule.setMode(newMode);
 				this.updateModeButtons();
@@ -96,7 +96,7 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 				if ("<players>".equals(this.selectedRule.getName()) || "<machines>".equals(this.selectedRule.getName()))
 					return;
 
-				this.entity.removeRule(this.selectedRule);
+				this.menu.removeRule(this.selectedRule);
 				this.selectedRule = null;
 			}
 		});
@@ -116,12 +116,12 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 				if (this.selectedRule.getId() == null) {
 					// New rule
 					if (!"<players>".equals(this.selectedRule.getName()) && !"<machines>".equals(this.selectedRule.getName())) {
-						this.entity.addRule(this.selectedRule.getName(), this.selectedRule.getMode());
+						this.menu.addRule(this.selectedRule);
 					}
 				} else {
 					System.out.println("Editing rule "+this.selectedRule.getName()+" to be mode "+this.selectedRule.getMode());
 					// Existing rule
-					this.entity.editRule(this.selectedRule.getId(), this.selectedRule.getName(), this.selectedRule.getMode());
+					this.menu.editRule(this.selectedRule);
 				}
 			}
 			this.selectedRule = null;
@@ -133,7 +133,7 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 				Component.translatable("screens.rezolve.cancel"), (button) -> {
 			if (this.selectedRule != null) {
 				if ("<machines>".equals(this.selectedRule.getName())) {
-					this.selectRule(this.entity.getRuleByName("<machines>"));
+					this.selectRule(this.menu.ruleSet.getRuleByName("<machines>"));
 				} else if (this.selectedRule.getId() == null) {
 					this.selectedRule = null;
 				}
@@ -145,7 +145,13 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 		
 		this.addBtn = new Button(this.leftPos + 227, this.topPos + 2, 18, 20,
 				Component.literal("+"), (button) -> {
-			this.selectRule(this.entity.new Rule(null, "", Rule.MODE_ALLOWED));
+
+			var rule = new SecurityRule(null, "", SecurityRule.MODE_ALLOWED);
+
+//			rule.draft = true;
+//			menu.ruleSet.add(rule);
+
+			this.selectRule(rule);
 			this.editing = true;
 		});
 		this.addBtn.visible = true;
@@ -179,7 +185,7 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 	private int listHeight = 117;
 	private int entryHeight = 30;
 	
-	private Rule selectedRule = null;
+	private SecurityRule selectedRule = null;
 
 //	@Override
 //	public void handleMouseInput() throws IOException {
@@ -201,20 +207,25 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 				;
 		
 		switch (mode) {
-		case Rule.MODE_RESTRICTED: 
+		case SecurityRule.MODE_RESTRICTED:
 			modeStr = Component.translatable("screens.rezolve.restricted");
 			break;
-		case Rule.MODE_ALLOWED:
+		case SecurityRule.MODE_ALLOWED:
 			modeStr = Component.translatable("screens.rezolve.allowed");
 			break;
-		case Rule.MODE_OWNER:
+		case SecurityRule.MODE_OWNER:
 			modeStr = Component.translatable("screens.rezolve.owner");
 			break;
 		}
 		
 		return modeStr;
 	}
-	
+
+	@Override
+	protected void renderLabels(PoseStack pPoseStack, int pMouseX, int pMouseY) {
+		this.font.draw(pPoseStack, this.title, (float)this.titleLabelX, (float)this.titleLabelY, 4210752);
+	}
+
 	protected Component getMachinePolicyMode(int mode) {
 		Component modeStr = Component.empty()
 				.append(Component.translatable("screens.rezolve.unknown"))
@@ -223,16 +234,16 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 				.append("]");
 		
 		switch (mode) {
-		case Rule.MODE_NONE:
+		case SecurityRule.MODE_NONE:
 			modeStr = Component.translatable("screens.rezolve.none");
 			break;
-		case Rule.MODE_OPEN:
+		case SecurityRule.MODE_OPEN:
 			modeStr = Component.translatable("screens.rezolve.open");
 			break;
-		case Rule.MODE_PROTECTED:
+		case SecurityRule.MODE_PROTECTED:
 			modeStr = Component.translatable("screens.rezolve.protected");
 			break;
-		case Rule.MODE_OWNER:
+		case SecurityRule.MODE_OWNER:
 			modeStr = Component.translatable("screens.rezolve.owners_only");
 			break;
 		}
@@ -247,36 +258,44 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 			this.playerModeBtn.setMessage(this.getUserPolicyMode(this.selectedRule.getMode()));
 		}
 	}
-	
+
+	@Override
+	public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+		if (pButton == 0 && hoveredRule != null) {
+			this.selectRule(hoveredRule);
+			return true;
+		}
+
+		return super.mouseClicked(pMouseX, pMouseY, pButton);
+	}
+
+	SecurityRule hoveredRule;
+
 	@Override
 	protected void renderSubWindows(PoseStack poseStack, double mouseX, double mouseY) {
-		
+		enableScissor(leftPos + listX, topPos + listY, leftPos + listX + listWidth + 1, topPos + listY + listHeight);
+		colorQuad(poseStack, 0xCCCCCCFF, listX - 10, listY - 10, listWidth + 20, listHeight + 20);
+
 		int x = this.listX;
 		int y = this.listY + this.listScrollPosition;
-		
-		for (Rule rule : this.entity.getRules()) {
+
+		hoveredRule = null;
+		for (SecurityRule rule : this.menu.ruleSet.rules) {
 			
 			boolean mouseOver = 
 				(x < mouseX && mouseX < x + this.listWidth) 
 				&& (y < mouseY && mouseY < y + this.entryHeight)
 				&& (listY < mouseY && mouseY < listY + this.listHeight)
 			;
-			
-			if (!mouseDown && minecraft.mouseHandler.isLeftPressed() && mouseOver) {
-				this.mouseDown = true;
 
-				// We were clicked.
+			if (mouseOver)
+				hoveredRule = rule;
 
-				this.selectRule(rule);
-
-			}
-			
-			if (!minecraft.mouseHandler.isLeftPressed())
-				mouseDown = false;
-			
 			if (y > 0 && y < this.listY + this.listHeight) {
 				if (mouseOver) {
-					colorQuad(poseStack, 0xFF999999, x, y, x + listWidth, y + entryHeight);
+					colorQuad(poseStack, 0x999999FF, x, y, listWidth, entryHeight);
+				} else if (selectedRule == rule) {
+					colorQuad(poseStack, 0x666666FF, x, y, listWidth, entryHeight);
 				}
 
 				Component modeStr = Component.literal("");
@@ -291,7 +310,7 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 					nameStr = Component.translatable("screens.rezolve.default_user_policy");
 				}
 				
-				if (this.entity.rootUser != null && this.entity.rootUser.equals(rule.getName())) {
+				if (this.menu.rootUser != null && this.menu.rootUser.equals(rule.getName())) {
 					modeStr = Component.empty()
 							.append(modeStr)
 							.append(" [")
@@ -316,9 +335,11 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 			
 			y += this.entryHeight;
 		}
+
+		disableScissor();
 	}
 	
-	private void selectRule(Rule rule) {
+	private void selectRule(SecurityRule rule) {
 		this.selectedRule = rule;
 		this.editing = false;
 		this.nameField.setValue(this.selectedRule.getName());
@@ -331,14 +352,6 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 	@Override
 	public void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
 		super.renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
-		
-		// Handle a clicked button.
-		
-		if (!this.mouseDown && minecraft.mouseHandler.isLeftPressed()) {
-			this.mouseDown = true;
-		} else if (!minecraft.mouseHandler.isLeftPressed()) {
-			this.mouseDown = false;
-		}
 		
 		if (!this.searchField.isFocused() && "".equals(this.searchField.getValue())) {
 			this.font.draw(
@@ -362,7 +375,7 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 		
 		if (selectedRule != null) {
 			
-			Rule rule = selectedRule;
+			SecurityRule rule = selectedRule;
 			
 			if ("<machines>".equals(rule.getName())) {
 				this.font.draw(
@@ -425,7 +438,7 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 							? "Default User Policy" 
 							: rule.getName()
 					;
-					String modeName = this.getUserPolicyMode(rule.getMode());
+					Component modeName = this.getUserPolicyMode(rule.getMode());
 					
 					this.font.draw(
 							pPoseStack,

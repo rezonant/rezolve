@@ -202,7 +202,8 @@ public class ThunderboltCable extends Cable {
 				NetworkHooks.openScreen(serverPlayer, new SimpleMenuProvider(
 						(containerId, playerInventory, player) -> {
 							var menu = (ThunderboltCableMenu)createMenu(containerId, playerInventory, entity);
-							menu.setDirection(direction);
+							menu.direction = direction;
+							menu.updateState();
 							return menu;
 						},
 						entity.getMenuTitle()
@@ -219,6 +220,11 @@ public class ThunderboltCable extends Cable {
 	public void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pBlock, BlockPos pFromPos, boolean pIsMoving) {
 		super.neighborChanged(pState, pLevel, pPos, pBlock, pFromPos, pIsMoving);
 		this.notifyNetwork(pLevel, pPos);
+
+		var entity = pLevel.getBlockEntity(pPos);
+		if (entity instanceof ThunderboltCableEntity cableEntity) {
+			cableEntity.onNeighborChanged(pFromPos);
+		}
 	}
 
 	@Override
@@ -281,23 +287,23 @@ public class ThunderboltCable extends Cable {
 	 * @param pos
 	 */
 	private void notifyNetwork(Level world, BlockPos pos) {
-		// Update the cable network if we're on the server
-
 		if (world.isClientSide)
 			return;
 
-		CableNetwork network = new CableNetwork(world, pos, RezolveRegistry.block(getClass()));
+		if (world.getBlockEntity(pos) instanceof ThunderboltCableEntity cableEntity) {
+			for (var endpoint : cableEntity.getNetwork().getEndpoints()) {
+				BlockPos otherPos = endpoint.getPosition();
+				BlockEntity entity = world.getBlockEntity(otherPos);
+				if (entity == null)
+					continue;
 
-		for (BlockPos otherPos : network.getEndpoints()) {
-			BlockEntity entity = world.getBlockEntity(otherPos);
-			if (entity == null)
-		continue;
-
-		if (entity instanceof ICableEndpoint) {
-			((ICableEndpoint) entity).onCableUpdate();
+				if (entity instanceof ICableEndpoint) {
+					((ICableEndpoint) entity).onCableUpdate();
+				}
+			}
 		}
 	}
-}
+
 
 	@Override
 	public BlockState updateShape(BlockState oldBS, Direction pDirection, BlockState pNeighborState, LevelAccessor level, BlockPos pos, BlockPos pNeighborPos) {
@@ -332,10 +338,20 @@ public class ThunderboltCable extends Cable {
 		return st != null && st.getBlock() == this;
 	}
 
-
+	/**
+	 * Returns true if Thunderbolt cable can interface with the given block (that is,
+	 * the block is a valid "endpoint"). This returns false for cables.
+	 * @param world
+	 * @param pos
+	 * @return
+	 */
 	public boolean canInterfaceWith(BlockGetter world, BlockPos pos) {
 		BlockState st = world.getBlockState(pos);
 		BlockEntity te = world.getBlockEntity(pos);
+
+		// Cables (specifically) cannot be interfaced with.
+		if (st.getBlock() == this)
+			return false;
 
 		if (st == null || st.getBlock() == null)
 			return false;
@@ -346,11 +362,12 @@ public class ThunderboltCable extends Cable {
 		return false;
 	}
 
-	public boolean canNetworkWith(BlockGetter w, BlockPos thisBlock, BlockState bs, Direction face, BlockPos otherBlock) {
-		return this.canConnectTo(w, otherBlock) || this.canInterfaceWith(w, otherBlock);
-	}
+    @Override
+    public boolean canNetworkWith(BlockGetter w, BlockPos otherBlock) {
+        return canInterfaceWith(w, otherBlock) || canConnectTo(w, otherBlock);
+    }
 
-	enum ConnectionType {
+    enum ConnectionType {
 		NONE,
 		INTERFACES,
 		CONNECTS

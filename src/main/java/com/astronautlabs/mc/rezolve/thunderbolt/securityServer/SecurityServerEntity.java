@@ -1,9 +1,12 @@
 package com.astronautlabs.mc.rezolve.thunderbolt.securityServer;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+
 import com.astronautlabs.mc.rezolve.common.machines.MachineEntity;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
+import com.google.common.base.Objects;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -11,172 +14,78 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.util.INBTSerializable;
 
 public class SecurityServerEntity extends MachineEntity {
 	public SecurityServerEntity(BlockPos pPos, BlockState pBlockState) {
 		super(RezolveRegistry.blockEntityType(SecurityServerEntity.class), pPos, pBlockState);
 
-		this.rules = new ArrayList<Rule>();
-		this.rules.add(new Rule("<machines>", Rule.MODE_OPEN));
-		this.rules.add(new Rule("<players>", Rule.MODE_RESTRICTED));
+		this.ruleSet.add(new SecurityRule("<machines>", SecurityRule.MODE_OPEN));
+		this.ruleSet.add(new SecurityRule("<players>", SecurityRule.MODE_RESTRICTED));
 	}
 
-	void setRootUser(LivingEntity player) {
-		this.rootUser = player.getUUID().toString();
+	void setRootUser(Player player) {
+		this.rootUser = player.getGameProfile().getName();
 		
-		Rule playerRule = this.getRuleByNameInternal(this.rootUser);
+		SecurityRule playerRule = ruleSet.getRuleByName(this.rootUser);
 		
 		if (playerRule == null) {
 			System.out.println("CREATING ROOT USER OF "+this.rootUser);
-			playerRule = new Rule(this.rootUser, Rule.MODE_OWNER);
-			this.rules.add(playerRule);
+			playerRule = new SecurityRule(this.rootUser, SecurityRule.MODE_OWNER);
+			this.ruleSet.add(playerRule);
 		} else {
-			playerRule.mode = Rule.MODE_OWNER;
+			playerRule.mode = SecurityRule.MODE_OWNER;
 		}
 	}
 
-	public class Rule {
-		public Rule(String id, String name, int mode) {
-			this.id = id;
-			this.name = name;
-			this.mode = mode;
-		}
-
-		public Rule(String name, int mode) {
-			this.id = UUID.randomUUID().toString();
-			this.name = name;
-			this.mode = mode;
-		}
-
-		public static final int MODE_OPEN = -1;
-		public static final int MODE_RESTRICTED = 0;
-		public static final int MODE_ALLOWED = 1;
-		public static final int MODE_OWNER = 2;
-
-		public static final int MODE_NONE = 0;
-		public static final int MODE_PROTECTED = 1;
-
-		String id;
-		String name;
-		int mode;
-		
-		public String getId() {
-			return this.id;
-		}
-		
-		public void setName(String name) {
-			this.name = name;
-		}
-		
-		public String getName() {
-			return this.name;
-		}
-		
-		public void setMode(int mode) {
-			this.mode = mode;
-		}
-		
-		public int getMode() {
-			return this.mode;
-		}
-		
-		public Rule copy() {
-			return new Rule(this.id, this.name, this.mode);
-		}
-	}
-	
-	ArrayList<Rule> rules = new ArrayList<Rule>();
+	SecurityRuleSet ruleSet = new SecurityRuleSet();
 	String rootUser = null;
-	
-	public void addRule(String name, int mode) {
-		if (this.getLevel().isClientSide) {
-			
-//			RezolvePacketHandler.INSTANCE.sendToServer(new RuleModificationMessage(
-//				Minecraft.getInstance().thePlayer,
-//				this, "", name, mode
-//			));
-			
-			return;
-		}
-		
-		this.rules.add(new Rule(name, mode));
+
+	public String getRootUser() {
+		return rootUser;
+	}
+
+	public SecurityRule[] getRules() {
+		return ruleSet.asCopiedArray();
+	}
+
+	public void addRule(SecurityRule rule) {
+		this.ruleSet.add(rule);
 		this.setChanged();
 	}
-
-	public Rule getRuleById(String id) {
-		for (Rule rule : this.rules) {
-			if (id.equals(rule.id))
-				return rule.copy();
-		}
-		
-		return null;
-	}
-
-	private Rule getRuleByIdInternal(String id) {
-		for (Rule rule : this.rules) {
-			if (id.equals(rule.id))
-				return rule;
-		}
-		
-		return null;
-	}
 	
-	public boolean editRule(String id, String name, int mode) {
-		Rule rule = this.getRuleByIdInternal(id);
+	public boolean editRule(SecurityRule editedRule) {
+		SecurityRule rule = ruleSet.getRuleById(editedRule.id);
 		
 		if (rule == null)
 			return false;
-		
-		if (this.getLevel().isClientSide) {
-//			RezolvePacketHandler.INSTANCE.sendToServer(new RuleModificationMessage(
-//				Minecraft.getInstance().thePlayer,
-//				this, id, name, mode
-//			));
-				
-			return true;
-		}
 
 		if (!"<players>".equals(rule.getName()) && !"<machines>".equals(rule.getName())) {
-			rule.name = name;
+			rule.name = editedRule.name;
 		}
 		
-		rule.mode = mode;
+		rule.mode = editedRule.mode;
 		this.setChanged();
 		
 		return true;
-	}
-	
-	public Rule[] getRules() {
-		ArrayList<Rule> ruleCopies = new ArrayList<Rule>();
-		for (Rule rule : this.rules)
-			ruleCopies.add(rule.copy());
-		
-		return ruleCopies.toArray(new Rule[this.rules.size()]);
 	}
 
 	@Override
 	public void load(CompoundTag tag) {
 		super.load(tag);
 
-		if (tag.contains("RootUser")) {
-			this.rootUser = tag.getString("RootUser");
+		if (tag.contains("rootUser")) {
+			this.rootUser = tag.getString("rootUser");
 		}
 
-		if (tag.contains("Rules")) {
-			ListTag rulesList = tag.getList("Rules", Tag.TAG_COMPOUND);
-			this.rules = new ArrayList<Rule>();
-
-			for (int i = 0, max = rulesList.size(); i < max; ++i) {
-				CompoundTag ruleNBT = (CompoundTag)rulesList.get(i);
-				this.rules.add(new Rule(ruleNBT.getString("ID"), ruleNBT.getString("Name"), ruleNBT.getInt("Mode")));
-			}
+		if (tag.contains("ruleSet")) {
+			this.ruleSet = SecurityRuleSet.of(tag.getCompound("ruleSet"));
 		}
 
-		if (this.rules == null || this.rules.size() == 0) {
+		if (ruleSet.isEmpty()) {
 			// Reset rules.
-			this.rules = new ArrayList<Rule>();
-			this.rules.add(new Rule("<machines>", Rule.MODE_OPEN));
-			this.rules.add(new Rule("<players>", Rule.MODE_RESTRICTED));
+			ruleSet.add(new SecurityRule("<machines>", SecurityRule.MODE_OPEN));
+			ruleSet.add(new SecurityRule("<players>", SecurityRule.MODE_RESTRICTED));
 		}
 	}
 
@@ -184,41 +93,17 @@ public class SecurityServerEntity extends MachineEntity {
 	protected void saveAdditional(CompoundTag tag) {
 		super.saveAdditional(tag);
 		if (this.rootUser != null) {
-			tag.putString("RootUser", this.rootUser);
+			tag.putString("rootUser", this.rootUser);
 		}
 
-		ListTag rulesList = new ListTag();
-
-		for (Rule rule : this.rules) {
-			CompoundTag ruleNBT = new CompoundTag();
-			ruleNBT.putString("ID", rule.id);
-			ruleNBT.putString("Name", rule.name);
-			ruleNBT.putInt("Mode", rule.mode);
-			rulesList.add(ruleNBT);
-		}
-
-		tag.put("Rules", rulesList);
+		tag.put("ruleSet", ruleSet.asTag());
 	}
 
-	public void removeRule(String id) {
-		this.removeRule(this.getRuleById(id));
-	}
-	
-	public void removeRule(Rule selectedRule) {
+	public void removeRule(SecurityRule selectedRule) {
 		if (selectedRule == null)
 			return;
-		
-		if (this.getLevel().isClientSide) {
 
-//			RezolvePacketHandler.INSTANCE.sendToServer(new RuleModificationMessage(
-//				Minecraft.getInstance().thePlayer,
-//				this, selectedRule.getId(), "", -2
-//			));
-			
-			return;
-		}
-		
-		Rule ruleToRemove = this.getRuleByIdInternal(selectedRule.getId());
+		SecurityRule ruleToRemove = ruleSet.resolve(selectedRule);
 		if (ruleToRemove == null)
 			return;
 
@@ -227,55 +112,37 @@ public class SecurityServerEntity extends MachineEntity {
 		if ("<machines>".equals(ruleToRemove.getName()))
 			return;
 		
-		this.rules.remove(ruleToRemove);
+		ruleSet.remove(ruleToRemove);
 		this.setChanged();
 	}
 
-	public Rule getRuleByName(String name) {
-		for (Rule rule : this.rules) {
-			if (name.equals(rule.name))
-				return rule.copy();
-		}
-		
-		return null;
-	}
-	
-	private Rule getRuleByNameInternal(String name) {
-		for (Rule rule : this.rules) {
-			if (name.equals(rule.name))
-				return rule;
-		}
-		
-		return null;
-	}
-
 	public boolean canPlayerOpen(Player player) {
-
 		if (this.rootUser != null && this.rootUser.equals(player.getName())) 
 			return true;
 		
 		int playerAccess = this.getPlayerAccess(player);
-		if (playerAccess == Rule.MODE_OWNER)
+		if (playerAccess == SecurityRule.MODE_OWNER)
 			return true;
 		
 		return false;
 	}
 	
 	public int getPlayerAccess(Player player) {
+		int playerAccess = SecurityRule.MODE_RESTRICTED;
 
-		int playerAccess = Rule.MODE_RESTRICTED;
+		// Get default player policy
 
-		for (Rule rule : this.rules) {
+		for (SecurityRule rule : ruleSet.rules) {
 			if ("<players>".equals(rule.getName())) {
 				playerAccess = rule.getMode();
 			}
 		}
-		
-		for (Rule rule : this.rules) {
-			if (rule.getName().equals(player.getName())) {
-				playerAccess = rule.getMode();
-			}
-		}
+
+		// Get specific policy for this player, if one exists
+
+		var playerRule = ruleSet.getRuleByName(player.getGameProfile().getName());
+		if (playerRule != null)
+			playerAccess = playerRule.mode;
 		
 		return playerAccess;
 	}
@@ -284,25 +151,25 @@ public class SecurityServerEntity extends MachineEntity {
 
 		int playerAccess = this.getPlayerAccess(entityPlayer);
 		
-		int machineAccess = Rule.MODE_NONE;
-		Rule machineRule = this.getRuleByName("<machines>");
+		int machineAccess = SecurityRule.MODE_NONE;
+		SecurityRule machineRule = ruleSet.getRuleByName("<machines>");
 		
 		if (machineRule != null) {
 			machineAccess = machineRule.getMode();
 		}
 		
-		if (machineAccess == Rule.MODE_NONE) {
+		if (machineAccess == SecurityRule.MODE_NONE) {
 			return true;
-		} else if (machineAccess == Rule.MODE_PROTECTED) {
-			if (playerAccess == Rule.MODE_ALLOWED || playerAccess == Rule.MODE_OWNER)
+		} else if (machineAccess == SecurityRule.MODE_PROTECTED) {
+			if (playerAccess == SecurityRule.MODE_ALLOWED || playerAccess == SecurityRule.MODE_OWNER)
 				return true;
 			return false;
-		} else if (machineAccess == Rule.MODE_OPEN) {
-			if (playerAccess == Rule.MODE_RESTRICTED)
+		} else if (machineAccess == SecurityRule.MODE_OPEN) {
+			if (playerAccess == SecurityRule.MODE_RESTRICTED)
 				return false;
 			return true;
-		} else if (machineAccess == Rule.MODE_OWNER) {
-			if (playerAccess == Rule.MODE_OWNER)
+		} else if (machineAccess == SecurityRule.MODE_OWNER) {
+			if (playerAccess == SecurityRule.MODE_OWNER)
 				return true;
 			return false;
 		}

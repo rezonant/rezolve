@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.BlockPos;
 
+import java.util.Locale;
 import java.util.Objects;
 
 public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
@@ -248,14 +249,14 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
     	String name = stack.getDisplayName().getString();
     	String subName = pos.getX()+", "+pos.getY()+", "+pos.getZ();
 
-    	if (name.toLowerCase().contains(searchString.toLowerCase()) || subName.toLowerCase().contains(searchString.toLowerCase()))
+    	if (name.toLowerCase(Locale.ROOT).contains(searchString.toLowerCase()) || subName.toLowerCase().contains(searchString.toLowerCase()))
     		return true;
 
 	    DatabaseServerEntity db = this.entity.getDatabase();
     	if (db != null) {
     		String customName = db.getMachineName(pos);
     		if (customName != null && !"".equals(customName)) {
-    			if (customName.toLowerCase().contains(searchString.toLowerCase()))
+    			if (customName.toLowerCase(Locale.ROOT).contains(searchString.toLowerCase()))
     				return true;
     		}
     	}

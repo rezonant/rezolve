@@ -13,7 +13,7 @@ public class Cable extends Machine {
 		super(properties.isViewBlocking((state, level, pos) -> false).noOcclusion());
 	}
 
-	public boolean canNetworkWith(BlockGetter w, BlockPos thisBlock, BlockState bs, Direction face, BlockPos otherBlock) {
+	public boolean canNetworkWith(BlockGetter w, BlockPos otherBlock) {
 		return false;
 	}
 }

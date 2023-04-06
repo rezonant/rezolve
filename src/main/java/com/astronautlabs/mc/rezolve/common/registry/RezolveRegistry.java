@@ -131,7 +131,6 @@ public class RezolveRegistry {
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public static void handleClientSetup(FMLClientSetupEvent event) {
-
         for (var klass : registeredClasses) {
             if (AbstractContainerMenu.class.isAssignableFrom(klass)) {
                 var menuClass = (Class<? extends AbstractContainerMenu>)klass;
@@ -167,7 +166,7 @@ public class RezolveRegistry {
                             return ctor.newInstance(pMenu, pInventory, pTitle);
                         } catch (ReflectiveOperationException e) {
                             // Must print this error as it gets eaten up the stack.
-                            LOGGER.error("Failed to construct screen {}: {}", screenClass.getCanonicalName(), e.getMessage());
+                            LOGGER.error("Failed to construct screen {}: {}", screenClass.getCanonicalName(), e.toString());
                             throw new RuntimeException(String.format("Failed to construct screen %s", screenClass.getCanonicalName()), e);
                         }
                     }

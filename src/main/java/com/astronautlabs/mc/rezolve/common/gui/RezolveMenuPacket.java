@@ -61,7 +61,8 @@ public class RezolveMenuPacket extends RezolvePacket {
             if (containerId == 0) {
                 LOGGER.error(
                         "Received a Menu packet for container #{}, but open container is currently #{}. "
-                                + "Packet will be ignored. Likely cause: {}'s read/write methods do not call super()",
+                                + "Packet will be ignored. Likely cause: {}'s read/write methods do not call super(), "
+                                + "or that setMenu() was not called when creating this packet.",
                         containerId, player.containerMenu.containerId,
                         getClass().getCanonicalName()
                 );

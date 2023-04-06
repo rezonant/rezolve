@@ -1,5 +1,6 @@
 package com.astronautlabs.mc.rezolve.thunderbolt.securityServer;
 
+import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
 import com.astronautlabs.mc.rezolve.thunderbolt.cable.CableNetwork;
 
@@ -29,8 +30,7 @@ public class SecurityAccessController {
 			return;
 		}
 		
-		CableNetwork network = new CableNetwork(evt.getEntity().level, evt.getPos(), RezolveRegistry.block(ThunderboltCable.class));
-		securityServer = network.getSecurityServer();
+		securityServer = RezolveMod.getGoverningSecurityServer(evt.getEntity().level, evt.getPos());
 		
 		if (securityServer != null) {
 			if (!securityServer.canPlayerUse(evt.getEntity(), evt.getPos())) {
