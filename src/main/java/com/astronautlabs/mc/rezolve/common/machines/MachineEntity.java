@@ -375,6 +375,8 @@ public class MachineEntity extends BlockEntityBase implements Container, IMachin
 	@Override
 	public void load(CompoundTag tag) {
 		currentOperation = Operation.of(tag.getCompound("op"));
+		if (currentOperation != null)
+			currentOperation.setMachine(this);
 
 		if (tag.contains("customName", Tag.TAG_STRING))
 			this.setCustomName(tag.getString("customName"));

@@ -8,6 +8,7 @@ import com.astronautlabs.mc.rezolve.common.inventory.VirtualInventory;
 import com.astronautlabs.mc.rezolve.common.network.RezolvePacket;
 import com.astronautlabs.mc.rezolve.common.network.RezolvePacketReceiver;
 import com.astronautlabs.mc.rezolve.common.network.WithPacket;
+import com.astronautlabs.mc.rezolve.common.util.RezolveItemUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -21,6 +22,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
 import net.minecraftforge.common.util.INBTSerializable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -304,8 +306,79 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 	}
 
 	@Override
-	public ItemStack quickMoveStack(Player pPlayer, int pIndex) {
-		return null;
+	public ItemStack quickMoveStack(Player pPlayer, int sourceSlotId) {
+		if (sourceSlotId < 0 || sourceSlotId > slots.size())
+			return ItemStack.EMPTY;
+
+		var sourceSlot = getSlot(sourceSlotId);
+		var quickMovedStack = sourceSlot.getItem().copy();
+
+		if (sourceSlot instanceof IngredientSlot)
+			return ItemStack.EMPTY;
+
+		// Try adding to an existing slot.
+
+		for (int destinationSlotId = 0, max = slots.size(); destinationSlotId < max; ++destinationSlotId) {
+			// Not interested in moving from machine slot to machine slot
+			if (sourceSlotId < firstPlayerInventorySlot && destinationSlotId < firstPlayerInventorySlot)
+				continue;
+
+			// Not interested in moving from player slot to player slot
+			if (sourceSlotId >= firstPlayerInventorySlot && destinationSlotId >= firstPlayerInventorySlot)
+				continue;
+
+			var destinationSlot = getSlot(destinationSlotId);
+			var existingStack = destinationSlot.getItem().copy();
+
+			if (destinationSlot instanceof IngredientSlot)
+				continue;
+
+			if (ItemStack.isSame(existingStack, quickMovedStack)) {
+				var takeAmount = Math.min(quickMovedStack.getCount(), destinationSlot.getItem().getMaxStackSize() - destinationSlot.getItem().getCount());
+				if (takeAmount == 0)
+					continue;
+
+				var taken = quickMovedStack.split(takeAmount);
+				existingStack.setCount(existingStack.getCount() + taken.getCount());
+
+				destinationSlot.set(existingStack);
+				sourceSlot.set(quickMovedStack);
+				return quickMovedStack;
+			}
+		}
+
+		// Try looking for an empty slot.
+
+		for (int destinationSlotId = 0, max = slots.size(); destinationSlotId < max; ++destinationSlotId) {
+			// Not interested in moving from machine slot to machine slot
+			if (sourceSlotId < firstPlayerInventorySlot && destinationSlotId < firstPlayerInventorySlot)
+				continue;
+
+			// Not interested in moving from player slot to player slot
+			if (sourceSlotId >= firstPlayerInventorySlot && destinationSlotId >= firstPlayerInventorySlot)
+				continue;
+
+			var destinationSlot = getSlot(destinationSlotId);
+			var existingStack = destinationSlot.getItem().copy();
+
+			if (existingStack.isEmpty()) {
+				if (destinationSlot instanceof IngredientSlot ingredientSlot) {
+
+					if (ingredientSlot.isSingleItemOnly())
+						destinationSlot.set(new ItemStack(quickMovedStack.getItem()));
+					else
+						destinationSlot.set(quickMovedStack);
+
+					return ItemStack.EMPTY;
+				} else if (destinationSlot.mayPlace(quickMovedStack)) {
+					destinationSlot.set(quickMovedStack);
+					sourceSlot.set(ItemStack.EMPTY);
+					return ItemStack.EMPTY;
+				}
+			}
+		}
+
+		return ItemStack.EMPTY;
 	}
 
 	@Override
@@ -315,7 +388,18 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 
 	public static final int SLOT_PIXEL_SIZE = 18;
 
+	private int firstPlayerInventorySlot = -1;
+
+	public boolean hasPlayerInventorySlots() {
+		return firstPlayerInventorySlot >= 0;
+	}
+
+	public int getFirstPlayerInventorySlot() {
+		return firstPlayerInventorySlot;
+	}
+
 	protected void addPlayerSlots(int offsetX, int offsetY) {
+		firstPlayerInventorySlot = this.slots.size();
 		for (int y = 0; y < 3; ++y) {
 			for (int x = 0; x < 9; ++x) {
 				this.addSlot(new Slot(playerInventory, 9 + x + y * 9, offsetX + x * SLOT_PIXEL_SIZE, offsetY + y * SLOT_PIXEL_SIZE));

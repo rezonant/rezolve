@@ -42,6 +42,12 @@
   "rezolve.directions.east": "East",
   "rezolve.directions.west": "West",
 
+  "screens.rezolve.slot": "Slot",
+  "screens.rezolve.input_items": "Input Items",
+  "screens.rezolve.patterns": "Patterns",
+  "screens.rezolve.bundles": "Bundles",
+  "screens.rezolve.energy_unit": "FE",
+  "screens.rezolve.energy_meter": "Energy Meter",
   "screens.rezolve.none": "None",
   "screens.rezolve.open": "Open",
   "screens.rezolve.protected": "Protected",

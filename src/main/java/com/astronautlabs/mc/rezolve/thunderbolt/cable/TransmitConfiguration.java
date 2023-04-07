@@ -13,10 +13,12 @@ public class TransmitConfiguration implements INBTSerializable<CompoundTag> {
 
     public TransmitConfiguration(TransmissionType type) {
         this.type = type;
+        if (type == TransmissionType.ENERGY)
+            this.mode = TransmissionMode.AUTO;
     }
 
     private TransmissionType type = TransmissionType.ITEMS;
-    private TransmissionMode mode = TransmissionMode.AUTO;
+    private TransmissionMode mode = TransmissionMode.NONE;
     private boolean supported = false;
 
     public void setType(@Nonnull TransmissionType type) {

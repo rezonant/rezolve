@@ -21,6 +21,27 @@ public class BundlerScreen extends MachineScreen<BundlerMenu> {
 	}
 
 	@Override
+	protected void init() {
+		super.init();
+
+		addEnergyMeter(leftPos + 231, topPos + 20, 88);
+		addSlotGrid(
+				Component.translatable("screens.rezolve.input_items"),
+				3, 0, 9
+		);
+
+		addSlotGrid(
+				Component.translatable("screens.rezolve.patterns"),
+				3, 9, 9
+		);
+
+		addSlotGrid(
+				Component.translatable("screens.rezolve.bundles"),
+				3, 18, 9
+		);
+	}
+
+	@Override
 	public void renderContents(PoseStack pPoseStack, int mouseX, int mouseY, float pPartialTick) {
 		super.renderContents(pPoseStack, mouseX, mouseY, pPartialTick);
 
@@ -33,8 +54,8 @@ public class BundlerScreen extends MachineScreen<BundlerMenu> {
 	    int rfBarHeight = 88;
 	    int rfBarWidth = 14;
 	    
-	    double usedHeight = menu.energyStored / (double)menu.energyCapacity * rfBarHeight;
-		colorQuad(pPoseStack, 0, 0, 0, 1, rfBarX, rfBarY, rfBarWidth, rfBarHeight - usedHeight);
+//	    double usedHeight = menu.energyStored / (double)menu.energyCapacity * rfBarHeight;
+//		colorQuad(pPoseStack, 0, 0, 0, 1, rfBarX, rfBarY, rfBarWidth, rfBarHeight - usedHeight);
 
 	    Operation<BundlerEntity> op = this.menu.operation;
 	    String statusStr;

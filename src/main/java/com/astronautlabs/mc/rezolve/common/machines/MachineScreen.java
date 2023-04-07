@@ -1,8 +1,10 @@
 package com.astronautlabs.mc.rezolve.common.machines;
 
 import com.astronautlabs.mc.rezolve.common.gui.Label;
+import com.astronautlabs.mc.rezolve.common.gui.Meter;
+import com.astronautlabs.mc.rezolve.common.gui.RezolveGuiUtil;
+import com.astronautlabs.mc.rezolve.common.gui.SlotWidget;
 import com.astronautlabs.mc.rezolve.common.inventory.BaseSlot;
-import com.astronautlabs.mc.rezolve.common.inventory.DyeSlot;
 import com.astronautlabs.mc.rezolve.common.inventory.IngredientSlot;
 import com.astronautlabs.mc.rezolve.common.inventory.OutputSlot;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -14,7 +16,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -24,6 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerScreen<MenuT> {
     protected MachineScreen(MenuT menu, Inventory playerInventory, Component pTitle, String guiBackgroundResource, int width, int height) {
@@ -43,6 +45,9 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
     protected void init() {
         super.init();
         this.controls.clear();
+
+        if (menu.hasPlayerInventorySlots())
+            addInventoryGrid(menu.getFirstPlayerInventorySlot());
     }
 
     protected Label addLabel(Component content, int x, int y) {
@@ -51,6 +56,92 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
 
     protected Label addLabel(Component content, int x, int y, int width) {
         return addRenderableWidget(new Label(font, content, x, y, width));
+    }
+
+    protected void addSlot(Component label, int slotId) {
+        addSlotGrid(label, 1, slotId, 1);
+    }
+
+    protected void addSlotGrid(Component label, int breadth, int firstSlotId, int count) {
+        var labelWidth = font.width(label);
+        var slotWidth = 18;
+        var gridWidth = breadth * slotWidth;
+        var firstSlot = menu.getSlot(firstSlotId);
+        var labelX = firstSlot.x;
+        var labelY = firstSlot.y - font.lineHeight - 5;
+
+        if (labelWidth < gridWidth) {
+            labelX = firstSlot.x + gridWidth / 2 - labelWidth / 2;
+        }
+
+        addLabel(label, leftPos + labelX, topPos + labelY, labelWidth + 20);
+
+        for (int i = 0, max = count; i < max; ++i) {
+            addRenderableWidget(
+                new SlotWidget(
+                    leftPos,
+                    topPos,
+                    Component.empty()
+                            .append(label)
+                            .append(" ")
+                            .append(Component.translatable("screens.resolve.slot"))
+                            .append(" ")
+                            .append((i + 1)+""),
+                    menu.getSlot(firstSlotId + i)
+                )
+            );
+        }
+    }
+
+    private void addInventoryGrid(int firstSlotId) {
+        for (int i = 0, max = 36; i < max; ++i) {
+            addRenderableWidget(
+                    new SlotWidget(
+                            leftPos,
+                            topPos,
+                            Component.empty()
+                                    .append(Component.translatable("screens.resolve.inventory_slot"))
+                                    .append(" ")
+                                    .append((i + 1)+""),
+                            menu.getSlot(firstSlotId + i)
+                    )
+            );
+        }
+    }
+
+    protected Meter addMeter(
+            Component narrationTitle, Component label, ResourceLocation texture, int x, int y, int height
+    ) {
+        return addMeter(narrationTitle, label, texture, x, y, height, null);
+    }
+
+    protected Meter addMeter(
+            Component narrationTitle, Component label, ResourceLocation texture, int x, int y, int height,
+            Function<MenuT, Double> stateFunc
+    ) {
+        var meter = addRenderableWidget(new Meter(font, x, y, height, narrationTitle, label, texture) {
+            @Override
+            public void updateState() {
+                if (stateFunc != null)
+                    setValue(stateFunc.apply(menu));
+            }
+        });
+
+        if (x < 0) {
+            meter.move(imageWidth - meter.getWidth(), y);
+        }
+
+        return meter;
+    }
+
+    protected Meter addEnergyMeter(int x, int y, int height) {
+        return addMeter(
+                Component.translatable("screens.rezolve.energy_meter"),
+                Component.translatable("screens.rezolve.energy_unit"),
+                new ResourceLocation("rezolve", "textures/gui/widgets/energy_meter.png"),
+                x, y, height,
+                menu -> menu.energyStored / (double)menu.energyCapacity
+        );
     }
 
     protected void renderSubWindows(PoseStack poseStack, double mouseX, double mouseY) {
@@ -278,63 +369,18 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
     protected int backgroundTextureHeight = 256;
 
     protected void textureQuad(PoseStack stack, ResourceLocation location, double x, double y, double width, double height) {
-        textureQuad(stack, location, x, y, width, height, 0, 0, 1, 1);
+        RezolveGuiUtil.textureQuad(stack, location, x, y, width, height);
     }
 
     protected void textureQuad(PoseStack stack, ResourceLocation location, double x, double y, double width, double height, float minU, float minV, float maxU, float maxV) {
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.setShaderTexture(0, location);
-        RenderSystem.setShaderColor(1, 1, 1, 1);
-
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tesselator.getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.vertex(stack.last().pose(), (float)x, (float) (y + height), 0.0f)
-                .uv(minU, maxV)
-                .color(255, 255, 255, 255)
-                .endVertex();
-        bufferbuilder.vertex(stack.last().pose(), (float) (x + width), (float) (y + height), 0.0F)
-                .uv(maxU, maxV)
-                .color(255, 255, 255, 255)
-                .endVertex();
-        bufferbuilder.vertex(stack.last().pose(), (float) (x + width), (float) y, 0.0F)
-                .uv(maxU, minV)
-                .color(255, 255, 255, 255)
-                .endVertex();
-        bufferbuilder.vertex(stack.last().pose(), (float) x, (float) y, 0.0F)
-                .uv(minU, minV)
-                .color(255, 255, 255, 255)
-                .endVertex();
-
-        tesselator.end();
+        RezolveGuiUtil.textureQuad(stack, location, x, y, width, height, minU, minV, maxU, maxV);
     }
 
     protected void colorQuad(PoseStack stack, int color, double x, double y, double width, double height) {
-        float red = ((color >> 24) & 0xFF) / 255.0f;
-        float green = ((color >> 16) & 0xFF) / 255.0f;
-        float blue = ((color >> 8) & 0xFF) / 255.0f;
-        float alpha = (color & 0xFF) / 255.0f;
-        colorQuad(stack, red, green, blue, alpha, x, y, width, height);
+        RezolveGuiUtil.colorQuad(stack, color, x, y, width, height);
     }
+
     protected void colorQuad(PoseStack stack, float r, float g, float b, float a, double x, double y, double width, double height) {
-        RenderSystem.disableTexture();
-        RenderSystem.disableDepthTest();
-        RenderSystem.colorMask(true, true, true, false);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tesselator.getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        bufferbuilder.vertex(stack.last().pose(), (float)x, (float)(y + height), 0.0f)                      .color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(stack.last().pose(), (float)x + (float)width, (float)(y + height), 0.0f)    .color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(stack.last().pose(), (float)x + (float)width, (float)y, 0.0f)               .color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(stack.last().pose(), (float)x, (float)y, 0.0f)                                  .color(r, g, b, a).endVertex();
-
-        tesselator.end();
-        RenderSystem.disableBlend();
-        RenderSystem.enableTexture();
-        RenderSystem.enableDepthTest();
+        RezolveGuiUtil.colorQuad(stack, r, g, b, a, x, y, width, height);
     }
 }

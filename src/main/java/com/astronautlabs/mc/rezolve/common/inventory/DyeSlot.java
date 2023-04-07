@@ -17,6 +17,6 @@ public class DyeSlot extends IngredientSlot {
 
 	@Override
 	public boolean isValidItem(ItemStack stack) {
-		return RezolveMod.instance().isDye(stack.getItem());
+		return stack.isEmpty() || RezolveMod.instance().isDye(stack.getItem());
 	}
 }

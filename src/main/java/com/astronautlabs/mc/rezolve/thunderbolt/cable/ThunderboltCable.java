@@ -202,6 +202,9 @@ public class ThunderboltCable extends Cable {
 				NetworkHooks.openScreen(serverPlayer, new SimpleMenuProvider(
 						(containerId, playerInventory, player) -> {
 							var menu = (ThunderboltCableMenu)createMenu(containerId, playerInventory, entity);
+							if (direction == null) {
+								throw new RuntimeException("Direction should never be null");
+							}
 							menu.direction = direction;
 							menu.updateState();
 							return menu;
@@ -210,10 +213,10 @@ public class ThunderboltCable extends Cable {
 				));
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(pLevel.isClientSide);
 		}
 
-		return super.use(pState, pLevel, pPos, pPlayer, pHand, pHit);
+		return InteractionResult.PASS;
 	}
 
 	@Override

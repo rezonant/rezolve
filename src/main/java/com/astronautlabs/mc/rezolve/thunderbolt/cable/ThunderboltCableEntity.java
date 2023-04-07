@@ -10,6 +10,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.IItemHandler;
 
 import java.util.HashMap;
@@ -66,20 +69,16 @@ public class ThunderboltCableEntity extends MachineEntity {
 
                 for (var face : inletBlock.getFaces()) {
                     for (var transmitTypeConfig : face.getTransmissionConfigurations()) {
-                        if (transmitTypeConfig.getMode() == TransmissionMode.PULL) {
+                        if (transmitTypeConfig.getMode().canPull()) {
                             switch (transmitTypeConfig.getType()) {
                                 case ITEMS -> {
                                     transferItem(cableNetwork, transmitTypeConfig, face, inletBlock);
                                 }
                                 case FLUIDS -> {
-                                    var handler = entity.getCapability(ForgeCapabilities.FLUID_HANDLER, face.getDirection()).orElse(null);
-                                    if (handler == null)
-                                        continue;
+                                    transferFluid(cableNetwork, transmitTypeConfig, face, inletBlock);
                                 }
                                 case ENERGY -> {
-                                    var handler = entity.getCapability(ForgeCapabilities.ENERGY, face.getDirection()).orElse(null);
-                                    if (handler == null)
-                                        continue;
+                                    transferEnergy(cableNetwork, transmitTypeConfig, face, inletBlock);
                                 }
                             }
                         }
@@ -113,7 +112,7 @@ public class ThunderboltCableEntity extends MachineEntity {
             FaceConfiguration face,
             BlockConfiguration inletBlock)
     {
-        var amount = 1;
+        var amount = 64;
         var entity = level.getBlockEntity(inletBlock.getPosition());
         var sourceHandler = RezolveCapHelper.getItemHandler(entity, face.getDirection());
         if (sourceHandler == null)
@@ -149,16 +148,128 @@ public class ThunderboltCableEntity extends MachineEntity {
                             continue;
 
                         for (int destinationSlot = 0, destSlotCount = destHandler.getSlots(); destinationSlot < destSlotCount; ++destinationSlot) {
-                            var result = destHandler.insertItem(destinationSlot, itemsToTransfer, true);
-                            if (result != null && !result.isEmpty())
-                                continue;
+                            var remainder = destHandler.insertItem(destinationSlot, itemsToTransfer, true);
+                            var acceptedAmount = itemsToTransfer.getCount() - remainder.getCount();
 
-                            // This will work
-
-                            var item = sourceHandler.extractItem(sourceSlot, itemsToTransfer.getCount(), false);
+                            var item = sourceHandler.extractItem(sourceSlot, acceptedAmount, false);
                             destHandler.insertItem(destinationSlot, item, false);
-                            return true;
+
+                            itemsToTransfer = remainder;
+
+                            if (itemsToTransfer.isEmpty())
+                                return true;
                         }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void transferFluid(
+            CableNetwork cableNetwork,
+            TransmitConfiguration transmitTypeConfig,
+            FaceConfiguration face,
+            BlockConfiguration inletBlock
+    ) {
+        var amount = 1000;
+        var entity = level.getBlockEntity(inletBlock.getPosition());
+        var sourceHandler = entity.getCapability(ForgeCapabilities.FLUID_HANDLER, face.getDirection()).orElse(null);
+        if (sourceHandler == null)
+            return;
+
+        var potentialStack = sourceHandler.drain(amount, IFluidHandler.FluidAction.SIMULATE);
+        if (potentialStack != null && !potentialStack.isEmpty()) {
+            pushFluid(inletBlock, sourceHandler, potentialStack);
+        }
+    }
+
+    private boolean pushFluid(
+            BlockConfiguration inletBlock,
+            IFluidHandler sourceHandler,
+            FluidStack fluidToTransfer
+    ) {
+        for (var dest : getExistingNetwork().getEndpoints()) {
+            if (Objects.equals(inletBlock.getPosition(), dest.getPosition()))
+                continue;
+
+            var destEntity = level.getBlockEntity(dest.getPosition());
+
+            for (var blockInterface : dest.getInterfaces()) {
+                for (var destFace : blockInterface.getFaces()) {
+                    var itemInterface = destFace.getTransmissionConfiguration(TransmissionType.FLUIDS);
+                    if (itemInterface.getMode().canPush()) {
+                        var destHandler = RezolveCapHelper.getFluidHandler(destEntity, destFace.getDirection());
+                        if (destHandler == null)
+                            continue;
+
+                        var receivableAmount = destHandler.fill(fluidToTransfer, IFluidHandler.FluidAction.SIMULATE);
+                        if (receivableAmount <= 0)
+                            continue;
+
+                        // This will work
+
+                        var actualStack = sourceHandler.drain(receivableAmount, IFluidHandler.FluidAction.EXECUTE);
+                        var filled = destHandler.fill(actualStack, IFluidHandler.FluidAction.EXECUTE);
+
+                        fluidToTransfer.setAmount(fluidToTransfer.getAmount() - filled);
+
+                        if (fluidToTransfer.isEmpty())
+                            return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void transferEnergy(
+            CableNetwork cableNetwork,
+            TransmitConfiguration transmitTypeConfig,
+            FaceConfiguration face,
+            BlockConfiguration inletBlock
+    ) {
+        var amount = 500;
+        var entity = level.getBlockEntity(inletBlock.getPosition());
+        var sourceHandler = entity.getCapability(ForgeCapabilities.ENERGY, face.getDirection()).orElse(null);
+        if (sourceHandler == null)
+            return;
+
+        var availableAmount = sourceHandler.extractEnergy(amount, true);
+        if (availableAmount > 0) {
+            pushEnergy(inletBlock, sourceHandler, availableAmount);
+        }
+    }
+
+    private boolean pushEnergy(
+            BlockConfiguration inletBlock,
+            IEnergyStorage sourceHandler,
+            int amount
+    ) {
+        for (var dest : getExistingNetwork().getEndpoints()) {
+            if (Objects.equals(inletBlock.getPosition(), dest.getPosition()))
+                continue;
+
+            var destEntity = level.getBlockEntity(dest.getPosition());
+
+            for (var blockInterface : dest.getInterfaces()) {
+                for (var destFace : blockInterface.getFaces()) {
+                    var itemInterface = destFace.getTransmissionConfiguration(TransmissionType.ENERGY);
+                    if (itemInterface.getMode().canPush()) {
+                        var destHandler = RezolveCapHelper.getEnergyStorage(destEntity, destFace.getDirection());
+                        if (destHandler == null)
+                            continue;
+
+                        var receivableAmount = destHandler.receiveEnergy(amount, true);
+
+                        var actualTransferred = sourceHandler.extractEnergy(receivableAmount, false);
+                        destHandler.receiveEnergy(actualTransferred, false);
+                        amount -= actualTransferred;
+
+                        if (amount <= 0)
+                            return true;
                     }
                 }
             }

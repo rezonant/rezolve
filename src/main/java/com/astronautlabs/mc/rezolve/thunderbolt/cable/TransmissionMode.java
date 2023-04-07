@@ -22,7 +22,7 @@ public enum TransmissionMode {
     }
 
     public boolean canPull() {
-        return this == PULL;
+        return this == PULL || this == AUTO;
     }
 
     public boolean canPush() {

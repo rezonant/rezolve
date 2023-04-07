@@ -176,7 +176,7 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 	@Override
 	public void updatePeriodically() {
 
-		ArrayList<Player> deactivatedPlayers = new ArrayList<Player>();
+		ArrayList<PlayerActivationState> deactivatedPlayers = new ArrayList<>();
 
 		// Update based on players who have activated remote UIs
 
@@ -185,7 +185,7 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 			for (PlayerActivationState state : this.activatedPlayers) {
 				var player = state.player;
 				if (player.containerMenu == player.inventoryMenu || player.containerMenu instanceof RemoteShellMenu) {
-					deactivatedPlayers.add(player);
+					deactivatedPlayers.add(state);
 					state.active = false;
 					state.activeMachine = null;
 				} else {
@@ -195,7 +195,7 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 						System.out.println("Closing UI due to lack of power.");
 
 						BlockState blockState = level.getBlockState(getBlockPos());
-						deactivatedPlayers.add(player);
+						deactivatedPlayers.add(state);
 
 						player.closeContainer();
 						openBlock(player, getBlockPos());
@@ -211,10 +211,11 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 				sendPlayerState(state);
 			}
 
-			for (Player player : deactivatedPlayers) {
+			for (var activationState : deactivatedPlayers) {
+				var player = activationState.player;
 				System.out.println("Player has closed remote inventory, clearing override...");
 				RezolveMod.clearPlayerOverridePosition(player.getUUID());
-				this.activatedPlayers.remove(player);
+				this.activatedPlayers.remove(activationState);
 			}
 		}
 	}

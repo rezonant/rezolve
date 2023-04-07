@@ -36,9 +36,11 @@ public class ThunderboltCableMenu extends MachineMenu<ThunderboltCableEntity> {
     protected void updateState() {
         super.updateState();
 
-        position = machine.getBlockPos().relative(direction);
-        targetBlockId = Block.getId(machine.getLevel().getBlockState(position));
-        configuration = machine.getBlockConfiguration(direction);
+        if (direction != null) {
+            position = machine.getBlockPos().relative(direction);
+            targetBlockId = Block.getId(machine.getLevel().getBlockState(position));
+            configuration = machine.getBlockConfiguration(direction);
+        }
     }
 
     public void setDirection(Direction direction) {

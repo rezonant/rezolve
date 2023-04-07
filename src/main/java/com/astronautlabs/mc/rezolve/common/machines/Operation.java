@@ -33,6 +33,10 @@ public abstract class Operation<T extends MachineEntity> {
 	private T machine;
 	private float progress;
 
+	public void setMachine(T machine) {
+		this.machine = machine;
+	}
+
 	public static Tag asTag(Operation value) {
 		if (value == null) {
 			var tag = new CompoundTag();

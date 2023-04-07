@@ -84,10 +84,12 @@ public class ThunderboltCableScreen extends MachineScreen<ThunderboltCableMenu> 
 
         if (selectedSide != null) {
             for (var entry : transmissionTypeButtons.entrySet()) {
-                entry.getValue().setValue(
-                        menu.configuration.getFace(selectedSide)
-                                .getTransmissionConfiguration(entry.getKey()).getMode()
-                );
+                var faceConfig = menu.configuration.getFace(selectedSide);
+                var transmitConfig = faceConfig.getTransmissionConfiguration(entry.getKey());
+
+                entry.getValue().active = transmitConfig.isSupported();
+                entry.getValue().setAlpha(transmitConfig.isSupported() ? 1 : 0.5f);
+                entry.getValue().setValue(transmitConfig.getMode());
             }
         }
     }
@@ -210,8 +212,8 @@ public class ThunderboltCableScreen extends MachineScreen<ThunderboltCableMenu> 
         rotationX += pDragX;
         rotationY -= pDragY;
 
-        totalDragDistance += pDragX;
-        totalDragDistance += pDragY;
+        totalDragDistance += Math.abs(pDragX);
+        totalDragDistance += Math.abs(pDragY);
 
         return super.mouseDragged(pMouseX, pMouseY, pButton, pDragX, pDragY);
 
@@ -315,32 +317,33 @@ public class ThunderboltCableScreen extends MachineScreen<ThunderboltCableMenu> 
 
             var cap = menu.configuration.getFace(direction);
 
+            var transmissionTypeSize = 12;
+            List<ItemStack> indicators = new ArrayList<>();
+
+            if (cap.getTransmissionConfiguration(TransmissionType.ITEMS).getMode() != TransmissionMode.NONE) {
+                indicators.add(new ItemStack(Items.CHEST));
+            }
+
+            if (cap.getTransmissionConfiguration(TransmissionType.FLUIDS).getMode() != TransmissionMode.NONE) {
+                indicators.add(new ItemStack(Items.BUCKET));
+            }
+
+            if (cap.getTransmissionConfiguration(TransmissionType.ENERGY).getMode() != TransmissionMode.NONE) {
+                indicators.add(new ItemStack(Items.REDSTONE_LAMP));
+            }
+
+            var indicatorWidth = transmissionTypeSize * indicators.size();
+            for (int i = 0, max = indicators.size(); i < max; ++i) {
+                renderItemIn3D(
+                        pPoseStack, indicators.get(i),
+                        blockFaceScale / 2 - indicatorWidth / 2 + transmissionTypeSize * i - transmissionTypeSize / 4,
+                        blockFaceScale / 2 - transmissionTypeSize / 2,
+                        0,
+                        transmissionTypeSize
+                );
+            }
+
             if (direction == hoveredSide) {
-                var transmissionTypeSize = 12;
-                List<ItemStack> indicators = new ArrayList<>();
-
-                if (cap.supportsItems()) {
-                    indicators.add(new ItemStack(Items.CHEST));
-                }
-
-                if (cap.supportsFluids()) {
-                    indicators.add(new ItemStack(Items.BUCKET));
-                }
-
-                if (cap.supportsEnergy()) {
-                    indicators.add(new ItemStack(Items.REDSTONE_LAMP));
-                }
-
-                var indicatorWidth = transmissionTypeSize * indicators.size();
-                for (int i = 0, max = indicators.size(); i < max; ++i) {
-                    renderItemIn3D(
-                            pPoseStack, indicators.get(i),
-                            blockFaceScale / 2 - indicatorWidth / 2 + transmissionTypeSize * i - transmissionTypeSize / 4,
-                            blockFaceScale / 2 - transmissionTypeSize / 2,
-                            0,
-                            transmissionTypeSize
-                    );
-                }
 
                 var labelX = blockFaceScale / 2 - (float)directionWidth / 2;
                 var labelY = blockFaceScale - font.lineHeight; // blockFaceScale / 2 - font.lineHeight / 2;
