@@ -10,9 +10,11 @@ import com.astronautlabs.mc.rezolve.bundles.bundleBuilder.BundlePatternItem;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
 import com.astronautlabs.mc.rezolve.common.util.ShiftedPlayer;
 import com.astronautlabs.mc.rezolve.thunderbolt.cable.*;
+import com.astronautlabs.mc.rezolve.thunderbolt.proxy.ProxyBlock;
 import com.astronautlabs.mc.rezolve.thunderbolt.remoteShell.*;
 import com.astronautlabs.mc.rezolve.thunderbolt.securityServer.SecurityServerEntity;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -58,11 +60,12 @@ public class RezolveMod {
 //			BlueThunderboltCable.class,
 //			GreenThunderboltCable.class,
 //			OrangeThunderboltCable.class,
-			RemoteShellBlock.class
+			RemoteShellBlock.class,
+			ProxyBlock.class
 		);
 	}
 
-	public static void setPlayerOverridePosition(UUID playerID, BlockPos pos) {
+	public static void setPlayerOverridePosition(UUID playerID, CableNetwork.LevelPosition pos) {
 		synchronized (playerOverridePositions) {
 			playerOverridePositions.put(playerID.toString(), pos);
 		}
@@ -74,7 +77,7 @@ public class RezolveMod {
 		}
 	}
 	
-	public static Map<String, BlockPos> playerOverridePositions = new HashMap<String, BlockPos>();
+	public static Map<String, CableNetwork.LevelPosition> playerOverridePositions = new HashMap<>();
 	
 	/**
 	 * Determine if the player is allowed to interact with the given UI container.
@@ -91,7 +94,7 @@ public class RezolveMod {
 			if (!playerOverridePositions.containsKey(player.getStringUUID()))
 				return false;
 
-			BlockPos overriddenPosition = playerOverridePositions.get(player.getStringUUID());
+			var overriddenPosition = playerOverridePositions.get(player.getStringUUID());
 			return container.stillValid(new ShiftedPlayer(player, overriddenPosition));
 		}
 	}
@@ -212,6 +215,9 @@ public class RezolveMod {
 	}
 
 	public static InteractionResult useSecurely(Block block, BlockState state, Level level, BlockPos blockPos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+		if (level.isClientSide)
+			return block.use(state, level, blockPos, player, hand, hitResult);
+
 		var securityServer = RezolveMod.getGoverningSecurityServer(level, blockPos);
 		if (securityServer != null && !securityServer.canPlayerUse(player, blockPos)) {
 			if (!level.isClientSide) {

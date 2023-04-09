@@ -4,7 +4,7 @@ import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.blocks.WithBlockEntity;
 import com.astronautlabs.mc.rezolve.common.gui.WithMenu;
 import com.astronautlabs.mc.rezolve.common.registry.RegistryId;
-import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.SculkCatalystBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
@@ -23,6 +24,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -295,18 +297,23 @@ public class ThunderboltCable extends Cable {
 
 		if (world.getBlockEntity(pos) instanceof ThunderboltCableEntity cableEntity) {
 			for (var endpoint : cableEntity.getNetwork().getEndpoints()) {
-				BlockPos otherPos = endpoint.getPosition();
-				BlockEntity entity = world.getBlockEntity(otherPos);
-				if (entity == null)
-					continue;
-
-				if (entity instanceof ICableEndpoint) {
-					((ICableEndpoint) entity).onCableUpdate();
+				if (endpoint.getBlockEntity() instanceof ICableEndpoint cableEndpoint) {
+					cableEndpoint.onCableUpdate();
 				}
 			}
 		}
 	}
 
+	@Nullable
+	@Override
+	public <T extends BlockEntity> GameEventListener getListener(ServerLevel pLevel, T pBlockEntity) {
+		return pBlockEntity instanceof ThunderboltCableEntity ? (ThunderboltCableEntity)pBlockEntity : null;
+	}
+
+	@Override
+	public void destroy(LevelAccessor pLevel, BlockPos pPos, BlockState pState) {
+		super.destroy(pLevel, pPos, pState);
+	}
 
 	@Override
 	public BlockState updateShape(BlockState oldBS, Direction pDirection, BlockState pNeighborState, LevelAccessor level, BlockPos pos, BlockPos pNeighborPos) {
@@ -338,6 +345,10 @@ public class ThunderboltCable extends Cable {
 
 	public boolean canConnectTo(BlockGetter world, BlockPos pos) {
 		BlockState st = world.getBlockState(pos);
+
+		if (st.getBlock() == Blocks.NETHER_PORTAL)
+			return true;
+
 		return st != null && st.getBlock() == this;
 	}
 

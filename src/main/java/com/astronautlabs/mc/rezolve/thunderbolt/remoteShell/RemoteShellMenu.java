@@ -40,8 +40,8 @@ public class RemoteShellMenu extends MachineMenu<RemoteShellEntity> {
 		hasDatabase = machine.getDatabase() != null;
 	}
 
-	public void activate(BlockPos activatedMachine, Player player) {
-		var packet = new RemoteShellActivatePacket(activatedMachine, player.getStringUUID());
+	public void activate(MachineListing listing, Player player) {
+		var packet = new RemoteShellActivatePacket(listing.getLevel(), listing.getBlockPos(), player.getStringUUID());
 		packet.setMenu(this);
 		packet.sendToServer();
 	}
@@ -60,13 +60,13 @@ public class RemoteShellMenu extends MachineMenu<RemoteShellEntity> {
 
 		for (var endpoint : this.machine.getConnectedMachines()) {
 			var machinePos = endpoint.getPosition();
-			var machineBlockState = this.machine.getLevel().getBlockState(machinePos);
+			var machineBlockState = endpoint.getBlockState();
 			var name = machineBlockState.getBlock().getName().getString();
 			if (db != null)
 				name = db.getMachineName(machinePos);
 			var item = new ItemStack(machineBlockState.getBlock().asItem(), 1);
 
-			searchResults.machines.add(new MachineListing(machinePos, name, item));
+			searchResults.machines.add(new MachineListing(endpoint.getLevelKey(), machinePos, name, item));
 		}
 	}
 
@@ -85,7 +85,7 @@ public class RemoteShellMenu extends MachineMenu<RemoteShellEntity> {
 	@Override
 	public void receivePacketOnServer(RezolvePacket rezolvePacket) {
 		if (rezolvePacket instanceof RemoteShellActivatePacket activation) {
-			machine.activate(activation.getActivatedMachine(), machine.getLevel().getPlayerByUUID(UUID.fromString(activation.getPlayerId())));
+			machine.activate(activation.getLevel(), activation.getActivatedMachine(), machine.getLevel().getPlayerByUUID(UUID.fromString(activation.getPlayerId())));
 		} else if (rezolvePacket instanceof RemoteShellRenameMachinePacket rename) {
 			machine.renameMachine(rename.getMachinePos(), rename.getName());
 		} else if (rezolvePacket instanceof RemoteShellMenuReturnPacket ret) {

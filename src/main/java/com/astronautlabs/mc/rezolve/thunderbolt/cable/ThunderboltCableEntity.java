@@ -1,5 +1,6 @@
 package com.astronautlabs.mc.rezolve.thunderbolt.cable;
 
+import com.astronautlabs.mc.rezolve.common.capabilities.ResourceHandler;
 import com.astronautlabs.mc.rezolve.common.machines.MachineEntity;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
 import com.astronautlabs.mc.rezolve.common.util.RezolveCapHelper;
@@ -7,8 +8,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.*;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fluids.FluidStack;
@@ -18,8 +26,11 @@ import net.minecraftforge.items.IItemHandler;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public class ThunderboltCableEntity extends MachineEntity {
+    private static final Capability<ResourceHandler> RESOURCE_HANDLER_CAPABILITY = CapabilityManager.get(new CapabilityToken<>(){});
+
     public ThunderboltCableEntity(BlockPos pPos, BlockState pBlockState) {
         super(RezolveRegistry.blockEntityType(ThunderboltCableEntity.class), pPos, pBlockState);
     }
@@ -60,6 +71,8 @@ public class ThunderboltCableEntity extends MachineEntity {
     public void updatePeriodically() {
         if (isInterface) {
             var cableNetwork = getNetwork();
+            if (cableNetwork == null)
+                return;
 
             for (var inletBlock : configuration.values()) {
                 var pos = inletBlock.getPosition();
@@ -69,6 +82,9 @@ public class ThunderboltCableEntity extends MachineEntity {
 
                 for (var face : inletBlock.getFaces()) {
                     for (var transmitTypeConfig : face.getTransmissionConfigurations()) {
+                        if (!transmitTypeConfig.isSupported())
+                            continue;
+
                         if (transmitTypeConfig.getMode().canPull()) {
                             switch (transmitTypeConfig.getType()) {
                                 case ITEMS -> {
@@ -94,7 +110,7 @@ public class ThunderboltCableEntity extends MachineEntity {
         super.adoptNetwork(network);
 
         for (var config : configuration.values()) {
-            var endpoint = network.getEndpoint(config.getPosition());
+            var endpoint = network.getEndpoint(getLevel(), config.getPosition());
             if (endpoint != null)
                 endpoint.addInterface(getBlockPos(), config);
         }
@@ -114,15 +130,15 @@ public class ThunderboltCableEntity extends MachineEntity {
     {
         var amount = 64;
         var entity = level.getBlockEntity(inletBlock.getPosition());
-        var sourceHandler = RezolveCapHelper.getItemHandler(entity, face.getDirection());
-        if (sourceHandler == null)
-            return;
 
-        for (int sourceSlot = 0, max = sourceHandler.getSlots(); sourceSlot < max; ++sourceSlot) {
-            var potentialStack = sourceHandler.extractItem(sourceSlot, amount, true);
-            if (potentialStack != null && !potentialStack.isEmpty()) {
-                if (pushItem(inletBlock, sourceHandler, sourceSlot, potentialStack))
-                    return;
+        var itemHandler = RezolveCapHelper.getItemHandler(entity, face.getDirection());
+        if (itemHandler != null) {
+            for (int sourceSlot = 0, max = itemHandler.getSlots(); sourceSlot < max; ++sourceSlot) {
+                var potentialStack = itemHandler.extractItem(sourceSlot, amount, true);
+                if (potentialStack != null && !potentialStack.isEmpty()) {
+                    if (pushItem(inletBlock, itemHandler, sourceSlot, potentialStack))
+                        return;
+                }
             }
         }
     }
@@ -134,10 +150,10 @@ public class ThunderboltCableEntity extends MachineEntity {
             ItemStack itemsToTransfer
     ) {
         for (var dest : getExistingNetwork().getEndpoints()) {
-            if (Objects.equals(inletBlock.getPosition(), dest.getPosition()))
+            if (dest.is(inletBlock.getPosition()))
                 continue;
 
-            var destEntity = level.getBlockEntity(dest.getPosition());
+            var destEntity = dest.getBlockEntity();
 
             for (var blockInterface : dest.getInterfaces()) {
                 for (var destFace : blockInterface.getFaces()) {
@@ -191,10 +207,10 @@ public class ThunderboltCableEntity extends MachineEntity {
             FluidStack fluidToTransfer
     ) {
         for (var dest : getExistingNetwork().getEndpoints()) {
-            if (Objects.equals(inletBlock.getPosition(), dest.getPosition()))
+            if (dest.is(inletBlock.getPosition()))
                 continue;
 
-            var destEntity = level.getBlockEntity(dest.getPosition());
+            var destEntity = dest.getBlockEntity();
 
             for (var blockInterface : dest.getInterfaces()) {
                 for (var destFace : blockInterface.getFaces()) {
@@ -248,11 +264,15 @@ public class ThunderboltCableEntity extends MachineEntity {
             IEnergyStorage sourceHandler,
             int amount
     ) {
-        for (var dest : getExistingNetwork().getEndpoints()) {
-            if (Objects.equals(inletBlock.getPosition(), dest.getPosition()))
+        var network = getExistingNetwork();
+        if (network == null)
+            return false;
+
+        for (var dest : network.getEndpoints()) {
+            if (dest.is(inletBlock.getPosition()))
                 continue;
 
-            var destEntity = level.getBlockEntity(dest.getPosition());
+            var destEntity = dest.getBlockEntity();
 
             for (var blockInterface : dest.getInterfaces()) {
                 for (var destFace : blockInterface.getFaces()) {

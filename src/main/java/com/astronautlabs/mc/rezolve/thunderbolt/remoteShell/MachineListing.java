@@ -1,25 +1,34 @@
 package com.astronautlabs.mc.rezolve.thunderbolt.remoteShell;
 
-import com.astronautlabs.mc.rezolve.common.util.RezolveTagUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.INBTSerializable;
 
 public class MachineListing implements INBTSerializable<CompoundTag> {
     public MachineListing() {
     }
 
-    public MachineListing(BlockPos pos, String name, ItemStack item) {
+    public MachineListing(ResourceKey<Level> level, BlockPos pos, String name, ItemStack item) {
+        this.level = level;
         this.blockPos = pos;
         this.name = name;
         this.item = item;
     }
 
-    BlockPos blockPos;
-    String name;
-    ItemStack item;
+    private ResourceKey<Level> level;
+    private BlockPos blockPos;
+    private String name;
+    private ItemStack item;
+
+    public ResourceKey<Level> getLevel() {
+        return level;
+    }
 
     BlockPos getBlockPos() {
         return blockPos;
@@ -36,6 +45,7 @@ public class MachineListing implements INBTSerializable<CompoundTag> {
     @Override
     public CompoundTag serializeNBT() {
         var tag = new CompoundTag();
+        tag.putString("level", level.location().toString());
         tag.put("blockPos", NbtUtils.writeBlockPos(blockPos));
         tag.putString("name", name);
         tag.put("item", item.serializeNBT());
@@ -44,6 +54,12 @@ public class MachineListing implements INBTSerializable<CompoundTag> {
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
+        if (nbt.contains("level")) {
+            level = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString("level")));
+        } else {
+            level = Level.OVERWORLD;
+        }
+
         blockPos = NbtUtils.readBlockPos(nbt.getCompound("blockPos"));
         name = nbt.getString("name");
         item = ItemStack.of(nbt.getCompound("item"));

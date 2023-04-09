@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
@@ -18,6 +19,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.BlockPositionSource;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.gameevent.GameEventListener;
+import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -29,8 +34,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class MachineEntity extends BlockEntityBase implements Container, IMachineInventory, ICapabilityProvider, RezolvePacketReceiver {
+public class MachineEntity extends BlockEntityBase implements Container, IMachineInventory, ICapabilityProvider, RezolvePacketReceiver, GameEventListener {
 	protected Operation currentOperation;
 	protected EnergyStorage energy;
 	protected MachineItemHandler itemHandler;
@@ -70,10 +76,55 @@ public class MachineEntity extends BlockEntityBase implements Container, IMachin
 	private List<CableNetwork> networks = new ArrayList<>();
 
 	@Override
-	public void setRemoved() {
-		super.setRemoved();
-		if (actsAsCable() && getExistingNetwork() != null)
-			getExistingNetwork().invalidate();
+	public PositionSource getListenerSource() {
+		return new BlockPositionSource(getBlockPos());
+	}
+
+	@Override
+	public int getListenerRadius() {
+		return 5;
+	}
+
+	@Override
+	public boolean handleGameEvent(ServerLevel pLevel, GameEvent.Message pEventMessage) {
+		if (pEventMessage.gameEvent() == GameEvent.BLOCK_DESTROY) {
+
+			// Vec3.atCenterOf() always just adds 0.5 to all components, which means if you simply truncate to int
+			// you will get the wrong result. Consider a block at Z -60. -60 + 0.5 = -59.5. Truncate(-59.5) = -59
+			// But that's not the block position.
+
+			var blockPos = new BlockPos(
+					(int)(pEventMessage.source().x() - 0.5),
+					(int)(pEventMessage.source().y() - 0.5),
+					(int)(pEventMessage.source().z() - 0.5)
+			);
+			if (Objects.equals(getBlockPos(), blockPos)) {
+				// uh oh, this is me
+				wasDestroyed();
+			}
+
+			var networks = getNetworks();
+			for (var network : networks) {
+				var endpoint = network.getEndpoint(getLevel(), blockPos);
+				if (endpoint != null) {
+					// This block is an endpoint on the network, so we need to rebuild the network to address this change.
+					network.invalidate();
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Called when the corresponding block is destroyed, but not when the block entity is unloaded.
+	 */
+	protected void wasDestroyed() {
+		// Invalidate all connected networks
+		var networks = getNetworks();
+		for (var network : networks) {
+			network.invalidate();
+		}
 	}
 
 	/**
@@ -94,8 +145,23 @@ public class MachineEntity extends BlockEntityBase implements Container, IMachin
 	 * @param network
 	 */
 	public void adoptNetwork(CableNetwork network) {
-		if (actsAsCable())
+		if (networks.contains(network))
+			return;
+
+		if (actsAsCable()) {
+			// A cable can only ever be connected to a single network.
+			// If another network is asking us to adopt it, then that means any existing network we
+			// were associated with is no longer valid. In most cases, the existing network will have already
+			// been invalidated, because of neighbor checking, block destroyed game events etc. However,
+			// since Rezolve cables work across dimensions, it is possible for activity on the other end of the
+			// dimensional link to cause a network to boot, and then traverse into the other dimension where a cable
+			// network is already booted.
+
+			for (var oldNetwork : networks)
+				oldNetwork.invalidate();
+
 			networks.clear();
+		}
 		this.networks.add(network);
 	}
 

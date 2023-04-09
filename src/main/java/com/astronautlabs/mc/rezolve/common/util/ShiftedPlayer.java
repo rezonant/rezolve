@@ -1,5 +1,6 @@
 package com.astronautlabs.mc.rezolve.common.util;
 
+import com.astronautlabs.mc.rezolve.thunderbolt.cable.CableNetwork;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 
@@ -8,8 +9,13 @@ import net.minecraft.world.entity.player.Player;
  */
 public class ShiftedPlayer extends Player {
 
-    public ShiftedPlayer(Player wrappedPlayer, BlockPos fakePosition) {
-        super(wrappedPlayer.getLevel(), fakePosition, 0, wrappedPlayer.getGameProfile(), wrappedPlayer.getProfilePublicKey());
+    public ShiftedPlayer(Player wrappedPlayer, CableNetwork.LevelPosition fakePosition) {
+        super(
+                wrappedPlayer.getLevel().getServer().getLevel(fakePosition.getLevelKey()),
+                fakePosition.getPosition(),
+                0, wrappedPlayer.getGameProfile(), wrappedPlayer.getProfilePublicKey()
+        );
+
         this.wrappedPlayer = wrappedPlayer;
     }
 

@@ -134,13 +134,13 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 
 		this.selectedMachine = machine;
 
-		ItemStack stack = machine.item;
+		ItemStack stack = machine.getItem();
 
     	if (stack != null) {
 
     		// Set UI properties based on this machine
     		this.selectedMachineSecure = false;
-    		this.selectedMachineName = machine.name;
+    		this.selectedMachineName = machine.getName();
 
     		// Set fields
 
@@ -178,8 +178,8 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 		    int y = listY + topPos + this.listScrollPosition;
 
 		    for (var machine : menu.searchResults.machines) {
-				BlockPos pos = machine.blockPos;
-		    	ItemStack stack = machine.item;
+				BlockPos pos = machine.getBlockPos();
+		    	ItemStack stack = machine.getItem();
 		    	if (stack == null)
 		    		continue;
 //		    	if (!this.matchesSearch(pos))
@@ -201,8 +201,8 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 		    int y = listY + topPos + this.listScrollPosition;
 
 		    for (var machine : menu.searchResults.machines) {
-				BlockPos pos = machine.blockPos;
-		    	ItemStack stack = machine.item;
+				BlockPos pos = machine.getBlockPos();
+		    	ItemStack stack = machine.getItem();
 
 		    	if (stack == null)
 		    		continue;
@@ -210,7 +210,7 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 //		    		continue;
 
 		    	if (x < mouseX && mouseX < x + slotWidth && y < mouseY && mouseY < y + slotHeight && mouseY > listY + topPos && mouseY < listY + listHeight + topPos) {
-		    		this.activateMachine(pos);
+		    		this.activateMachine(machine);
 		    		return true;
 		    	}
 
@@ -222,8 +222,8 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 		return super.mouseClicked(mouseX, mouseY, mouseButton);
 	}
 
-	private void activateMachine(BlockPos pos) {
-		menu.activate(pos, minecraft.player);
+	private void activateMachine(MachineListing machine) {
+		menu.activate(machine, minecraft.player);
 	}
 
     int iconWidth = 18;
@@ -278,7 +278,7 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 	    int y = listY + scrollOffset;
 
 	    for (var machine : this.menu.searchResults.machines) {
-	    	ItemStack stack = machine.item;
+	    	ItemStack stack = machine.getItem();
 	    	if (stack == null)
 	    		continue;
 //	    	if (!this.matchesSearch(pos))
@@ -302,8 +302,8 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 
 	    for (var machine : menu.searchResults.machines) {
 
-			BlockPos pos = machine.blockPos;
-	    	ItemStack stack = machine.item;
+			BlockPos pos = machine.getBlockPos();
+	    	ItemStack stack = machine.getItem();
 	    	if (stack == null)
 	    		continue;
 
@@ -316,7 +316,7 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 		    	String name = stack.getDisplayName().getString();
 		    	String subName = pos.getX()+", "+pos.getY()+", "+pos.getZ();
 
-				String customName = machine.name;
+				String customName = machine.getName();
 				if (!Objects.equals(name, customName)) {
 					subName = name+" ["+subName+"]";
 					name = customName;
@@ -368,8 +368,8 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 
         if (this.selectedMachine != null) {
 			var machine = this.selectedMachine;
-			BlockPos pos = machine.blockPos;
-            ItemStack stack = machine.item;
+			BlockPos pos = machine.getBlockPos();
+            ItemStack stack = machine.getItem();
 
             if (stack != null) {
                 String stackName = RezolveItemUtil.getName(stack);

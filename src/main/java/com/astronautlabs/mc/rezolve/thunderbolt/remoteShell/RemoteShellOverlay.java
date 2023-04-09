@@ -47,8 +47,8 @@ public class RemoteShellOverlay implements IGuiOverlay {
 		int height = mc.getWindow().getGuiScaledHeight();
 
 		MachineListing machine = state.activeMachine;
-    	BlockPos pos = machine.blockPos;
-    	ItemStack stack = machine.item;
+    	BlockPos pos = machine.getBlockPos();
+    	ItemStack stack = machine.getItem();
 
     	int x = 4;
     	int y = 4;

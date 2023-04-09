@@ -1,38 +1,40 @@
 package com.astronautlabs.mc.rezolve.thunderbolt.remoteShell;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.machines.MachineEntity;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
-import com.astronautlabs.mc.rezolve.thunderbolt.cable.CableEndpoint;
 import com.astronautlabs.mc.rezolve.thunderbolt.cable.CableNetwork;
-import com.astronautlabs.mc.rezolve.thunderbolt.cable.ICableEndpoint;
-import com.astronautlabs.mc.rezolve.thunderbolt.cable.ThunderboltCable;
 import com.astronautlabs.mc.rezolve.thunderbolt.databaseServer.DatabaseServerEntity;
 import com.astronautlabs.mc.rezolve.thunderbolt.remoteShell.packets.RemoteShellStatePacket;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.network.NetworkHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import javax.annotation.Nonnull;
 
 public class RemoteShellEntity extends MachineEntity implements ContainerListener {
 	private static final Logger LOGGER = LogManager.getLogger(RezolveMod.ID);
@@ -87,8 +89,8 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 //        }
     }
 
-	public CableEndpoint[] getConnectedMachines() {
-		List<CableEndpoint> machines = new ArrayList<>();
+	public CableNetwork.Endpoint[] getConnectedMachines() {
+		List<CableNetwork.Endpoint> machines = new ArrayList<>();
 
 		for (var network : getNetworks()) {
 			machines.addAll(List.of(network.getEndpoints()));
@@ -96,11 +98,11 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 
 		machines = machines.stream().filter(m -> !m.equals(getBlockPos())).toList();
 
-		return machines.toArray(new CableEndpoint[machines.size()]);
+		return machines.toArray(new CableNetwork.Endpoint[machines.size()]);
 	}
 
 	class PlayerActivationState {
-		PlayerActivationState(Player player, boolean active, MachineListing activeMachine) {
+		PlayerActivationState(Player player, boolean active, @Nonnull MachineListing activeMachine) {
 			this.player = player;
 			this.active = active;
 			this.activeMachine = activeMachine;
@@ -112,28 +114,49 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 	}
 
 	List<PlayerActivationState> activatedPlayers = new ArrayList<>();
-	BlockPos clientActivatedMachine = null;
 
-	public BlockPos getClientActivatedMachine() {
-		return this.clientActivatedMachine;
+	private MinecraftServer getServer() {
+		return getLevel().getServer();
 	}
 
-	public void activate(BlockPos machinePos, Player player) {
+	public void activate(ResourceKey<Level> levelKey, BlockPos machinePos, Player player) {
 		if (this.energy.extractEnergy(this.openEnergyCost, true) < this.openEnergyCost) {
 			return;
 		}
 
+		// Ensure that the passed location is actually on an attached cable network before proceeding.
+		CableNetwork.Endpoint endpoint = null;
+
+		for (var network : getNetworks()) {
+			var potentialEndpoint = network.getEndpoint(levelKey, machinePos);
+			if (potentialEndpoint != null) {
+				endpoint = potentialEndpoint;
+				break;
+			}
+		}
+
+		if (endpoint == null)
+			return;
+
 		this.energy.extractEnergy(this.openEnergyCost, false);
 
-		BlockState machineBlockState = this.getLevel().getBlockState(machinePos);
+		// We add an override entry for this player to the endpoint location (in the specific level)
+		// so that Rezolve's mixin can do container stillValid() checks against the simulated location,
+		// so that any checks not specifically related to player location will still function as expected.
 
-		RezolveMod.setPlayerOverridePosition(player.getUUID(), machinePos);
+		RezolveMod.setPlayerOverridePosition(
+				player.getUUID(),
+				endpoint.getLevelPosition()
+		);
 
-		System.out.println("Activating block using Remote Shell: "+machineBlockState.getBlock().getName().toString());
+		System.out.println("Activating block using Remote Shell: "+endpoint.getBlock().getName().toString());
 
 		AbstractContainerMenu existingContainer = player.containerMenu;
 
-		openBlock(player, machinePos);
+		var chunkPos = new ChunkPos(endpoint.getPosition());
+
+		ForgeChunkManager.forceChunk((ServerLevel)endpoint.getLevel(), RezolveMod.ID, player, chunkPos.x, chunkPos.z, true, true);
+		openBlock(player, endpoint.getLevel(), endpoint.getPosition());
 
 		if (existingContainer != player.containerMenu) {
 			var remoteContainer = player.containerMenu;
@@ -142,13 +165,20 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 
 			synchronized (this.activatedPlayers) {
 				var activation = this.activatedPlayers.stream().filter(s -> s.player == player).findFirst().orElse(null);
+				var machineListing = new MachineListing(
+						endpoint.getLevelKey(),
+						machinePos,
+						"TODO",
+						new ItemStack(endpoint.getBlockItem(), 1)
+				);
 
 				if (activation == null) {
-					this.activatedPlayers.add(activation = new PlayerActivationState(player, true, getMachineAt(machinePos)));
+					this.activatedPlayers.add(activation = new PlayerActivationState(player, true, machineListing));
 				}
 
 				activation.active = true;
-				activation.activeMachine = new MachineListing(machinePos, "TODO", new ItemStack(machineBlockState.getBlock().asItem(), 1));
+				activation.activeMachine = machineListing;
+
 				sendPlayerState(activation);
 			}
 
@@ -159,14 +189,10 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 
 	}
 
-	MachineListing getMachineAt(BlockPos pos) {
-		return new MachineListing(pos, "TODO", new ItemStack(getBlockState().getBlock().asItem(), 1));
-	}
-
-	private void openBlock(Player player, BlockPos activatedMachine) {
-		getLevel().getBlockState(activatedMachine).use(
-			getLevel(), player, InteractionHand.MAIN_HAND,
-			new BlockHitResult(Vec3.atCenterOf(activatedMachine), Direction.UP, activatedMachine, false)
+	private void openBlock(Player player, Level level, BlockPos pos) {
+		level.getBlockState(pos).use(
+			level, player, InteractionHand.MAIN_HAND,
+			new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false)
 		);
 	}
 
@@ -186,8 +212,6 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 				var player = state.player;
 				if (player.containerMenu == player.inventoryMenu || player.containerMenu instanceof RemoteShellMenu) {
 					deactivatedPlayers.add(state);
-					state.active = false;
-					state.activeMachine = null;
 				} else {
 					// Take a constant power draw
 					if (this.getStoredEnergy() < this.constantDrawCost) {
@@ -198,10 +222,7 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 						deactivatedPlayers.add(state);
 
 						player.closeContainer();
-						openBlock(player, getBlockPos());
-
-						state.active = false;
-						state.activeMachine = null;
+						openBlock(player, getLevel(), getBlockPos());
 					} else {
 						energy.extractEnergy(this.constantDrawCost, false);
 						setChanged();
@@ -215,6 +236,14 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 				var player = activationState.player;
 				System.out.println("Player has closed remote inventory, clearing override...");
 				RezolveMod.clearPlayerOverridePosition(player.getUUID());
+
+				var level = getServer().getLevel(activationState.activeMachine.getLevel());
+				var chunkPos = new ChunkPos(activationState.activeMachine.getBlockPos());
+
+				ForgeChunkManager.forceChunk(level, RezolveMod.ID, activationState.player, chunkPos.x, chunkPos.z, false, false);
+
+				activationState.active = false;
+				activationState.activeMachine = null;
 				this.activatedPlayers.remove(activationState);
 			}
 		}
