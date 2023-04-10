@@ -12,16 +12,26 @@ public class BundleBuilderScreen extends MachineScreen<BundleBuilderMenu> {
 
 	public BundleBuilderScreen(BundleBuilderMenu menu, Inventory playerInv, Component title) {
 		super(menu, playerInv, title, "rezolve:textures/gui/container/bundle_builder_gui.png", 218, 212);
+
+		inventoryLabelX = 30;
+		inventoryLabelY = 116;
+		titleLabelX = 10;
+		titleLabelY = 8;
 	}
 
 	@Override
 	protected void init() {
 		super.init();
 
-		inventoryLabelX = 30;
-		inventoryLabelY = 116;
-		titleLabelX = 10;
-		titleLabelY = 8;
+		addEnergyMeter(leftPos + 191, topPos + 17, 88);
+		//addProgressIndicator(leftPos + 117, topPos + 60, Component.literal(""), () -> 0.0);
+		addSlotGrid(Component.translatable("screens.rezolve.items"), 3, 3, 9);
+		addSlot(Component.translatable("screens.rezolve.in"), BundleBuilderEntity.PATTERN_INPUT_SLOT, true);
+		addSlot(Component.translatable("screens.rezolve.out"), BundleBuilderEntity.PATTERN_OUTPUT_SLOT, true);
+		addSlot(Component.translatable("screens.rezolve.dye"), BundleBuilderEntity.DYE_SLOT, true);
+
+		addLabel(Component.translatable("screens.rezolve.name"), leftPos + 83, topPos + 41 - font.lineHeight - 4);
+
 		nameField = new EditBox(font, leftPos + 83, topPos + 41, 88, 13, Component.translatable("screens.rezolve.name"));
 		nameField.setMaxLength(23);
 		addRenderableWidget(nameField);
@@ -61,24 +71,5 @@ public class BundleBuilderScreen extends MachineScreen<BundleBuilderMenu> {
 			menu.setPatternName(this.nameField.getValue());
 
 		return result;
-	}
-
-	@Override
-	public void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-		super.renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
-		//String s = this.entity.getDisplayName().getUnformattedText();
-		//this.fontRendererObj.drawString(s, 88 - this.fontRendererObj.getStringWidth(s) / 2, 6, 4210752);            //#404040
-		//this.fontRendererObj.drawString(this.playerInv.getDisplayName().getUnformattedText(), 8, 72, 4210752);      //#404040
-
-		int rfBarX = 191;
-		int rfBarY = 17;
-		int rfBarHeight = 88;
-		int rfBarWidth = 14;
-
-		double usedHeight = menu.energyStored / (double)menu.energyCapacity * rfBarHeight;
-		colorQuad(pPoseStack, 0, 0, 0, 1, rfBarX, rfBarY, rfBarWidth, rfBarHeight - usedHeight);
-
-		this.colorQuad(pPoseStack, 1, 0, 0, 0, rfBarX, rfBarY, rfBarX + rfBarWidth, rfBarY + rfBarHeight);
-		this.colorQuad(pPoseStack, 1, 1, 0, 0, rfBarX, rfBarY + rfBarHeight - usedHeight, rfBarX + rfBarWidth, rfBarY + rfBarHeight);
 	}
 }

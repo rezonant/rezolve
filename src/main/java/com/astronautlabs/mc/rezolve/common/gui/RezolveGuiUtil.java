@@ -12,9 +12,20 @@ public class RezolveGuiUtil {
     }
 
     public static void textureQuad(PoseStack stack, ResourceLocation location, double x, double y, double width, double height, float minU, float minV, float maxU, float maxV) {
+        textureQuad(stack, location, Color.WHITE, x, y, width, height, minU, minV, maxU, maxV);
+    }
+
+    public static void textureQuad(
+            PoseStack stack, ResourceLocation location,
+            Color color,
+            double x, double y,
+            double width, double height,
+            float minU, float minV,
+            float maxU, float maxV
+    ) {
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderTexture(0, location);
-        RenderSystem.setShaderColor(1, 1, 1, 1);
+        color.applyToShader();
 
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
@@ -40,14 +51,14 @@ public class RezolveGuiUtil {
     }
 
     public static void colorQuad(PoseStack stack, int color, double x, double y, double width, double height) {
-        float red = ((color >> 24) & 0xFF) / 255.0f;
-        float green = ((color >> 16) & 0xFF) / 255.0f;
-        float blue = ((color >> 8) & 0xFF) / 255.0f;
-        float alpha = (color & 0xFF) / 255.0f;
-        colorQuad(stack, red, green, blue, alpha, x, y, width, height);
+        colorQuad(stack, Color.argb(color), x, y, width, height);
     }
 
     public static void colorQuad(PoseStack stack, float r, float g, float b, float a, double x, double y, double width, double height) {
+        colorQuad(stack, Color.of(r, g, b, a), x, y, width, height);
+    }
+
+    public static void colorQuad(PoseStack stack, Color color, double x, double y, double width, double height) {
         RenderSystem.disableTexture();
         RenderSystem.disableDepthTest();
         RenderSystem.colorMask(true, true, true, false);
@@ -58,10 +69,23 @@ public class RezolveGuiUtil {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        bufferbuilder.vertex(stack.last().pose(), (float)x, (float)(y + height), 0.0f)                      .color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(stack.last().pose(), (float)x + (float)width, (float)(y + height), 0.0f)    .color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(stack.last().pose(), (float)x + (float)width, (float)y, 0.0f)               .color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(stack.last().pose(), (float)x, (float)y, 0.0f)                                  .color(r, g, b, a).endVertex();
+
+        bufferbuilder.vertex(stack.last().pose(), (float)x, (float)(y + height), 0.0f)
+                .color(color.r, color.g, color.b, color.a)
+                .endVertex();
+
+        bufferbuilder.vertex(stack.last().pose(), (float)x + (float)width, (float)(y + height), 0.0f)
+                .color(color.r, color.g, color.b, color.a)
+                .endVertex();
+
+        bufferbuilder.vertex(stack.last().pose(), (float)x + (float)width, (float)y, 0.0f)
+                .color(color.r, color.g, color.b, color.a)
+                .endVertex();
+
+        bufferbuilder.vertex(stack.last().pose(), (float)x, (float)y, 0.0f)
+                .color(color.r, color.g, color.b, color.a)
+                .endVertex();
+
 
         tesselator.end();
         RenderSystem.disableBlend();

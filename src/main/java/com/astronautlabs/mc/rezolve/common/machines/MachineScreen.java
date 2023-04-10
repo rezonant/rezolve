@@ -1,9 +1,6 @@
 package com.astronautlabs.mc.rezolve.common.machines;
 
-import com.astronautlabs.mc.rezolve.common.gui.Label;
-import com.astronautlabs.mc.rezolve.common.gui.Meter;
-import com.astronautlabs.mc.rezolve.common.gui.RezolveGuiUtil;
-import com.astronautlabs.mc.rezolve.common.gui.SlotWidget;
+import com.astronautlabs.mc.rezolve.common.gui.*;
 import com.astronautlabs.mc.rezolve.common.inventory.BaseSlot;
 import com.astronautlabs.mc.rezolve.common.inventory.IngredientSlot;
 import com.astronautlabs.mc.rezolve.common.inventory.OutputSlot;
@@ -26,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerScreen<MenuT> {
     protected MachineScreen(MenuT menu, Inventory playerInventory, Component pTitle, String guiBackgroundResource, int width, int height) {
@@ -58,11 +56,33 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
         return addRenderableWidget(new Label(font, content, x, y, width));
     }
 
+    protected ProgressIndicator addOperationProgressIndicator(int x, int y) {
+        return addProgressIndicator(x, y, Component.translatable("rezolve.screens.progress"), () -> (double)menu.progress);
+    }
+
+    protected ProgressIndicator addProgressIndicator(int x, int y, Component label, Supplier<Double> stateProvider) {
+        return addRenderableWidget(new ProgressIndicator(x, y, label) {
+            @Override
+            protected void updateState() {
+                super.updateState();
+                setValue(stateProvider.get());
+            }
+        });
+    }
+
     protected void addSlot(Component label, int slotId) {
-        addSlotGrid(label, 1, slotId, 1);
+        addSlotGrid(label, 1, slotId, 1, false);
+    }
+
+    protected void addSlot(Component label, int slotId, boolean bottom) {
+        addSlotGrid(label, 1, slotId, 1, bottom);
     }
 
     protected void addSlotGrid(Component label, int breadth, int firstSlotId, int count) {
+        addSlotGrid(label, breadth, firstSlotId, count, false);
+    }
+
+    protected void addSlotGrid(Component label, int breadth, int firstSlotId, int count, boolean bottom) {
         var labelWidth = font.width(label);
         var slotWidth = 18;
         var gridWidth = breadth * slotWidth;
@@ -72,6 +92,10 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
 
         if (labelWidth < gridWidth) {
             labelX = firstSlot.x + gridWidth / 2 - labelWidth / 2;
+        }
+
+        if (bottom) {
+            labelY = firstSlot.y + slotWidth + 5;
         }
 
         addLabel(label, leftPos + labelX, topPos + labelY, labelWidth + 20);
@@ -343,7 +367,7 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
 
         // Underlay fade
 
-        colorQuad(pPoseStack, 0x00000080, 0, 0, width, height);
+        colorQuad(pPoseStack, 0x80000000, 0, 0, width, height);
 
         // Subwindows. These are drawn _beneath_ the background image to give the illuision that it is a subwindow.
 

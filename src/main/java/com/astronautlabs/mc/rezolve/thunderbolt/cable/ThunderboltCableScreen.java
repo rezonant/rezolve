@@ -7,6 +7,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -28,6 +29,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import org.jetbrains.annotations.NotNull;
@@ -60,6 +62,8 @@ public class ThunderboltCableScreen extends MachineScreen<ThunderboltCableMenu> 
     float rotationX = 45;
     float rotationY = -22;
 
+    boolean rotationInitialized = false;
+
     @Override
     protected void init() {
         super.init();
@@ -82,6 +86,16 @@ public class ThunderboltCableScreen extends MachineScreen<ThunderboltCableMenu> 
     protected void containerTick() {
         super.containerTick();
 
+        if (!rotationInitialized && menu.position != null) {
+            var vec = minecraft.player.position().subtract(Vec3.atCenterOf(menu.position)).multiply(1, -1, 1);
+            var xRot = -angle2d(new Vec2((float)vec.x, (float)vec.z), Vec2.UNIT_X) + 90;
+            //var yRot = angle2d(new Vec2((float)vec.x, (float)vec.y), Vec2.UNIT_X) + 90;
+
+            rotationX = (float)xRot;
+            //rotationY = (float)yRot;
+            rotationInitialized = true;
+        }
+
         if (selectedSide != null) {
             for (var entry : transmissionTypeButtons.entrySet()) {
                 var faceConfig = menu.configuration.getFace(selectedSide);
@@ -92,6 +106,11 @@ public class ThunderboltCableScreen extends MachineScreen<ThunderboltCableMenu> 
                 entry.getValue().setValue(transmitConfig.getMode());
             }
         }
+    }
+
+    private double angle2d(Vec2 a, Vec2 b) {
+        var det = a.x * b.y - a.y * b.x;
+        return Math.atan2(det, a.dot(Vec2.UNIT_X)) * (180 / Math.PI);
     }
 
     private void addTransmissionType(TransmissionType type) {
@@ -308,7 +327,7 @@ public class ThunderboltCableScreen extends MachineScreen<ThunderboltCableMenu> 
             pPoseStack.scale(1 / blockFaceScale, 1 / blockFaceScale, 1);
 
             if (direction == hoveredSide) {
-                colorQuad(pPoseStack, 0x00FF0088, 0, 0, blockFaceScale, blockFaceScale);
+                colorQuad(pPoseStack, 0x8800FF00, 0, 0, blockFaceScale, blockFaceScale);
             }
 
             var directionName = friendlyDirectionName(direction);

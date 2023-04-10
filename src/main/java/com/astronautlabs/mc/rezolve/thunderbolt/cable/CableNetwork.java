@@ -1,6 +1,7 @@
 package com.astronautlabs.mc.rezolve.thunderbolt.cable;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
+import com.astronautlabs.mc.rezolve.common.LevelPosition;
 import com.astronautlabs.mc.rezolve.common.capabilities.Tunnel;
 import com.astronautlabs.mc.rezolve.common.machines.MachineEntity;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
@@ -326,46 +327,6 @@ public class CableNetwork {
 		return shouldContinue;
 	}
 
-	public static class LevelPosition {
-		public LevelPosition(ResourceKey<Level> level, BlockPos pos) {
-			this.level = level;
-			this.position = pos;
-		}
-
-
-		private final ResourceKey<Level> level;
-		private final BlockPos position;
-
-		public ResourceKey<Level> getLevelKey() {
-			return level;
-		}
-
-		public BlockPos getPosition() {
-			return position;
-		}
-
-		public boolean is(BlockPos pos) {
-			return Objects.equals(position, pos);
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-
-			if (obj instanceof LevelPosition other) {
-				return level == other.level && Objects.equals(position, other.position);
-			}
-
-			return false;
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(level.location().toString(), position);
-		}
-	}
-
 	public static class Endpoint extends LevelPosition {
 		public Endpoint(MinecraftServer server, ResourceKey<Level> level, BlockPos pos) {
 			super(level, pos);
@@ -414,6 +375,10 @@ public class CableNetwork {
 
 		public void addInterface(BlockPos pos, BlockConfiguration configuration) {
 			interfaces.put(pos, configuration);
+		}
+
+		public boolean is(LevelPosition position) {
+			return Objects.equals(getLevelPosition(), position);
 		}
 
 		public boolean is(BlockEntity entity) {

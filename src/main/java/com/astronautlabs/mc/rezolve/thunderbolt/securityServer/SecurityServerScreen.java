@@ -274,7 +274,7 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 	@Override
 	protected void renderSubWindows(PoseStack poseStack, double mouseX, double mouseY) {
 		enableScissor(leftPos + listX, topPos + listY, leftPos + listX + listWidth + 1, topPos + listY + listHeight);
-		colorQuad(poseStack, 0xCCCCCCFF, listX - 10, listY - 10, listWidth + 20, listHeight + 20);
+		colorQuad(poseStack, 0xFFCCCCCC, listX - 10, listY - 10, listWidth + 20, listHeight + 20);
 
 		int x = this.listX;
 		int y = this.listY + this.listScrollPosition;
@@ -293,9 +293,9 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 
 			if (y > 0 && y < this.listY + this.listHeight) {
 				if (mouseOver) {
-					colorQuad(poseStack, 0x999999FF, x, y, listWidth, entryHeight);
+					colorQuad(poseStack, 0xFF999999, x, y, listWidth, entryHeight);
 				} else if (selectedRule == rule) {
-					colorQuad(poseStack, 0x666666FF, x, y, listWidth, entryHeight);
+					colorQuad(poseStack, 0xFF666666, x, y, listWidth, entryHeight);
 				}
 
 				Component modeStr = Component.literal("");

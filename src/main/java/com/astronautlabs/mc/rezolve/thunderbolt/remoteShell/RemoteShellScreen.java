@@ -271,7 +271,7 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
     @Override
     protected void renderSubWindows(PoseStack pPoseStack, double mouseX, double mouseY) {
 		enableScissor(leftPos + listX, topPos + listY, leftPos + listX + listWidth + 1, topPos + listY + listHeight);
-		colorQuad(pPoseStack, 0xCCCCCCFF, listX - 10, listY - 10, listWidth + 20, listHeight + 20);
+		colorQuad(pPoseStack, 0xFFCCCCCC, listX - 10, listY - 10, listWidth + 20, listHeight + 20);
 
 		int scrollOffset = this.listScrollPosition;
 	    int x = listX;
@@ -291,7 +291,7 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 	    	;
 
 	    	if (highlighted) {
-				colorQuad(pPoseStack, 0x44FFFFFF, x, y, slotWidth, slotHeight);
+				colorQuad(pPoseStack, 0xFF44FFFF, x, y, slotWidth, slotHeight);
 	    	}
 
 	    	y += slotHeight;

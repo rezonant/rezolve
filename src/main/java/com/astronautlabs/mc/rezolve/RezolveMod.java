@@ -1,12 +1,12 @@
 package com.astronautlabs.mc.rezolve;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import com.astronautlabs.mc.rezolve.bundles.BundleItem;
 import com.astronautlabs.mc.rezolve.bundles.bundleBuilder.BundlePatternItem;
+import com.astronautlabs.mc.rezolve.common.LevelPosition;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
 import com.astronautlabs.mc.rezolve.common.util.ShiftedPlayer;
 import com.astronautlabs.mc.rezolve.thunderbolt.cable.*;
@@ -14,7 +14,6 @@ import com.astronautlabs.mc.rezolve.thunderbolt.proxy.ProxyBlock;
 import com.astronautlabs.mc.rezolve.thunderbolt.remoteShell.*;
 import com.astronautlabs.mc.rezolve.thunderbolt.securityServer.SecurityServerEntity;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -65,7 +64,7 @@ public class RezolveMod {
 		);
 	}
 
-	public static void setPlayerOverridePosition(UUID playerID, CableNetwork.LevelPosition pos) {
+	public static void setPlayerOverridePosition(UUID playerID, LevelPosition pos) {
 		synchronized (playerOverridePositions) {
 			playerOverridePositions.put(playerID.toString(), pos);
 		}
@@ -77,7 +76,7 @@ public class RezolveMod {
 		}
 	}
 	
-	public static Map<String, CableNetwork.LevelPosition> playerOverridePositions = new HashMap<>();
+	public static Map<String, LevelPosition> playerOverridePositions = new HashMap<>();
 	
 	/**
 	 * Determine if the player is allowed to interact with the given UI container.

@@ -10,8 +10,10 @@ import com.astronautlabs.mc.rezolve.common.network.RezolvePacketReceiver;
 import com.astronautlabs.mc.rezolve.common.network.WithPacket;
 import com.astronautlabs.mc.rezolve.common.util.RezolveItemUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
@@ -152,6 +154,8 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 				tag.put(property.name, Operation.asTag((Operation) value));
 			else if (instanceOf(propertyClass, Direction.class))
 				tag.putString(property.name, ((Direction)value).name());
+			else if (instanceOf(propertyClass, BlockPos.class))
+				tag.put(property.name, NbtUtils.writeBlockPos((BlockPos)value));
 			else if (instanceOf(propertyClass, INBTSerializable.class)) {
 				if (value == null)
 					tag.putString(property.name, "<NULL>");
@@ -237,6 +241,8 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 					value = Operation.of(tag.getCompound(property.name));
 				else if (instanceOf(propertyClass, Direction.class))
 					value = Direction.valueOf(tag.getString(property.name));
+				else if (instanceOf(propertyClass, BlockPos.class))
+					value = NbtUtils.readBlockPos(tag.getCompound(property.name));
 				else if (instanceOf(propertyClass, INBTSerializable.class)) {
 					var propTag = tag.get(property.name);
 					if (propTag instanceof StringTag stringTag && Objects.equals("<NULL>", stringTag.getAsString())) {

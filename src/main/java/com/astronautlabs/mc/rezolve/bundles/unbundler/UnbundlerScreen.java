@@ -21,20 +21,18 @@ public class UnbundlerScreen extends MachineScreen<UnbundlerMenu> {
 	}
 
 	@Override
+	protected void init() {
+		super.init();
+
+		addOperationProgressIndicator(leftPos + 103, topPos + 81);
+		addEnergyMeter(leftPos + 226, topPos + 20, 88);
+		addSlotGrid(Component.translatable("screens.rezolve.bundles"), 3, 0, 9);
+		addSlotGrid(Component.translatable("screens.rezolve.items_title"), 4, 9, 16);
+	}
+
+	@Override
 	public void renderContents(PoseStack pPoseStack, int mouseX, int mouseY, float partialTick) {
 		super.renderContents(pPoseStack, mouseX, mouseY, partialTick);
-
-	    //String s = this.entity.getDisplayName().getUnformattedText();
-	    //this.fontRendererObj.drawString(s, 88 - this.fontRendererObj.getStringWidth(s) / 2, 6, 4210752);            //#404040
-	    //this.fontRendererObj.drawString(this.playerInv.getDisplayName().getUnformattedText(), 8, 72, 4210752);      //#404040
-
-	    int rfBarX = 226;
-	    int rfBarY = 20;
-	    int rfBarHeight = 88;
-	    int rfBarWidth = 14;
-
-		double usedHeight = menu.energyStored / (double)menu.energyCapacity * rfBarHeight;
-		colorQuad(pPoseStack, 0, 0, 0, 1, rfBarX, rfBarY, rfBarWidth, rfBarHeight - usedHeight);
 
 	    // Draw operation details
 
@@ -42,13 +40,8 @@ public class UnbundlerScreen extends MachineScreen<UnbundlerMenu> {
 	    String statusStr;
 
 	    if (op != null) {
-			float progress = menu.progress;
-			int width = (int)(32 * progress);
-
     	    RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			RenderSystem.enableBlend();
-
-			textureQuad(pPoseStack, new ResourceLocation("rezolve:textures/gui/container/arrow.png"), 103, 81, width, 32, 0, 0, progress, 1);
 
     		statusStr = "Operation: "+op.getPercentage()+"%";
 	    } else {

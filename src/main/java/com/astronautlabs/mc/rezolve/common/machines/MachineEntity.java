@@ -345,6 +345,10 @@ public class MachineEntity extends BlockEntityBase implements Container, IMachin
 	public void outputSlotActivated(int index) {
 	}
 
+	public boolean hasNetwork() {
+		return getNetworks().length > 0;
+	}
+
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction facing) {
 		if (capability == ForgeCapabilities.ITEM_HANDLER) {
