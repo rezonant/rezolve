@@ -1,8 +1,11 @@
+<!-- modrinth_exclude.start -->
 # ![rezolve](src/main/resources/logo.svg)
 
-[![Discord](https://img.shields.io/discord/1094875744661950474?label=discord)](https://discord.gg/U8R7g3UgK8) [![Curseforge](https://img.shields.io/badge/curseforge-alpha-orange)](https://www.curseforge.com/minecraft/mc-mods/rezolve/files/2455133) [![CircleCI](https://circleci.com/gh/rezonant/rezolve/tree/main.svg?style=shield)](https://circleci.com/gh/rezonant/rezolve/tree/main) [![Github Sponsors](https://img.shields.io/github/sponsors/rezonant)](https://github.com/sponsors/rezonant)
+[![Discord](https://img.shields.io/discord/1094875744661950474?label=discord)](https://discord.gg/U8R7g3UgK8) [![Modrinth](https://img.shields.io/badge/modrinth-115454)](https://modrinth.com/mod/rezolve) [![Curseforge](https://img.shields.io/badge/curseforge-f16436)](https://www.curseforge.com/minecraft/mc-mods/rezolve/files/2455133) [![CircleCI](https://circleci.com/gh/rezonant/rezolve/tree/main.svg?style=shield)](https://circleci.com/gh/rezonant/rezolve/tree/main) [![Github Sponsors](https://img.shields.io/github/sponsors/rezonant)](https://github.com/sponsors/rezonant)
 
 A Minecraft mod providing powerful cabling, remote access, and automation tooling to help you manage complex bases.
+
+<!-- modrinth_exclude.end -->
 
 # Thunderbolt
 

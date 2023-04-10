@@ -1,8 +1,7 @@
-# Java Gradle CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-java/ for more details
-#
-version: 2
+version: 2.1
+orbs:
+  discord: antonioned/discord@0.1.0
+
 jobs:
   build:
     docker:
@@ -15,8 +14,6 @@ jobs:
     
     steps:
       - checkout
-      - run: git submodule sync --recursive
-      - run: git submodule update --recursive --init
       - run: source ./gradle-props.sh && copyEnvVarsToGradleProperties
       - restore_cache:
           keys:
@@ -31,7 +28,16 @@ jobs:
             - ~/.m2
           key: v1-dependencies-{{ checksum "build.gradle" }}
       - run: ./gradlew reobfJar
-      - run: ./gradlew uploadArchives
+      - store_artifacts:
+          path: build/libs
+      - store_artifacts:
+          path: build/reobfJar
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build
+    
 notify:
   webhooks:
     - url: https://webhooks.gitter.im/e/908bd7a6f5e52495c0b3

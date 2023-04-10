@@ -9,6 +9,7 @@ bin
 config/
 asm/
 crash-reports/
+local.properties
 
 # idea
 out
