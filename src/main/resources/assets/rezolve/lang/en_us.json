@@ -105,5 +105,9 @@
   "screens.rezolve.input_slot": "Input slot",
   "screens.rezolve.bundle_pattern_input_slot": "Blank patterns (input)",
   "screens.rezolve.bundle_pattern_output_slot": "Encoded patterns (output)",
-  "screens.rezolve.bundle_input_slot": "Bundles (input)"
+  "screens.rezolve.bundle_input_slot": "Bundles (input)",
+
+  "rezolve.guide.name": "Guide to Rezolve",
+  "rezolve.guide.landing_text": "Rezolve provides advanced cabling and other tools for managing automation",
+  "rezolve.guide.entries.bundler.name": "Bundler"
 }
