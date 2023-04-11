@@ -112,8 +112,11 @@ minecraft {
     runs {
         client {
             workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
+            // jvmArg "-XX:+AllowEnhancedClassRedefinition" // needed for JBR (full hotswap support)
+            //property 'forge.logging.markers', 'REGISTRIES' // lots of registry debugging!
             property 'forge.logging.console.level', 'debug' // https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
             mods {
                 rezolve {
