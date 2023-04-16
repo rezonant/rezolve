@@ -4,20 +4,29 @@ import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.ItemBase;
 import com.astronautlabs.mc.rezolve.common.blocks.BlockBase;
 import com.astronautlabs.mc.rezolve.common.network.RezolvePacket;
+import com.google.gson.JsonObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.data.CachedOutput;
+import net.minecraft.data.DataGenerator;
+import net.minecraft.data.DataProvider;
 import net.minecraft.data.recipes.*;
 import net.minecraft.data.worldgen.features.OreFeatures;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -27,12 +36,15 @@ import net.minecraft.world.level.material.Material;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.client.model.generators.ModelFile;
+import net.minecraftforge.common.world.ForgeBiomeModifiers;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,13 +54,13 @@ import java.util.function.Consumer;
 @Mod.EventBusSubscriber(modid = RezolveMod.ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public enum Metal {
 	COPPER("copper",
-			new Properties().withCommonOre(7, 20, 300)),
+			new Properties().withCommonOre(90, 70, 500)),
 
 	LEAD("lead",
-			new Properties().withCommonOre(5, 20, 150)),
+			new Properties().withCommonOre(60, 40, 500)),
 
 	TIN("tin",
-			new Properties().withCommonOre(6, 20, 200));
+			new Properties().withCommonOre(70, 60, 500));
 
 	Metal(String name) {
 		this.name = name;
@@ -160,14 +172,17 @@ public enum Metal {
 
 	@SubscribeEvent
 	public static void gatherData(GatherDataEvent event) {
+		var generator = event.getGenerator();
 		for (var metal : values()) {
-			event.getGenerator().addProvider(true, metal.new Recipes(event));
-			event.getGenerator().addProvider(true, metal.new BlocksGenerator(event));
-			event.getGenerator().addProvider(true, metal.new ItemsGenerator(event));
+			generator.addProvider(true, metal.new Recipes(event));
+			generator.addProvider(true, metal.new BlocksGenerator(event));
+			generator.addProvider(true, metal.new ItemsGenerator(event));
+			generator.addProvider(true, metal.new BiomeModifiersGenerator(event));
 		}
 	}
 
 	private ConfiguredFeature<OreConfiguration, Feature<OreConfiguration>> overworldOreConfiguration;
+	private PlacedFeature overworldOrePlacedFeature;
 
 	public ConfiguredFeature<OreConfiguration, Feature<OreConfiguration>> getOverworldOreConfiguration() {
 		return overworldOreConfiguration;
@@ -219,7 +234,7 @@ public enum Metal {
 				event.register(
 						Registry.PLACED_FEATURE_REGISTRY,
 						RezolveMod.loc(metal.getName()),
-						() -> new PlacedFeature(
+						() -> metal.overworldOrePlacedFeature = new PlacedFeature(
 								new Holder.Direct<>(metal.overworldOreConfiguration),
 								metal.orePlacement
 						)
@@ -327,6 +342,33 @@ public enum Metal {
 	public class DeepSlateOre extends Block {
 		public DeepSlateOre() {
 			super("deepslate_ore");
+		}
+	}
+
+	public class BiomeModifiersGenerator implements DataProvider {
+		BiomeModifiersGenerator(GatherDataEvent event) {
+			generator = event.getGenerator();
+		}
+
+		private DataGenerator generator;
+
+		@Override
+		public void run(CachedOutput pOutput) throws IOException {
+			var obj = new JsonObject();
+			obj.addProperty("type", "forge:add_features");
+			obj.addProperty("biomes", "#minecraft:is_overworld");
+			obj.addProperty("features", "rezolve:" + Metal.this.getName());
+			obj.addProperty("step", "underground_ores");
+
+			Path mainOutput = generator.getOutputFolder();
+			String pathSuffix = "data/rezolve/forge/biome_modifier/add_" + Metal.this.getName() + ".json";
+			Path outputPath = mainOutput.resolve(pathSuffix);
+			DataProvider.saveStable(pOutput, obj, outputPath);
+		}
+
+		@Override
+		public String getName() {
+			return "Biome Modifiers: rezolve";
 		}
 	}
 

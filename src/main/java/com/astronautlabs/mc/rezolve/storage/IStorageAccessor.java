@@ -2,18 +2,50 @@ package com.astronautlabs.mc.rezolve.storage;
 
 import net.minecraft.world.item.ItemStack;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public interface IStorageAccessor {
-	List<ItemStack> readItems();
+	default List<ItemStack> readItems() {
+		return readItems("", 0, -1);
+	}
 
-	List<ItemStack> readItems(String query);
+	default List<ItemStack> readItems(String query) {
+		return readItems(query, 0, -1);
+	}
 
 	void readItems(List<ItemStack> list);
 
-	List<ItemStack> readItems(int offset, int size);
+	default List<ItemStack> readItems(int offset, int size) {
+		return readItems("", offset, size);
+	}
 
-	List<ItemStack> readItems(String query, int offset, int size);
+	default List<ItemStack> readItems(String query, int offset, int size) {
+		List<ItemStack> list = new ArrayList<>() {
+			@Override
+			public boolean add(ItemStack itemStack) {
+				if (!itemStack.getDisplayName().getString().toLowerCase(Locale.ROOT).contains(query.toLowerCase(Locale.ROOT)))
+					return false;
+
+				return super.add(itemStack);
+			}
+		};
+
+		readItems(list);
+
+
+		if (size < 0)
+			size = list.size();
+
+		if (offset >= list.size())
+			return new ArrayList<>();
+
+		if (offset > 0)
+			list = list.subList(offset, size);
+
+		return list;
+	}
 
 	/**
 	 * Add a stack of items to the disk (or simulate it).

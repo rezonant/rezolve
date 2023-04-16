@@ -53,8 +53,11 @@ public class StorageView extends GuiComponent implements Widget, GuiEventListene
 				handleUpdate(contentPacket);
 			} else if (packet instanceof StorageViewChangeResponse changeResponse) {
 				handleResponse(changeResponse);
+			} else {
+				return false;
 			}
-			return false;
+
+			return true;
 		});
 	}
 
@@ -167,8 +170,8 @@ public class StorageView extends GuiComponent implements Widget, GuiEventListene
 		int py = this.displayedOffset / this.windowColumnCount;
 
 		for (StorageViewContentPacket.ItemEntry item : this.visibleItems) {
-			int slotPosX = px * this.itemSize;
-			int slotPosY = this.scrollOffset + py * this.itemSize;
+			int slotPosX = margin + px * this.itemSize;
+			int slotPosY = margin + this.scrollOffset + py * this.itemSize;
 
 			if (slotPosX < x && slotPosY < y && x <= slotPosX + this.itemSize && y < slotPosY + this.itemSize) {
 				System.out.println("StorageView:onClick("+x+", "+y+") clicked on item!");
@@ -242,6 +245,8 @@ public class StorageView extends GuiComponent implements Widget, GuiEventListene
 
 	private StorageViewContentPacket.ItemEntry hoveredItem;
 
+	private int margin = 3;
+
 	@Override
 	public void render(PoseStack pPoseStack, int mouseX, int mouseY, float pPartialTick) {
 
@@ -260,7 +265,7 @@ public class StorageView extends GuiComponent implements Widget, GuiEventListene
 		var max = new Vector3f(x + width, y + width, 0);
 		max.transform(pPoseStack.last().normal());
 
-		//enableScissor(x, y, x + width, y + height);
+		enableScissor(x, y + 1, x + width, y + height - 1);
 
 		try {
 			if (this.visibleItems != null) {
@@ -271,8 +276,8 @@ public class StorageView extends GuiComponent implements Widget, GuiEventListene
 
 				for (StorageViewContentPacket.ItemEntry item : this.visibleItems) {
 
-					int slotPosX = this.itemSize*x;
-					int slotPosY = this.itemSize*y + this.scrollOffset;
+					int slotPosX = margin + this.itemSize*x;
+					int slotPosY = margin + this.itemSize*y + this.scrollOffset;
 
 					if (slotPosY < localMouseY && slotPosX < localMouseX && slotPosY + this.itemSize > localMouseY && slotPosX + this.itemSize > localMouseX) {
 						// mouse is on the thing
@@ -440,20 +445,26 @@ public class StorageView extends GuiComponent implements Widget, GuiEventListene
 	}
 
 	@Override
+	public boolean isMouseOver(double pMouseX, double pMouseY) {
+		return x < pMouseX && pMouseX < x + width && y < pMouseY && pMouseY < y + height;
+	}
+
+	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double pDelta) {
 		boolean inFrame = (mouseX > this.x && mouseX < this.x + this.width && mouseY > this.y && mouseY < this.y + this.height);
 		if (inFrame) {
 			this.handleMouseWheel(pDelta);
+			return true;
 		}
 
 		return GuiEventListener.super.mouseScrolled(mouseX, mouseY, pDelta);
 	}
 
-	private int scrollSpeed = 30;
+	private int scrollSpeed = 10;
 
 	public void handleMouseWheel(double dWheel) {
 
-		this.scrollOffset += dWheel / this.scrollSpeed;
+		this.scrollOffset += dWheel * this.scrollSpeed;
 		if (this.scrollOffset > 0)
 			this.scrollOffset = 0;
 		else if (this.scrollOffset < Math.min(0, -(this.windowTotalRowCount - this.windowRowCount) * this.itemSize))

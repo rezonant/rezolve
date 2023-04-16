@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
 public class StorageShellScreen extends MachineScreen<StorageShellMenu> implements IStorageViewContainer {
@@ -25,10 +26,16 @@ public class StorageShellScreen extends MachineScreen<StorageShellMenu> implemen
 	public int CLEAR_CRAFTING_GRID_BTN = 2;
 
 	@Override
+	protected void renderLabels(PoseStack pPoseStack, int pMouseX, int pMouseY) {
+		this.font.draw(pPoseStack, this.title, (float)this.titleLabelX, (float)this.titleLabelY, 4210752);
+		//this.font.draw(pPoseStack, this.playerInventoryTitle, (float)this.inventoryLabelX, (float)this.inventoryLabelY, 4210752);
+	}
+
+	@Override
 	public void init() {
 		super.init();
 
-		this.searchField = new EditBox(font, this.leftPos + 6, this.topPos + 5, 243, 13, Component.translatable("rezolve.screens.search"));
+		this.searchField = new EditBox(font, this.leftPos + 24, this.topPos + 21, 207, 13, Component.translatable("rezolve.screens.search"));
 		this.searchField.setVisible(true);
 		this.searchField.setValue("");
 		this.searchField.setBordered(true);
@@ -38,7 +45,7 @@ public class StorageShellScreen extends MachineScreen<StorageShellMenu> implemen
 		//this.searchField.setTextColor(0x000000);
 		this.addRenderableWidget(this.searchField);
 
-		this.storageView = new StorageView(this, this.leftPos + 7, this.topPos + 20, 240, 90);
+		this.storageView = new StorageView(this, this.leftPos + 23, this.topPos + 36, 210, 85);
 		this.addRenderableWidget(this.storageView);
 
 		this.clearCraftingGridBtn = new Button(this.leftPos + 51, this.topPos + 122, 7, 7, Component.literal("×"), (btn) -> {
@@ -47,7 +54,16 @@ public class StorageShellScreen extends MachineScreen<StorageShellMenu> implemen
 
 		this.addRenderableWidget(this.clearCraftingGridBtn);
 
-		addEnergyMeter(250, 4, 107);
+		addEnergyMeter(leftPos + 234, topPos + 20, 107);
+		addMeter(
+				Component.translatable("rezolve.screens.usage"),
+				Component.literal(""),
+				new ResourceLocation("rezolve", "textures/gui/widgets/storage_meter.png"),
+				leftPos + 5, topPos + 20, 107,
+				menu -> 0.25
+		);
+
+		addSlotGrid(Component.translatable("rezolve.screens.crafting"), 3, 0, 9, false);
 	}
 
 	private EditBox searchField;

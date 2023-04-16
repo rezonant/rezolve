@@ -1,49 +1,71 @@
-package com.astronautlabs.mc.rezolve.storage.machines.diskBay;
+package com.astronautlabs.mc.rezolve.parts;
 
+import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.ItemBase;
-import com.astronautlabs.mc.rezolve.common.registry.RegistryId;
-import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.client.model.generators.ItemModelProvider;
+import net.minecraftforge.client.model.generators.ModelFile;
+import net.minecraftforge.data.event.GatherDataEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
 
-@RegistryId("storage_part")
+import java.util.HashMap;
+import java.util.Map;
+
+@Mod.EventBusSubscriber(modid = RezolveMod.ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class StoragePartItem extends ItemBase {
 
-	public StoragePartItem() {
+	public StoragePartItem(int size) {
 		super(new Properties());
+		this.size = size;
 	}
 
-	public ItemStack getSizedStack(int storageSize) {
+	int size;
+
+	public static ItemStack getSizedStack(int storageSize) {
 		return getSizedStack(storageSize, 1);
-
 	}
-	public ItemStack getSizedStack(int storageSize, int count) {
-		var tag = new CompoundTag();
-		tag.putInt("type", storageSize);
+	public static ItemStack getSizedStack(int storageSize, int count) {
+		return new ItemStack(sizes.get(storageSize), count);
+	}
+	private static Map<Integer, StoragePartItem> sizes = new HashMap<>();
 
-		return new ItemStack(this, 1, tag);
+	private static StoragePartItem addSize(StoragePartItem item) {
+		sizes.put(item.size, item);
+		return item;
 	}
 
-	@Override
-	public void fillItemCategory(CreativeModeTab pCategory, NonNullList<ItemStack> pItems) {
-		super.fillItemCategory(pCategory, pItems);
-		pItems.add(getSizedStack(0)); // 2^0 = 1K
-		pItems.add(getSizedStack(1)); // 2^1 = 2K
-		pItems.add(getSizedStack(2)); // 2^2 = 4K
-		pItems.add(getSizedStack(3)); // 2^3 = 8K
-		pItems.add(getSizedStack(4)); // 2^4 = 16K
-		pItems.add(getSizedStack(5)); // 2^5 = 32K
-		pItems.add(getSizedStack(6)); // 2^6 = 64K
-		pItems.add(getSizedStack(7)); // 2^7 = 128k
-		pItems.add(getSizedStack(8)); // 2^8 = 256k
-		pItems.add(getSizedStack(9)); // 2^9 = 512k
-		pItems.add(getSizedStack(10)); // 2^10 = 1024 = 1M
-		pItems.add(getSizedStack(11)); // 2^11 = 2048 = 2M
-		pItems.add(getSizedStack(12)); // 2^12 = 4096 = 4M
-		pItems.add(getSizedStack(13)); // 2^13 = 8192 = 8M
-		pItems.add(getSizedStack(14)); // 2^14 = 16384 = 16M
-		pItems.add(getSizedStack(15)); // 2^15 = 32768 = 32M
+	@SubscribeEvent
+	public static void gatherData(GatherDataEvent event) {
+		event.getGenerator().addProvider(true, new ItemsGenerator(event));
+	}
+
+	@SubscribeEvent
+	public static void register(RegisterEvent event) {
+		if (event.getRegistryKey() == ForgeRegistries.Keys.ITEMS) {
+			for (int i = 0, max = 16; i < max; ++i) {
+				var item = addSize(new StoragePartItem(i));
+				event.register(ForgeRegistries.Keys.ITEMS, RezolveMod.loc("storage_part_" + i), () -> item);
+			}
+		}
+	}
+
+	private static class ItemsGenerator extends ItemModelProvider {
+		public ItemsGenerator(GatherDataEvent event) {
+			super(event.getGenerator(), RezolveMod.ID, event.getExistingFileHelper());
+		}
+
+		@Override
+		protected void registerModels() {
+			for (int i = 0, max = 16; i < max; ++i) {
+				getBuilder("storage_part_" + i)
+						.parent(new ModelFile.UncheckedModelFile(RezolveMod.loc("item/standard_item")))
+						.texture("layer0", RezolveMod.loc("storage_parts/size_" + i))
+				;
+			}
+		}
 	}
 
 //	@Override

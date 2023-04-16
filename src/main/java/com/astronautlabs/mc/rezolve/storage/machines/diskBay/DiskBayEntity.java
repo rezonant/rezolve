@@ -3,6 +3,7 @@ package com.astronautlabs.mc.rezolve.storage.machines.diskBay;
 import com.astronautlabs.mc.rezolve.common.inventory.ValidatedSlot;
 import com.astronautlabs.mc.rezolve.common.machines.MachineEntity;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
+import com.astronautlabs.mc.rezolve.storage.DiskItem;
 import com.astronautlabs.mc.rezolve.storage.IStorageAccessor;
 import com.astronautlabs.mc.rezolve.storage.IStorageTileEntity;
 import com.astronautlabs.mc.rezolve.storage.MultiplexedStorageAccessor;
@@ -30,7 +31,7 @@ public class DiskBayEntity extends MachineEntity implements IStorageTileEntity {
 		return (
 				stack == null
 						|| stack.getCount() == 0
-						|| (stack.getCount() == 1 && stack.getItem() == RezolveRegistry.item(DiskItem.class))
+						|| (stack.getCount() == 1 && stack.getItem() instanceof DiskItem)
 		);
 	}
 

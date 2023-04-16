@@ -8,6 +8,7 @@ import com.astronautlabs.mc.rezolve.storage.IStorageTileEntity;
 import com.astronautlabs.mc.rezolve.storage.NetworkStorageAccessor;
 import com.astronautlabs.mc.rezolve.thunderbolt.cable.CableNetwork;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -18,6 +19,11 @@ public class StorageShellEntity extends MachineEntity implements IStorageTileEnt
 
 		for (int i = 0, max = 10; i < max; ++i)
 			addSlot(new Slot(this, i, 0, 0));
+	}
+
+	@Override
+	public Component getMenuTitle() {
+		return Component.translatable("block.rezolve.storage_shell");
 	}
 
 	@Override

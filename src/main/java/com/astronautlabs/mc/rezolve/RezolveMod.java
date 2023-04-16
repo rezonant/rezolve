@@ -10,10 +10,7 @@ import com.astronautlabs.mc.rezolve.common.LevelPosition;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
 import com.astronautlabs.mc.rezolve.common.util.ShiftedPlayer;
 import com.astronautlabs.mc.rezolve.parts.MachineFrameBlock;
-import com.astronautlabs.mc.rezolve.parts.MachinePart;
 import com.astronautlabs.mc.rezolve.storage.machines.diskBay.DiskBayBlock;
-import com.astronautlabs.mc.rezolve.storage.machines.diskBay.DiskItem;
-import com.astronautlabs.mc.rezolve.storage.machines.diskBay.StoragePartItem;
 import com.astronautlabs.mc.rezolve.storage.machines.diskManipulator.DiskManipulatorBlock;
 import com.astronautlabs.mc.rezolve.storage.machines.storageMonitor.StorageMonitorBlock;
 import com.astronautlabs.mc.rezolve.storage.machines.storageShell.StorageShellBlock;
@@ -74,9 +71,6 @@ public class RezolveMod {
 			DiskManipulatorBlock.class,
 			StorageShellBlock.class,
 			StorageMonitorBlock.class,
-			DiskItem.class,
-			StoragePartItem.class,
-			MachinePart.class,
 			MachineFrameBlock.class
 		);
 	}

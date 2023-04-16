@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class MultiplexedStorageAccessor extends StorageAccessorBase implements IStorageAccessor {
+public class MultiplexedStorageAccessor implements IStorageAccessor {
 
 	public MultiplexedStorageAccessor() {
 
@@ -50,7 +50,7 @@ public class MultiplexedStorageAccessor extends StorageAccessorBase implements I
 					ItemStack existingStack = itemMap.get(stackKey);
 					existingStack.setCount(existingStack.getCount() + stack.getCount());
 				} else {
-					ItemStack ownedStack = ItemStackUtil.cloneStack(stack);
+					ItemStack ownedStack = stack.copy();
 					itemMap.put(stackKey, ownedStack);
 					list.add(ownedStack);
 				}
@@ -79,8 +79,8 @@ public class MultiplexedStorageAccessor extends StorageAccessorBase implements I
 	public ItemStack takeItemStack(ItemStack stack, String hashLocator, boolean simulate) {
 		this.onQuery();
 
-		ItemStack desired = ItemStackUtil.cloneStack(stack);
-		ItemStack found = ItemStackUtil.getEmptyStack(stack);
+		ItemStack desired = stack.copy();
+		ItemStack found = ItemStack.EMPTY.copy();
 
 		for (IStorageAccessor accessor : this.accessors) {
 			ItemStack taken = accessor.takeItemStack(desired, hashLocator, simulate);

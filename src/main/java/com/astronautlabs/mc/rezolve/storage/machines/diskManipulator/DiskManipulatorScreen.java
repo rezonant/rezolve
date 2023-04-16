@@ -6,6 +6,7 @@ import com.astronautlabs.mc.rezolve.storage.view.StorageView;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
 public class DiskManipulatorScreen extends MachineScreen<DiskManipulatorMenu> implements IStorageViewContainer {
@@ -14,7 +15,7 @@ public class DiskManipulatorScreen extends MachineScreen<DiskManipulatorMenu> im
 		super(menu, playerInventory, pTitle, "rezolve:textures/gui/container/disk_manipulator_gui.png", 255, 212);
 
 		inventoryLabelX = 47;
-		inventoryLabelY = 116;
+		inventoryLabelY = 113;
 	}
 
 	@Override
@@ -23,10 +24,15 @@ public class DiskManipulatorScreen extends MachineScreen<DiskManipulatorMenu> im
 	}
 
 	@Override
+	public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
+		return super.mouseScrolled(pMouseX, pMouseY, pDelta);
+	}
+
+	@Override
 	protected void init() {
 		super.init();
 
-		searchField = new EditBox(font, leftPos + 23, topPos + 5, 216, 13, Component.translatable("rezolve.screens.search"));
+		searchField = new EditBox(font, leftPos + 25, topPos + 18, 207, 13, Component.translatable("rezolve.screens.search"));
 		this.searchField.setVisible(true);
 		this.searchField.setValue("");
 		this.searchField.setBordered(true);
@@ -35,10 +41,19 @@ public class DiskManipulatorScreen extends MachineScreen<DiskManipulatorMenu> im
 
 		this.addRenderableWidget(this.searchField);
 
-		this.storageView = new StorageView(this, this.leftPos + 24, this.topPos + 20, 209, 90);
+		this.storageView = new StorageView(this, this.leftPos + 24, this.topPos + 33, 209, 75);
 		this.addRenderableWidget(this.storageView);
 
-		addEnergyMeter(leftPos + 235, topPos + 3, 111);
+		addEnergyMeter(leftPos + 235, topPos + 17, 111);
+		addMeter(
+				Component.translatable("rezolve.screens.usage"),
+				Component.literal("%"),
+				new ResourceLocation("rezolve", "textures/gui/widgets/storage_meter.png"),
+				leftPos + 5, topPos + 38, 89,
+				menu -> 0.25
+		);
+
+		addSlot(Component.literal(""), 0);
 	}
 
 	private EditBox searchField;

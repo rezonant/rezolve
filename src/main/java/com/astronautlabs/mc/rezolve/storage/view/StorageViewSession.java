@@ -26,9 +26,10 @@ public class StorageViewSession {
 	private int offset = 0;
 	private int limit = 60;
 	private String query = "";
+	private IStorageAccessor accessor;
 
 	public void sendUpdate() {
-		IStorageAccessor accessor = this.storage.getStorageAccessor();
+		accessor = this.storage.getStorageAccessor();
 		StorageViewContentPacket message = new StorageViewContentPacket();
 
 		message.setMenu(menu);
@@ -48,6 +49,32 @@ public class StorageViewSession {
 		message.sendToPlayer(player);
 	}
 
+	public void checkForUpdates() {
+		if (storage.getStorageAccessor() != accessor) {
+			sendUpdate();
+		}
+	}
+
+	public ItemStack giveItem(ItemStack stack, boolean simulate) {
+		IStorageAccessor accessor = this.storage.getStorageAccessor();
+		if (accessor == null)
+			return stack;
+
+		var result = accessor.giveItemStack(stack, ItemStackUtil.hashOfStack(ItemStackUtil.getSingleItem(stack)), simulate);
+
+		sendUpdate();
+
+		return result;
+	}
+
+	public ItemStack takeItem(ItemStack stack, boolean simulate) {
+		var result = accessor.takeItemStack(stack, ItemStackUtil.hashOfStack(ItemStackUtil.getSingleItem(stack)), simulate);
+
+		sendUpdate();
+
+		return result;
+	}
+
 	public void handleStorageRequest(StorageViewChangeRequest message) {
 
 		IStorageAccessor accessor = this.storage.getStorageAccessor();
@@ -61,6 +88,7 @@ public class StorageViewSession {
 		response.playerId = message.playerId;
 
 		if (StorageViewChangeRequest.OPERATION_GIVE.equals(message.operationType)) {
+
 
 			ItemStack stack = message.requestedStack;
 			String hash = message.requestedStackHash;
@@ -80,7 +108,7 @@ public class StorageViewSession {
 			ItemStack takenStack = accessor.takeItemStack(message.requestedStack, message.requestedStackHash, false);
 			response.resultingStack = takenStack;
 
-			player.containerMenu.setCarried(takenStack.getCount() > 0 ? takenStack : null);
+			player.containerMenu.setCarried(takenStack.getCount() > 0 ? takenStack : ItemStack.EMPTY);
 			//player.updateHeldItem();
 
 		} else {

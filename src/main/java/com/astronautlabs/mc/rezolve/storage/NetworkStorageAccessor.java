@@ -1,7 +1,12 @@
 package com.astronautlabs.mc.rezolve.storage;
 
 import com.astronautlabs.mc.rezolve.thunderbolt.cable.CableNetwork;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.items.IItemHandler;
+
+import java.util.HashSet;
 
 public class NetworkStorageAccessor extends MultiplexedStorageAccessor {
 	public NetworkStorageAccessor(CableNetwork network) {
@@ -29,8 +34,22 @@ public class NetworkStorageAccessor extends MultiplexedStorageAccessor {
 				IStorageTileEntity storageTileEntity = (IStorageTileEntity)entity;
 				IStorageAccessor accessor =  storageTileEntity.getStorageAccessor();
 
-				if (accessor != this)
+				if (!(accessor instanceof NetworkStorageAccessor))
 					this.accessors.add(accessor);
+			} else {
+				var itemHandler = entity.getCapability(ForgeCapabilities.ITEM_HANDLER).orElse(null);
+
+				if (itemHandler != null) {
+					this.accessors.add(new ItemHandlerStorageAccessor(itemHandler));
+				} else {
+					var set = new HashSet<IItemHandler>();
+
+					for (var dir : Direction.values()) {
+						itemHandler = entity.getCapability(ForgeCapabilities.ITEM_HANDLER, dir).orElse(null);
+						if (itemHandler != null && set.add(itemHandler))
+							this.accessors.add(new ItemHandlerStorageAccessor(itemHandler));
+					}
+				}
 			}
 		}
 	}

@@ -1,6 +1,5 @@
 package com.astronautlabs.mc.rezolve.storage.machines.diskManipulator;
 
-import com.astronautlabs.mc.rezolve.common.gui.WithMenu;
 import com.astronautlabs.mc.rezolve.common.inventory.ValidatedSlot;
 import com.astronautlabs.mc.rezolve.common.machines.MachineEntity;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
@@ -8,8 +7,10 @@ import com.astronautlabs.mc.rezolve.storage.IStorageAccessor;
 import com.astronautlabs.mc.rezolve.storage.IStorageTileEntity;
 import com.astronautlabs.mc.rezolve.storage.machines.diskBay.DiskAccessor;
 import com.astronautlabs.mc.rezolve.storage.machines.diskBay.DiskBayEntity;
-import com.astronautlabs.mc.rezolve.storage.machines.diskBay.DiskItem;
+import com.astronautlabs.mc.rezolve.storage.DiskItem;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -32,16 +33,28 @@ public class DiskManipulatorEntity extends MachineEntity implements IStorageTile
 	private ItemStack loadedDisk = null;
 	private DiskAccessor loadedDiskAccessor = null;
 
+	public boolean hasDisk() {
+		return loadedDiskAccessor != null;
+	}
+
 	@Override
-	public void updatePeriodically() {
-		super.updatePeriodically();
+	public Component getMenuTitle() {
+		return Component.translatable("block.rezolve.disk_manipulator");
+	}
 
-		// Server-side
+	@Override
+	protected void onSlotChanged(Slot slot) {
+		if (slot.index == 0) {
+			updateDisk();
+		}
+		super.onSlotChanged(slot);
+	}
 
+	private void updateDisk() {
 		ItemStack diskInSlot = this.getStackInSlot(0);
 		boolean needsLoad = false;
 
-		if (loadedDisk != null && diskInSlot == null) {
+		if (loadedDisk != null && diskInSlot.isEmpty()) {
 			loadedDisk = null;
 			loadedDiskAccessor = null;
 			needsLoad = false;
@@ -53,22 +66,27 @@ public class DiskManipulatorEntity extends MachineEntity implements IStorageTile
 		} else if (loadedDisk == null) {
 			needsLoad = true;
 		} else {
-			needsLoad = !ItemStack.isSame(loadedDisk, diskInSlot);
+			needsLoad = !ItemStack.isSameItemSameTags(loadedDisk, diskInSlot);
 		}
 
-		if (needsLoad && diskInSlot.getItem() == RezolveRegistry.item(DiskItem.class)) {
+		if (needsLoad && diskInSlot.getItem() instanceof DiskItem) {
 			System.out.println("Loading disk...");
 			loadedDisk = diskInSlot;
-			loadedDiskAccessor = new DiskAccessor(diskInSlot);
+			loadedDiskAccessor = new DiskAccessor(diskInSlot, disk -> {
+				setItem(0, disk);
+				loadedDisk = disk;
+			});
 
 			System.out.println(" - Used     : "+loadedDiskAccessor.getTotalItems());
 			System.out.println(" - Capacity : "+loadedDiskAccessor.getSize());
-
-		} else if (loadedDisk != null) {
-			// Sync the disk back
-			ItemStack newItem = loadedDiskAccessor.getItemStack();
-			this.setItem(0, newItem);
-			this.loadedDisk = newItem;
 		}
+	}
+
+	@Override
+	public void updatePeriodically() {
+		super.updatePeriodically();
+
+		// Server-side
+
 	}
 }

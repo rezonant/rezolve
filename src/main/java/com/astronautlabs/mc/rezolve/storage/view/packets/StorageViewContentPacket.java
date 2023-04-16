@@ -48,8 +48,12 @@ public class StorageViewContentPacket extends RezolveMenuPacket {
 
 		int itemCount = buf.readInt();
 		for (int i = 0; i < itemCount; ++i) {
-			ItemEntry item = new ItemEntry(buf.readItem());
-			item.amount = buf.readInt();
+			var stack = buf.readItem();
+			var amount = buf.readInt();
+
+			stack.setCount(amount);
+			ItemEntry item = new ItemEntry(stack);
+			item.amount = amount;
 			item.hash = buf.readUtf();
 
 			this.itemEntries.add(item);
@@ -66,7 +70,9 @@ public class StorageViewContentPacket extends RezolveMenuPacket {
 
 		buf.writeInt(this.itemEntries.size());
 		for (ItemEntry item : this.itemEntries) {
-			buf.writeItem(item.stack);
+			var singleItem = new ItemStack(item.stack.getItem(), 1);
+			singleItem.setTag(item.stack.getTag());
+			buf.writeItem(singleItem);
 			buf.writeInt(item.amount);
 			buf.writeUtf(item.hash);
 		}

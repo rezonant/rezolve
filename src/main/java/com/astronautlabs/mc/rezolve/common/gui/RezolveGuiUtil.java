@@ -17,8 +17,8 @@ public class RezolveGuiUtil {
 
         textureQuad(stack, bg, x, y, width, 1, 0, 0, 1, 1/32.0f); // top line
         textureQuad(stack, bg, x, y + height, width, 1, 0, 31.0f/32.0f, 1, 1); // bottom line
-        textureQuad(stack, bg, x, y, 1, height, 0, 0, 1/32.0f, 1); // left line
-        textureQuad(stack, bg, x + width - 1, y, 1, height, 31/32.0f, 0, 1, 1); // right line
+        textureQuad(stack, bg, x, y, 1, height, 0, 0, 1/32.0f, 31/32.0f); // left line
+        textureQuad(stack, bg, x + width - 1, y, 1, height, 31/32.0f, 1/32.0f, 1, 1); // right line
 
         textureQuad(stack, bg, x + 1, y + 1, width - 2, height - 2, 1/32.0f, 1/32.0f, 31/32.0f, 31/32.0f);
 

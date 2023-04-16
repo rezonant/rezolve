@@ -1,7 +1,7 @@
 package com.astronautlabs.mc.rezolve.storage.machines.diskBay;
 
-import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
+import com.astronautlabs.mc.rezolve.storage.DiskItem;
 import com.astronautlabs.mc.rezolve.storage.IStorageAccessor;
 import com.astronautlabs.mc.rezolve.util.ItemStackUtil;
 import net.minecraft.nbt.CompoundTag;
@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Consumer;
 
 public class DiskAccessor implements IStorageAccessor {
 
@@ -28,13 +29,13 @@ public class DiskAccessor implements IStorageAccessor {
 		if (this.nbt == null)
 			this.nbt = new CompoundTag();
 
-		this.sizeMetadata = nbt.getInt("size");
-		this.size = DiskItem.determineSize(disk);
+		this.sizeMetadata = DiskItem.determineSize(disk);
+		this.size = DiskItem.determineCapacity(disk);
 		this.readFromNBT();
 	}
 
 	public static boolean accepts(ItemStack stack) {
-		return stack != null && stack.getItem() == RezolveRegistry.item(DiskItem.class);
+		return stack != null && stack.getItem() instanceof DiskItem;
 	}
 
 	public interface IListener {
@@ -53,7 +54,7 @@ public class DiskAccessor implements IStorageAccessor {
 		DiskStatus diskStatus = new DiskStatus();
 
 		diskStatus.disk = diskItem;
-		diskStatus.size = DiskItem.determineSize(diskItem);
+		diskStatus.size = DiskItem.determineCapacity(diskItem);
 		diskStatus.spaceUsed = 0;
 
 		CompoundTag itemTag = diskItem.getTag();
@@ -427,7 +428,7 @@ public class DiskAccessor implements IStorageAccessor {
 		if (this.dirty)
 			this.writeToNBT();
 
-		ItemStack stack = RezolveRegistry.item(DiskItem.class).getSizedDisk(this.sizeMetadata);
+		ItemStack stack = DiskItem.getSizedStack(this.sizeMetadata);
 		stack.setTag(this.nbt);
 
 		return stack;
