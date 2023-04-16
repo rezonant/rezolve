@@ -1,0 +1,12 @@
+{
+    "parent": "block/cube",
+    "textures": {
+        "down": "rezolve:blocks/block_remote_shell_side",
+        "up": "rezolve:blocks/block_remote_shell_side",
+        "north": "rezolve:blocks/block_storage_monitor_front",
+        "east": "rezolve:blocks/block_remote_shell_side",
+        "south": "rezolve:blocks/block_remote_shell_side",
+        "west": "rezolve:blocks/block_remote_shell_side",
+        "particle": "blocks/lapis_block"
+    }
+}

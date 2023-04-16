@@ -1,5 +1,5 @@
 <!-- modrinth_exclude.start -->
-# ![rezolve](src/main/resources/logo.png)
+# ![✹ rezolve](src/main/resources/logo.png)
 
 [![Modrinth](https://img.shields.io/badge/modrinth-115454)](https://modrinth.com/mod/rezolve) 
 [![Curseforge](https://img.shields.io/badge/curseforge-f16436)](https://www.curseforge.com/minecraft/mc-mods/rezolve/files/2455133) 
@@ -44,6 +44,28 @@ a user level for specific players by typing their Minecraft usernames. This mech
 interface access to the machine on both the client and the server. Note that accessing the contents of a machine may 
 still be possible by an unauthorized user by placing piping/automation blocks nearby the controlled machine. This will 
 be handled in an upcoming version of Rezolve.
+
+# Ores
+
+Rezolve adds Copper, Tin, and Lead ore as well as the corresponding ingots and nuggets. These are ore dictionary 
+compatible, can be disabled in the configuration, and Rezolve will intelligently disable them if another mod 
+provides compatible versions of these ores.
+
+# Storage
+
+Rezolve provides a full-featured item storage system.
+
+## Disk Manipulator
+
+Insert a disk to view and modify it's contents. 
+
+## Disk Bay 
+
+Insert one or many disks to make them available to the Omnicable network.
+
+## Storage Shell
+
+Connect the storage shell to an Omnicable network which has some storage on it to extract/insert items from that storage.
 
 # Bundling
 
@@ -127,6 +149,13 @@ added to the project.
 
 If you wish to test alongside other mods, you can copy the mods from the `mods` folder into `run/mods`.
 
+## ⚑ Translations
+
+Currently, Rezolve only has official translations for English. We are looking for help to add new official translations.
+Rezolve does however ship with automatic translations for all languages that Minecraft itself supports via Google Translate. 
+All automatic translations are marked with the ⚑ character in-game. These automatic translations are regular `.lang` files
+within the repository, see `src/main/resources/assets/rezolve/lang`. If you'd like to improve them, send a PR! 
+
 ## Maven
 
 All versions of this mod are available in a Maven repository hosted on PackageCloud:
@@ -150,3 +179,4 @@ you can, let us know how you used the code!
 You do not need our permission to include this mod in a pack. You are free to use it in any way you wish without
 any stipulations. That being said, we'd love to hear about how you've used the mod so far. Hearing that you are 
 enjoying this mod keeps us motivated to improve it!
+

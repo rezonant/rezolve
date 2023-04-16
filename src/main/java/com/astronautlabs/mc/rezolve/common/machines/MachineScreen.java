@@ -407,4 +407,8 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
     protected void colorQuad(PoseStack stack, float r, float g, float b, float a, double x, double y, double width, double height) {
         RezolveGuiUtil.colorQuad(stack, r, g, b, a, x, y, width, height);
     }
+
+    public MachineMenu getMachineMenu() {
+        return (MachineMenu)getMenu();
+    }
 }

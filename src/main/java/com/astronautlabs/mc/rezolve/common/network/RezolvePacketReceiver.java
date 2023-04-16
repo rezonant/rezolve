@@ -9,10 +9,10 @@ import net.minecraftforge.network.NetworkDirection;
  */
 public interface RezolvePacketReceiver {
     default void receivePacket(RezolvePacket rezolvePacket, NetworkDirection direction) {
-        if (direction == NetworkDirection.PLAY_TO_CLIENT)
-            RezolveMod.LOGGER.warn("Unexpectedly received packet {} on client instead of server");
+        if (direction == NetworkDirection.PLAY_TO_CLIENT )
+            RezolveMod.LOGGER.warn("Packet {} is not handled by {} on the client", rezolvePacket.getClass().getCanonicalName(), this.getClass().getCanonicalName());
         else if (direction == NetworkDirection.PLAY_TO_SERVER)
-            RezolveMod.LOGGER.warn("Unexpectedly received packet {} on server instead of client");
+            RezolveMod.LOGGER.warn("Packet {} is not handled by {} on the server", rezolvePacket.getClass().getCanonicalName(), this.getClass().getCanonicalName());
     }
 
     default void receivePacketOnServer(RezolvePacket rezolvePacket) { receivePacket(rezolvePacket, NetworkDirection.PLAY_TO_SERVER); };

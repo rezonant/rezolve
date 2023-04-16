@@ -32,7 +32,6 @@ public class BlockBase extends Block {
         return this.registryName;
     }
 
-	public BlockItem itemBlock;
     protected RezolveMod mod;
     
     public void init(RezolveMod mod) {
@@ -47,8 +46,4 @@ public class BlockBase extends Block {
     public void fillItemCategory(CreativeModeTab pTab, NonNullList<ItemStack> pItems) {
         super.fillItemCategory(pTab, pItems);
     }
-
-    //    public void registerRenderer() {
-//        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(this), 0, new ModelResourceLocation(getRegistryName(), "inventory"));
-//    }
 }

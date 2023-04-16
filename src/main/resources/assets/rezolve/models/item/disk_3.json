@@ -1,0 +1,6 @@
+{
+    "parent":"rezolve:item/standard_item",
+    "textures": {
+        "layer0":"rezolve:items/item_disk_3"
+    }
+}

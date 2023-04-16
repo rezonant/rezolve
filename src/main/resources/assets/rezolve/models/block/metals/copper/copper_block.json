@@ -1,0 +1,6 @@
+{
+    "parent": "rezolve:block/metals/storage",
+    "textures": {
+        "all": "rezolve:metals/copper/copper_block"
+    }
+}

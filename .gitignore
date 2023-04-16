@@ -10,6 +10,11 @@ config/
 asm/
 crash-reports/
 local.properties
+logs/
+saves/
+options.txt
+scratch/
+src/generated/resources/.cache
 
 # idea
 out

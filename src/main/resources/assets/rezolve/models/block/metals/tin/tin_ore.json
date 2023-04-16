@@ -1,0 +1,6 @@
+{
+    "parent": "rezolve:block/metals/ore",
+    "textures": {
+        "all": "rezolve:metals/tin/tin_ore"
+    }
+}

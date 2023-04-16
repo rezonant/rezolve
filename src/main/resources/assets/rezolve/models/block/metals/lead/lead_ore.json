@@ -1,0 +1,6 @@
+{
+    "parent": "rezolve:block/metals/ore",
+    "textures": {
+        "all": "rezolve:metals/lead/lead_ore"
+    }
+}

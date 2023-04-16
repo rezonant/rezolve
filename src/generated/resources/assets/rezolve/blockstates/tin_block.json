@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "rezolve:block/tin_block"
+    }
+  }
+}

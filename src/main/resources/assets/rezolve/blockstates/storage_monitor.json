@@ -1,0 +1,9 @@
+{
+  "forge_marker": 1,
+  "variants": {
+    "facing=north": { "model": "rezolve:block/storage_monitor" },
+    "facing=south": { "model": "rezolve:block/storage_monitor", "y": 180 },
+    "facing=west": { "model": "rezolve:block/storage_monitor", "y": 270 },
+    "facing=east": { "model": "rezolve:block/storage_monitor", "y": 90 }
+  }
+}

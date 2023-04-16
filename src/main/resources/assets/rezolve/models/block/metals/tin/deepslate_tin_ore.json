@@ -1,0 +1,6 @@
+{
+    "parent": "rezolve:block/metals/deepslate_ore",
+    "textures": {
+        "all": "rezolve:metals/tin/deepslate_tin_ore"
+    }
+}

@@ -1,5 +1,6 @@
 package com.astronautlabs.mc.rezolve.common.gui;
 
+import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.renderer.GameRenderer;
@@ -9,6 +10,18 @@ public class RezolveGuiUtil {
 
     public static void textureQuad(PoseStack stack, ResourceLocation location, double x, double y, double width, double height) {
         textureQuad(stack, location, x, y, width, height, 0, 0, 1, 1);
+    }
+
+    public static void insetBox(PoseStack stack, double x, double y, double width, double height) {
+        var bg = RezolveMod.loc("textures/gui/widgets/storage_view_background.png");
+
+        textureQuad(stack, bg, x, y, width, 1, 0, 0, 1, 1/32.0f); // top line
+        textureQuad(stack, bg, x, y + height, width, 1, 0, 31.0f/32.0f, 1, 1); // bottom line
+        textureQuad(stack, bg, x, y, 1, height, 0, 0, 1/32.0f, 1); // left line
+        textureQuad(stack, bg, x + width - 1, y, 1, height, 31/32.0f, 0, 1, 1); // right line
+
+        textureQuad(stack, bg, x + 1, y + 1, width - 2, height - 2, 1/32.0f, 1/32.0f, 31/32.0f, 31/32.0f);
+
     }
 
     public static void textureQuad(PoseStack stack, ResourceLocation location, double x, double y, double width, double height, float minU, float minV, float maxU, float maxV) {

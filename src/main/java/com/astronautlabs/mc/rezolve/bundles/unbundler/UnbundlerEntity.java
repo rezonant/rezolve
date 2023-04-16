@@ -1,7 +1,6 @@
 package com.astronautlabs.mc.rezolve.bundles.unbundler;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
-
 import com.astronautlabs.mc.rezolve.common.gui.WithMenu;
 import com.astronautlabs.mc.rezolve.common.inventory.InventorySnapshot;
 import com.astronautlabs.mc.rezolve.common.inventory.OutputSlot;
@@ -9,7 +8,9 @@ import com.astronautlabs.mc.rezolve.common.inventory.VirtualInventory;
 import com.astronautlabs.mc.rezolve.common.machines.MachineEntity;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
 import com.astronautlabs.mc.rezolve.common.machines.WithOperation;
+import com.astronautlabs.mc.rezolve.common.util.RezolveItemUtil;
 import com.astronautlabs.mc.rezolve.common.util.RezolveTagUtil;
+import com.astronautlabs.mc.rezolve.util.ItemStackUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -73,7 +74,7 @@ public class UnbundlerEntity extends MachineEntity {
 				if (existingStack == null)
 					continue;
 				
-				if (!RezolveMod.areStacksSame(existingStack, stack))
+				if (!ItemStack.isSame(existingStack, stack))
 					continue;
 				
 				int maxStackSize = stack.getItem().getMaxStackSize(stack);
@@ -158,7 +159,7 @@ public class UnbundlerEntity extends MachineEntity {
 			
 			ItemStack inputStack = this.getStackInSlot(i);
 			
-			if (!RezolveMod.areStacksSame(inputStack, bundle))
+			if (!ItemStack.isSame(inputStack, bundle))
 				continue;
 			
 			return i;
@@ -241,7 +242,7 @@ public class UnbundlerEntity extends MachineEntity {
 		
 			ItemStack inputStack = this.getStackInSlot(i);
 			
-			if (!RezolveMod.areStacksSame(inputStack, bundle)) {
+			if (!ItemStack.isSame(inputStack, bundle)) {
 				continue;
 			}
 			

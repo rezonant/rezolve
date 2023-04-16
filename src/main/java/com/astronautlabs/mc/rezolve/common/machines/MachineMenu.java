@@ -2,6 +2,7 @@ package com.astronautlabs.mc.rezolve.common.machines;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
 import com.astronautlabs.mc.rezolve.common.Errors;
+import com.astronautlabs.mc.rezolve.common.gui.RezolveMenuPacket;
 import com.astronautlabs.mc.rezolve.common.inventory.IngredientSlot;
 import com.astronautlabs.mc.rezolve.common.inventory.SetIngredientSlotPacket;
 import com.astronautlabs.mc.rezolve.common.inventory.VirtualInventory;
@@ -26,12 +27,15 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.network.NetworkDirection;
+import org.apache.commons.lang3.function.TriFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.BiFunction;
 
 @WithPacket(MachineMenuStatePacket.class)
 @WithPacket(SetIngredientSlotPacket.class)
@@ -404,6 +408,19 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 		return firstPlayerInventorySlot;
 	}
 
+	protected void addSlotGrid(int firstSlot, int x, int y, int gridStride, int gridHeight) {
+		addSlotGrid(firstSlot, (id, sx, sy) -> new Slot(container, id, sx, sy), x, y, gridStride, gridHeight);
+	}
+
+	protected void addSlotGrid(int firstSlot, TriFunction<Integer, Integer, Integer, Slot> ctor, int x, int y, int gridStride, int gridHeight) {
+		int slotSize = 18;
+		for (int j = 0, maxJ = gridHeight; j < maxJ; ++j) {
+			for (int i = 0, maxI = gridStride; i < maxI; ++i) {
+				addSlot(ctor.apply(j * gridStride + i, x + i * slotSize + 1, y + j * slotSize + 1));
+			}
+		}
+	}
+
 	protected void addPlayerSlots(int offsetX, int offsetY) {
 		firstPlayerInventorySlot = this.slots.size();
 		for (int y = 0; y < 3; ++y) {
@@ -420,5 +437,25 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 		for (int x = 0; x < 9; ++x) {
 			this.addSlot(new Slot(playerInventory, x, playerHotbarOffsetX + x * 18, playerHotbarOffsetY));
 		}
+	}
+
+	public interface PacketSubscriber {
+		boolean handlePacket(RezolveMenuPacket packet);
+	}
+
+	private List<PacketSubscriber> packetSubscribers = new ArrayList<>();
+
+	public void addPacketHandler(PacketSubscriber subscriber) {
+		packetSubscribers.add(subscriber);
+	}
+
+	@Override
+	public void receivePacket(RezolvePacket rezolvePacket, NetworkDirection direction) {
+		for (var subscriber : packetSubscribers) {
+			if (subscriber.handlePacket((RezolveMenuPacket)rezolvePacket))
+				return;
+		}
+
+		RezolvePacketReceiver.super.receivePacket(rezolvePacket, direction);
 	}
 }
