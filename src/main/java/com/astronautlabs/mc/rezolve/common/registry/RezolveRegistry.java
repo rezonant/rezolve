@@ -9,12 +9,18 @@ import com.astronautlabs.mc.rezolve.common.network.RezolvePacket;
 import com.astronautlabs.mc.rezolve.common.machines.Operation;
 import com.astronautlabs.mc.rezolve.common.network.WithPacket;
 import com.astronautlabs.mc.rezolve.common.util.RezolveReflectionUtil;
+import com.astronautlabs.mc.rezolve.worlds.Metal;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.core.BlockPos;
+import net.minecraft.data.tags.BlockTagsProvider;
+import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
@@ -27,6 +33,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -37,6 +44,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Provides an annotation-driven way to register blocks, items, block entities and menus for the Rezolve mod.
@@ -228,7 +236,7 @@ public class RezolveRegistry {
                 register.register(
                         ForgeRegistries.Keys.ITEMS,
                         new ResourceLocation(RezolveMod.ID, id),
-                        () -> new BlockItem(block, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
+                        () -> new BlockItem(block, new Item.Properties().tab(RezolveMod.CREATIVE_MODE_TAB))
                 );
             }
 
@@ -341,4 +349,76 @@ public class RezolveRegistry {
         return (MenuType<T>)registryObjects.get(klass);
     }
 
+    public interface Tagger<T> {
+        Tagger tag(TagKey<T> tag);
+        Tagger tag(String tag);
+    }
+
+    private record TagProvider<T>(T block, Consumer<Tagger> configurer) {}
+    private static List<TagProvider<Block>> blocksForTagging = new ArrayList<>();
+    private static List<TagProvider<Item>> itemsForTagging = new ArrayList<>();
+
+    public static void registerForTagging(Block block, Consumer<Tagger<Block>> configurer) {
+        blocksForTagging.add(new TagProvider(block, configurer));
+    }
+
+    public static void registerForTagging(Item item, Consumer<Tagger<Item>> configurer) {
+        itemsForTagging.add(new TagProvider(item, configurer));
+    }
+
+    @SubscribeEvent
+    public static void gatherData(GatherDataEvent event) {
+        var blockTagsProvider = new BlockTagsGenerator(event);
+
+        event.getGenerator().addProvider(true, blockTagsProvider);
+        event.getGenerator().addProvider(true, new ItemTagsGenerator(event, blockTagsProvider));
+    }
+
+    public static class BlockTagsGenerator extends BlockTagsProvider {
+        public BlockTagsGenerator(GatherDataEvent event) {
+            super(event.getGenerator(), RezolveMod.ID, event.getExistingFileHelper());
+        }
+
+        @Override
+        protected void addTags() {
+            for (var provider: blocksForTagging) {
+                provider.configurer.accept(new Tagger<Block>() {
+                    @Override
+                    public Tagger tag(TagKey<Block> tag) {
+                        BlockTagsGenerator.this.tag(tag).add(provider.block);
+                        return null;
+                    }
+
+                    @Override
+                    public Tagger tag(String tag) {
+                        return tag(BlockTags.create(ResourceLocation.tryParse(tag)));
+                    }
+                });
+            }
+        }
+    }
+
+    public static class ItemTagsGenerator extends ItemTagsProvider {
+        public ItemTagsGenerator(GatherDataEvent event, BlockTagsProvider blockTagsProvider) {
+            super(event.getGenerator(), blockTagsProvider, RezolveMod.ID, event.getExistingFileHelper());
+        }
+
+        @Override
+        protected void addTags() {
+            for (var provider: itemsForTagging) {
+                provider.configurer.accept(new Tagger<Item>() {
+                    @Override
+                    public Tagger tag(TagKey<Item> tag) {
+                        ItemTagsGenerator.this.tag(tag).add(provider.block);
+                        return null;
+                    }
+
+                    @Override
+                    public Tagger tag(String tag) {
+                        return tag(ItemTags.create(ResourceLocation.tryParse(tag)));
+                    }
+                });
+            }
+        }
+    }
 }

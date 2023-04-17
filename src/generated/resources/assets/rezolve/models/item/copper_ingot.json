@@ -1,6 +1,0 @@
-{
-  "parent": "rezolve:item/standard_item",
-  "textures": {
-    "layer0": "rezolve:metals/copper/copper_ingot"
-  }
-}

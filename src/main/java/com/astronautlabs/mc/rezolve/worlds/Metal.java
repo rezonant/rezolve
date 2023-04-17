@@ -7,26 +7,24 @@ import com.astronautlabs.mc.rezolve.common.network.RezolvePacket;
 import com.google.gson.JsonObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.recipes.*;
+import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.data.worldgen.features.OreFeatures;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -36,7 +34,6 @@ import net.minecraft.world.level.material.Material;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.client.model.generators.ModelFile;
-import net.minecraftforge.common.world.ForgeBiomeModifiers;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -53,14 +50,36 @@ import java.util.function.Consumer;
 
 @Mod.EventBusSubscriber(modid = RezolveMod.ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public enum Metal {
-	COPPER("copper",
-			new Properties().withCommonOre(90, 70, 500)),
+	LEAD("lead", new Properties()
+			.withCommonOre(60, 40, 120)
+			.hardness(1)
+			.withVeinSize(5)
+			.needsIronTool()
+	),
 
-	LEAD("lead",
-			new Properties().withCommonOre(60, 40, 500)),
+	COBALT("cobalt", new Properties()
+			.withRareOre(30, 0, 100)
+			.hardness(3)
+			.withVeinSize(8)
+			.needsDiamondTool()
+	),
 
-	TIN("tin",
-			new Properties().withCommonOre(70, 60, 500));
+	TIN("tin", new Properties()
+			.withCommonOre(70, 60, 500)
+			.hardness(2)
+			.withVeinSize(12)
+			.needsStoneTool()
+	),
+
+	SILVER("silver", new Properties()
+			.withRareOre(60, 40, 500)
+			.hardness(3)
+			.withVeinSize(20)
+	),
+
+	;
+
+	private int veinSize = 7;
 
 	Metal(String name) {
 		this.name = name;
@@ -81,6 +100,12 @@ public enum Metal {
 	private Nugget nugget;
 	private List<PlacementModifier> orePlacement;
 	private boolean hasOre = false;
+	private List<TagKey<Block>> blockTags = new ArrayList<>();
+
+	{
+		// All metal blocks will inherit these tags
+		blockTags.add(BlockTags.SNAPS_GOAT_HORN);
+	}
 
 	private static class Properties {
 		private List<Consumer<Metal>> configurers = new ArrayList<>();
@@ -97,6 +122,46 @@ public enum Metal {
 			if (!hasHardness)
 				configurers.add(m -> m.hardness = resistance / 5.0F);
 
+			return this;
+		}
+
+		public Properties withTag(TagKey<Block> tag) {
+			configurers.add(m -> m.blockTags.add(tag));
+			return this;
+		}
+
+		public Properties withForgeTag(String forgeTag) {
+			configurers.add(m -> m.blockTags.add(BlockTags.create(new ResourceLocation("forge", forgeTag))));
+			return this;
+		}
+
+		public Properties needsDiamondTool() {
+			return withTag(BlockTags.NEEDS_DIAMOND_TOOL);
+		}
+
+
+		public Properties needsIronTool() {
+			return withTag(BlockTags.NEEDS_IRON_TOOL);
+		}
+
+		public Properties needsStoneTool() {
+			return withTag(BlockTags.NEEDS_STONE_TOOL);
+		}
+
+		public Properties needsWoodTool() {
+			return withForgeTag("needs_wood_tool");
+		}
+
+		public Properties needsGoldTool() {
+			return withForgeTag("needs_gold_tool");
+		}
+
+		public Properties needsNetheriteTool() {
+			return withForgeTag("needs_netherite_tool");
+		}
+
+		public Properties withVeinSize(int veinSize) {
+			configurers.add(m -> m.veinSize = veinSize);
 			return this;
 		}
 
@@ -222,7 +287,7 @@ public enum Metal {
 								new OreConfiguration(List.of(
 									OreConfiguration.target(OreFeatures.STONE_ORE_REPLACEABLES, metal.ore().defaultBlockState()),
 									OreConfiguration.target(OreFeatures.DEEPSLATE_ORE_REPLACEABLES, metal.deepSlateOre().defaultBlockState())
-								), 7)
+								), metal.veinSize)
 						)
 				);
 			}
@@ -249,15 +314,26 @@ public enum Metal {
 		return String.format("Metal [%s]", this.name);
 	}
 
-	public class Block extends BlockBase {
-		public Block(String stateName) {
+	public class MetalBlock extends BlockBase {
+		public MetalBlock(String stateName) {
+			this(stateName, Properties.of(Material.METAL));
+		}
+
+		public MetalBlock(String stateName, Properties properties) {
 			super(
-					Properties.of(Material.METAL)
+					properties
 							.destroyTime(getHardness())
 							.explosionResistance(getResistance())
 			);
 
 			this.stateName = stateName;
+		}
+
+		{
+			applyTags(tagger -> {
+				for (var tag : getMetal().blockTags)
+					tagger.tag(tag);
+			});
 		}
 
 		private String stateName;
@@ -278,7 +354,7 @@ public enum Metal {
 
 		public class Item extends BlockItem {
 			public Item() {
-				super(Block.this, new Properties().tab(CreativeModeTab.TAB_MISC));
+				super(MetalBlock.this, new Properties().tab(RezolveMod.CREATIVE_MODE_TAB));
 			}
 
 			@Override
@@ -321,9 +397,15 @@ public enum Metal {
 		}
 	}
 
-	public class StorageBlock extends Block {
+	public class StorageBlock extends MetalBlock {
 		public StorageBlock() {
 			super("block");
+		}
+
+		{
+			applyTags(tagger -> {
+				tagger.tag("forge:storage_blocks/" + getMetal().getName());
+			});
 		}
 	}
 
@@ -333,13 +415,23 @@ public enum Metal {
 		}
 	}
 
-	public class Ore extends Block {
+	public class Ore extends MetalBlock {
 		public Ore() {
-			super("ore");
+			super("ore", Properties.of(Material.METAL)
+					.requiresCorrectToolForDrops()
+			);
+		}
+
+		{
+			applyTags(tagger -> {
+				tagger.tag("forge:ores_in_ground/stone");
+				tagger.tag("forge:ores/" + getMetal().getName());
+				tagger.tag("forge:ore_rates/singular");
+			});
 		}
 	}
 
-	public class DeepSlateOre extends Block {
+	public class DeepSlateOre extends MetalBlock {
 		public DeepSlateOre() {
 			super("deepslate_ore");
 		}
@@ -387,11 +479,11 @@ public enum Metal {
 			blockModel(storageBlock, "block");
 		}
 
-		private void blockModel(Block block, String type) {
+		private void blockModel(MetalBlock block, String type) {
 			blockModel(block, "", type);
 		}
 
-		private void blockModel(Block block, String prefix, String type) {
+		private void blockModel(MetalBlock block, String prefix, String type) {
 			if (!prefix.isEmpty())
 				prefix = prefix + "_";
 

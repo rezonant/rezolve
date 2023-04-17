@@ -1,4 +1,5 @@
 {
+  "rezolve": "Rezolve",
   "block.rezolve.bundler": "Bundler",
   "block.rezolve.unbundler": "Unbundler",
   "block.rezolve.bundle_builder": "Bundle Pattern Builder",
@@ -137,7 +138,8 @@
   "rezolve.metal_forms.nugget": "Nugget",
   "rezolve.metal_forms.block": "Block",
 
-  "rezolve.metals.copper": "Copper",
+  "rezolve.metals.cobalt": "Cobalt",
+  "rezolve.metals.silver": "Silver",
   "rezolve.metals.lead": "Lead",
   "rezolve.metals.tin": "Tin",
 

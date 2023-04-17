@@ -1,7 +1,10 @@
 package com.astronautlabs.mc.rezolve.common;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
+import com.astronautlabs.mc.rezolve.RezolveMod;
+import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -10,7 +13,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class ItemBase extends Item {
 	public ItemBase(Item.Properties properties) {
-		super(properties.tab(CreativeModeTab.TAB_MISC));
+		super(properties.tab(RezolveMod.CREATIVE_MODE_TAB));
 	}
 
 	public String getRegistryName() {
@@ -20,7 +23,11 @@ public class ItemBase extends Item {
 	public void registerRecipes() {
 		
 	}
-	
+
+	public void applyTags(Consumer<RezolveRegistry.Tagger<Item>> configurer) {
+		RezolveRegistry.registerForTagging(this, configurer);
+	}
+
 	public void registerRenderer() {
 		
 //		ArrayList<ItemStack> subtypes = new ArrayList<ItemStack>();

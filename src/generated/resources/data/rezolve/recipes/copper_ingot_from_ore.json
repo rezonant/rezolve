@@ -1,9 +1,0 @@
-{
-  "type": "minecraft:smelting",
-  "cookingtime": 100,
-  "experience": 0.7,
-  "ingredient": {
-    "item": "rezolve:copper_ore"
-  },
-  "result": "rezolve:copper_ingot"
-}

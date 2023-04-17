@@ -50,6 +50,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class RezolveMod {
 	public static final String ID = "rezolve";
 	public static final Logger LOGGER = LogManager.getLogger(RezolveMod.ID);
+	public static final CreativeModeTab CREATIVE_MODE_TAB = new RezolveCreativeTab();
 
 	public RezolveMod() {
 		_instance = this;

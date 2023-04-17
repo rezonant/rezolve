@@ -5,6 +5,7 @@ import com.astronautlabs.mc.rezolve.common.blocks.EntityBlockBase;
 import com.astronautlabs.mc.rezolve.common.registry.RezolveRegistry;
 import com.google.common.base.Predicate;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -20,10 +21,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.BlockHitResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public abstract class Machine extends EntityBlockBase {
 	private static final Logger LOGGER = LogManager.getLogger();
@@ -91,5 +95,20 @@ public abstract class Machine extends EntityBlockBase {
 	public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
 		this.openMenu(pState, pLevel, pPos, pPlayer);
 		return InteractionResult.sidedSuccess(pLevel.isClientSide);
+	}
+
+	/**
+	 * Tag to attach to an item when this block is broken and turned into an item
+	 * @return
+	 */
+	public CompoundTag getItemTag() {
+		return null;
+	}
+
+	@Override
+	public List<ItemStack> getDrops(BlockState pState, LootContext.Builder pBuilder) {
+		var item = new ItemStack(asItem());
+		item.setTag(getItemTag());
+		return List.of(item);
 	}
 }
