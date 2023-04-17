@@ -15,6 +15,7 @@ import com.astronautlabs.mc.rezolve.storage.machines.diskManipulator.DiskManipul
 import com.astronautlabs.mc.rezolve.storage.machines.storageMonitor.StorageMonitorBlock;
 import com.astronautlabs.mc.rezolve.storage.machines.storageShell.StorageShellBlock;
 import com.astronautlabs.mc.rezolve.thunderbolt.cable.*;
+import com.astronautlabs.mc.rezolve.thunderbolt.extender.Extender;
 import com.astronautlabs.mc.rezolve.thunderbolt.proxy.ProxyBlock;
 import com.astronautlabs.mc.rezolve.thunderbolt.remoteShell.*;
 import com.astronautlabs.mc.rezolve.thunderbolt.securityServer.SecurityServerEntity;
@@ -72,7 +73,8 @@ public class RezolveMod {
 			DiskManipulatorBlock.class,
 			StorageShellBlock.class,
 			StorageMonitorBlock.class,
-			MachineFrameBlock.class
+			MachineFrameBlock.class,
+			Extender.class
 		);
 	}
 

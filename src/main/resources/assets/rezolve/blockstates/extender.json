@@ -1,0 +1,11 @@
+{
+  "forge_marker": 1,
+  "variants": {
+    "facing=north": { "model": "rezolve:block/extender" },
+    "facing=up": { "model": "rezolve:block/extender", "x": 90 },
+    "facing=down": { "model": "rezolve:block/extender", "x": -90 },
+    "facing=south": { "model": "rezolve:block/extender", "y": 180 },
+    "facing=west": { "model": "rezolve:block/extender", "y": 270 },
+    "facing=east": { "model": "rezolve:block/extender", "y": 90 }
+  }
+}

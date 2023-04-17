@@ -1,5 +1,6 @@
 {
   "rezolve": "Rezolve",
+  "block.rezolve.extender": "Extender",
   "block.rezolve.bundler": "Bundler",
   "block.rezolve.unbundler": "Unbundler",
   "block.rezolve.bundle_builder": "Bundle Pattern Builder",

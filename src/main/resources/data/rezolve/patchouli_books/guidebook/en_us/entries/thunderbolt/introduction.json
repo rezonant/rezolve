@@ -1,0 +1,16 @@
+{
+  "name": "Introduction",
+  "icon": "minecraft:writable_book",
+  "category": "rezolve:thunderbolt",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Thunderbolt is Rezolve's universal cabling system. It is capable of transporting items, fluids, energy, and redstone signals. It also acts as the network fabric for Rezolve's remote control, storage, and logistics features. When interacting with sided blocks, Thunderbolt cable does not require multiple connections to the block. Instead, a single connection can be configured to push/pull any kind of resource into any side of the block."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "rezolve:thunderbolt_cable"
+    }
+  ]
+}

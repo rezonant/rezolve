@@ -1,0 +1,15 @@
+{
+  "name": "Introduction",
+  "icon": "minecraft:writable_book",
+  "category": "rezolve:remote_shell",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The Remote Shell allows you to remotely control any machine or block connected to a connected Thunderbolt network. Simply construct the Remote Shell, connect it to another machine (like a Furnace, Crafting Table, or other block which has a user interface) and use the Remote Shell user interface to select which block you'd like to interact with. While you are using the block remotely, the Remote Shell will consume energy, and inserting/extracting items from the remote block will cost additional energy. If you run out of energy, the connection to the remote block will close. The blocks you interact with must be in loaded chunks, and some blocks do not work across dimensions."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "rezolve:remote_shell"
+    }
+  ]
+}

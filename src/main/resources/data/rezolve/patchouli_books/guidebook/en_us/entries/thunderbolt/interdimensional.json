@@ -1,0 +1,39 @@
+{
+  "name": "Interdimensional",
+  "icon": "minecraft:writable_book",
+  "category": "rezolve:thunderbolt",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Thunderbolt networks are not limited to a single dimension. Note that interdimensional use of some features such as the Remote Shell are not compatible with all mods, and remote access of areas that are not currently loaded may not function as expected."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "(image)"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Nether Portals",
+      "text":  "The simplest way to create an interdimensional Thunderbolt network is to connect cable directly to both sides of the purple Portal within a Nether Portal frame. When you do so, machines on both sides (in the Overworld and in the Nether) will be on the same Thunderbolt network. You can transfer items, fluids, energy, redstone signals, and use all of Rezolve's remote control, automation and logistics features. Useful for connecting your Nether resource farms to your main base!"
+    },
+    {
+      "type": "patchouli:text",
+      "text": "(image)"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "End Portal",
+      "text":  "Thunderbolt can also communicate across the End Portal. It works similarly to the Nether Portal, but with a few important distinctions. To get started, connect a Thunderbolt cable to both the Overworld End Portal and the End's Return Portal.$(br)$(br)Since all Overworld End Portals link to the same place, it is also possible to 'bridge' an Overworld Thunderbolt network across long distances, by connecting two cable networks to two different Stronghold End Portals."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "(image)"
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Interdimensional Bridges",
+      "text":  "More sophisticated interdimensional networks can be created by using Interdimensional Bridges. These can also be used to create unified Thunderbolt networks across vast distances within the same dimension."
+    }
+  ]
+}

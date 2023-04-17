@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ftf",
+    "ror",
+    "frf"
+  ],
+  "key": {
+    "f": { "item": "rezolve:machine_frame" },
+    "t": { "item": "minecraft:redstone_torch" },
+    "r": { "item": "minecraft:redstone" },
+    "o": { "item": "minecraft:observer" }
+  },
+  "result": {
+    "item": "rezolve:extender",
+    "count": 1
+  }
+}

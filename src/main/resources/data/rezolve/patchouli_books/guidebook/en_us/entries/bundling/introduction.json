@@ -1,0 +1,45 @@
+{
+  "name": "Introduction",
+  "icon": "minecraft:writable_book",
+  "category": "rezolve:bundling",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Bundling allows you to use energy to bind sets of items together so that they can be transported as one. You need to create a bundle pattern using the Bundle Pattern Builder, then use it with the Bundler to turn items into the bundle type you specified. Afterwards you can use the Unbundler to reverse the process to get the original items out."
+    },
+    {
+      "type": "patchouli:spotlight",
+      "title": "Bundles",
+      "item": "rezolve:bundle",
+      "text": "Bundles hold multiple items together. The positions of items within a crafting grid or inventory can even be remembered! This is key to using the automation systems Rezolve grants you."
+    },
+
+    {
+      "type": "patchouli:text",
+      "text": "The Bundle Pattern Builder is used to encode Bundle Patterns for use with the Bundler machine. Bundles can be nested, but doing so costs significantly more energy for each layer of nested bundles."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "rezolve:bundle_builder",
+      "recipe2": "rezolve:bundle_pattern"
+    },
+
+    {
+      "type": "patchouli:text",
+      "text": "The Bundler is responsible for creating bundles based on the pattern you created using the Pattern Builder. Bundler requires energy to do this. The amount of energy required depends on the items involved and whether bundles are themselves being bundled."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "rezolve:bundler"
+    },
+
+    {
+      "type": "patchouli:text",
+      "text": "The Unbundler lets you reobtain the original items used to create a Bundle. Energy is required for this, and similar to the Bundler, the amount of energy depends on the items found within the bundles."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "rezolve:unbundler"
+    }
+  ]
+}

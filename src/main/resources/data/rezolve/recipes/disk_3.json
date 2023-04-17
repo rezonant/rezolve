@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "rsr",
+    "rCr",
+    "rrr"
+  ],
+  "key": {
+    "r": { "item": "minecraft:redstone" },
+    "s": { "item": "rezolve:storage_part_3" },
+    "C": { "item": "minecraft:integrated_circuit" }
+  },
+  "result": {
+    "item": "rezolve:disk_3",
+    "count": 1
+  }
+}

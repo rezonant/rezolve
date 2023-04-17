@@ -1,0 +1,14 @@
+{
+  "type": "patchouli:shaped_book_recipe",
+  "pattern": [
+    " t ",
+    "sbs",
+    " t "
+  ],
+  "key": {
+    "t": { "tag": "forge:ingots/tin" },
+    "s": { "tag": "forge:ingots/silver" },
+    "b": { "item": "minecraft:book" }
+  },
+  "book": "rezolve:guidebook"
+}
