@@ -36,22 +36,6 @@ public class SecurityServer extends Machine {
 		//RuleModificationMessageHandler.register();
 		this.accessController = new SecurityAccessController();
 	}
-
-//	@Override
-//	public void registerRecipes() {
-//		RezolveMod.addRecipe(
-//			new ItemStack(this.itemBlock),
-//			"oNo",
-//			"cRc",
-//			"oDo",
-//
-//			'o', Blocks.OBSIDIAN,
-//			'N', Items.NETHER_STAR,
-//			'c', RezolveMod.ETHERNET_CABLE_BLOCK,
-//			'R', RezolveMod.REMOTE_SHELL_BLOCK,
-//			'D', Items.IRON_DOOR
-//		);
-//	}
 	
 	private SecurityAccessController accessController;
 	

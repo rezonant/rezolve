@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "cDc",
+    "EhE",
+    "cAc"
+  ],
+  "key": {
+    "c": { "item": "rezolve:thunderbolt_cable" },
+    "D": { "item": "rezolve:dac" },
+    "h": { "item": "minecraft:hopper" },
+    "E": { "item": "minecraft:ender_pearl" },
+    "A": { "item": "rezolve:adc" }
+  },
+  "result": {
+    "item": "rezolve:storage_shell",
+    "count": 1
+  }
+}

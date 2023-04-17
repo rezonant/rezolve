@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "oNo",
+    "cRc",
+    "oDo"
+  ],
+  "key": {
+    "o": { "item": "minecraft:obsidian" },
+    "N": { "item": "minecraft:nether_star" },
+    "c": { "item": "rezolve:thunderbolt_cable" },
+    "R": { "item": "rezolve:remote_shell" },
+    "D": { "item": "minecraft:iron_door" }
+  },
+  "result": {
+    "item": "rezolve:security_server",
+    "count": 1
+  }
+}

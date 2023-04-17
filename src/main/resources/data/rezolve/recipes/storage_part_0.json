@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "tct",
+    "iCi",
+    "tmt"
+  ],
+  "key": {
+    "t": { "item": "rezolve:tin_nugget" },
+    "c": { "item": "minecraft:chest" },
+    "i": { "item": "minecraft:iron_ingot" },
+    "C": { "item": "rezolve:integrated_circuit" },
+    "m": { "item": "rezolve:physical_mapper" }
+  },
+  "result": {
+    "item": "rezolve:storage_part_0",
+    "count": 1
+  }
+}

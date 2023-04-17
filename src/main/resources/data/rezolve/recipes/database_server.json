@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ene",
+    "CpC",
+    "cac"
+  ],
+  "key": {
+    "e": { "item": "minecraft:ender_eye" },
+    "n": { "item": "minecraft:name_tag" },
+    "C": { "item": "minecraft:chest" },
+    "p": { "item": "minecraft:prismarine_shard" },
+    "c": { "item": "rezolve:thunderbolt_cable" },
+    "a": { "item": "minecraft:anvil" }
+  },
+  "result": {
+    "item": "rezolve:database_server",
+    "count": 1
+  }
+}

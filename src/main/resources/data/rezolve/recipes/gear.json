@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ttt",
+    "tbt",
+    "ttt"
+  ],
+  "key": {
+    "t": { "item": "rezolve:tin_nugget" },
+    "b": { "item": "minecraft:stone_button" }
+  },
+  "result": {
+    "item": "rezolve:gear",
+    "count": 1
+  }
+}

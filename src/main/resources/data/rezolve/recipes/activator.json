@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "TbT",
+    "TcT",
+    "TrT"
+  ],
+  "key": {
+    "T": { "item": "rezolve:tin_ingot" },
+    "b": { "item": "minecraft:stone_button" },
+    "c": { "item": "rezolve:thunderbolt_cable" },
+    "r": { "item": "minecraft:redstone_block" }
+  },
+  "result": {
+    "item": "rezolve:activator",
+    "count": 1
+  }
+}

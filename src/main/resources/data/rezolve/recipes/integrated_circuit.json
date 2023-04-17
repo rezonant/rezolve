@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "cgc",
+    "GsG",
+    "cLc"
+  ],
+  "key": {
+    "c": { "item": "rezolve:thunderbolt_cable" },
+    "g": { "item": "minecraft:green_dye" },
+    "G": { "item": "minecraft:glass" },
+    "s": { "item": "minecraft:sandstone" },
+    "L": { "item": "rezolve:lead_ingot" }
+  },
+  "result": {
+    "item": "rezolve:integrated_circuit",
+    "count": 1
+  }
+}

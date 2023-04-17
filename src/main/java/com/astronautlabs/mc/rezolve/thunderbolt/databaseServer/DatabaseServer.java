@@ -26,40 +26,6 @@ public class DatabaseServer extends Machine {
 	}
 
 //	@Override
-//	public void registerRecipes() {
-//
-//		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
-//			RezolveMod.addRecipe(
-//				new ItemStack(this.itemBlock),
-//				"nen",
-//				"CMC",
-//				"cac",
-//
-//				'n', Items.NAME_TAG,
-//				'e', Items.ENDER_EYE,
-//				'C', Blocks.CHEST,
-//				'M', Item.REGISTRY.getObject(new ResourceLocation("enderio:itemMachinePart")),
-//				'c', RezolveMod.ETHERNET_CABLE_BLOCK,
-//				'a', Blocks.ANVIL
-//			);
-//		} else {
-//			RezolveMod.addRecipe(
-//				new ItemStack(this.itemBlock),
-//				"ene",
-//				"CpC",
-//				"cac",
-//
-//				'e', Items.ENDER_EYE,
-//				'n', Items.NAME_TAG,
-//				'C', Blocks.CHEST,
-//				'p', Items.PRISMARINE_SHARD,
-//				'c', RezolveMod.ETHERNET_CABLE_BLOCK,
-//				'a', Blocks.ANVIL
-//			);
-//		}
-//	}
-
-//	@Override
 //	public List<ItemStack> getDrops(BlockGetter world, BlockPos pos, BlockState state, int fortune) {
 //
 //		System.out.println("GETDROPS");

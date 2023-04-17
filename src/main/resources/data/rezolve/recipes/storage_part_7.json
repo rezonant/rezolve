@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "c6c",
+    "cCc",
+    "c6c"
+  ],
+  "key": {
+    "6": { "item": "rezolve:storage_part_6" },
+    "c": { "item": "rezolve:cobalt_ingot" },
+    "C": { "item": "rezolve:integrated_circuit" }
+  },
+  "result": {
+    "item": "rezolve:storage_part_7",
+    "count": 1
+  }
+}

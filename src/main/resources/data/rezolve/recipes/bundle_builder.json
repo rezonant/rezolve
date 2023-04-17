@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "QEQ",
+    "CRC",
+    "QNQ"
+  ],
+  "key": {
+    "Q": { "item": "minecraft:quartz_block" },
+    "E": { "item": "minecraft:enchanting_table" },
+    "C": { "item": "minecraft:crafting_table" },
+    "R": { "item": "minecraft:comparator" },
+    "N": { "item": "minecraft:nether_star" }
+  },
+  "result": {
+    "item": "rezolve:bundle_builder",
+    "count": 1
+  }
+}

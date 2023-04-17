@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PcP",
+    "CpC",
+    "PHP"
+  ],
+  "key": {
+    "P": { "item": "rezolve:bundle_pattern" },
+    "c": { "item": "minecraft:crafting_table" },
+    "C": { "item": "minecraft:chest" },
+    "p": { "item": "minecraft:piston" },
+    "H": { "item": "minecraft:hopper" }
+  },
+  "result": {
+    "item": "rezolve:unbundler",
+    "count": 1
+  }
+}

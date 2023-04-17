@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "DXD",
+    "DCD",
+    "DXD"
+  ],
+  "key": {
+    "X": { "item": "rezolve:storage_part_14" },
+    "D": { "item": "minecraft:diamond_block" },
+    "C": { "item": "rezolve:integrated_circuit" }
+  },
+  "result": {
+    "item": "rezolve:storage_part_15",
+    "count": 1
+  }
+}

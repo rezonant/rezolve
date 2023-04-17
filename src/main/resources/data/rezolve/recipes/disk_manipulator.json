@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "RDR",
+    "ECE",
+    "RAR"
+  ],
+  "key": {
+    "R": { "item": "minecraft:redstone" },
+    "D": { "item": "rezolve:dac" },
+    "E": { "item": "minecraft:ender_pearl" },
+    "C": { "item": "minecraft:comparator" },
+    "A": { "item": "rezolve:adc" }
+  },
+  "result": {
+    "item": "rezolve:disk_manipulator",
+    "count": 1
+  }
+}

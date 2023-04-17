@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "rMr",
+    "gPg",
+    "rgr"
+  ],
+  "key": {
+    "r": { "item": "minecraft:redstone" },
+    "M": { "item": "rezolve:motor_blade" },
+    "g": { "item": "rezolve:gear" },
+    "P": { "item": "minecraft:sticky_piston" }
+  },
+  "result": {
+    "item": "rezolve:physical_mapper",
+    "count": 1
+  }
+}

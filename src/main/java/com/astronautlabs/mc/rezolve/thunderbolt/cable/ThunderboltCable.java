@@ -130,46 +130,6 @@ public class ThunderboltCable extends Cable {
 		return Shapes.or(CENTER_SHAPE, shapesArray);
 	}
 
-//	@Override
-//	public void registerRecipes() {
-//		ItemStack redstoneBundle = RezolveMod.BUNDLE_ITEM.withContents(
-//			1,
-//			new ItemStack(Items.REDSTONE, 1),
-//			new ItemStack(Items.REDSTONE, 1),
-//			new ItemStack(Items.REDSTONE, 1),
-//			new ItemStack(Items.REDSTONE, 1),
-//			new ItemStack(Items.REDSTONE, 1),
-//			new ItemStack(Items.REDSTONE, 1),
-//			new ItemStack(Items.REDSTONE, 1),
-//			new ItemStack(Items.REDSTONE, 1),
-//			new ItemStack(Items.REDSTONE, 1)
-//		);
-//
-//		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
-//			RezolveMod.addRecipe(
-//				new ItemStack(this.itemBlock),
-//				"pWp",
-//				"WRW",
-//				"pWp",
-//
-//				'p', new ItemStack(Item.REGISTRY.getObject(new ResourceLocation("enderio:itemMaterial")), 1, 3),
-//				'W', Blocks.WOOL,
-//				'R', redstoneBundle
-//			);
-//		} else {
-//			RezolveMod.addRecipe(
-//				new ItemStack(this.itemBlock),
-//				"IWI",
-//				"WRW",
-//				"IWI",
-//
-//				'I', Items.IRON_INGOT,
-//				'W', Blocks.WOOL,
-//				'R', redstoneBundle
-//			);
-//		}
-//	}
-
 	float radius = 3f / 16f;
 
 	private static final Logger LOGGER = LogManager.getLogger(RezolveMod.ID);

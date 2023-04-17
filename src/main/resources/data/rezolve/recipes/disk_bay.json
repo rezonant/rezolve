@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "cDc",
+    "hCh",
+    "cAc"
+  ],
+  "key": {
+    "c": { "item": "rezolve:thunderbolt_cable" },
+    "D": { "item": "rezolve:dac" },
+    "h": { "item": "minecraft:hopper" },
+    "C": { "item": "minecraft:chest" },
+    "A": { "item": "rezolve:adc" }
+  },
+  "result": {
+    "item": "rezolve:disk_bay",
+    "count": 1
+  }
+}

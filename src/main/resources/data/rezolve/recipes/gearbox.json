@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "tgt",
+    "gtg",
+    "tgt"
+  ],
+  "key": {
+    "t": { "item": "rezolve:tin_nugget" },
+    "g": { "item": "rezolve:gear" }
+  },
+  "result": {
+    "item": "rezolve:gearbox",
+    "count": 1
+  }
+}

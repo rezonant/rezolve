@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "cDc",
+    "PhP",
+    "cAc"
+  ],
+  "key": {
+    "c": { "item": "rezolve:thunderbolt_cable" },
+    "D": { "item": "rezolve:dac" },
+    "h": { "item": "rezolve:display_panel" },
+    "P": { "item": "rezolve:physical_mapper" },
+    "A": { "item": "rezolve:adc" }
+  },
+  "result": {
+    "item": "rezolve:storage_monitor",
+    "count": 1
+  }
+}

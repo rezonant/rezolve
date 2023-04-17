@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "sss",
+    "rrr",
+    "rcr"
+  ],
+  "key": {
+    "s": { "item": "minecraft:sandstone" },
+    "r": { "item": "minecraft:redstone" },
+    "c": { "item": "rezolve:integrated_circuit" }
+  },
+  "result": {
+    "item": "rezolve:cpu",
+    "count": 1
+  }
+}

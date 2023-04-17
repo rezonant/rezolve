@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "rir",
+    "igi",
+    "rir"
+  ],
+  "key": {
+    "r": { "item": "minecraft:redstone" },
+    "i": { "item": "minecraft:iron_ingot" },
+    "g": { "item": "rezolve:gearbox" }
+  },
+  "result": {
+    "item": "rezolve:servo",
+    "count": 1
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "sAs",
+    "lCl",
+    "sDs"
+  ],
+  "key": {
+    "s": { "item": "rezolve:storage_part_0" },
+    "A": { "item": "rezolve:adc" },
+    "l": { "item": "rezolve:lead_nugget" },
+    "C": { "item": "rezolve:integrated_circuit" },
+    "D": { "item": "rezolve:dac" }
+  },
+  "result": {
+    "item": "rezolve:transcoder",
+    "count": 1
+  }
+}

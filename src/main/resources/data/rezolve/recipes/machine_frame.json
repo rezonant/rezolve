@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "bab",
+    "gdg",
+    "bsb"
+  ],
+  "key": {
+    "b": { "item": "rezolve:motor_blade" },
+    "a": { "item": "rezolve:activator" },
+    "g": { "item": "rezolve:gearbox" },
+    "s": { "item": "rezolve:servo" },
+    "d": { "item": "minecraft:diamond" }
+  },
+  "result": {
+    "item": "rezolve:machine_frame",
+    "count": 1
+  }
+}

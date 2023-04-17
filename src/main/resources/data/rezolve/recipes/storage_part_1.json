@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " 0 ",
+    "gCg",
+    " 0 "
+  ],
+  "key": {
+    "0": { "item": "rezolve:storage_part_0" },
+    "g": { "item": "minecraft:gold_ingot" },
+    "C": { "item": "rezolve:integrated_circuit" }
+  },
+  "result": {
+    "item": "rezolve:storage_part_1",
+    "count": 1
+  }
+}

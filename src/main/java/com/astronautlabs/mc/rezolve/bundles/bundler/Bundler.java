@@ -28,37 +28,4 @@ public class Bundler extends Machine {
 
 		return super.use(pState, pLevel, pPos, pPlayer, pHand, pHit);
 	}
-
-	//	@Override
-//	public void registerRecipes() {
-//
-//		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
-//			RezolveMod.addRecipe(
-//				new ItemStack(this.itemBlock),
-//				"VSV",
-//				"CMC",
-//				"VFV",
-//
-//				'V', "item|enderio:itemAlloy|2",
-//				'S', "block|minecraft:sticky_piston",
-//				'C', "block|minecraft:chest",
-//				'M', "item|enderio:itemMachinePart|0",
-//				'F', "item|enderio:itemBasicFilterUpgrade"
-//			);
-//
-//		} else {
-//			RezolveMod.addRecipe(
-//				new ItemStack(this.itemBlock),
-//				"IMI",
-//				"CSC",
-//				"IHI",
-//
-//				'I', "item|minecraft:iron_block",
-//				'M', "item|minecraft:minecart",
-//				'C', "item|minecraft:chest",
-//				'S', "item|minecraft:sticky_piston",
-//				'H', "item|minecraft:hopper"
-//			);
-//		}
-//	}
 }

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "R4R",
+    "gCg",
+    "R4R"
+  ],
+  "key": {
+    "4": { "item": "rezolve:storage_part_4" },
+    "g": { "item": "minecraft:gold_ingot" },
+    "C": { "item": "rezolve:integrated_circuit" },
+    "R": { "item": "minecraft:redstone_block" }
+  },
+  "result": {
+    "item": "rezolve:storage_part_5",
+    "count": 1
+  }
+}

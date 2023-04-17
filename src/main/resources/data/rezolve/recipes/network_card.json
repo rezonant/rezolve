@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xxc",
+    " xb",
+    " xm"
+  ],
+  "key": {
+    "x": { "item": "rezolve:tin_ingot" },
+    "c": { "item": "rezolve:cpu" },
+    "b": { "item": "rezolve:integrated_circuit" },
+    "m": { "item": "rezolve:physical_mapper" }
+  },
+  "result": {
+    "item": "rezolve:network_card",
+    "count": 1
+  }
+}

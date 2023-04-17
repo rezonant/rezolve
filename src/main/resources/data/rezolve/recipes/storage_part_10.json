@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "o9o",
+    "oCo",
+    "o9o"
+  ],
+  "key": {
+    "9": { "item": "rezolve:storage_part_9" },
+    "o": { "item": "rezolve:cobalt_block" },
+    "C": { "item": "rezolve:integrated_circuit" }
+  },
+  "result": {
+    "item": "rezolve:storage_part_10",
+    "count": 1
+  }
+}

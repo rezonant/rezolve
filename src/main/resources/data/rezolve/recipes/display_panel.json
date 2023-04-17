@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "tCt",
+    "ScS",
+    "AsA"
+  ],
+  "key": {
+    "t": { "item": "rezolve:thunderbolt_cable" },
+    "C": { "item": "rezolve:cpu" },
+    "S": { "item": "rezolve:silver_ingot" },
+    "c": { "item": "rezolve:circuit_board" },
+    "A": { "item": "rezolve:activator" },
+    "s": { "item": "rezolve:storage_part_0" }
+  },
+  "result": {
+    "item": "rezolve:display_panel",
+    "count": 1
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "x x",
+    " o ",
+    "x x"
+  ],
+  "key": {
+    "x": { "item": "rezolve:tin_ingot" },
+    "o": { "item": "rezolve:tin_block" }
+  },
+  "result": {
+    "item": "rezolve:motor_blade",
+    "count": 1
+  }
+}

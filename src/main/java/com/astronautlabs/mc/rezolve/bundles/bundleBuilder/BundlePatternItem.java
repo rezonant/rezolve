@@ -21,38 +21,6 @@ public class BundlePatternItem extends ItemBase implements ITooltipHint {
 	}
 
 	@Override
-	public void registerRecipes() {
-//
-//		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
-//
-//			RezolveMod.addRecipe(
-//				this.blank(),
-//				"PSP",
-//				"GFG",
-//				"PSP",
-//
-//				'P', "item|enderio:itemAlloy|5",
-//				'S', "item|enderio:itemMaterial",
-//				'G', Items.GLOWSTONE_DUST,
-//				'F', "item|enderio:itemBasicFilterUpgrade"
-//			);
-//
-//		} else {
-//			RezolveMod.addRecipe(
-//				this.blank(),
-//				"OSO",
-//				"GIG",
-//				"OSO",
-//
-//				'O', Blocks.OBSIDIAN,
-//				'S', Items.SLIME_BALL,
-//				'G', Items.GLOWSTONE_DUST,
-//				'I', Items.ITEM_FRAME
-//			);
-//		}
-	}
-	
-	@Override
 	public Component getName(ItemStack stack) {
 		
 		if (stack.hasTag()) {

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "aia",
+    "tgt",
+    "aia"
+  ],
+  "key": {
+    "a": { "item": "rezolve:activator" },
+    "i": { "item": "minecraft:iron_ingot" },
+    "t": { "item": "rezolve:tin_ingot" },
+    "g": { "item": "minecraft:green_dye" }
+  },
+  "result": {
+    "item": "rezolve:circuit_board",
+    "count": 1
+  }
+}

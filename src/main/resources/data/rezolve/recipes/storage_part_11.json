@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "oXo",
+    "dCd",
+    "oXo"
+  ],
+  "key": {
+    "X": { "item": "rezolve:storage_part_10" },
+    "d": { "item": "minecraft:diamond" },
+    "o": { "item": "rezolve:cobalt_block" },
+    "C": { "item": "rezolve:integrated_circuit" }
+  },
+  "result": {
+    "item": "rezolve:storage_part_11",
+    "count": 1
+  }
+}

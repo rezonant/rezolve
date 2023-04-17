@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IWI",
+    "WRW",
+    "IWI"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_ingot" },
+    "W": { "tag": "minecraft:wool" },
+    "R": { "item": "minecraft:redstone" }
+  },
+  "result": {
+    "item": "rezolve:thunderbolt_cable",
+    "count": 1
+  }
+}

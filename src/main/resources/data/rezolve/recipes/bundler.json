@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IMI",
+    "CSC",
+    "IHI"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_block" },
+    "M": { "item": "minecraft:minecart" },
+    "C": { "item": "minecraft:chest" },
+    "S": { "item": "minecraft:sticky_piston" },
+    "H": { "item": "minecraft:hopper" }
+  },
+  "result": {
+    "item": "rezolve:bundler",
+    "count": 1
+  }
+}

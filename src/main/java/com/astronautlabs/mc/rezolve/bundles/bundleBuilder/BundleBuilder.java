@@ -36,35 +36,6 @@ public class BundleBuilder extends Machine implements ITooltipHint {
 	public Class<? extends BlockEntityBase> getBlockEntityClass() {
 		return BundleBuilderEntity.class;
 	}
-	
-//	@Override
-//	public void registerRecipes() {
-//		if (Item.REGISTRY.getObject(new ResourceLocation("enderio:itemAlloy")) != null) {
-//			RezolveMod.addRecipe(new ItemStack(this.itemBlock),
-//				"RCR",
-//				"FMF",
-//				"RcR",
-//
-//				'R', "item|enderio:itemAlloy|3",
-//				'C', Items.COMPARATOR,
-//				'F', "item|enderio:itemBasicFilterUpgrade",
-//				'M', "item|enderio:itemMachinePart|0",
-//				'c', "item|enderio:itemBasicCapacitor|2"
-//			);
-//		} else {
-//			RezolveMod.addRecipe(new ItemStack(this.itemBlock),
-//				"QEQ",
-//				"CRC",
-//				"QNQ",
-//
-//				'Q', Blocks.QUARTZ_BLOCK,
-//				'E', Blocks.ENCHANTING_TABLE,
-//				'C', Blocks.CRAFTING_TABLE,
-//				'R', Items.COMPARATOR,
-//				'N', Items.NETHER_STAR
-//			);
-//		}
-//	}
 
 	@Override
 	public void setPlacedBy(Level pLevel, BlockPos pPos, BlockState pState, @Nullable LivingEntity pPlacer, ItemStack pStack) {
