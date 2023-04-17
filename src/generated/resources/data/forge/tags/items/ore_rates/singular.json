@@ -1,8 +1,12 @@
 {
   "values": [
     "rezolve:lead_ore",
+    "rezolve:deepslate_lead_ore",
     "rezolve:cobalt_ore",
+    "rezolve:deepslate_cobalt_ore",
     "rezolve:tin_ore",
-    "rezolve:silver_ore"
+    "rezolve:deepslate_tin_ore",
+    "rezolve:silver_ore",
+    "rezolve:deepslate_silver_ore"
   ]
 }
