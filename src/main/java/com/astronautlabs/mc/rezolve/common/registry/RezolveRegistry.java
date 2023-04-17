@@ -1,6 +1,7 @@
 package com.astronautlabs.mc.rezolve.common.registry;
 
 import com.astronautlabs.mc.rezolve.RezolveMod;
+import com.astronautlabs.mc.rezolve.common.blocks.BlockBase;
 import com.astronautlabs.mc.rezolve.common.blocks.WithBlockEntity;
 import com.astronautlabs.mc.rezolve.common.gui.WithMenu;
 import com.astronautlabs.mc.rezolve.common.gui.WithScreen;
@@ -9,7 +10,6 @@ import com.astronautlabs.mc.rezolve.common.network.RezolvePacket;
 import com.astronautlabs.mc.rezolve.common.machines.Operation;
 import com.astronautlabs.mc.rezolve.common.network.WithPacket;
 import com.astronautlabs.mc.rezolve.common.util.RezolveReflectionUtil;
-import com.astronautlabs.mc.rezolve.worlds.Metal;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
@@ -25,7 +25,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -47,7 +46,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Provides an annotation-driven way to register blocks, items, block entities and menus for the Rezolve mod.
+ * Provides an annotation-driven way to register blocks, items, object entities and menus for the Rezolve mod.
  */
 @Mod.EventBusSubscriber(modid = RezolveMod.ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class RezolveRegistry {
@@ -57,7 +56,7 @@ public class RezolveRegistry {
     private static List<Class<?>> registeredClasses = new ArrayList<>();
 
     /**
-     * Register multiple classes at the same time. The registration type (block, item, etc) is auto-determined based on
+     * Register multiple classes at the same time. The registration type (object, item, etc) is auto-determined based on
      * the base class of each passed class. See the register*() methods for more information about particular types.
      * @param classes
      */
@@ -236,7 +235,14 @@ public class RezolveRegistry {
                 register.register(
                         ForgeRegistries.Keys.ITEMS,
                         new ResourceLocation(RezolveMod.ID, id),
-                        () -> new BlockItem(block, new Item.Properties().tab(RezolveMod.CREATIVE_MODE_TAB))
+                        () -> {
+                            var blockItem = new BlockItem(block, new Item.Properties().tab(RezolveMod.CREATIVE_MODE_TAB));
+                            if (block instanceof BlockBase blockBase) {
+                                blockBase.initializeItem(blockItem);
+                            }
+
+                            return blockItem;
+                        }
                 );
             }
 
@@ -354,7 +360,7 @@ public class RezolveRegistry {
         Tagger tag(String tag);
     }
 
-    private record TagProvider<T>(T block, Consumer<Tagger> configurer) {}
+    private record TagProvider<T>(T object, Consumer<Tagger> configurer) {}
     private static List<TagProvider<Block>> blocksForTagging = new ArrayList<>();
     private static List<TagProvider<Item>> itemsForTagging = new ArrayList<>();
 
@@ -381,19 +387,23 @@ public class RezolveRegistry {
 
         @Override
         protected void addTags() {
-            for (var provider: blocksForTagging) {
-                provider.configurer.accept(new Tagger<Block>() {
-                    @Override
-                    public Tagger tag(TagKey<Block> tag) {
-                        BlockTagsGenerator.this.tag(tag).add(provider.block);
-                        return null;
-                    }
+            try {
+                for (var provider : blocksForTagging) {
+                    provider.configurer.accept(new Tagger<Block>() {
+                        @Override
+                        public Tagger tag(TagKey<Block> tag) {
+                            BlockTagsGenerator.this.tag(tag).add(provider.object);
+                            return null;
+                        }
 
-                    @Override
-                    public Tagger tag(String tag) {
-                        return tag(BlockTags.create(ResourceLocation.tryParse(tag)));
-                    }
-                });
+                        @Override
+                        public Tagger tag(String tag) {
+                            return tag(BlockTags.create(ResourceLocation.tryParse(tag)));
+                        }
+                    });
+                }
+            } catch (RuntimeException e) {
+                throw e;
             }
         }
     }
@@ -405,19 +415,23 @@ public class RezolveRegistry {
 
         @Override
         protected void addTags() {
-            for (var provider: itemsForTagging) {
-                provider.configurer.accept(new Tagger<Item>() {
-                    @Override
-                    public Tagger tag(TagKey<Item> tag) {
-                        ItemTagsGenerator.this.tag(tag).add(provider.block);
-                        return null;
-                    }
+            try {
+                for (var provider : itemsForTagging) {
+                    provider.configurer.accept(new Tagger<Item>() {
+                        @Override
+                        public Tagger tag(TagKey<Item> tag) {
+                            ItemTagsGenerator.this.tag(tag).add(provider.object);
+                            return null;
+                        }
 
-                    @Override
-                    public Tagger tag(String tag) {
-                        return tag(ItemTags.create(ResourceLocation.tryParse(tag)));
-                    }
-                });
+                        @Override
+                        public Tagger tag(String tag) {
+                            return tag(ItemTags.create(ResourceLocation.tryParse(tag)));
+                        }
+                    });
+                }
+            } catch (RuntimeException e) {
+                throw e;
             }
         }
     }

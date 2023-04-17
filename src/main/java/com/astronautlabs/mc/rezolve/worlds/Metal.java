@@ -12,13 +12,14 @@ import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.recipes.*;
-import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.data.worldgen.features.OreFeatures;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.BlockGetter;
@@ -101,6 +102,8 @@ public enum Metal {
 	private List<PlacementModifier> orePlacement;
 	private boolean hasOre = false;
 	private List<TagKey<Block>> blockTags = new ArrayList<>();
+	private List<TagKey<net.minecraft.world.item.Item>> itemTags = new ArrayList<>();
+
 
 	{
 		// All metal blocks will inherit these tags
@@ -125,39 +128,49 @@ public enum Metal {
 			return this;
 		}
 
-		public Properties withTag(TagKey<Block> tag) {
+		public Properties withBlockTag(TagKey<Block> tag) {
 			configurers.add(m -> m.blockTags.add(tag));
 			return this;
 		}
 
-		public Properties withForgeTag(String forgeTag) {
+		public Properties withItemTag(TagKey<Item> tag) {
+			configurers.add(m -> m.itemTags.add(tag));
+			return this;
+		}
+
+		public Properties withForgeBlockTag(String forgeTag) {
 			configurers.add(m -> m.blockTags.add(BlockTags.create(new ResourceLocation("forge", forgeTag))));
 			return this;
 		}
 
+		public Properties withForgeItemTag(String forgeTag) {
+			configurers.add(m -> m.itemTags.add(ItemTags.create(new ResourceLocation("forge", forgeTag))));
+			return this;
+		}
+
 		public Properties needsDiamondTool() {
-			return withTag(BlockTags.NEEDS_DIAMOND_TOOL);
+			return withBlockTag(BlockTags.NEEDS_DIAMOND_TOOL);
 		}
 
 
 		public Properties needsIronTool() {
-			return withTag(BlockTags.NEEDS_IRON_TOOL);
+			return withBlockTag(BlockTags.NEEDS_IRON_TOOL);
 		}
 
 		public Properties needsStoneTool() {
-			return withTag(BlockTags.NEEDS_STONE_TOOL);
+			return withBlockTag(BlockTags.NEEDS_STONE_TOOL);
 		}
 
 		public Properties needsWoodTool() {
-			return withForgeTag("needs_wood_tool");
+			return withForgeBlockTag("needs_wood_tool");
 		}
 
 		public Properties needsGoldTool() {
-			return withForgeTag("needs_gold_tool");
+			return withForgeBlockTag("needs_gold_tool");
 		}
 
 		public Properties needsNetheriteTool() {
-			return withForgeTag("needs_netherite_tool");
+			return withForgeBlockTag("needs_netherite_tool");
 		}
 
 		public Properties withVeinSize(int veinSize) {
@@ -265,11 +278,11 @@ public enum Metal {
 			}
 		} else if (event.getRegistryKey() == ForgeRegistries.Keys.ITEMS) {
 			for (var metal : values()) {
-				event.register(ForgeRegistries.Keys.ITEMS, new ResourceLocation(RezolveMod.ID, metal.getName() + "_block"), () -> metal.storageBlock().item());
+				event.register(ForgeRegistries.Keys.ITEMS, new ResourceLocation(RezolveMod.ID, metal.getName() + "_block"), () -> metal.storageBlock().asItem());
 
 				if (metal.hasOre) {
-					event.register(ForgeRegistries.Keys.ITEMS, new ResourceLocation(RezolveMod.ID, metal.getName() + "_ore"), () -> metal.ore().item());
-					event.register(ForgeRegistries.Keys.ITEMS, new ResourceLocation(RezolveMod.ID, "deepslate_" + metal.getName() + "_ore"), () -> metal.deepSlateOre().item());
+					event.register(ForgeRegistries.Keys.ITEMS, new ResourceLocation(RezolveMod.ID, metal.getName() + "_ore"), () -> metal.ore().asItem());
+					event.register(ForgeRegistries.Keys.ITEMS, new ResourceLocation(RezolveMod.ID, "deepslate_" + metal.getName() + "_ore"), () -> metal.deepSlateOre().asItem());
 				}
 				event.register(ForgeRegistries.Keys.ITEMS, new ResourceLocation(RezolveMod.ID, metal.getName() + "_ingot"), () -> metal.ingot());
 				event.register(ForgeRegistries.Keys.ITEMS, new ResourceLocation(RezolveMod.ID, metal.getName() + "_nugget"), () -> metal.nugget());
@@ -334,10 +347,24 @@ public enum Metal {
 				for (var tag : getMetal().blockTags)
 					tagger.tag(tag);
 			});
+
+			applyItemTags(tagger -> {
+				for (var tag : getMetal().itemTags)
+					tagger.tag(tag);
+			});
 		}
 
 		private String stateName;
-		private Item item = new Item();
+		private MetalBlockItem item;
+
+		@Override
+		public Item asItem() {
+			if (item == null) {
+				item = new MetalBlockItem();
+				initializeItem(item);
+			}
+			return item;
+		}
 
 		public Metal getMetal() {
 			return Metal.this;
@@ -348,12 +375,8 @@ public enum Metal {
 			return getResistance();
 		}
 
-		public BlockItem item() {
-			return item;
-		}
-
-		public class Item extends BlockItem {
-			public Item() {
+		public class MetalBlockItem extends BlockItem {
+			public MetalBlockItem() {
 				super(MetalBlock.this, new Properties().tab(RezolveMod.CREATIVE_MODE_TAB));
 			}
 
@@ -368,14 +391,21 @@ public enum Metal {
 		}
 	}
 
-	public class Item extends ItemBase {
-		public Item(String stateName) {
+	public class MetalItem extends ItemBase {
+		public MetalItem(String stateName) {
 			super(new Properties());
 
 			this.stateName = stateName;
 		}
 
 		private String stateName;
+
+		{
+			applyTags(tagger -> {
+				for (var tag : getMetal().itemTags)
+					tagger.tag(tag);
+			});
+		}
 
 		public Metal getMetal() {
 			return Metal.this;
@@ -391,9 +421,15 @@ public enum Metal {
 		}
 	}
 
-	public class Ingot extends Item {
+	public class Ingot extends MetalItem {
 		public Ingot() {
 			super("ingot");
+		}
+
+		{
+			applyTags(tagger -> {
+				tagger.tag("forge:ingots/" + getMetal().getName());
+			});
 		}
 	}
 
@@ -406,12 +442,22 @@ public enum Metal {
 			applyTags(tagger -> {
 				tagger.tag("forge:storage_blocks/" + getMetal().getName());
 			});
+
+			applyItemTags(tagger -> {
+				tagger.tag("forge:storage_blocks/" + getMetal().getName());
+			});
 		}
 	}
 
-	public class Nugget extends Item {
+	public class Nugget extends MetalItem {
 		public Nugget() {
 			super("nugget");
+		}
+
+		{
+			applyTags(tagger -> {
+				tagger.tag("forge:nuggets/" + getMetal().getName());
+			});
 		}
 	}
 
@@ -428,12 +474,32 @@ public enum Metal {
 				tagger.tag("forge:ores/" + getMetal().getName());
 				tagger.tag("forge:ore_rates/singular");
 			});
+
+			applyItemTags(tagger -> {
+				tagger.tag("forge:ores_in_ground/stone");
+				tagger.tag("forge:ores/" + getMetal().getName());
+				tagger.tag("forge:ore_rates/singular");
+			});
 		}
 	}
 
 	public class DeepSlateOre extends MetalBlock {
 		public DeepSlateOre() {
 			super("deepslate_ore");
+		}
+
+		{
+			applyTags(tagger -> {
+				tagger.tag("forge:ores_in_ground/deepslate");
+				tagger.tag("forge:ores/" + getMetal().getName());
+				tagger.tag("forge:ore_rates/singular");
+			});
+
+			applyItemTags(tagger -> {
+				tagger.tag("forge:ores_in_ground/deepslate");
+				tagger.tag("forge:ores/" + getMetal().getName());
+				tagger.tag("forge:ore_rates/singular");
+			});
 		}
 	}
 
@@ -550,7 +616,7 @@ public enum Metal {
 					.requires(storageBlock)
 					.unlockedBy("has_storage_block", has(storageBlock))
 					.save(consumer, RezolveMod.loc(name + "_ingot_from_block"));
-			SimpleCookingRecipeBuilder.smelting(Ingredient.of(ore.item()), ingot, 0.7F, 100)
+			SimpleCookingRecipeBuilder.smelting(Ingredient.of(ore.asItem()), ingot, 0.7F, 100)
 					.unlockedBy("has_ore", has(ore))
 					.save(consumer, RezolveMod.loc(name + "_ingot_from_ore"));
 		}
