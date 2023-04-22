@@ -247,6 +247,10 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
                 ;
     }
 
+    public boolean hoveringOverMainWindow(double pMouseX, double pMouseY) {
+        return leftPos < pMouseX && pMouseX < leftPos + imageWidth && topPos < pMouseY && pMouseY < topPos + imageHeight;
+    }
+
     @Override
     protected void renderBg(PoseStack pPoseStack, float pPartialTick, int pMouseX, int pMouseY) {
         TorchUtil.insetBox(

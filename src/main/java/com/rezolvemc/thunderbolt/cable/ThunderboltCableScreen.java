@@ -61,12 +61,13 @@ public class ThunderboltCableScreen extends MachineScreen<ThunderboltCableMenu> 
     float rotationY = -22;
 
     boolean rotationInitialized = false;
+    int blockViewHeight = 150;
 
     @Override
     protected void setup() {
         super.setup();
 
-        sideInfoLbl = addLabel(SELECT_A_SIDE, leftPos + 10, topPos + 150, 145);
+        sideInfoLbl = addLabel(SELECT_A_SIDE, leftPos + 10, topPos + blockViewHeight, 145);
 
         createTransmissionTypeButtons();
         selectSide(selectedSide);
@@ -179,8 +180,12 @@ public class ThunderboltCableScreen extends MachineScreen<ThunderboltCableMenu> 
 
     @Override
     public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
-        mouseDown = true;
         totalDragDistance = 0;
+
+        if (hoveringOverMainWindow(pMouseX, pMouseY) && pMouseY > topPos + titlebarHeight && pMouseY < topPos + titlebarHeight + blockViewHeight) {
+            rotating = true;
+            return true;
+        }
         return super.mouseClicked(pMouseX, pMouseY, pButton);
     }
 
@@ -206,25 +211,29 @@ public class ThunderboltCableScreen extends MachineScreen<ThunderboltCableMenu> 
     }
 
     private double totalDragDistance = 0;
-    private boolean mouseDown = false;
+    private boolean rotating = false;
 
     @Override
     public boolean mouseReleased(double pMouseX, double pMouseY, int pButton) {
-        mouseDown = false;
         boolean wasDragged = totalDragDistance >= 1;
         if (!wasDragged && hoveredSide != null)
             selectSide(hoveredSide);
 
+        rotating = false;
         return super.mouseReleased(pMouseX, pMouseY, pButton);
     }
 
     @Override
     public boolean mouseDragged(double pMouseX, double pMouseY, int pButton, double pDragX, double pDragY) {
-        rotationX += pDragX;
-        rotationY -= pDragY;
 
-        totalDragDistance += Math.abs(pDragX);
-        totalDragDistance += Math.abs(pDragY);
+
+        if (rotating) {
+            rotationX += pDragX;
+            rotationY -= pDragY;
+
+            totalDragDistance += Math.abs(pDragX);
+            totalDragDistance += Math.abs(pDragY);
+        }
 
         return super.mouseDragged(pMouseX, pMouseY, pButton, pDragX, pDragY);
 
