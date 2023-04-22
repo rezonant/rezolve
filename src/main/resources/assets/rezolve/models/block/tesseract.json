@@ -1,0 +1,12 @@
+{
+    "parent": "block/cube",
+    "textures": {
+        "down": "rezolve:blocks/block_machine_frame_side",
+        "up": "rezolve:blocks/block_machine_frame_side",
+        "north": "rezolve:blocks/block_machine_frame_side",
+        "east": "rezolve:blocks/block_machine_frame_side",
+        "south": "rezolve:blocks/block_machine_frame_side",
+        "west": "rezolve:blocks/block_machine_frame_side",
+        "particle": "blocks/block_machine_frame_side"
+    }
+}

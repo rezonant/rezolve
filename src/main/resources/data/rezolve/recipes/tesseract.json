@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "fcf",
+    "cec",
+    "fcf"
+  ],
+  "key": {
+    "f": { "item": "rezolve:machine_frame" },
+    "c": { "tag": "forge:ingots/cobalt" },
+    "e": { "item": "minecraft:ender_pearl" }
+  },
+  "result": {
+    "item": "rezolve:tesseract",
+    "count": 1
+  }
+}

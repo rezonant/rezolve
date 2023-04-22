@@ -2,6 +2,7 @@
   "rezolve": "Rezolve",
   "block.rezolve.extender": "Extender",
   "block.rezolve.bundler": "Bundler",
+  "block.rezolve.tesseract": "Tesseract",
   "block.rezolve.unbundler": "Unbundler",
   "block.rezolve.bundle_builder": "Bundle Pattern Builder",
   "block.rezolve.thunderbolt_cable": "Thunderbolt Cable",
@@ -72,6 +73,7 @@
   "rezolve.thunderbolt.transmission_types.fluids": "Fluids",
   "rezolve.thunderbolt.transmission_types.energy": "Energy",
 
+  "screens.rezolve.machine_list": "Machine List",
   "screens.rezolve.restricted": "Restricted",
   "screens.rezolve.allowed": "Allowed",
   "screens.rezolve.owner": "Owner",

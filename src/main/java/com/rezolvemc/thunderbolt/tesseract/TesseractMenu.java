@@ -1,0 +1,17 @@
+package com.rezolvemc.thunderbolt.tesseract;
+
+import org.torchmc.WithScreen;
+import com.rezolvemc.common.machines.MachineMenu;
+import com.rezolvemc.common.registry.RezolveRegistry;
+import net.minecraft.world.entity.player.Inventory;
+
+@WithScreen(TesseractScreen.class)
+public class TesseractMenu extends MachineMenu<TesseractEntity> {
+    public TesseractMenu(int pContainerId, Inventory playerInventory) {
+        this(pContainerId, playerInventory, null);
+    }
+
+    public TesseractMenu(int pContainerId, Inventory playerInventory, TesseractEntity machine) {
+        super(RezolveRegistry.menuType(TesseractMenu.class), pContainerId, playerInventory, machine);
+    }
+}
