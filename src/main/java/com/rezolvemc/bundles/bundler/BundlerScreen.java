@@ -20,8 +20,8 @@ public class BundlerScreen extends MachineScreen<BundlerMenu> {
 	}
 
 	@Override
-	protected void init() {
-		super.init();
+	protected void setup() {
+		super.setup();
 
 		addEnergyMeter(leftPos + 231, topPos + 20, 88);
 		addOperationProgressIndicator(leftPos + 133, topPos + 54);

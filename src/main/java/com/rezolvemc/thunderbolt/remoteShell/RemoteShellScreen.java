@@ -31,8 +31,8 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 	private String selectedMachineName = null;
 
 	@Override
-	protected void init() {
-		super.init();
+	protected void setup() {
+		super.setup();
 
 		this.nameField = new EditBox(this.font, this.leftPos + 11, this.topPos + 120, 211, 18, Component.translatable("screens.rezolve.name"));
 		this.nameField.setMaxLength(23);

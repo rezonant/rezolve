@@ -15,8 +15,8 @@ public class DiskBayScreen extends MachineScreen<DiskBayMenu> {
 	}
 
 	@Override
-	protected void init() {
-		super.init();
+	protected void setup() {
+		super.setup();
 
 		addSlotGrid(Component.translatable("rezolve.screens.disks"), 9, 0, 27, false);
 		addEnergyMeter(leftPos + 231, topPos + 20, 88);

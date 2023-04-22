@@ -19,8 +19,8 @@ public class UnbundlerScreen extends MachineScreen<UnbundlerMenu> {
 	}
 
 	@Override
-	protected void init() {
-		super.init();
+	protected void setup() {
+		super.setup();
 
 		addOperationProgressIndicator(leftPos + 103, topPos + 81);
 		addEnergyMeter(leftPos + 226, topPos + 20, 88);

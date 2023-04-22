@@ -27,8 +27,8 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 	}
 
 	@Override
-	protected void init() {
-		super.init();
+	protected void setup() {
+		super.setup();
 		
 		this.searchField = new EditBox(this.font, this.leftPos + 10, this.topPos + 7, 218, 18, Component.translatable("screens.rezolve.search"));
 		this.searchField.setVisible(true);

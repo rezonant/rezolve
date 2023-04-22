@@ -21,8 +21,8 @@ public class TesseractScreen extends MachineScreen<TesseractMenu> {
     }
 
     @Override
-    protected void init() {
-        super.init();
+    protected void setup() {
+        super.setup();
 
         addLeftShoulderButton(Component.literal("Test"), Rezolve.tex("blocks/block_security_server_front.png"), () -> {});
         addLeftShoulderButton(Component.literal("Test"), Rezolve.tex("blocks/block_database_server_front.png"), () -> {});

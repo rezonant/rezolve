@@ -19,8 +19,8 @@ public class StorageMonitorScreen extends MachineScreen<StorageMonitorMenu> impl
 	}
 
 	@Override
-	public void init() {
-		super.init();
+	public void setup() {
+		super.setup();
 
 		this.searchField = new EditBox(font, leftPos + 7, topPos + 5, 240, 13, Component.translatable("rezolve.screens.search"));
 		this.searchField.setVisible(true);

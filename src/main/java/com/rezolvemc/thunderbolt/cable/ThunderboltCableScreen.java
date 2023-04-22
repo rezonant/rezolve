@@ -63,8 +63,8 @@ public class ThunderboltCableScreen extends MachineScreen<ThunderboltCableMenu> 
     boolean rotationInitialized = false;
 
     @Override
-    protected void init() {
-        super.init();
+    protected void setup() {
+        super.setup();
 
         sideInfoLbl = addLabel(SELECT_A_SIDE, leftPos + 10, topPos + 150, 145);
 

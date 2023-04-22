@@ -30,8 +30,8 @@ public class DiskManipulatorScreen extends MachineScreen<DiskManipulatorMenu> im
 	}
 
 	@Override
-	protected void init() {
-		super.init();
+	protected void setup() {
+		super.setup();
 
 		searchField = new EditBox(font, leftPos + 25, topPos + 18, 207, 13, Component.translatable("rezolve.screens.search"));
 		this.searchField.setVisible(true);

@@ -16,8 +16,8 @@ public class BundleBuilderScreen extends MachineScreen<BundleBuilderMenu> {
 	}
 
 	@Override
-	protected void init() {
-		super.init();
+	protected void setup() {
+		super.setup();
 
 		addEnergyMeter(leftPos + 191, topPos + 17, 88);
 		//addProgressIndicator(leftPos + 117, topPos + 60, Component.literal(""), () -> 0.0);

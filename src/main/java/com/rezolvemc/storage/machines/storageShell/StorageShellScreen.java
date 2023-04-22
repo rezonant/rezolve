@@ -25,12 +25,9 @@ public class StorageShellScreen extends MachineScreen<StorageShellMenu> implemen
 		return storageView;
 	}
 
-	public int SEARCH_FIELD = 1;
-	public int CLEAR_CRAFTING_GRID_BTN = 2;
-
 	@Override
-	public void init() {
-		super.init();
+	public void setup() {
+		super.setup();
 
 		this.searchField = new EditBox(font, this.leftPos + 24, this.topPos + 21, 207, 13, Component.translatable("rezolve.screens.search"));
 		this.searchField.setVisible(true);
