@@ -1,4 +1,4 @@
-package com.rezolvemc.common.blocks;
+package com.rezolvemc.common.registry;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
 

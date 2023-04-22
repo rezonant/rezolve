@@ -1,6 +1,6 @@
 package com.rezolvemc.thunderbolt.cable.packets;
 
-import org.torchmc.RezolveMenuPacket;
+import com.rezolvemc.common.network.RezolveMenuPacket;
 import com.rezolvemc.common.registry.RegistryId;
 import com.rezolvemc.thunderbolt.cable.TransmissionMode;
 import com.rezolvemc.thunderbolt.cable.TransmissionType;

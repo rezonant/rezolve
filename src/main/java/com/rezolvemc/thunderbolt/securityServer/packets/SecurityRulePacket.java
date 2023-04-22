@@ -1,6 +1,6 @@
 package com.rezolvemc.thunderbolt.securityServer.packets;
 
-import org.torchmc.RezolveMenuPacket;
+import com.rezolvemc.common.network.RezolveMenuPacket;
 import com.rezolvemc.thunderbolt.securityServer.SecurityRule;
 import net.minecraft.network.FriendlyByteBuf;
 

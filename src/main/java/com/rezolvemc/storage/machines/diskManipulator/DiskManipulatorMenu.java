@@ -1,6 +1,6 @@
 package com.rezolvemc.storage.machines.diskManipulator;
 
-import org.torchmc.WithScreen;
+import com.rezolvemc.common.registry.WithScreen;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.network.RezolvePacket;
 import com.rezolvemc.common.registry.RezolveRegistry;

@@ -1,4 +1,4 @@
-package org.torchmc;
+package org.torchmc.util;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.nio.FloatBuffer;
 
-public class RezolveGuiUtil {
+public class TorchUtil {
 
     public static void textureQuad(PoseStack stack, ResourceLocation location, double x, double y, double width, double height) {
         textureQuad(stack, location, x, y, width, height, 0, 0, 1, 1);

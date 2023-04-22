@@ -1,6 +1,6 @@
 package com.rezolvemc.bundles.unbundler;
 
-import org.torchmc.WithMenu;
+import com.rezolvemc.common.registry.WithMenu;
 import com.rezolvemc.common.inventory.InventorySnapshot;
 import com.rezolvemc.common.inventory.OutputSlot;
 import com.rezolvemc.common.inventory.VirtualInventory;

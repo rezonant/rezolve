@@ -1,4 +1,6 @@
-package org.torchmc;
+package org.torchmc.layout;
+
+import org.torchmc.WidgetBase;
 
 public abstract class LayoutPanel extends Panel {
 

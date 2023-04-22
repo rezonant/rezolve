@@ -2,7 +2,7 @@ package com.rezolvemc.thunderbolt.databaseServer;
 
 import com.rezolvemc.common.machines.Machine;
 import com.rezolvemc.common.registry.RegistryId;
-import com.rezolvemc.common.blocks.WithBlockEntity;
+import com.rezolvemc.common.registry.WithBlockEntity;
 
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.core.Direction;

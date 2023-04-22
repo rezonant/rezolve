@@ -1,9 +1,11 @@
-package org.torchmc;
+package org.torchmc.widgets;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.torchmc.WidgetBase;
+import org.torchmc.util.TorchUtil;
 
 public class Meter extends WidgetBase {
     public Meter(Font font, int x, int y, int height, Component narrationTitle, Component label, ResourceLocation texture) {
@@ -65,23 +67,23 @@ public class Meter extends WidgetBase {
         var labelAreaHeight = font.lineHeight + labelMargin*2;
         var barHeight = height - labelAreaHeight;
 
-        RezolveGuiUtil.textureQuad(
+        TorchUtil.textureQuad(
                 pPoseStack, texture, x, y, width, borderSize,
                 0, 0, 1, borderSize/textureHeight
         );
-        RezolveGuiUtil.textureQuad(
+        TorchUtil.textureQuad(
                 pPoseStack, texture, x, y + borderSize, width, barHeight - borderSize*2,
                 0, borderSize/textureHeight,
                 1, (textureHeight - borderSize)/textureHeight
         );
-        RezolveGuiUtil.textureQuad(
+        TorchUtil.textureQuad(
                 pPoseStack, texture, x, y + barHeight - borderSize, width, borderSize,
                 0, (textureHeight - borderSize)/textureHeight,
                 1, 1
         );
 
         // Black out the unfilled portion
-        RezolveGuiUtil.colorQuad(pPoseStack, 0, 0, 0, 1, x, y, width, barHeight - getRenderedValue() * barHeight);
+        TorchUtil.colorQuad(pPoseStack, 0, 0, 0, 1, x, y, width, barHeight - getRenderedValue() * barHeight);
 
         // Label
 

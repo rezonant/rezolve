@@ -1,6 +1,6 @@
 package com.rezolvemc.storage.machines.diskBay;
 
-import org.torchmc.WithScreen;
+import com.rezolvemc.common.registry.WithScreen;
 import com.rezolvemc.common.inventory.ValidatedSlot;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.registry.RezolveRegistry;

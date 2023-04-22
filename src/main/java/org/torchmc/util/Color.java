@@ -1,4 +1,4 @@
-package org.torchmc;
+package org.torchmc.util;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 

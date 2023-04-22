@@ -1,6 +1,6 @@
 package com.rezolvemc.common.machines;
 
-import org.torchmc.RezolveMenuPacket;
+import com.rezolvemc.common.network.RezolveMenuPacket;
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.registry.RegistryId;
 import net.minecraft.nbt.CompoundTag;

@@ -1,4 +1,4 @@
-package org.torchmc;
+package org.torchmc.layout;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 

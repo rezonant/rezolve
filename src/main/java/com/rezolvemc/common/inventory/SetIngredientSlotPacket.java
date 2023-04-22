@@ -1,6 +1,6 @@
 package com.rezolvemc.common.inventory;
 
-import org.torchmc.RezolveMenuPacket;
+import com.rezolvemc.common.network.RezolveMenuPacket;
 import com.rezolvemc.common.registry.RegistryId;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.inventory.Slot;

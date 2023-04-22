@@ -8,7 +8,7 @@ import com.rezolvemc.common.machines.Sync;
 import com.rezolvemc.common.network.RezolvePacket;
 import com.rezolvemc.common.network.WithPacket;
 import com.rezolvemc.common.registry.RezolveRegistry;
-import org.torchmc.WithScreen;
+import com.rezolvemc.common.registry.WithScreen;
 import net.minecraft.world.entity.player.Inventory;
 
 @WithScreen(BundleBuilderScreen.class)

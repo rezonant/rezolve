@@ -1,8 +1,10 @@
-package org.torchmc;
+package org.torchmc.widgets;
 
 import com.rezolvemc.Rezolve;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
+import org.torchmc.WidgetBase;
+import org.torchmc.util.TorchUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,7 +103,7 @@ public class ListView extends WidgetBase {
         boolean xInBounds = x < mouseX && mouseX < x + width;
         boolean mouseInView = isMouseOver(mouseX, mouseY);
 
-        RezolveGuiUtil.insetBox(poseStack, Rezolve.tex("gui/widgets/simple_frame.png"), x, y, width, height);
+        TorchUtil.insetBox(poseStack, Rezolve.tex("gui/widgets/simple_frame.png"), x, y, width, height);
         scissor(poseStack, x, y, width, height, () -> {
             pushPose(poseStack, () -> {
                 repose(poseStack, () -> poseStack.translate(x + itemPadding, y - scrollPos + itemPadding, 0));
@@ -111,10 +113,10 @@ public class ListView extends WidgetBase {
                 for (var item : items) {
                     item.render(poseStack, width - itemPadding*2 - scrollBarWidth, mouseX, mouseY, partialTick);
 
-                    RezolveGuiUtil.colorQuad(poseStack, 0x33000000, -itemPadding, item.getHeight() + itemPadding - 1, width - scrollBarWidth, 1);
+                    TorchUtil.colorQuad(poseStack, 0x33000000, -itemPadding, item.getHeight() + itemPadding - 1, width - scrollBarWidth, 1);
 
                     if (mouseInView && xInBounds && itemY < mouseY && mouseY < itemY + itemPadding*2 + item.getHeight()) {
-                        RezolveGuiUtil.colorQuad(poseStack, 0x33000000, -itemPadding, -itemPadding, width - scrollBarWidth, item.getHeight()+itemPadding*2);
+                        TorchUtil.colorQuad(poseStack, 0x33000000, -itemPadding, -itemPadding, width - scrollBarWidth, item.getHeight()+itemPadding*2);
                     }
 
                     repose(poseStack, () -> poseStack.translate(0, item.getHeight() + itemPadding*2, 0));

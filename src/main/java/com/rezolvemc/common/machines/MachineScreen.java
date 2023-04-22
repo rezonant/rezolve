@@ -19,7 +19,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import org.torchmc.*;
+import org.torchmc.layout.Panel;
+import org.torchmc.layout.VerticalLayoutPanel;
+import org.torchmc.util.Color;
+import org.torchmc.util.Size;
+import org.torchmc.util.TorchUtil;
+import org.torchmc.widgets.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -247,7 +252,7 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
         //RenderHelper.disableStandardItemLighting();
         //RenderHelper.enableGUIStandardItemLighting();
 
-        var tr = RezolveGuiUtil.getTranslation(poseStack.last().pose());
+        var tr = TorchUtil.getTranslation(poseStack.last().pose());
 
         this.setBlitOffset(200);
         Font font = this.font;
@@ -504,19 +509,19 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
 
         if (!resizing) {
             if (hoveringRightEdge(pMouseX, pMouseY) && hoveringBottomEdge(pMouseX, pMouseY)) {
-                RezolveGuiUtil.colorQuad(
+                TorchUtil.colorQuad(
                         pPoseStack, Color.WHITE.withAlpha(0.5f),
                         getRightEdgeStart(), getBottomEdgeStart(),
                         dragHandleSize, dragHandleSize
                 );
             } else if (hoveringRightEdge(pMouseX, pMouseY)) {
-                RezolveGuiUtil.colorQuad(
+                TorchUtil.colorQuad(
                         pPoseStack, Color.WHITE.withAlpha(0.5f),
                         getRightEdgeStart(), topPos,
                         dragHandleSize, imageHeight
                 );
             } else if (hoveringBottomEdge(pMouseX, pMouseY)) {
-                RezolveGuiUtil.colorQuad(
+                TorchUtil.colorQuad(
                         pPoseStack, Color.WHITE.withAlpha(0.5f),
                         leftPos, getBottomEdgeStart(),
                         imageWidth, dragHandleSize
@@ -577,14 +582,14 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
 
         // Machine UI
 
-        RezolveGuiUtil.insetBox(
+        TorchUtil.insetBox(
                 pPoseStack,
                 Rezolve.loc("textures/gui/widgets/screen_background.png"),
                 leftPos, topPos, imageWidth, imageHeight
         );
 
         if (twoToneHeight > 0) {
-            RezolveGuiUtil.insetBox(
+            TorchUtil.insetBox(
                     pPoseStack,
                     Rezolve.loc("textures/gui/widgets/twotone_background.png"),
                     leftPos, topPos, imageWidth, twoToneHeight
@@ -601,19 +606,19 @@ public class MachineScreen<MenuT extends MachineMenu> extends AbstractContainerS
     }
 
     protected void textureQuad(PoseStack stack, ResourceLocation location, double x, double y, double width, double height) {
-        RezolveGuiUtil.textureQuad(stack, location, x, y, width, height);
+        TorchUtil.textureQuad(stack, location, x, y, width, height);
     }
 
     protected void textureQuad(PoseStack stack, ResourceLocation location, double x, double y, double width, double height, float minU, float minV, float maxU, float maxV) {
-        RezolveGuiUtil.textureQuad(stack, location, x, y, width, height, minU, minV, maxU, maxV);
+        TorchUtil.textureQuad(stack, location, x, y, width, height, minU, minV, maxU, maxV);
     }
 
     protected void colorQuad(PoseStack stack, int color, double x, double y, double width, double height) {
-        RezolveGuiUtil.colorQuad(stack, color, x, y, width, height);
+        TorchUtil.colorQuad(stack, color, x, y, width, height);
     }
 
     protected void colorQuad(PoseStack stack, float r, float g, float b, float a, double x, double y, double width, double height) {
-        RezolveGuiUtil.colorQuad(stack, r, g, b, a, x, y, width, height);
+        TorchUtil.colorQuad(stack, r, g, b, a, x, y, width, height);
     }
 
     public MachineMenu getMachineMenu() {

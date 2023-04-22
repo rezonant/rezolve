@@ -1,6 +1,6 @@
 package com.rezolvemc.thunderbolt.remoteShell.packets;
 
-import org.torchmc.RezolveMenuPacket;
+import com.rezolvemc.common.network.RezolveMenuPacket;
 import com.rezolvemc.common.util.RezolveByteBufUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.core.BlockPos;

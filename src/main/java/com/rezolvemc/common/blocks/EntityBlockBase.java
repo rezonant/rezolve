@@ -4,7 +4,8 @@ import java.lang.reflect.Constructor;
 
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.machines.MachineEntity;
-import org.torchmc.WithMenu;
+import com.rezolvemc.common.registry.WithBlockEntity;
+import com.rezolvemc.common.registry.WithMenu;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;

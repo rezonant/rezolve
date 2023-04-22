@@ -1,6 +1,6 @@
 package com.rezolvemc.thunderbolt.tesseract;
 
-import org.torchmc.WithScreen;
+import com.rezolvemc.common.registry.WithScreen;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import net.minecraft.world.entity.player.Inventory;

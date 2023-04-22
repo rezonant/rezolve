@@ -1,6 +1,6 @@
 package com.rezolvemc.thunderbolt.remoteShell.packets;
 
-import org.torchmc.RezolveMenuPacket;
+import com.rezolvemc.common.network.RezolveMenuPacket;
 import net.minecraft.network.FriendlyByteBuf;
 
 public class RemoteShellMenuReturnPacket extends RezolveMenuPacket {

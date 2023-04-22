@@ -1,10 +1,11 @@
-package org.torchmc;
+package org.torchmc.widgets;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import org.torchmc.WidgetBase;
 
 public class Label extends WidgetBase {
     public Label(Font font, Component initialContent, int x, int y, int width) {

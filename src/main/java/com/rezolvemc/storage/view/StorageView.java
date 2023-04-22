@@ -1,7 +1,7 @@
 package com.rezolvemc.storage.view;
 
 import com.rezolvemc.Rezolve;
-import org.torchmc.RezolveGuiUtil;
+import org.torchmc.util.TorchUtil;
 import com.rezolvemc.common.machines.MachineScreen;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.storage.view.packets.StorageViewChangeRequest;
@@ -251,7 +251,7 @@ public class StorageView extends GuiComponent implements Widget, GuiEventListene
 	@Override
 	public void render(PoseStack pPoseStack, int mouseX, int mouseY, float pPartialTick) {
 
-		RezolveGuiUtil.insetBox(
+		TorchUtil.insetBox(
 				pPoseStack,
 				Rezolve.loc("textures/gui/widgets/storage_view_background.png"),
 				x, y, width, height
@@ -317,8 +317,8 @@ public class StorageView extends GuiComponent implements Widget, GuiEventListene
 				if (puckPosition < 0)
 					puckPosition = 0;
 
-				RezolveGuiUtil.colorQuad(pPoseStack, 0x44000000, scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight);
-				RezolveGuiUtil.colorQuad(pPoseStack, 0x88FFFFFF, scrollBarX, scrollBarY + puckPosition, scrollBarWidth, puckHeight);
+				TorchUtil.colorQuad(pPoseStack, 0x44000000, scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight);
+				TorchUtil.colorQuad(pPoseStack, 0x88FFFFFF, scrollBarX, scrollBarY + puckPosition, scrollBarWidth, puckHeight);
 
 			} else {
 				this.font.draw(pPoseStack, noConnectionMessage, 7, 30, 0xFFFFFFFF);

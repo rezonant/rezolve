@@ -1,4 +1,4 @@
-package org.torchmc;
+package org.torchmc.util;
 
 public class Size {
     public Size(int width, int height) {

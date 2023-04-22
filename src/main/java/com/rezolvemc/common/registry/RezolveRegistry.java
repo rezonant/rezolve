@@ -2,9 +2,6 @@ package com.rezolvemc.common.registry;
 
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.blocks.BlockBase;
-import com.rezolvemc.common.blocks.WithBlockEntity;
-import org.torchmc.WithMenu;
-import org.torchmc.WithScreen;
 import com.rezolvemc.common.machines.WithOperation;
 import com.rezolvemc.common.network.RezolvePacket;
 import com.rezolvemc.common.machines.Operation;

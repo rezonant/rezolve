@@ -1,8 +1,8 @@
 package com.rezolvemc.thunderbolt.cable;
 
 import com.rezolvemc.Rezolve;
-import com.rezolvemc.common.blocks.WithBlockEntity;
-import org.torchmc.WithMenu;
+import com.rezolvemc.common.registry.WithBlockEntity;
+import com.rezolvemc.common.registry.WithMenu;
 import com.rezolvemc.common.registry.RegistryId;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;

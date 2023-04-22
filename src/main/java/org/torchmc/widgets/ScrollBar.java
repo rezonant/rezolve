@@ -1,8 +1,11 @@
-package org.torchmc;
+package org.torchmc.widgets;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import org.torchmc.WidgetBase;
+import org.torchmc.util.Color;
+import org.torchmc.util.TorchUtil;
 
 public class ScrollBar extends WidgetBase {
     public ScrollBar(int x, int y, int width, int height) {
@@ -127,8 +130,8 @@ public class ScrollBar extends WidgetBase {
             else if (isThumbHovered(pMouseX, pMouseY))
                 color = hoverColor;
 
-            RezolveGuiUtil.colorQuad(pPoseStack, barColor, x, y, width, height);
-            RezolveGuiUtil.colorQuad(pPoseStack, color.argb(), x, y + getThumbPosition(), width, getThumbSize());
+            TorchUtil.colorQuad(pPoseStack, barColor, x, y, width, height);
+            TorchUtil.colorQuad(pPoseStack, color.argb(), x, y + getThumbPosition(), width, getThumbSize());
         }
     }
 

@@ -1,21 +1,17 @@
 package com.rezolvemc.thunderbolt.remoteShell;
 
-import org.torchmc.ListView;
-import org.torchmc.ListViewItem;
+import org.torchmc.widgets.ListView;
+import org.torchmc.widgets.ListViewItem;
 import com.rezolvemc.common.machines.MachineScreen;
-import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.common.util.RezolveItemUtil;
-import com.rezolvemc.thunderbolt.databaseServer.DatabaseServerEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.BlockPos;
 
-import java.util.Locale;
 import java.util.Objects;
 
 public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {

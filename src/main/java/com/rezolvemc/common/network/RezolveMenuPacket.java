@@ -1,4 +1,4 @@
-package org.torchmc;
+package com.rezolvemc.common.network;
 
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.network.RezolvePacket;

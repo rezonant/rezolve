@@ -1,5 +1,7 @@
 package org.torchmc;
 
+import org.torchmc.layout.Panel;
+
 /**
  * A simple Panel type which supports free-form layout.
  */

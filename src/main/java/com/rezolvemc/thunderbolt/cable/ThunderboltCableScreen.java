@@ -1,6 +1,6 @@
 package com.rezolvemc.thunderbolt.cable;
 
-import org.torchmc.Label;
+import org.torchmc.widgets.Label;
 import com.rezolvemc.common.machines.MachineScreen;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import com.mojang.blaze3d.platform.GlStateManager;

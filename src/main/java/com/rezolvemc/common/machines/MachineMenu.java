@@ -2,7 +2,7 @@ package com.rezolvemc.common.machines;
 
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.Errors;
-import org.torchmc.RezolveMenuPacket;
+import com.rezolvemc.common.network.RezolveMenuPacket;
 import com.rezolvemc.common.inventory.IngredientSlot;
 import com.rezolvemc.common.inventory.SetIngredientSlotPacket;
 import com.rezolvemc.common.inventory.VirtualInventory;

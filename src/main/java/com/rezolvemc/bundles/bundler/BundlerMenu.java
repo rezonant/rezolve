@@ -6,7 +6,7 @@ import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.machines.MachineOutputSlot;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.common.network.WithPacket;
-import org.torchmc.WithScreen;
+import com.rezolvemc.common.registry.WithScreen;
 import net.minecraft.world.entity.player.Inventory;
 
 @WithScreen(BundlerScreen.class)

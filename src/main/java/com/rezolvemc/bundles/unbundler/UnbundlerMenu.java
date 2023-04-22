@@ -1,7 +1,7 @@
 package com.rezolvemc.bundles.unbundler;
 
 import com.rezolvemc.bundles.bundler.BundleSlot;
-import org.torchmc.WithScreen;
+import com.rezolvemc.common.registry.WithScreen;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.machines.MachineOutputSlot;
 

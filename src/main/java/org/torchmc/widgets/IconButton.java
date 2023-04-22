@@ -1,30 +1,23 @@
-package org.torchmc;
+package org.torchmc.widgets;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import org.torchmc.WidgetBase;
+import org.torchmc.util.Color;
+import org.torchmc.util.Size;
+import org.torchmc.util.TorchUtil;
 
-/**
- * A button
- */
-public class Button extends WidgetBase {
-    /**
-     * Minecraft buttons are always 20 (virtual) pixels tall.
-     * You can't do anything about it, and you should ask yourself why you want to.
-     * User interface guidelines exist for reasons.
-     */
-    public static final int HEIGHT = 20;
+public class IconButton extends WidgetBase {
+    public static final int SIZE = 18;
 
-    public Button(int x, int y, int width, Component text, Runnable onPress) {
-        super(Component.empty(), x, y, width, HEIGHT);
+    public IconButton(int x, int y, Component text, ResourceLocation icon, Runnable onPress) {
+        super(Component.empty(), x, y, 18, 18);
 
         this.text = text;
+        this.icon = icon;
         this.onPress = onPress;
     }
 
@@ -32,6 +25,7 @@ public class Button extends WidgetBase {
     private Color activeTextColor = Color.argb(0xFFFFFFFF);
     private Color inactiveTextColor = Color.argb(0xFFA0A0A0);
     private Component text;
+    private ResourceLocation icon;
     private float alpha = 1;
 
     public float getAlpha() {
@@ -39,13 +33,6 @@ public class Button extends WidgetBase {
     }
     public void setAlpha(float alpha) {
         this.alpha = alpha;
-    }
-
-    protected int getYImage(boolean pIsHovered) {
-        if (!isActive() || pressed)
-            return 0;
-
-        return isHovered() ? 2 : 1;
     }
 
     public Component getText() {
@@ -74,23 +61,16 @@ public class Button extends WidgetBase {
 
     @Override
     public Size getDesiredSize() {
-        return new Size(width, 20);
+        return new Size(SIZE, SIZE);
     }
 
     @Override
     protected void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-        Minecraft minecraft = Minecraft.getInstance();
-        Font font = minecraft.font;
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, AbstractWidget.WIDGETS_LOCATION);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
-        int i = this.getYImage(this.isHoveredOrFocused());
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.enableDepthTest();
-        this.blit(pPoseStack, this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
-        this.blit(pPoseStack, this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
-        drawCenteredString(pPoseStack, font, text, this.x + this.width / 2, this.y + (this.height - 8) / 2, activeTextColor.multiplyAlpha(this.alpha).argb());
+        if (isHovered()) {
+            TorchUtil.colorQuad(pPoseStack, 0xFFFFFFFF, x, y, width, height);
+        }
+        TorchUtil.colorQuad(pPoseStack, 0xFF000000, x + 1, y + 1, width - 2, height - 2);
+        TorchUtil.textureQuad(pPoseStack, icon, x + 1, y + 1, width - 2, height - 2, 0, 0, 1, 1);
     }
 
     boolean pressed = false;

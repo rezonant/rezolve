@@ -2,8 +2,8 @@ package com.rezolvemc.bundles.unbundler;
 
 import com.rezolvemc.common.machines.Machine;
 import com.rezolvemc.common.registry.RegistryId;
-import com.rezolvemc.common.blocks.WithBlockEntity;
-import org.torchmc.WithMenu;
+import com.rezolvemc.common.registry.WithBlockEntity;
+import com.rezolvemc.common.registry.WithMenu;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
 

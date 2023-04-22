@@ -1,6 +1,6 @@
 package com.rezolvemc.thunderbolt.securityServer;
 
-import org.torchmc.WithScreen;
+import com.rezolvemc.common.registry.WithScreen;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.machines.Sync;
 import com.rezolvemc.common.network.RezolvePacket;

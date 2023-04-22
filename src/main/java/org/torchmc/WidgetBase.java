@@ -12,12 +12,14 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
+import org.torchmc.util.Size;
+import org.torchmc.util.TorchUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class WidgetBase extends GuiComponent implements Widget, GuiEventListener, NarratableEntry {
-    WidgetBase(Component narrationTitle, int x, int y, int width, int height) {
+    public WidgetBase(Component narrationTitle, int x, int y, int width, int height) {
         this.narrationTitle = narrationTitle;
 
         this.x = x;
@@ -231,11 +233,11 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
         return visible;
     }
 
-    protected void didBecomeVisible() {
+    public void didBecomeVisible() {
 
     }
 
-    protected void didBecomeInvisible() {
+    public void didBecomeInvisible() {
 
     }
 
@@ -257,7 +259,7 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
         didResize();
     }
 
-    Component narrationTitle;
+    protected Component narrationTitle;
 
     @Override
     public final void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
@@ -308,7 +310,7 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
     }
 
     protected void scissor(PoseStack stack, int x, int y, int width, int height, Runnable runnable) {
-        var tr = RezolveGuiUtil.getTranslation(stack.last().pose());
+        var tr = TorchUtil.getTranslation(stack.last().pose());
 
         enableScissor(
                 (int)tr.x() + x,

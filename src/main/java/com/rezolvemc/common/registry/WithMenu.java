@@ -1,4 +1,4 @@
-package org.torchmc;
+package com.rezolvemc.common.registry;
 
 import net.minecraft.world.inventory.AbstractContainerMenu;
 

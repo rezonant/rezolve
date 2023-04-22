@@ -5,7 +5,12 @@ import com.rezolvemc.common.machines.MachineScreen;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import org.torchmc.*;
+import org.torchmc.layout.ContainerPanel;
+import org.torchmc.layout.VerticalLayoutPanel;
+import org.torchmc.widgets.Button;
+import org.torchmc.widgets.Label;
+import org.torchmc.widgets.ListView;
+import org.torchmc.widgets.ListViewItem;
 
 public class TesseractScreen extends MachineScreen<TesseractMenu> {
     public TesseractScreen(TesseractMenu menu, Inventory playerInventory, Component pTitle) {

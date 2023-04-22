@@ -1,4 +1,7 @@
-package org.torchmc;
+package org.torchmc.layout;
+
+import org.torchmc.util.Size;
+import org.torchmc.WidgetBase;
 
 /**
  * Provides a fixed-size Panel which can contain a single Widget.

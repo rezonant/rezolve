@@ -1,4 +1,4 @@
-package org.torchmc;
+package com.rezolvemc.common.registry;
 
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 

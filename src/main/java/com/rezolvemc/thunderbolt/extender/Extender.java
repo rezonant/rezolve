@@ -1,7 +1,7 @@
 package com.rezolvemc.thunderbolt.extender;
 
 import com.rezolvemc.common.blocks.EntityBlockBase;
-import com.rezolvemc.common.blocks.WithBlockEntity;
+import com.rezolvemc.common.registry.WithBlockEntity;
 import com.rezolvemc.common.registry.RegistryId;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;

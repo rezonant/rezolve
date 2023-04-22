@@ -1,9 +1,12 @@
-package org.torchmc;
+package org.torchmc.widgets;
 
 import com.rezolvemc.Rezolve;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.torchmc.WidgetBase;
+import org.torchmc.util.Color;
+import org.torchmc.util.TorchUtil;
 
 public class ProgressIndicator extends WidgetBase {
     public static final ResourceLocation ARROW_TEXTURE = Rezolve.loc("textures/gui/widgets/arrow.png");
@@ -33,13 +36,13 @@ public class ProgressIndicator extends WidgetBase {
         double size = 32;
         double width = size * value;
 
-        RezolveGuiUtil.textureQuad(
+        TorchUtil.textureQuad(
                 pPoseStack, ARROW_TEXTURE,
                 Color.of(0.6, 0.6, 0.6, 1),
                 x, y, size, size, 0, 0, 1, 1
         );
 
-        RezolveGuiUtil.textureQuad(
+        TorchUtil.textureQuad(
                 pPoseStack, ARROW_TEXTURE,
                 Color.of(1, 0, 0, 1),
                 x, y, width, size, 0, 0, (float)value, 1
