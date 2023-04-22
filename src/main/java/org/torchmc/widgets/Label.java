@@ -18,6 +18,7 @@ public class Label extends WidgetBase {
 
     public Label(Component initialContent) {
         super(initialContent);
+        font = Minecraft.getInstance().font;
         setContent(initialContent);
     }
 
@@ -52,6 +53,7 @@ public class Label extends WidgetBase {
 
     public void setFont(Font font) {
         this.font = font;
+        constructLabel();
     }
 
     public Font getFont() {
@@ -65,6 +67,10 @@ public class Label extends WidgetBase {
     public void setContent(Component content) {
         this.content = content;
         this.narrationTitle = content;
+        constructLabel();
+    }
+
+    private void constructLabel() {
         this.label = MultiLineLabel.create(font, content, width);
     }
 

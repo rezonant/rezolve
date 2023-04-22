@@ -9,7 +9,7 @@ import org.torchmc.util.Color;
 import org.torchmc.util.TorchUtil;
 
 public class ProgressIndicator extends WidgetBase {
-    public static final ResourceLocation ARROW_TEXTURE = TorchUI.builtInTex("textures/gui/widgets/arrow.png");
+    public static final ResourceLocation ARROW_TEXTURE = TorchUI.builtInTex("gui/widgets/arrow.png");
 
     public ProgressIndicator(int x, int y, Component narrationTitle) {
         super(narrationTitle);

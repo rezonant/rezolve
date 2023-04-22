@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.Rect2i;
@@ -83,13 +84,18 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
 
     @Override
     protected final void init() {
-        if (!initialized) {
+        if (!initialized || !wasMoved) {
             this.leftPos = (this.width - this.imageWidth) / 2;
             this.topPos = (this.height - this.imageHeight) / 2;
             initialized = true;
         }
 
         setup();
+    }
+
+    @Override
+    public void resize(Minecraft pMinecraft, int pWidth, int pHeight) {
+        super.resize(pMinecraft, pWidth, pHeight);
     }
 
     protected void setup() {
@@ -245,14 +251,14 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
     protected void renderBg(PoseStack pPoseStack, float pPartialTick, int pMouseX, int pMouseY) {
         TorchUtil.insetBox(
                 pPoseStack,
-                 TorchUI.builtInTex("textures/gui/widgets/screen_background.png"),
+                 TorchUI.builtInTex("gui/widgets/screen_background.png"),
                 leftPos, topPos, imageWidth, imageHeight
         );
 
         if (twoToneHeight > 0) {
             TorchUtil.insetBox(
                     pPoseStack,
-                    TorchUI.builtInTex("textures/gui/widgets/twotone_background.png"),
+                    TorchUI.builtInTex("gui/widgets/twotone_background.png"),
                     leftPos, topPos, imageWidth, twoToneHeight
             );
         }

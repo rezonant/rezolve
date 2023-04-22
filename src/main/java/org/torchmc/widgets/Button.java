@@ -112,7 +112,8 @@ public class Button extends WidgetBase {
     @Override
     public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
         pressed = true;
-        handler.run();
+        if (handler != null)
+            handler.run();
         return true;
     }
 

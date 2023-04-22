@@ -22,7 +22,7 @@ public class SlotWidget extends WidgetBase {
     private int screenY;
     private Slot slot;
     private Component narrationLabel;
-    private ResourceLocation texture = TorchUI.builtInTex("textures/gui/widgets/slot.png");
+    private ResourceLocation texture = TorchUI.builtInTex("gui/widgets/slot.png");
 
     @Override
     public void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {

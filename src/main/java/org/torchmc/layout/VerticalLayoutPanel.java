@@ -62,9 +62,16 @@ public class VerticalLayoutPanel extends LayoutPanel {
                 continue;
 
             var size = panel.getDesiredSize();
+            var grow = panel.getGrowScale();
+
+            if (size == null) {
+                size = new Size(0, 0);
+                if (grow == null)
+                    grow = new Size(1, 1);
+            }
+
             availableSpace -= size.height + space;
 
-            var grow = panel.getGrowScale();
             if (grow != null) {
                 expansion += grow.height;
             }
@@ -80,8 +87,15 @@ public class VerticalLayoutPanel extends LayoutPanel {
                 continue;
 
             var size = child.getDesiredSize();
-            int height = size.height;
             Size grow = child.getGrowScale();
+
+            if (size == null) {
+                size = new Size(0, 0);
+                if (grow == null)
+                    grow = new Size(1, 1);
+            }
+
+            int height = size.height;
 
             if (grow != null && expansion > 0 && grow.height > 0)
                 height += Math.max(0, (grow.height / (double)expansion) * availableSpace);
