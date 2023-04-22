@@ -9,7 +9,7 @@ import org.torchmc.util.TorchUtil;
 
 public class Meter extends WidgetBase {
     public Meter(Font font, int x, int y, int height, Component narrationTitle, Component label, ResourceLocation texture) {
-        super(narrationTitle, x, y, 16, height);
+        super(narrationTitle);
 
         this.font = font;
         this.label = label;

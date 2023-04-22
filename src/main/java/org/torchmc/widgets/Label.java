@@ -1,25 +1,27 @@
 package org.torchmc.widgets;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import org.torchmc.WidgetBase;
+import org.torchmc.util.Size;
 
 public class Label extends WidgetBase {
-    public Label(Font font, Component initialContent, int x, int y, int width) {
-        super(initialContent, x, y, width, 0);
-        this.font = font;
+    public Label(String text) {
+        this(Component.literal(text));
+    }
 
+
+
+    public Label(Component initialContent) {
+        super(initialContent);
         setContent(initialContent);
     }
 
     public static final int DEFAULT_COLOR = 4210752;
-
-    public Label(Font font, Component initialContent, int x, int y) {
-        this(font, initialContent, x, y, 99999);
-    }
 
     private Font font;
     private MultiLineLabel label;
@@ -46,6 +48,14 @@ public class Label extends WidgetBase {
 
     public void setAlignment(Alignment alignment) {
         this.alignment = alignment;
+    }
+
+    public void setFont(Font font) {
+        this.font = font;
+    }
+
+    public Font getFont() {
+        return font;
     }
 
     public FormattedText getContent() {
@@ -82,6 +92,10 @@ public class Label extends WidgetBase {
             label.renderCentered(pPoseStack, width, x, y, color);
         else if (alignment == Alignment.LEFT)
             label.renderLeftAlignedNoShadow(pPoseStack, x, y, font.lineHeight, color);
+    }
 
+    @Override
+    public Size getDesiredSize() {
+        return new Size(font.width(content), font.lineHeight);
     }
 }

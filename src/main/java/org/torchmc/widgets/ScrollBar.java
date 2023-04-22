@@ -8,8 +8,8 @@ import org.torchmc.util.Color;
 import org.torchmc.util.TorchUtil;
 
 public class ScrollBar extends WidgetBase {
-    public ScrollBar(int x, int y, int width, int height) {
-        super(Component.literal(""), x, y, width, height);
+    public ScrollBar() {
+        super(Component.literal(""));
     }
 
     private int scrollPosition = 0;

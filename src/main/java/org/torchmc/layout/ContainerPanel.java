@@ -12,7 +12,7 @@ public class ContainerPanel<T extends WidgetBase> extends LayoutPanel {
         this.height = height;
     }
 
-    public static <T extends WidgetBase> ContainerPanel of(T widget, int width, int height) {
+    public static <T extends WidgetBase> ContainerPanel<T> of(T widget, int width, int height) {
         ContainerPanel<T> panel = new ContainerPanel(width, height);
         panel.addChild(widget);
         return panel;

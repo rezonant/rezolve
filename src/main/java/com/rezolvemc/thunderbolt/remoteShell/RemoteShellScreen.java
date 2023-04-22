@@ -62,10 +62,9 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 
 		addEnergyMeter(leftPos + 230, topPos + 43, 95);
 
-		listView = addRenderableWidget(new ListView(
-				Component.translatable("screens.rezolve.machine_list"),
-				leftPos + 13, topPos + 47, slotWidth, 81
-		));
+		listView = addChild(new ListView(Component.translatable("screens.rezolve.machine_list")), listView -> {
+			listView.move(leftPos + 13, topPos + 47, slotWidth, 81);
+		});
 
 		listView.setItemPadding(2);
 	}

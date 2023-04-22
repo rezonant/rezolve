@@ -17,15 +17,11 @@ import org.torchmc.util.TorchUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public abstract class WidgetBase extends GuiComponent implements Widget, GuiEventListener, NarratableEntry {
-    public WidgetBase(Component narrationTitle, int x, int y, int width, int height) {
+    public WidgetBase(Component narrationTitle) {
         this.narrationTitle = narrationTitle;
-
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
 
         if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> acScreen)
             this.screen = acScreen;
@@ -136,8 +132,13 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
     }
 
     public <T extends WidgetBase> T addChild(T widget) {
+        return addChild(widget, w -> {});
+    }
+
+    public <T extends WidgetBase> T addChild(T widget, Consumer<T> initializer) {
         children.add(widget);
         widget.adoptParent(this);
+        initializer.accept(widget);
         return widget;
     }
 

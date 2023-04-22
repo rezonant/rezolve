@@ -45,12 +45,20 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
             addInventoryGrid(menu.getFirstPlayerInventorySlot());
     }
 
-    protected IconButton addLeftShoulderButton(Component label, ResourceLocation icon, Runnable action) {
-        return leftShoulderButtons.addChild(new IconButton(0, 0, label, icon, action));
+    protected IconButton addLeftShoulderButton(String label, ResourceLocation icon) {
+        return addLeftShoulderButton(Component.literal(label), icon);
     }
 
-    protected IconButton addRightShoulderButton(Component label, ResourceLocation icon, Runnable action) {
-        return rightShoulderButtons.addChild(new IconButton(0, 0, label, icon, action));
+    protected IconButton addLeftShoulderButton(Component label, ResourceLocation icon) {
+        return leftShoulderButtons.addChild(new IconButton(label, icon));
+    }
+
+    protected IconButton addRightShoulderButton(Component label, ResourceLocation icon) {
+        return rightShoulderButtons.addChild(new IconButton(label, icon));
+    }
+
+    protected IconButton addRightShoulderButton(String label, ResourceLocation icon) {
+        return addRightShoulderButton(Component.literal(label), icon);
     }
 
     protected Label addLabel(Component content, int x, int y) {
@@ -58,7 +66,9 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
     }
 
     protected Label addLabel(Component content, int x, int y, int width) {
-        return addRenderableWidget(new Label(font, content, x, y, width));
+        return addChild(new Label(content), label -> {
+            label.move(x, y, width, font.lineHeight);
+        });
     }
 
     protected ProgressIndicator addOperationProgressIndicator(int x, int y) {

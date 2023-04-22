@@ -24,14 +24,17 @@ public class Button extends WidgetBase {
      */
     public static final int HEIGHT = 20;
 
-    public Button(int x, int y, int width, Component text, Runnable onPress) {
-        super(Component.empty(), x, y, width, HEIGHT);
+    public Button(Component text) {
+        super(Component.empty());
 
         this.text = text;
-        this.onPress = onPress;
     }
 
-    private Runnable onPress;
+    public Button(String text) {
+        this(Component.literal(text));
+    }
+
+    private Runnable handler;
     private Color activeTextColor = Color.argb(0xFFFFFFFF);
     private Color inactiveTextColor = Color.argb(0xFFA0A0A0);
     private Component text;
@@ -42,6 +45,14 @@ public class Button extends WidgetBase {
     }
     public void setAlpha(float alpha) {
         this.alpha = alpha;
+    }
+
+    public Runnable getHandler() {
+        return handler;
+    }
+
+    public void setHandler(Runnable handler) {
+        this.handler = handler;
     }
 
     protected int getYImage(boolean pIsHovered) {
@@ -101,7 +112,7 @@ public class Button extends WidgetBase {
     @Override
     public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
         pressed = true;
-        onPress.run();
+        handler.run();
         return true;
     }
 

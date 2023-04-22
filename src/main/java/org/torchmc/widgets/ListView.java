@@ -1,8 +1,8 @@
 package org.torchmc.widgets;
 
-import com.rezolvemc.Rezolve;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
+import org.torchmc.TorchUI;
 import org.torchmc.WidgetBase;
 import org.torchmc.util.TorchUtil;
 
@@ -10,15 +10,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ListView extends WidgetBase {
-    public ListView(Component narrationTitle, int x, int y, int width, int height) {
-        super(narrationTitle, x, y, width, height);
+    public ListView(Component narrationTitle) {
+        super(narrationTitle);
 
-        scrollbar = addChild(new ScrollBar(width - scrollBarWidth, 0, scrollBarWidth, height) {
+        scrollbar = addChild(new ScrollBar() {
             @Override
             public void scrollPositionChanged(int position) {
                 scrollPos = position;
             }
         });
+    }
+
+    public ListView(String narrationTitle) {
+        this(Component.literal(narrationTitle));
     }
 
     private int scrollBarWidth = 3;
@@ -27,6 +31,14 @@ public class ListView extends WidgetBase {
 
     public void addItem(ListViewItem item) {
         items.add(item);
+    }
+
+    public void addItem(Component content) {
+        addItem(new TextListViewItem(content));
+    }
+
+    public void addItem(String text) {
+        addItem(new TextListViewItem(text));
     }
 
     public void clearItems() {
@@ -103,7 +115,12 @@ public class ListView extends WidgetBase {
         boolean xInBounds = x < mouseX && mouseX < x + width;
         boolean mouseInView = isMouseOver(mouseX, mouseY);
 
-        TorchUtil.insetBox(poseStack, Rezolve.tex("gui/widgets/simple_frame.png"), x, y, width, height);
+        TorchUtil.insetBox(
+                poseStack,
+                TorchUI.builtInTex("gui/widgets/simple_frame.png"),
+                x, y, width, height
+        );
+
         scissor(poseStack, x, y, width, height, () -> {
             pushPose(poseStack, () -> {
                 repose(poseStack, () -> poseStack.translate(x + itemPadding, y - scrollPos + itemPadding, 0));

@@ -5,7 +5,7 @@ import org.torchmc.WidgetBase;
 
 public class Panel extends WidgetBase {
     public Panel() {
-        super(Component.empty(), 0, 0, 0, 0);
+        super(Component.empty());
     }
 
 }

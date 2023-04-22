@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.rezolvemc.Rezolve;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -21,6 +20,7 @@ import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public abstract class TorchScreen<T extends AbstractContainerMenu> extends AbstractContainerScreen<T> {
     public TorchScreen(T pMenu, Inventory pPlayerInventory, Component pTitle, int width, int height) {
@@ -73,13 +73,13 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
      * Whether to render the Inventory label provided by Vanilla Minecraft.
      * Use inventoryLabelX/Y to position it.
      */
-    protected boolean enableInventoryLabel = true;
+    protected boolean enableInventoryLabel = false;
 
     /**
      * What amount of the top portion of the window should receive a darker background color than the rest.
      * This is typically used to create a visual separation between the machine's UI and the user's inventory.
      */
-    protected int twoToneHeight = 120;
+    protected int twoToneHeight = 0;
 
     @Override
     protected final void init() {
@@ -97,6 +97,20 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
     }
 
     protected <T extends Panel> T setPanel(T panel) {
+        return setPanel(panel, p -> {});
+    }
+
+    protected <T extends WidgetBase> T addChild(T widget) {
+        return addChild(widget, w -> {});
+    }
+
+    protected <T extends WidgetBase> T addChild(T widget, Consumer<T> initializer) {
+        addRenderableWidget(widget);
+        initializer.accept(widget);
+        return widget;
+    }
+
+    protected <T extends Panel> T setPanel(T panel, Consumer<T> initializer) {
         if (this.panel != null) {
             removeWidget(this.panel);
         }
@@ -107,6 +121,9 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
 
         int margin = 8;
         panel.move(margin + leftPos, margin + topPos + font.lineHeight + 2, imageWidth - margin*2, imageHeight - margin*2 - font.lineHeight - 2);
+
+        initializer.accept(panel);
+
         return panel;
     }
 
@@ -228,14 +245,14 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
     protected void renderBg(PoseStack pPoseStack, float pPartialTick, int pMouseX, int pMouseY) {
         TorchUtil.insetBox(
                 pPoseStack,
-                Rezolve.loc("textures/gui/widgets/screen_background.png"),
+                 TorchUI.builtInTex("textures/gui/widgets/screen_background.png"),
                 leftPos, topPos, imageWidth, imageHeight
         );
 
         if (twoToneHeight > 0) {
             TorchUtil.insetBox(
                     pPoseStack,
-                    Rezolve.loc("textures/gui/widgets/twotone_background.png"),
+                    TorchUI.builtInTex("textures/gui/widgets/twotone_background.png"),
                     leftPos, topPos, imageWidth, twoToneHeight
             );
         }

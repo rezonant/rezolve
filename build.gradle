@@ -53,6 +53,8 @@ archivesBaseName = "Rezolve-${minecraft_version}"
 java.toolchain.languageVersion = JavaLanguageVersion.of("${java_version}")
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
+// ------------------------------------------------------
+
 repositories {
     maven { url = "https://maven.minecraftforge.net" } // Forge
     maven { url "https://dvs1.progwml6.com/files/maven" } // JEI

@@ -1,18 +1,18 @@
 package org.torchmc.widgets;
 
-import com.rezolvemc.Rezolve;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.torchmc.TorchUI;
 import org.torchmc.WidgetBase;
 import org.torchmc.util.Color;
 import org.torchmc.util.TorchUtil;
 
 public class ProgressIndicator extends WidgetBase {
-    public static final ResourceLocation ARROW_TEXTURE = Rezolve.loc("textures/gui/widgets/arrow.png");
+    public static final ResourceLocation ARROW_TEXTURE = TorchUI.builtInTex("textures/gui/widgets/arrow.png");
 
     public ProgressIndicator(int x, int y, Component narrationTitle) {
-        super(narrationTitle, x, y, 32, 32);
+        super(narrationTitle);
     }
 
     private double value;

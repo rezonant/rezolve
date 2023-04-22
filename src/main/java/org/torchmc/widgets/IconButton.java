@@ -13,20 +13,31 @@ import org.torchmc.util.TorchUtil;
 public class IconButton extends WidgetBase {
     public static final int SIZE = 18;
 
-    public IconButton(int x, int y, Component text, ResourceLocation icon, Runnable onPress) {
-        super(Component.empty(), x, y, 18, 18);
+    public IconButton(String text, ResourceLocation icon) {
+        this(Component.literal(text), icon);
+    }
+
+    public IconButton(Component text, ResourceLocation icon) {
+        super(Component.empty());
 
         this.text = text;
         this.icon = icon;
-        this.onPress = onPress;
     }
 
-    private Runnable onPress;
+    private Runnable handler;
     private Color activeTextColor = Color.argb(0xFFFFFFFF);
     private Color inactiveTextColor = Color.argb(0xFFA0A0A0);
     private Component text;
     private ResourceLocation icon;
     private float alpha = 1;
+
+    public Runnable getHandler() {
+        return handler;
+    }
+
+    public void setHandler(Runnable handler) {
+        this.handler = handler;
+    }
 
     public float getAlpha() {
         return alpha;
@@ -78,7 +89,7 @@ public class IconButton extends WidgetBase {
     @Override
     public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
         pressed = true;
-        onPress.run();
+        handler.run();
         return true;
     }
 
