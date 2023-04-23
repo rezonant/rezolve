@@ -1,6 +1,8 @@
 package com.rezolvemc.storage.view;
 
 import com.rezolvemc.Rezolve;
+import net.minecraft.network.chat.Component;
+import org.torchmc.WidgetBase;
 import org.torchmc.util.TorchUtil;
 import com.rezolvemc.common.machines.MachineScreen;
 import com.rezolvemc.common.registry.RezolveRegistry;
@@ -24,7 +26,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-public class StorageView extends GuiComponent implements Widget, GuiEventListener, NarratableEntry {
+public class StorageView extends WidgetBase {
 
 	static {
 		RezolveRegistry.register(
@@ -35,8 +37,13 @@ public class StorageView extends GuiComponent implements Widget, GuiEventListene
 		);
 	}
 
-	public StorageView(MachineScreen screen, int x, int y, int width, int height) {
-		this.screen = screen;
+	public StorageView() {
+		this(0, 0, 0, 0);
+	}
+
+	public StorageView(int x, int y, int width, int height) {
+		super(Component.translatable("screens.rezolve.storage_view"));
+
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -49,7 +56,8 @@ public class StorageView extends GuiComponent implements Widget, GuiEventListene
 		this.font = mc.font;
 		this.sendStateToServer();
 
-		screen.getMachineMenu().addPacketHandler(packet -> {
+
+		((MachineScreen)screen).getMachineMenu().addPacketHandler(packet -> {
 			if (packet instanceof StorageViewContentPacket contentPacket) {
 				handleUpdate(contentPacket);
 			} else if (packet instanceof StorageViewChangeResponse changeResponse) {
@@ -62,7 +70,6 @@ public class StorageView extends GuiComponent implements Widget, GuiEventListene
 		});
 	}
 
-	private MachineScreen screen;
 	private int x;
 	private int y;
 	private int width;
@@ -249,7 +256,7 @@ public class StorageView extends GuiComponent implements Widget, GuiEventListene
 	private int margin = 3;
 
 	@Override
-	public void render(PoseStack pPoseStack, int mouseX, int mouseY, float pPartialTick) {
+	public void renderContents(PoseStack pPoseStack, int mouseX, int mouseY, float pPartialTick) {
 
 		TorchUtil.insetBox(
 				pPoseStack,
@@ -462,7 +469,7 @@ public class StorageView extends GuiComponent implements Widget, GuiEventListene
 			return true;
 		}
 
-		return GuiEventListener.super.mouseScrolled(mouseX, mouseY, pDelta);
+		return super.mouseScrolled(mouseX, mouseY, pDelta);
 	}
 
 	private int scrollSpeed = 10;

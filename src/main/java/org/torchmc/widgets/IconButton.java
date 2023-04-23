@@ -10,6 +10,8 @@ import org.torchmc.util.Color;
 import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
 
+import java.util.List;
+
 public class IconButton extends WidgetBase {
     public static final int SIZE = 18;
 
@@ -22,6 +24,8 @@ public class IconButton extends WidgetBase {
 
         this.text = text;
         this.icon = icon;
+
+        setFocusable(true);
     }
 
     private Runnable handler;
@@ -30,6 +34,16 @@ public class IconButton extends WidgetBase {
     private Component text;
     private ResourceLocation icon;
     private float alpha = 1;
+
+    @Override
+    public List<Component> getTooltip() {
+        var tooltip = super.getTooltip();
+        if (tooltip == null) {
+            tooltip = List.of(text);
+        }
+
+        return tooltip;
+    }
 
     public Runnable getHandler() {
         return handler;
@@ -77,9 +91,10 @@ public class IconButton extends WidgetBase {
 
     @Override
     protected void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-        if (isHovered()) {
+        if (isHoveredOrFocused()) {
             TorchUtil.colorQuad(pPoseStack, 0xFFFFFFFF, x, y, width, height);
         }
+
         TorchUtil.colorQuad(pPoseStack, 0xFF000000, x + 1, y + 1, width - 2, height - 2);
         TorchUtil.textureQuad(pPoseStack, icon, x + 1, y + 1, width - 2, height - 2, 0, 0, 1, 1);
     }

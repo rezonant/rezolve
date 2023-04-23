@@ -57,6 +57,10 @@ public class ThunderboltCableMenu extends MachineMenu<ThunderboltCableEntity> {
         packet.sendToServer();
     }
 
+    public void cycleTransmissionMode(Direction face, TransmissionType type, int direction) {
+        setTransmissionMode(face, type, configuration.getTransmitMode(face, type).seek(direction));
+    }
+
     @Override
     public void receivePacketOnServer(RezolvePacket rezolvePacket) {
         if (rezolvePacket instanceof SetTransmissionModePacket setTransmissionMode) {

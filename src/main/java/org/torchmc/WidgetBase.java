@@ -2,7 +2,9 @@ package org.torchmc;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.rezolvemc.common.util.RezolveUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -17,6 +19,7 @@ import org.torchmc.util.TorchUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public abstract class WidgetBase extends GuiComponent implements Widget, GuiEventListener, NarratableEntry {
@@ -25,16 +28,26 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
 
         if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> acScreen)
             this.screen = acScreen;
+
+        minecraft = Minecraft.getInstance();
+        font = minecraft.font;
     }
+
+    private boolean visible = true;
+    private WidgetBase parent;
+    protected AbstractContainerScreen screen;
+    private boolean isDecoration = false;
+    private boolean hovered = false;
+    private boolean focused = false;
+    private boolean active = true;
+    private List<Component> tooltip = null;
 
     protected int x;
     protected int y;
     protected int width;
     protected int height;
-    private boolean visible = true;
-    private WidgetBase parent;
-    private AbstractContainerScreen screen;
-    private boolean isDecoration = false;
+    protected Minecraft minecraft;
+    protected Font font;
 
     public int getX() {
         return x;
@@ -50,6 +63,22 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
 
     public int getHeight() {
         return height;
+    }
+
+    public List<Component> getTooltip() {
+        return tooltip;
+    }
+
+    public void setTooltip(List<Component> tooltip) {
+        this.tooltip = tooltip;
+    }
+
+    public void setTooltip(Component tooltip) {
+        this.tooltip = List.of(tooltip);
+    }
+
+    public void setTooltip(String text) {
+        this.tooltip = List.of(Component.literal(text));
     }
 
     public Rect2i getScreenRect() {
@@ -138,8 +167,56 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
     public <T extends WidgetBase> T addChild(T widget, Consumer<T> initializer) {
         children.add(widget);
         widget.adoptParent(this);
-        initializer.accept(widget);
+        widget.runInitializer(() -> initializer.accept(widget));
+
+        if (parent != null)
+            parent.hierarchyDidChange();
+
         return widget;
+    }
+
+    private boolean hierarchyChangesHeld = false;
+    private boolean hierarchyIsChanging = false;
+
+    /**
+     * Runs the given runnable while pausing hierarchy updates. If hierarchy updates are already paused,
+     * this runs the function without modifying the holding state.
+     * @param runnable
+     */
+    public void runInitializer(Runnable runnable) {
+        boolean didHoldChanges = false;
+        boolean wasChanged = false;
+
+        if (!hierarchyChangesHeld) {
+            hierarchyChangesHeld = true;
+            hierarchyIsChanging = false;
+            didHoldChanges = true;
+        }
+
+        try {
+            runnable.run();
+        } finally {
+            if (didHoldChanges) {
+                wasChanged = hierarchyIsChanging;
+                hierarchyChangesHeld = false;
+                hierarchyIsChanging = false;
+            }
+        }
+
+        if (wasChanged && parent != null)
+            parent.hierarchyDidChange();
+    }
+
+    /**
+     * Called when a widget has been added or removed somewhere below this widget.
+     */
+    protected void hierarchyDidChange() {
+        if (hierarchyChangesHeld) {
+            hierarchyIsChanging = true;
+        } else {
+            if (parent != null)
+                parent.hierarchyDidChange();
+        }
     }
 
     public WidgetBase[] getChildren() {
@@ -150,10 +227,6 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
     public boolean isMouseOver(double pMouseX, double pMouseY) {
         return x < pMouseX && pMouseX < x + width && y < pMouseY && pMouseY < y + height;
     }
-
-    private boolean hovered = false;
-    private boolean focused = false;
-    private boolean active = true;
 
     public boolean isHoveredOrFocused() {
         return hovered || focused;
@@ -180,30 +253,153 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
         this.active = active;
     }
 
+    private void setFocusState(boolean focused) {
+        if (this.focused == focused)
+            return;
+
+        this.focused = focused;
+        focusStateChanged(focused);
+        if (focused)
+            becameFocused();
+        else
+            becameUnfocused();
+    }
+
+    private WidgetBase focusedChild;
+    private boolean focusable = false;
+
+    /**
+     * True if this widget is itself focusable. Note that this is distinct from the widget being able to *handle* focus
+     * amongst its children, all widgets can do that.
+     * @return
+     */
+    public boolean isFocusable() {
+        return focusable;
+    }
+
+    public void setFocusable(boolean focusable) {
+        this.focusable = focusable;
+    }
+
     /**
      * Called when the focus state has *changed*. This does NOT mean we are focused! This means that the user's current focus
      * has changed, and we are somehow affected by it. If we were already focused, then we are no longer focused, and
      * if we were not focused, then we are now focused. Please do not call this manually to set focus! Kittens die when
      * you do that.
      *
+     * If the widget has multiple focusable elements, then it should try to find the next focusable one, based on direction
+     * (true for forward, false for backward). If the end of the set of focusable elements is reached, this method should
+     * set the current focused widget to null and return false. The screen is then responsible for restarting the focus
+     * chain so that focus wraps around.
+     *
+     * If this widget has no currently focused element, then the first focusable element should become focused when direction
+     * is true, and the last focusable element should become focused when direction is false.
+     *
      * @param direction
      */
     @Override
     public boolean changeFocus(boolean direction) {
-        focused = !focused;
-
         if (active && visible) {
-            focused = !focused;
-            focusStateChanged(focused);
-            if (focused)
-                becameFocused();
-            else
-                becameUnfocused();
 
-            return focused;
-        } else {
+            if (focusable && focusedChild == null) {
+                setFocusState(!focused);
+                if (focused) // we have just become focused, so we can stop here
+                    return true;
+            }
+
+            var list = direction ? children : RezolveUtil.reverseList(children);
+            int index = focusedChild != null ? list.indexOf(focusedChild) : 0;
+
+            for (int i = index; i < list.size(); ++i) {
+                var child = list.get(i);
+
+                if (child.changeFocus(direction)) {
+                    // The child has a new focusable widget, so nothing else to do
+                    if (focusedChild != null) {
+                        focusedChild.setFocusState(false);
+                    }
+                    focusedChild = child;
+                    return true;
+                }
+            }
+
+            if (focusedChild != null) {
+                focusedChild.setFocusState(false);
+            }
+            focusedChild = null;
             return false;
         }
+
+        return false;
+    }
+
+    /**
+     * Make this widget take the current focus.
+     */
+    public void takeFocus() {
+        if (isFocused())
+            return;
+
+        var parent = this.parent;
+        var child = this;
+
+        while (parent != null) {
+            parent.setFocusState(false);
+            for (var otherChild : parent.children) {
+                if (otherChild == child)
+                    continue;
+                otherChild.clearFocus();
+            }
+
+            parent.focusedChild = child;
+
+            // Next round
+
+            child = parent;
+            parent = parent.parent;
+        }
+
+        for (var renderable : screen.renderables) {
+            if (renderable == child)
+                continue;
+
+            if (renderable instanceof WidgetBase widget) {
+                widget.clearFocus();
+            }
+        }
+
+        screen.setFocused(child);
+
+        setFocusState(true);
+    }
+
+    private void clearFocus() {
+        setFocusState(false);
+        focusedChild = null;
+        for (var child : children) {
+            child.clearFocus();
+        }
+    }
+
+    @Override
+    public boolean charTyped(char pCodePoint, int pModifiers) {
+        if (focusedChild != null)
+            return focusedChild.charTyped(pCodePoint, pModifiers);
+        return false;
+    }
+
+    @Override
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (focusedChild != null)
+            return focusedChild.keyPressed(pKeyCode, pScanCode, pModifiers);
+        return false;
+    }
+
+    @Override
+    public boolean keyReleased(int pKeyCode, int pScanCode, int pModifiers) {
+        if (focusedChild != null)
+            return focusedChild.keyReleased(pKeyCode, pScanCode, pModifiers);
+        return false;
     }
 
     public void focusStateChanged(boolean focused) {
@@ -228,6 +424,12 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
             didBecomeVisible();
         else
             didBecomeInvisible();
+
+        // Since hierarchy change notifications are used to inform relayouting, it's important
+        // to send hierarchy change notifications when visibility changes to enable layouts to
+        // update as appropriate.
+        if (parent != null)
+            hierarchyDidChange();
     }
 
     public boolean isVisible() {
@@ -277,6 +479,14 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
             renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
         });
 
+        if (isHovered())
+            renderTooltip(pPoseStack, pMouseX, pMouseY);
+    }
+
+    protected void renderTooltip(PoseStack poseStack, int mouseX, int mouseY) {
+        var tooltip = getTooltip(); // Important to allow customization of tooltip behavior in widget classes
+        if (tooltip != null && tooltip.size() > 0)
+            screen.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY);
     }
 
     protected void renderChildren(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
@@ -314,10 +524,10 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
         var tr = TorchUtil.getTranslation(stack.last().pose());
 
         enableScissor(
-                (int)tr.x() + x,
-                (int)tr.y() + y,
-                (int)tr.x() + x + width,
-                (int)tr.y() + y + height
+            (int)tr.x() + x,
+                    (int)tr.y() + y,
+                    (int)tr.x() + x + Math.max(1, width),
+                    (int)tr.y() + y + Math.max(1, height)
         );
 
         try {
@@ -366,8 +576,18 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
         return GuiEventListener.super.mouseScrolled(pMouseX, pMouseY, pDelta);
     }
 
+    protected boolean mouseDown;
+    protected double clickX;
+    protected double clickY;
+
     @Override
     public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+        mouseDown = true;
+        clickX = pMouseX;
+        clickY = pMouseY;
+
+        // Pass to children, putting it into their parent coordinate space (ours)
+
         pMouseX -= x;
         pMouseY -= y;
 
@@ -384,7 +604,12 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
     }
 
     @Override
-    public boolean mouseReleased(double pMouseX, double pMouseY, int pButton) {        pMouseX -= x;
+    public boolean mouseReleased(double pMouseX, double pMouseY, int pButton) {
+        mouseDown = false;
+
+        // Pass to children, putting it into their parent coordinate space (ours)
+
+        pMouseX -= x;
         pMouseY -= y;
 
         if (draggedWidget != null && draggedWidget instanceof GuiEventListener listener) {
@@ -421,14 +646,24 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
         }
     }
 
+    Size desiredSize = null;
+
+    /**
+     * Set the size this widget desires to be. Used as an input to layout panels
+     * @param desiredSize
+     */
+    public void setDesiredSize(Size desiredSize) {
+        this.desiredSize = desiredSize;
+    }
+
     /**
      * Determines what size this widget would *like* to have. This is used
-     * as a feedback mechanism for panels which can use it, such as the Vertical/HorizontalLayoutPanel
+     * as an input for panels which can use it, such as the Vertical/HorizontalLayoutPanel
      *
      * @return
      */
     public Size getDesiredSize() {
-        return null;
+        return this.desiredSize;
     }
 
     private Size growScale;

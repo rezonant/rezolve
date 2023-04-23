@@ -15,6 +15,9 @@ public class Label extends WidgetBase {
     }
 
 
+    public Label() {
+        this(Component.empty());
+    }
 
     public Label(Component initialContent) {
         super(initialContent);
@@ -60,7 +63,7 @@ public class Label extends WidgetBase {
         return font;
     }
 
-    public FormattedText getContent() {
+    public Component getContent() {
         return content;
     }
 
@@ -68,6 +71,7 @@ public class Label extends WidgetBase {
         this.content = content;
         this.narrationTitle = content;
         constructLabel();
+        hierarchyDidChange();
     }
 
     private void constructLabel() {
@@ -77,16 +81,6 @@ public class Label extends WidgetBase {
     @Override
     protected void didResize() {
         setContent(content);
-    }
-
-    boolean visible = true;
-
-    public void setVisible(boolean visible) {
-        this.visible = visible;
-    }
-
-    public boolean isVisible() {
-        return visible;
     }
 
     @Override
@@ -102,6 +96,14 @@ public class Label extends WidgetBase {
 
     @Override
     public Size getDesiredSize() {
-        return new Size(font.width(content), font.lineHeight);
+        var custom = super.getDesiredSize();
+        if (custom == null) {
+            if (width == 0)
+                return new Size(font.width(content), font.lineHeight);
+            else
+                return new Size(0, font.lineHeight * label.getLineCount());
+        }
+
+        return custom;
     }
 }

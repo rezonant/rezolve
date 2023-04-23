@@ -30,7 +30,7 @@ public class StorageMonitorScreen extends MachineScreen<StorageMonitorMenu> impl
 		//this.searchField.setTextColor(0x000000);
 		this.addRenderableWidget(this.searchField);
 
-		this.storageView = new StorageView(this, leftPos + 7, topPos + 20, 240, 90);
+		this.storageView = new StorageView(leftPos + 7, topPos + 20, 240, 90);
 		this.addRenderableWidget(this.storageView);
 
 		addEnergyMeter(250, 3, 111);

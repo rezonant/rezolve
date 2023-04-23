@@ -23,7 +23,7 @@ public class TesseractScreen extends MachineScreen<TesseractMenu> {
     protected void setup() {
         super.setup();
 
-        leftShoulderButtons.addChild(new IconButton("Security", TEX_SECURITY_OPTIONS));
+        leftShoulderButtons.addChild(new IconButton("Security?!", TEX_SECURITY_OPTIONS));
         leftShoulderButtons.addChild(new IconButton("Database", TEX_DATABASE_OPTIONS));
         leftShoulderButtons.addChild(new IconButton("Disk", TEX_DISK_OPTIONS));
         rightShoulderButtons.addChild(new IconButton("Storage", TEX_STORAGE_OPTIONS));
@@ -33,6 +33,7 @@ public class TesseractScreen extends MachineScreen<TesseractMenu> {
             vert.setSpace(4);
             vert.addChild(new Label("This is a test"));
             vert.addChild(new Button("Here's a button!"));
+            vert.addChild(new EditBox("Edit box"));
             vert.addChild(new ListView("Channels"), listView -> {
                 listView.setGrowScale(1);
 

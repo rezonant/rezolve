@@ -16,6 +16,7 @@ public class DiskManipulatorScreen extends MachineScreen<DiskManipulatorMenu> im
 
 		inventoryLabelX = 47;
 		inventoryLabelY = 113;
+
 		twoToneHeight = 125;
 	}
 
@@ -42,7 +43,7 @@ public class DiskManipulatorScreen extends MachineScreen<DiskManipulatorMenu> im
 
 		this.addRenderableWidget(this.searchField);
 
-		this.storageView = new StorageView(this, this.leftPos + 24, this.topPos + 33, 209, 75);
+		this.storageView = new StorageView(this.leftPos + 24, this.topPos + 33, 209, 75);
 		this.addRenderableWidget(this.storageView);
 
 		addEnergyMeter(leftPos + 235, topPos + 17, 111);

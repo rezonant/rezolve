@@ -67,6 +67,14 @@ public class BlockConfiguration implements INBTSerializable<CompoundTag> {
         return face;
     }
 
+    public TransmitConfiguration getTransmitConfiguration(Direction dir, TransmissionType type) {
+        return getFace(dir).getTransmissionConfiguration(type);
+    }
+
+    public TransmissionMode getTransmitMode(Direction face, TransmissionType type) {
+        return getTransmitConfiguration(face, type).getMode();
+    }
+
     public void updateBlockState(Level level) {
         var blockState = level.getBlockState(position);
         var blockEntity = level.getBlockEntity(position);

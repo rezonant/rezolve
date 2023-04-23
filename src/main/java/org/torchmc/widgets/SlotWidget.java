@@ -6,26 +6,38 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.Slot;
 import org.torchmc.TorchUI;
 import org.torchmc.WidgetBase;
+import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
 
 public class SlotWidget extends WidgetBase {
-    public SlotWidget(int screenX, int screenY, Component narrationLabel, Slot slot) {
+    public SlotWidget(Component narrationLabel, Slot slot) {
         super(narrationLabel);
 
-        this.screenX = screenX;
-        this.screenY = screenY;
         this.narrationLabel = narrationLabel;
         this.slot = slot;
+        this.x = slot.x;
+        this.y = slot.y;
+        this.width = 18;
+        this.height = 18;
+
+        setDesiredSize(new Size(18, 18));
     }
 
-    private int screenX;
-    private int screenY;
     private Slot slot;
     private Component narrationLabel;
     private ResourceLocation texture = TorchUI.builtInTex("gui/widgets/slot.png");
 
     @Override
+    protected void didMove() {
+        super.didMove();
+
+        var pos = getScreenRect();
+        slot.x = screen.getGuiLeft() + pos.getX();
+        slot.y = screen.getGuiTop() + pos.getY();
+    }
+
+    @Override
     public void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-        TorchUtil.textureQuad(pPoseStack, texture, screenX + slot.x - 1, screenY + slot.y - 1, 18, 18);
+        TorchUtil.textureQuad(pPoseStack, texture, screen.getGuiLeft() + slot.x - 1, screen.getGuiTop() + slot.y - 1, 18, 18);
     }
 }

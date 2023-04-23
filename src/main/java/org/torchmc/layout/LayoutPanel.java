@@ -21,4 +21,10 @@ public abstract class LayoutPanel extends Panel {
     }
 
     protected abstract void updateLayout();
+
+    @Override
+    protected void hierarchyDidChange() {
+        updateLayout();
+        super.hierarchyDidChange();
+    }
 }

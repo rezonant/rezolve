@@ -78,6 +78,7 @@
   "screens.rezolve.allowed": "Allowed",
   "screens.rezolve.owner": "Owner",
 
+  "screens.rezolve.block_configurator": "Block Configurator",
   "screens.rezolve.bundles": "Bundles",
   "screens.rezolve.empty": "Empty",
   "screens.rezolve.unknown": "Unknown",
@@ -107,6 +108,7 @@
   "screens.rezolve.bundle_pattern_input_slot": "Blank patterns (input)",
   "screens.rezolve.bundle_pattern_output_slot": "Encoded patterns (output)",
   "screens.rezolve.bundle_input_slot": "Bundles (input)",
+  "screens.rezolve.storage_view": "Storage View",
 
   "rezolve.screens.usage": "Usage",
   "rezolve.screens.disks": "Disks",

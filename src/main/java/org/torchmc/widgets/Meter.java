@@ -8,6 +8,10 @@ import org.torchmc.WidgetBase;
 import org.torchmc.util.TorchUtil;
 
 public class Meter extends WidgetBase {
+    public Meter(Font font, Component narrationTitle, Component label, ResourceLocation texture) {
+        this(font, 0, 0, 0, narrationTitle, label, texture);
+    }
+
     public Meter(Font font, int x, int y, int height, Component narrationTitle, Component label, ResourceLocation texture) {
         super(narrationTitle);
 
@@ -15,6 +19,10 @@ public class Meter extends WidgetBase {
         this.label = label;
         this.narrationTitle = narrationTitle;
         this.texture = texture;
+        this.x = x;
+        this.y = y;
+        this.height = height;
+        this.width = 16;
     }
 
     private Component label;

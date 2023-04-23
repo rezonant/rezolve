@@ -9,9 +9,13 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
 import org.torchmc.WidgetBase;
 import org.torchmc.util.Color;
 import org.torchmc.util.Size;
+import org.torchmc.util.TorchUtil;
+
+import java.util.function.Consumer;
 
 /**
  * A button
@@ -28,13 +32,19 @@ public class Button extends WidgetBase {
         super(Component.empty());
 
         this.text = text;
+        setDesiredSize(new Size(width, 20));
+        setFocusable(true);
+    }
+
+    public Button() {
+        this(Component.empty());
     }
 
     public Button(String text) {
         this(Component.literal(text));
     }
 
-    private Runnable handler;
+    private Consumer<Integer> handler;
     private Color activeTextColor = Color.argb(0xFFFFFFFF);
     private Color inactiveTextColor = Color.argb(0xFFA0A0A0);
     private Component text;
@@ -47,16 +57,16 @@ public class Button extends WidgetBase {
         this.alpha = alpha;
     }
 
-    public Runnable getHandler() {
+    public Consumer<Integer> getHandler() {
         return handler;
     }
 
-    public void setHandler(Runnable handler) {
+    public void setHandler(Consumer<Integer> handler) {
         this.handler = handler;
     }
 
     protected int getYImage(boolean pIsHovered) {
-        if (!isActive() || pressed)
+        if (!isActive() || pressed || keyPressed)
             return 0;
 
         return isHovered() ? 2 : 1;
@@ -87,33 +97,64 @@ public class Button extends WidgetBase {
     }
 
     @Override
-    public Size getDesiredSize() {
-        return new Size(width, 20);
-    }
-
-    @Override
     protected void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-        Minecraft minecraft = Minecraft.getInstance();
-        Font font = minecraft.font;
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, AbstractWidget.WIDGETS_LOCATION);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
-        int i = this.getYImage(this.isHoveredOrFocused());
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.enableDepthTest();
-        this.blit(pPoseStack, this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
-        this.blit(pPoseStack, this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
-        drawCenteredString(pPoseStack, font, text, this.x + this.width / 2, this.y + (this.height - 8) / 2, activeTextColor.multiplyAlpha(this.alpha).argb());
+
+        float focusBorder = 2;
+
+        if (isFocused())
+            TorchUtil.colorQuad(pPoseStack, 0xFFFFFFFF, x - focusBorder, y - focusBorder, width + focusBorder*2, height + focusBorder*2);
+
+        scissor(pPoseStack, x, y, width, height, () -> {
+            Minecraft minecraft = Minecraft.getInstance();
+            Font font = minecraft.font;
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShaderTexture(0, AbstractWidget.WIDGETS_LOCATION);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
+            int i = this.getYImage(this.isHoveredOrFocused());
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.enableDepthTest();
+            this.blit(pPoseStack, this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
+            this.blit(
+                    pPoseStack,
+                    this.x + this.width / 2, this.y,
+                    200 - this.width / 2,
+                    46 + i * 20, this.width / 2, this.height
+            );
+
+            drawCenteredString(pPoseStack, font, text,
+                    this.x + this.width / 2, this.y + (this.height - 8) / 2,
+                    activeTextColor.multiplyAlpha(this.alpha).argb()
+            );
+        });
     }
 
     boolean pressed = false;
+    boolean keyPressed = false;
+
+    @Override
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (pKeyCode == GLFW.GLFW_KEY_SPACE) {
+            keyPressed = true;
+        }
+
+        return super.keyPressed(pKeyCode, pScanCode, pModifiers);
+    }
+
+    @Override
+    public boolean keyReleased(int pKeyCode, int pScanCode, int pModifiers) {
+        if (keyPressed && isFocused() && handler != null) {
+            handler.accept(0);
+        }
+        keyPressed = false;
+        return super.keyReleased(pKeyCode, pScanCode, pModifiers);
+    }
 
     @Override
     public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
         pressed = true;
         if (handler != null)
-            handler.run();
+            handler.accept(pButton);
         return true;
     }
 

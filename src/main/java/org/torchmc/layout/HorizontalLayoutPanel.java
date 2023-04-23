@@ -86,7 +86,7 @@ public class HorizontalLayoutPanel extends LayoutPanel {
                 width += (grow.width / (double)expansion) * availableSpace;
 
             child.move(x, padding, width, height - padding * 2);
-            x += size.width + space;
+            x += width + space;
         }
     }
 }

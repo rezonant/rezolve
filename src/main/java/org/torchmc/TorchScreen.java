@@ -1,7 +1,6 @@
 package org.torchmc;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
@@ -14,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import org.lwjgl.glfw.GLFW;
 import org.torchmc.layout.Panel;
 import org.torchmc.util.Color;
 import org.torchmc.util.ResizeMode;
@@ -42,6 +42,9 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
     private boolean wasMoved = false;
     private boolean initialized = false;
     private Panel panel;
+    private boolean resizable = true;
+    private boolean movable = true;
+    private Size minSize = new Size(50, 50);
 
     /**
      * True if the mouse is currently down on this widget.
@@ -91,6 +94,7 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
         }
 
         setup();
+        applyDimensions();
     }
 
     @Override
@@ -112,10 +116,20 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
 
     protected <T extends WidgetBase> T addChild(T widget, Consumer<T> initializer) {
         addRenderableWidget(widget);
-        initializer.accept(widget);
+        widget.runInitializer(() -> initializer.accept(widget));
+        applyDimensions();
         return widget;
     }
 
+    /**
+     * Set the primary panel for this Screen. If you use a primary panel, moving/resizing of the screen will be handled
+     * by adjusting the position of this panel, as opposed to calling rebuildWidgets(). This leads to smoother moving/resizing,
+     * but means that you cannot use any standard Minecraft widgets as they do not support being moved in a uniform way.
+     *
+     * @param panel
+     * @return
+     * @param <T>
+     */
     protected <T extends Panel> T setPanel(T panel, Consumer<T> initializer) {
         if (this.panel != null) {
             removeWidget(this.panel);
@@ -125,12 +139,24 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
         panel.setParentSize(new Size(imageWidth, imageHeight));
         addRenderableWidget(panel);
 
-        int margin = 8;
-        panel.move(margin + leftPos, margin + topPos + font.lineHeight + 2, imageWidth - margin*2, imageHeight - margin*2 - font.lineHeight - 2);
-
         initializer.accept(panel);
 
+        applyDimensions();
+
         return panel;
+    }
+
+    protected int panelMargin = 8;
+
+    protected void applyDimensions() {
+        if (panel != null) {
+            panel.move(
+                    panelMargin + leftPos,
+                    panelMargin + topPos + font.lineHeight + 2,
+                    imageWidth - panelMargin * 2,
+                    imageHeight - panelMargin * 2 - font.lineHeight - 2
+            );
+        }
     }
 
     @Override
@@ -172,28 +198,35 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
         clickX = pMouseX;
         clickY = pMouseY;
 
-        if (hoveringMenuBar(pMouseX, pMouseY)) {
-            moving = true;
-            moveStartLeftPos = leftPos;
-            moveStartTopPos = topPos;
-        } else if (hoveringBottomEdge(pMouseX, pMouseY) && hoveringRightEdge(pMouseX, pMouseY)) {
-            resizing = true;
-            resizeMode = ResizeMode.BOTTOM_RIGHT;
-            resizeStartWidth = imageWidth;
-            resizeStartHeight = imageHeight;
-            return true;
-        } else if (hoveringBottomEdge(pMouseX, pMouseY)) {
-            resizing = true;
-            resizeMode = ResizeMode.BOTTOM;
-            resizeStartWidth = imageWidth;
-            resizeStartHeight = imageHeight;
-            return true;
-        } else if (hoveringRightEdge(pMouseX, pMouseY)) {
-            resizing = true;
-            resizeMode = ResizeMode.RIGHT;
-            resizeStartWidth = imageWidth;
-            resizeStartHeight = imageHeight;
-            return true;
+        if (movable) {
+            if (hoveringMenuBar(pMouseX, pMouseY)) {
+                moving = true;
+                moveStartLeftPos = leftPos;
+                moveStartTopPos = topPos;
+                return true;
+            }
+        }
+
+        if (resizable) {
+            if (hoveringBottomEdge(pMouseX, pMouseY) && hoveringRightEdge(pMouseX, pMouseY)) {
+                resizing = true;
+                resizeMode = ResizeMode.BOTTOM_RIGHT;
+                resizeStartWidth = imageWidth;
+                resizeStartHeight = imageHeight;
+                return true;
+            } else if (hoveringBottomEdge(pMouseX, pMouseY)) {
+                resizing = true;
+                resizeMode = ResizeMode.BOTTOM;
+                resizeStartWidth = imageWidth;
+                resizeStartHeight = imageHeight;
+                return true;
+            } else if (hoveringRightEdge(pMouseX, pMouseY)) {
+                resizing = true;
+                resizeMode = ResizeMode.RIGHT;
+                resizeStartWidth = imageWidth;
+                resizeStartHeight = imageHeight;
+                return true;
+            }
         }
 
         return super.mouseClicked(pMouseX, pMouseY, pButton);
@@ -216,12 +249,19 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
                 }
             }
 
+            imageWidth = Math.max(minSize.width, imageWidth);
+            imageHeight = Math.max(minSize.height, imageHeight);
+
             if (!wasMoved) {
                 leftPos = (width - imageWidth) / 2;
                 topPos = (height - imageHeight) / 2;
             }
 
-            rebuildWidgets();
+            if (panel != null) {
+                applyDimensions();
+            } else {
+                rebuildWidgets();
+            }
 
             return true;
         } else if (moving) {
@@ -229,7 +269,11 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
             topPos = (int)(moveStartTopPos + (pMouseY - clickY));
             wasMoved = true;
 
-            rebuildWidgets();
+            if (panel != null) {
+                applyDimensions();
+            } else {
+                rebuildWidgets();
+            }
 
             return true;
         }
@@ -272,11 +316,14 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
 
     protected void renderTitleBar(PoseStack poseStack, float partialTick, int mouseX, int mouseY) {
         var border = 2;
-        colorQuad(
-                poseStack, 0xFF999999,
-                leftPos + border, topPos + border,
-                imageWidth - border*2, titlebarHeight - border*2
-        );
+
+        if (resizable) {
+            colorQuad(
+                    poseStack, 0xFF999999,
+                    leftPos + border, topPos + border,
+                    imageWidth - border * 2, titlebarHeight - border * 2
+            );
+        }
     }
 
     @Override
@@ -310,6 +357,22 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
     public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
         InputConstants.Key mouseKey = InputConstants.getKey(pKeyCode, pScanCode);
         if (getFocused() instanceof EditBox && ((EditBox) getFocused()).isFocused() && this.minecraft.options.keyInventory.isActiveAndMatches(mouseKey)) {
+            return false;
+        }
+
+        if (pKeyCode == GLFW.GLFW_KEY_TAB) {
+            boolean direction = !hasShiftDown();
+
+            // Try to move focus to the next/previous focusable widget.
+
+            if (!this.changeFocus(direction)) {
+                // This means there are no more widgets to focus, and the currently focused widget has now become null.
+                // Wrap around to the beginning of the list, because changeFocus is supposed to focus on the first focusable
+                // widget when there is no existing widget focused.
+
+                this.changeFocus(direction);
+            }
+
             return false;
         }
 
@@ -356,7 +419,7 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
         pPoseStack.popPose();
         RenderSystem.applyModelViewMatrix();
 
-        if (!resizing) {
+        if (!resizing && resizable) {
             if (hoveringRightEdge(pMouseX, pMouseY) && hoveringBottomEdge(pMouseX, pMouseY)) {
                 TorchUtil.colorQuad(
                         pPoseStack, Color.WHITE.withAlpha(0.5f),

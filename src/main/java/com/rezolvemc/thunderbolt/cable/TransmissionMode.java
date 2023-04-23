@@ -2,6 +2,7 @@ package com.rezolvemc.thunderbolt.cable;
 
 import net.minecraft.network.chat.Component;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 public enum TransmissionMode {
@@ -27,6 +28,26 @@ public enum TransmissionMode {
 
     public boolean canPush() {
         return this == PUSH || this == AUTO;
+    }
+
+    public TransmissionMode seek(int direction) {
+        if (direction > 0)
+            return next();
+        else if (direction < 0)
+            return previous();
+        else
+            return this;
+    }
+
+    public TransmissionMode next() {
+        var values = Arrays.asList(values());
+        return values.get((values.indexOf(this) + 1) % values.size());
+    }
+
+    public TransmissionMode previous() {
+        var values = Arrays.asList(values());
+        var index = values.indexOf(this);
+        return values.get(index > 0 ? index - 1 : values.size() - 1);
     }
 
     public static TransmissionMode byKey(String key) {

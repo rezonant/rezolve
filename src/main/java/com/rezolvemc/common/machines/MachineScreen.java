@@ -31,18 +31,29 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
 
     @Override
     protected void setup() {
-        addRenderableWidget(leftShoulderButtons = new VerticalLayoutPanel());
-        leftShoulderButtons.move(leftPos - IconButton.SIZE - 3, topPos, IconButton.SIZE, imageHeight);
+        addChild(leftShoulderButtons = new VerticalLayoutPanel());
         leftShoulderButtons.setIsDecoration(true);
         leftShoulderButtons.setSpace(2);
 
-        addRenderableWidget(rightShoulderButtons = new VerticalLayoutPanel());
-        rightShoulderButtons.move(leftPos + imageWidth + 3, topPos, IconButton.SIZE, imageHeight);
+        addChild(rightShoulderButtons = new VerticalLayoutPanel());
         rightShoulderButtons.setIsDecoration(true);
         rightShoulderButtons.setSpace(2);
 
+        applyDimensions();
+
         if (menu.hasPlayerInventorySlots())
             addInventoryGrid(menu.getFirstPlayerInventorySlot());
+    }
+
+    @Override
+    protected void applyDimensions() {
+        super.applyDimensions();
+
+        if (leftShoulderButtons != null)
+            leftShoulderButtons.move(leftPos - IconButton.SIZE - 3, topPos, IconButton.SIZE, imageHeight);
+
+        if (rightShoulderButtons != null)
+            rightShoulderButtons.move(leftPos + imageWidth + 3, topPos, IconButton.SIZE, imageHeight);
     }
 
     protected IconButton addLeftShoulderButton(String label, ResourceLocation icon) {
@@ -118,8 +129,6 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
         for (int i = 0, max = count; i < max; ++i) {
             addRenderableWidget(
                 new SlotWidget(
-                    leftPos,
-                    topPos,
                     Component.empty()
                             .append(label)
                             .append(" ")
@@ -136,8 +145,6 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
         for (int i = 0, max = 36; i < max; ++i) {
             addRenderableWidget(
                     new SlotWidget(
-                            leftPos,
-                            topPos,
                             Component.empty()
                                     .append(Component.translatable("screens.resolve.inventory_slot"))
                                     .append(" ")
