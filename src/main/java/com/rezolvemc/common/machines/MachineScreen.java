@@ -41,8 +41,8 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
 
         applyDimensions();
 
-        if (menu.hasPlayerInventorySlots())
-            addInventoryGrid(menu.getFirstPlayerInventorySlot());
+//        if (menu.hasPlayerInventorySlots())
+//            addInventoryGrid(menu.getFirstPlayerInventorySlot());
     }
 
     @Override

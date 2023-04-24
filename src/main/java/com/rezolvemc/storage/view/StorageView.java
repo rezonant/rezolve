@@ -3,6 +3,7 @@ package com.rezolvemc.storage.view;
 import com.rezolvemc.Rezolve;
 import net.minecraft.network.chat.Component;
 import org.torchmc.WidgetBase;
+import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
 import com.rezolvemc.common.machines.MachineScreen;
 import com.rezolvemc.common.registry.RezolveRegistry;
@@ -48,12 +49,10 @@ public class StorageView extends WidgetBase {
 		this.y = y;
 		this.width = width;
 		this.height = height;
-		this.mc = Minecraft.getInstance();
 
-		this.windowColumnCount = this.width / this.itemSize;
-		this.windowRowCount = this.height / this.itemSize;
 
-		this.font = mc.font;
+		setDesiredSize(new Size(0, 0));
+
 		this.sendStateToServer();
 
 
@@ -70,12 +69,13 @@ public class StorageView extends WidgetBase {
 		});
 	}
 
-	private int x;
-	private int y;
-	private int width;
-	private int height;
-	private Minecraft mc;
-	private Font font;
+	@Override
+	protected void didResize() {
+		super.didResize();
+		this.windowColumnCount = this.width / this.itemSize;
+		this.windowRowCount = this.height / this.itemSize;
+	}
+
 	private List<StorageViewContentPacket.ItemEntry> visibleItems;
 	private int displayedOffset;
 	private int offset;
@@ -118,7 +118,8 @@ public class StorageView extends WidgetBase {
 
 		float textWidth = font.width(altText);
 
-		mc.getItemRenderer().renderAndDecorateItem(stack, this.x + x, this.y + y);
+		TorchUtil.drawItem(poseStack, stack, x, y);
+		//minecraft.getItemRenderer().renderAndDecorateItem(stack, this.x + x, this.y + y);
 
 		poseStack.pushPose();
 			poseStack.translate(x + 17.0f - textWidth / 2, y + 11, 300);
@@ -158,14 +159,14 @@ public class StorageView extends WidgetBase {
 		x -= this.x;
 		y -= this.y;
 
-		ItemStack inHand = mc.player.containerMenu.getCarried();
+		ItemStack inHand = minecraft.player.containerMenu.getCarried();
 
 		if (inHand != null && inHand.getCount() > 0) {
 			// Player is giving item to system
 
 			System.out.println("StorageView:giveItems() : "+inHand.toString());
 
-			StorageViewChangeRequest request = StorageViewChangeRequest.giveItems(screen.getMenu(), mc.player, inHand, "hand");
+			StorageViewChangeRequest request = StorageViewChangeRequest.giveItems(screen.getMenu(), minecraft.player, inHand, "hand");
 			request.setMenu(screen.getMenu());
 			request.sendToServer();
 
@@ -204,7 +205,7 @@ public class StorageView extends WidgetBase {
 
 //		boolean shift = (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT));
 //		if (shift) {
-//			//mc.thePlayer.openContainer.transferStackInSlot();
+//			//minecraft.thePlayer.openContainer.transferStackInSlot();
 //			// ???
 //		}
 
@@ -215,7 +216,7 @@ public class StorageView extends WidgetBase {
 			requestedSize = Math.min(stack.getCount() / 2, maxStackSize / 2);
 
 		System.out.println("StorageView:onClick("+x+", "+y+", "+mouseButton+", "+stack.toString()+"): Trying for "+requestedSize+" items");
-		request = StorageViewChangeRequest.takeItems(screen.getMenu(), mc.player, ItemStackUtil.getStackSized(stack, maxStackSize), item.hash);
+		request = StorageViewChangeRequest.takeItems(screen.getMenu(), minecraft.player, ItemStackUtil.getStackSized(stack, maxStackSize), item.hash);
 		request.sendToServer();
 	}
 
@@ -257,16 +258,11 @@ public class StorageView extends WidgetBase {
 
 	@Override
 	public void renderContents(PoseStack pPoseStack, int mouseX, int mouseY, float pPartialTick) {
-
 		TorchUtil.insetBox(
 				pPoseStack,
 				Rezolve.loc("textures/gui/widgets/storage_view_background.png"),
 				x, y, width, height
 		);
-
-		pPoseStack.pushPose();
-		pPoseStack.translate(this.x, this.y, 0);
-		RenderSystem.applyModelViewMatrix();
 
 		int localMouseX = mouseX - this.x;
 		int localMouseY = mouseY - this.y;
@@ -277,70 +273,72 @@ public class StorageView extends WidgetBase {
 		var max = new Vector3f(x + width, y + width, 0);
 		max.transform(pPoseStack.last().normal());
 
-		enableScissor(x, y + 1, x + width, y + height - 1);
+		if (windowColumnCount == 0)
+			windowColumnCount = 1;
 
-		try {
-			if (this.visibleItems != null) {
-				int x = this.displayedOffset % this.windowColumnCount;
-				int y = this.displayedOffset / this.windowColumnCount;
+		pushPose(pPoseStack, () -> {
+			repose(pPoseStack, () -> {
+				pPoseStack.translate(this.x, this.y, 0);
+			});
 
-				StorageViewContentPacket.ItemEntry hoveredItem = null;
+			//enableScissor(x, y + 1, x + width, y + height - 1);
+			scissor(pPoseStack, 0, 0 + 1, width, height - 3, () -> {
+				if (this.visibleItems != null) {
+					int x = this.displayedOffset % this.windowColumnCount;
+					int y = this.displayedOffset / this.windowColumnCount;
 
-				for (StorageViewContentPacket.ItemEntry item : this.visibleItems) {
+					StorageViewContentPacket.ItemEntry hoveredItem = null;
 
-					int slotPosX = margin + this.itemSize*x;
-					int slotPosY = margin + this.itemSize*y + this.scrollOffset;
+					for (StorageViewContentPacket.ItemEntry item : this.visibleItems) {
 
-					if (slotPosY < localMouseY && slotPosX < localMouseX && slotPosY + this.itemSize > localMouseY && slotPosX + this.itemSize > localMouseX) {
-						// mouse is on the thing
-						hoveredItem = item;
+						int slotPosX = margin + this.itemSize*x;
+						int slotPosY = margin + this.itemSize*y + this.scrollOffset;
+
+						if (slotPosY < localMouseY && slotPosX < localMouseX && slotPosY + this.itemSize > localMouseY && slotPosX + this.itemSize > localMouseX) {
+							// mouse is on the thing
+							hoveredItem = item;
+						}
+
+						if (slotPosY + this.itemSize >= 0 && slotPosY < this.height && slotPosX >= 0 && slotPosX < this.width) {
+							this.drawItemStack(pPoseStack, item.stack, slotPosX, slotPosY, this.shortenCount(item.amount));
+						}
+
+						x += 1;
+						if (x >= this.windowColumnCount) {
+							y += 1;
+							x = 0;
+						}
 					}
 
-					if (slotPosY + this.itemSize >= 0 && slotPosY < this.height && slotPosX >= 0 && slotPosX < this.width) {
-						this.drawItemStack(pPoseStack, item.stack, slotPosX, slotPosY, this.shortenCount(item.amount));
-					}
+					this.hoveredItem = hoveredItem;
 
-					x += 1;
-					if (x >= this.windowColumnCount) {
-						y += 1;
-						x = 0;
-					}
+					int scrollBarX = this.width - 3;
+					int scrollBarY = 2;
+					int scrollBarHeight = this.height - 4;
+					int scrollBarWidth = 1;
+					int scrollableRowCount = Math.max(0, this.windowTotalRowCount - this.windowRowCount);
+					float scrollSpaceFactor = (float)this.windowRowCount / this.windowTotalRowCount;
+					int puckHeight = Math.min(scrollBarHeight, (int)Math.max(10, scrollSpaceFactor * scrollBarHeight));
+					float scrollFactor = -(float)this.scrollOffset / (this.itemSize*scrollableRowCount);
+					int puckPosition = (int)(scrollFactor * (scrollBarHeight - puckHeight));
+
+					if (puckPosition < 0)
+						puckPosition = 0;
+
+					TorchUtil.colorQuad(pPoseStack, 0x44000000, scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight);
+					TorchUtil.colorQuad(pPoseStack, 0x88FFFFFF, scrollBarX, scrollBarY + puckPosition, scrollBarWidth, puckHeight);
+
+				} else {
+					this.font.draw(pPoseStack, noConnectionMessage, 7, 30, 0xFFFFFFFF);
 				}
-
-				this.hoveredItem = hoveredItem;
-
-
-
-				int scrollBarX = this.width - 3;
-				int scrollBarY = 2;
-				int scrollBarHeight = this.height - 4;
-				int scrollBarWidth = 1;
-				int scrollableRowCount = Math.max(0, this.windowTotalRowCount - this.windowRowCount);
-				float scrollSpaceFactor = (float)this.windowRowCount / this.windowTotalRowCount;
-				int puckHeight = Math.min(scrollBarHeight, (int)Math.max(10, scrollSpaceFactor * scrollBarHeight));
-				float scrollFactor = -(float)this.scrollOffset / (this.itemSize*scrollableRowCount);
-				int puckPosition = (int)(scrollFactor * (scrollBarHeight - puckHeight));
-
-				if (puckPosition < 0)
-					puckPosition = 0;
-
-				TorchUtil.colorQuad(pPoseStack, 0x44000000, scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight);
-				TorchUtil.colorQuad(pPoseStack, 0x88FFFFFF, scrollBarX, scrollBarY + puckPosition, scrollBarWidth, puckHeight);
-
-			} else {
-				this.font.draw(pPoseStack, noConnectionMessage, 7, 30, 0xFFFFFFFF);
-			}
-		} finally {
-			pPoseStack.popPose();
-			RenderSystem.applyModelViewMatrix();
-			RenderSystem.disableScissor();
-		}
+			});
+		});
 	}
 
 	protected void renderToolTip(ItemStack stack, int x, int y)
 	{
 		// TODO
-//		List<Component> list = stack.getTooltipLines(mc.player, mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
+//		List<Component> list = stack.getTooltipLines(minecraft.player, mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
 //
 //		for (int i = 0; i < list.size(); ++i)
 //		{
@@ -398,7 +396,7 @@ public class StorageView extends WidgetBase {
 //				i2 = this.height - k - 6;
 //			}
 //
-//			RenderItem itemRender = mc.getRenderItem();
+//			RenderItem itemRender = minecraft.getRenderItem();
 //			this.zLevel = 300.0F;
 //			itemRender.zLevel = 300.0F;
 //			int l = -267386864;
@@ -450,7 +448,7 @@ public class StorageView extends WidgetBase {
 		state.setMenu(screen.getMenu());
 		state.offset = this.offset;
 		state.limit = this.windowColumnCount * (this.windowRowCount + 2);
-		state.playerId = mc.player.getStringUUID();
+		state.playerId = minecraft.player.getStringUUID();
 		state.query = this.query;
 
 		state.sendToServer();

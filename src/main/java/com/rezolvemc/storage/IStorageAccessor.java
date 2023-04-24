@@ -41,8 +41,10 @@ public interface IStorageAccessor {
 		if (offset >= list.size())
 			return new ArrayList<>();
 
+		size = Math.min(list.size() - offset, size);
+
 		if (offset > 0)
-			list = list.subList(offset, size);
+			list = list.subList(offset, offset+size);
 
 		return list;
 	}

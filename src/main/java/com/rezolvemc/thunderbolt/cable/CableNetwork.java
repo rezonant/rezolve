@@ -5,6 +5,7 @@ import com.rezolvemc.common.LevelPosition;
 import com.rezolvemc.common.capabilities.Tunnel;
 import com.rezolvemc.common.machines.MachineEntity;
 import com.rezolvemc.common.registry.RezolveRegistry;
+import com.rezolvemc.storage.NetworkStorageAccessor;
 import com.rezolvemc.thunderbolt.databaseServer.DatabaseServerEntity;
 import com.rezolvemc.thunderbolt.securityServer.SecurityServerEntity;
 
@@ -39,6 +40,7 @@ public class CableNetwork {
 		this.levelKey = level.dimension();
 		this.startingPoint = startingPoint;
 		this.cableType = cableType;
+		this.storageAccessor = new NetworkStorageAccessor(this);
 	}
 
 	private final MinecraftServer server;
@@ -48,7 +50,12 @@ public class CableNetwork {
 	private boolean invalidated = false;
 	private SecurityServerEntity securityServer;
 	private DatabaseServerEntity databaseServer;
+	private NetworkStorageAccessor storageAccessor;
 	private final Map<LevelPosition, Endpoint> endpoints = new HashMap<>();
+
+	public NetworkStorageAccessor getStorageAccessor() {
+		return storageAccessor;
+	}
 
 	/**
 	 * Used only for debugging. Should be removed after we've worked out all the cases where we cause cable network

@@ -7,7 +7,7 @@ import org.torchmc.WidgetBase;
  * Lays out child panels in a horizontal configuration.
  */
 public class HorizontalLayoutPanel extends LayoutPanel {
-    private int space;
+    private int space = 3;
     private int padding;
 
     public int getSpace() {
@@ -34,8 +34,18 @@ public class HorizontalLayoutPanel extends LayoutPanel {
         return super.addChild(widget);
     }
 
+    private Size cachedDesiredSize;
+
+    @Override
+    protected void hierarchyDidChange() {
+        super.hierarchyDidChange();
+        cachedDesiredSize = null;
+    }
+
     @Override
     public Size getDesiredSize() {
+        if (cachedDesiredSize != null)
+            return cachedDesiredSize;
         var total = new Size(padding * 2, padding * 2);
 
         for (var child : children) {
@@ -50,7 +60,7 @@ public class HorizontalLayoutPanel extends LayoutPanel {
         if (children.size() > 0)
             total.width -= space;
 
-        return total;
+        return cachedDesiredSize = total;
     }
 
     @Override

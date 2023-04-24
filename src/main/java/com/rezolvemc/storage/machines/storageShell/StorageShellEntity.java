@@ -45,7 +45,7 @@ public class StorageShellEntity extends MachineEntity implements IStorageTileEnt
 		CableNetwork network = this.getNetwork();
 
 		if (network != null)
-			return new NetworkStorageAccessor(network);
+			return network.getStorageAccessor();
 
 		return null;
 	}

@@ -8,7 +8,7 @@
   "key": {
     "r": { "item": "minecraft:redstone" },
     "s": { "item": "rezolve:storage_part_5" },
-    "C": { "item": "minecraft:integrated_circuit" }
+    "C": { "item": "rezolve:integrated_circuit" }
   },
   "result": {
     "item": "rezolve:disk_5",

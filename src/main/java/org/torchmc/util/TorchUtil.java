@@ -4,12 +4,27 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 import java.nio.FloatBuffer;
 
 public class TorchUtil {
+
+    public static void drawItem(PoseStack poseStack, ItemStack stack, int x, int y) {
+        RenderSystem.setShaderColor(1, 1, 1, 1);
+        poseStack.translate(0,0, 32);
+        RenderSystem.applyModelViewMatrix();
+        RenderSystem.enableDepthTest();
+
+        var tr = TorchUtil.getTranslation(poseStack.last().pose());
+        var itemRenderer = Minecraft.getInstance().getItemRenderer();
+
+        itemRenderer.renderAndDecorateItem(stack, (int)tr.x() + x, (int)tr.y() + y);
+        RenderSystem.disableDepthTest();
+    }
 
     public static void textureQuad(PoseStack stack, ResourceLocation location, double x, double y, double width, double height) {
         textureQuad(stack, location, x, y, width, height, 0, 0, 1, 1);
@@ -24,6 +39,17 @@ public class TorchUtil {
         var tz = (int)buf.get(14);
 
         return new Vector3f(tx, ty, tz);
+    }
+
+    public static void colorOutline(PoseStack stack, int color, double stroke, double x, double y, double width, double height) {
+        colorOutline(stack, Color.argb(color), stroke, x, y, width, height);
+    }
+
+    public static void colorOutline(PoseStack stack, Color color, double stroke, double x, double y, double width, double height) {
+        colorQuad(stack, color, x - stroke/2, y - stroke / 2, width + stroke, stroke);
+        colorQuad(stack, color, x - stroke/2, y + height - stroke / 2, width + stroke, stroke);
+        colorQuad(stack, color, x - stroke / 2, y, stroke, height);
+        colorQuad(stack, color, x + width - stroke / 2, y, stroke, height);
     }
 
     public static void insetBox(PoseStack stack, ResourceLocation texture, double x, double y, double width, double height) {

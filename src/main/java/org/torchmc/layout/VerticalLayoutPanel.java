@@ -8,7 +8,7 @@ import org.torchmc.WidgetBase;
  */
 public class VerticalLayoutPanel extends LayoutPanel {
     int padding = 0;
-    int space = 0;
+    int space = 3;
 
     public int getPadding() {
         return padding;
@@ -28,20 +28,30 @@ public class VerticalLayoutPanel extends LayoutPanel {
 
     @Override
     public <T extends WidgetBase> T addChild(T widget) {
-        if (widget.getDesiredSize() == null)
-            throw new IllegalArgumentException("Children of VerticalLayoutPanel must implement getDesiredSize()");
-
         return super.addChild(widget);
+    }
+
+    private Size cachedDesiredSize;
+
+    @Override
+    protected void hierarchyDidChange() {
+        super.hierarchyDidChange();
+        cachedDesiredSize = null;
     }
 
     @Override
     public Size getDesiredSize() {
+        if (cachedDesiredSize != null)
+            return cachedDesiredSize;
+
         var total = new Size(padding * 2, padding * 2);
 
         for (var panel : children) {
             if (!panel.isVisible())
                 continue;
             var size = panel.getDesiredSize();
+            if (size == null)
+                size = new Size(0, 0);
             total.width = Math.max(total.width, size.width + padding * 2);
             total.height += size.height + space;
         }
@@ -49,7 +59,7 @@ public class VerticalLayoutPanel extends LayoutPanel {
         if (children.size() > 0)
             total.height -= space;
 
-        return total;
+        return cachedDesiredSize = total;
     }
 
     @Override

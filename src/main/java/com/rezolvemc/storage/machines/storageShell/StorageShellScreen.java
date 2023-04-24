@@ -7,13 +7,14 @@ import com.rezolvemc.storage.gui.StorageShellClearCrafterPacket;
 import com.rezolvemc.storage.view.StorageView;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import org.torchmc.layout.HorizontalLayoutPanel;
 import org.torchmc.layout.VerticalLayoutPanel;
+import org.torchmc.widgets.EditBox;
 import org.torchmc.widgets.Meter;
+import org.torchmc.widgets.SlotGrid;
 
 public class StorageShellScreen extends MachineScreen<StorageShellMenu> implements IStorageViewContainer {
 
@@ -33,48 +34,77 @@ public class StorageShellScreen extends MachineScreen<StorageShellMenu> implemen
 	public void setup() {
 		super.setup();
 
-//		setPanel(new VerticalLayoutPanel(), root -> {
-//			root.addChild(new HorizontalLayoutPanel(), panel -> {
-//				panel.addChild(
-//						new Meter(font, Component.translatable("rezolve.screens.usage"), Component.literal(""), Rezolve.tex("gui/widgets/storage_meter.png"))
-//				);
-//
-//				panel.addChild(new VerticalLayoutPanel(), panel2 -> {
-//					panel2.addChild(new EditBox());
-//					panel2.addChild(new StorageView());
-//				});
-//			});
-//		});
+		setPanel(new VerticalLayoutPanel(), root -> {
+			root.setSpace(3);
+			root.addChild(new HorizontalLayoutPanel(), panel -> {
+				panel.setSpace(3);
+				panel.setGrowScale(1);
+				panel.addChild(
+						new Meter(
+								font,
+								Component.translatable("rezolve.screens.usage"),
+								Component.literal(""),
+								Rezolve.tex("gui/widgets/storage_meter.png")
+						)
+				);
 
-		this.searchField = new EditBox(font, this.leftPos + 24, this.topPos + 21, 207, 13, Component.translatable("rezolve.screens.search"));
-		this.searchField.setVisible(true);
-		this.searchField.setValue("");
-		this.searchField.setBordered(true);
-		this.searchField.setFocus(true);
+				panel.addChild(new VerticalLayoutPanel(), panel2 -> {
+					panel2.setGrowScale(1);
+					panel2.setSpace(3);
 
+					panel2.addChild(new EditBox(Component.translatable("screens.rezolve.search")), editBox -> {
+						searchField = editBox;
+					});
+					panel2.addChild(new StorageView(), view -> {
+						view.setGrowScale(1);
+						storageView = view;
+					});
+				});
 
-		//this.searchField.setTextColor(0x000000);
-		this.addRenderableWidget(this.searchField);
+				panel.addChild(
+						new Meter(
+								font,
+								Component.translatable("screens.rezolve.energy_meter"),
+								Component.translatable("screens.rezolve.energy_unit"),
+								Rezolve.tex("gui/widgets/energy_meter.png")
+						)
+				);
+			});
 
-		this.storageView = new StorageView(this.leftPos + 23, this.topPos + 36, 210, 85);
-		this.addRenderableWidget(this.storageView);
-
-		this.clearCraftingGridBtn = new Button(this.leftPos + 51, this.topPos + 122, 7, 7, Component.literal("×"), (btn) -> {
-			new StorageShellClearCrafterPacket(minecraft.player).sendToServer();
+			root.addChild(new SlotGrid(Component.translatable("screens.resolve.inventory_slot"), 9), grid -> {
+				grid.setContents(9, 36);
+			});
 		});
 
-		this.addRenderableWidget(this.clearCraftingGridBtn);
+//		this.searchField = new EditBox(font, this.leftPos + 24, this.topPos + 21, 207, 13, Component.translatable("rezolve.screens.search"));
+//		this.searchField.setVisible(true);
+//		this.searchField.setValue("");
+//		this.searchField.setBordered(true);
+//		this.searchField.setFocus(true);
+//		this.addRenderableWidget(this.searchField);
+//
+//		this.storageView = new StorageView(this.leftPos + 23, this.topPos + 36, 210, 85);
+//		this.addRenderableWidget(this.storageView);
+//
+//		addEnergyMeter(leftPos + 234, topPos + 20, 107);
+//		addMeter(
+//				Component.translatable("rezolve.screens.usage"),
+//				Component.literal(""),
+//				new ResourceLocation("rezolve", "textures/gui/widgets/storage_meter.png"),
+//				leftPos + 5, topPos + 20, 107,
+//				menu -> 0.25
+//		);
 
-		addEnergyMeter(leftPos + 234, topPos + 20, 107);
-		addMeter(
-				Component.translatable("rezolve.screens.usage"),
-				Component.literal(""),
-				new ResourceLocation("rezolve", "textures/gui/widgets/storage_meter.png"),
-				leftPos + 5, topPos + 20, 107,
-				menu -> 0.25
-		);
+		// -----------------------
+		// TODO
 
-		addSlotGrid(Component.translatable("rezolve.screens.crafting"), 3, 0, 9, true);
+//		this.clearCraftingGridBtn = new Button(this.leftPos + 51, this.topPos + 122, 7, 7, Component.literal("×"), (btn) -> {
+//			new StorageShellClearCrafterPacket(minecraft.player).sendToServer();
+//		});
+//
+//		this.addRenderableWidget(this.clearCraftingGridBtn);
+//
+//		addSlotGrid(Component.translatable("rezolve.screens.crafting"), 3, 0, 9, true);
 	}
 
 	private EditBox searchField;
@@ -82,19 +112,9 @@ public class StorageShellScreen extends MachineScreen<StorageShellMenu> implemen
 	private StorageView storageView;
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-		if (searchField.isMouseOver(mouseX, mouseY) && mouseButton == 1) {
-			this.searchField.setValue("");
-			return true;
-		}
-
-		return super.mouseClicked(mouseX, mouseY, mouseButton);
-	}
-
-	@Override
 	protected void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
 		super.renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
-		if (this.storageView != null)
+		if (this.storageView != null && this.searchField != null)
 			this.storageView.setQuery(this.searchField.getValue());
 	}
 }

@@ -19,7 +19,6 @@ import org.torchmc.util.TorchUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 public abstract class WidgetBase extends GuiComponent implements Widget, GuiEventListener, NarratableEntry {
@@ -208,7 +207,19 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
     }
 
     /**
-     * Called when a widget has been added or removed somewhere below this widget.
+     * Notify parents that the desiredSize() has changed in case they are interested.
+     * Note: Should only be called if you have overridden getCustomSize() to include custom on-demand logic.
+     * If you are using setDesiredSize() without any custom getDesiredSize() implementation, you should not
+     * call this, as it calls this already.
+     */
+    protected void desiredSizeDidChange() {
+        if (parent != null)
+            parent.hierarchyDidChange();
+    }
+
+    /**
+     * Fired when a widget has been added or removed somewhere below this widget, or when such a widget
+     * has changed its desired size.
      */
     protected void hierarchyDidChange() {
         if (hierarchyChangesHeld) {
@@ -445,18 +456,14 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
     }
 
     public final void move(int x, int y, int width, int height) {
-        if (this.x == x && this.y == y && this.width == width && this.height == height)
-            return;
-
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        didMove();
-        didResize();
+        move(x, y);
+        resize(width, height);
     }
 
     public final void resize(int width, int height) {
+        if (this.width == width && this.height == height)
+            return;
+
         this.width = width;
         this.height = height;
         didResize();
@@ -520,29 +527,42 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
             runnable.run();
     }
 
+    /**
+     * Control whether scissor operations are used globally. Useful for debugging issues with coordinates, where something appears
+     * not to render, but is actually rendered outside of scissor bounds due to coordinate issues.
+     */
+    public static boolean enableScissoring = true;
+
     protected void scissor(PoseStack stack, int x, int y, int width, int height, Runnable runnable) {
         var tr = TorchUtil.getTranslation(stack.last().pose());
 
-        enableScissor(
-            (int)tr.x() + x,
-                    (int)tr.y() + y,
-                    (int)tr.x() + x + Math.max(1, width),
-                    (int)tr.y() + y + Math.max(1, height)
-        );
+        if (enableScissoring) {
+            enableScissor(
+                    (int) tr.x() + x,
+                    (int) tr.y() + y,
+                    (int) tr.x() + x + Math.max(1, width),
+                    (int) tr.y() + y + Math.max(1, height)
+            );
+        }
 
         try {
             runnable.run();
         } finally {
-            disableScissor();
+            if (enableScissoring)
+                disableScissor();
         }
     }
 
     protected void displayScissor(int x, int y, int width, int height, Runnable runnable) {
-        enableScissor(x, y, x + width, y + height);
+        if (enableScissoring) {
+            enableScissor(x, y, x + width, y + height);
+        }
+
         try {
             runnable.run();
         } finally {
-            disableScissor();
+            if (enableScissoring)
+                disableScissor();
         }
     }
 
@@ -654,6 +674,7 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
      */
     public void setDesiredSize(Size desiredSize) {
         this.desiredSize = desiredSize;
+        desiredSizeDidChange();
     }
 
     /**

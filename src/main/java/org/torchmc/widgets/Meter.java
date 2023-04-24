@@ -5,6 +5,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.torchmc.WidgetBase;
+import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
 
 public class Meter extends WidgetBase {
@@ -23,6 +24,8 @@ public class Meter extends WidgetBase {
         this.y = y;
         this.height = height;
         this.width = 16;
+
+        setDesiredSize(new Size(16, 48));
     }
 
     private Component label;

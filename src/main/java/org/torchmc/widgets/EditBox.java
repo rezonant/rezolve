@@ -10,9 +10,17 @@ public class EditBox extends WidgetBase {
         super(narrationTitle);
 
         nativeWidget = new net.minecraft.client.gui.components.EditBox(font, 0, 0, 0, 0, Component.empty());
+        positionNativeWidget();
         setFocusable(true);
     }
 
+    private void positionNativeWidget() {
+        var rect = getScreenRect();
+        nativeWidget.x = rect.getX();
+        nativeWidget.y = rect.getY();
+        nativeWidget.setWidth(rect.getWidth());
+        nativeWidget.setHeight(rect.getHeight());
+    }
     public EditBox(String narrationTitle) {
         this(Component.literal(narrationTitle));
     }
@@ -32,17 +40,27 @@ public class EditBox extends WidgetBase {
     protected void didResize() {
         super.didResize();
 
-        nativeWidget.setWidth(width);
-        nativeWidget.setHeight(height);
+        positionNativeWidget();
+    }
+
+    public String getValue() {
+        return nativeWidget.getValue();
+    }
+
+    public void setValue(String value) {
+        nativeWidget.setValue(value);
     }
 
     @Override
     protected void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
         super.renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
 
+        positionNativeWidget();
+
         pushPose(pPoseStack, () -> {
             repose(pPoseStack, () -> {
-                pPoseStack.translate(x, y, 0);
+                var rect = getScreenRect();
+                pPoseStack.translate(-rect.getX() + x, -rect.getY() + y, 0);
             });
             nativeWidget.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
         });
@@ -61,12 +79,18 @@ public class EditBox extends WidgetBase {
     @Override
     public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
         takeFocus();
-        return nativeWidget.mouseClicked(pMouseX - x, pMouseY - y, pButton);
+
+        if (pButton == 1) {
+            nativeWidget.setValue("");
+        }
+
+        var rect = getScreenRect();
+        return nativeWidget.mouseClicked(rect.getX() - x + pMouseX, rect.getY() - y + pMouseY, pButton);
     }
 
     @Override
     public boolean mouseDragged(double pMouseX, double pMouseY, int pButton, double pDragX, double pDragY) {
-        return nativeWidget.mouseDragged(pMouseX - x, pMouseY - y, pButton, pDragX, pDragY);
+        return nativeWidget.mouseDragged(pMouseX, pMouseY, pButton, pDragX, pDragY);
     }
 
     @Override
@@ -76,7 +100,7 @@ public class EditBox extends WidgetBase {
 
     @Override
     public boolean mouseReleased(double pMouseX, double pMouseY, int pButton) {
-        return nativeWidget.mouseReleased(pMouseX - x, pMouseY - y, pButton);
+        return nativeWidget.mouseReleased(pMouseX, pMouseY, pButton);
     }
 
     @Override
