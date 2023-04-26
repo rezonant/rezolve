@@ -28,9 +28,6 @@ public class HorizontalLayoutPanel extends LayoutPanel {
 
     @Override
     public <T extends WidgetBase> T addChild(T widget) {
-        if (widget.getDesiredSize() == null)
-            throw new IllegalArgumentException("Children of VerticalLayoutPanel must implement getDesiredSize()");
-
         return super.addChild(widget);
     }
 
@@ -53,6 +50,9 @@ public class HorizontalLayoutPanel extends LayoutPanel {
                 continue;
 
             var size = child.getDesiredSize();
+            if (size == null)
+                size = new Size(0, 0);
+
             total.width += size.width + space;
             total.height = Math.max(total.height, size.height + padding * 2);
         }
@@ -65,7 +65,6 @@ public class HorizontalLayoutPanel extends LayoutPanel {
 
     @Override
     protected void updateLayout() {
-
         int availableSpace = width;
         int expansion = 0;
 
@@ -73,14 +72,23 @@ public class HorizontalLayoutPanel extends LayoutPanel {
             if (!child.isVisible())
                 continue;
 
-            var size = child.getDesiredSize();
-            availableSpace -= size.width;
 
-            var grow = child.getGrowScale();
+            Size size = child.getDesiredSize();
+            if (size == null) {
+                size = new Size(0, 0);
+            }
+
+            Size grow = child.getGrowScale();
             if (grow != null) {
                 expansion += grow.width;
             }
+
+            availableSpace -= size.width + space;
+
         }
+
+        if (children.size() > 0)
+            availableSpace += space;
 
         int x = padding;
 
@@ -88,15 +96,17 @@ public class HorizontalLayoutPanel extends LayoutPanel {
             if (!child.isVisible())
                 continue;
 
-            var size = child.getDesiredSize();
-            int width = size.width;
+            Size size = child.getDesiredSize();
+            if (size == null) {
+                size = new Size(0, 0);
+            }
+
             Size grow = child.getGrowScale();
-
             if (grow != null && expansion > 0 && grow.width > 0)
-                width += (grow.width / (double)expansion) * availableSpace;
+                size.width += (grow.width / (double)expansion) * availableSpace;
 
-            child.move(x, padding, width, height - padding * 2);
-            x += width + space;
+            child.move(x, padding, size.width, height - padding * 2);
+            x += size.width + space;
         }
     }
 }

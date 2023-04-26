@@ -127,4 +127,14 @@ public class EditBox extends WidgetBase {
     public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
         return nativeWidget.mouseScrolled(pMouseX, pMouseY, pDelta);
     }
+
+    private int maxLength = 32;
+    public void setMaxLength(int i) {
+        nativeWidget.setMaxLength(i);
+        maxLength = i;
+    }
+
+    public int getMaxLength() {
+        return maxLength;
+    }
 }

@@ -7,6 +7,7 @@ import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import org.torchmc.WidgetBase;
+import org.torchmc.layout.AxisConstraint;
 import org.torchmc.util.Size;
 
 public class Label extends WidgetBase {
@@ -70,7 +71,6 @@ public class Label extends WidgetBase {
     public void setContent(Component content) {
         this.content = content;
         this.narrationTitle = content;
-        constructLabel();
         hierarchyDidChange();
     }
 
@@ -80,7 +80,7 @@ public class Label extends WidgetBase {
 
     @Override
     protected void didResize() {
-        setContent(content);
+        constructLabel();
     }
 
     @Override
@@ -88,10 +88,27 @@ public class Label extends WidgetBase {
         if (!isVisible())
             return;
 
-        if (alignment == Alignment.CENTERED)
-            label.renderCentered(pPoseStack, width, x, y, color);
-        else if (alignment == Alignment.LEFT)
-            label.renderLeftAlignedNoShadow(pPoseStack, x, y, font.lineHeight, color);
+        if (label != null) {
+            if (alignment == Alignment.CENTERED)
+                label.renderCentered(pPoseStack, width, x, y, color);
+            else if (alignment == Alignment.LEFT)
+                label.renderLeftAlignedNoShadow(pPoseStack, x, y, font.lineHeight, color);
+        }
+    }
+
+    @Override
+    public AxisConstraint getDesiredWidth(int assumedHeight) {
+        return AxisConstraint.between(0, font.width(content), font.width(content));
+    }
+
+    @Override
+    public AxisConstraint getDesiredHeight(int assumedWidth) {
+        var label = MultiLineLabel.create(font, content, assumedWidth);
+
+        if (assumedWidth > 0)
+            return AxisConstraint.fixed(label.getLineCount()*font.lineHeight);
+
+        return AxisConstraint.between(font.lineHeight, font.lineHeight, font.width(content));
     }
 
     @Override

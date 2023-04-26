@@ -14,6 +14,8 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
+import org.torchmc.layout.Axis;
+import org.torchmc.layout.AxisConstraint;
 import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
 
@@ -674,7 +676,85 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
      */
     public void setDesiredSize(Size desiredSize) {
         this.desiredSize = desiredSize;
+        this.setWidthConstraint(AxisConstraint.fixed(desiredSize.width));
+        this.setHeightConstraint(AxisConstraint.fixed(desiredSize.height));
         desiredSizeDidChange();
+    }
+
+    public int getAxis(Axis axis) {
+        if (axis == Axis.X)
+            return getWidth();
+        else
+            return getHeight();
+    }
+
+    public void setAxis(Axis axis, int size) {
+        if (axis == Axis.X)
+            setWidth(size);
+        else if (axis == Axis.Y)
+            setHeight(size);
+    }
+
+    public void setWidth(int width) {
+        resize(width, getConstrainedHeight(width));
+    }
+
+    public void setHeight(int height) {
+        resize(getConstrainedWidth(height), height);
+    }
+
+    public int getSize(Axis axis) {
+        if (axis == Axis.X)
+            return width;
+        else if (axis == Axis.Y)
+            return height;
+
+        return 0;
+    }
+
+    public AxisConstraint getDesiredSize(Axis axis, int assumedSize) {
+        if (axis == Axis.X)
+            return getDesiredWidth(assumedSize);
+        else if (axis == Axis.Y)
+            return getDesiredHeight(assumedSize);
+        else
+            return AxisConstraint.FREE;
+    }
+
+    private AxisConstraint widthConstraint = AxisConstraint.FREE;
+    private AxisConstraint heightConstraint = AxisConstraint.FREE;
+
+    public void setWidthConstraint(AxisConstraint widthConstraint) {
+        this.widthConstraint = widthConstraint;
+    }
+
+    public void setHeightConstraint(AxisConstraint heightConstraint) {
+        this.heightConstraint = heightConstraint;
+    }
+
+    public AxisConstraint getDesiredWidth(int assumedHeight) {
+        return widthConstraint;
+    }
+
+    public AxisConstraint getDesiredHeight(int assumedWidth) {
+        return heightConstraint;
+    }
+
+    public int getConstrainedAxis(Axis axis, int crossSize) {
+        if (axis == Axis.X)
+            return getConstrainedWidth(crossSize);
+        else if (axis == Axis.Y)
+            return getConstrainedHeight(crossSize);
+
+        return 0;
+    }
+
+    public int getConstrainedWidth(int height) {
+        return width;
+    }
+
+    public int getConstrainedHeight(int width) {
+        return height;
     }
 
     /**
@@ -683,6 +763,7 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
      *
      * @return
      */
+    @Deprecated
     public Size getDesiredSize() {
         return this.desiredSize;
     }
@@ -695,6 +776,19 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
 
     public void setGrowScale(Size growScale) {
         this.growScale = growScale;
+    }
+
+    public int getGrowScale(Axis axis) {
+        var scale = getGrowScale();
+        if (scale == null)
+            return 0;
+
+        if (axis == Axis.X)
+            return scale.width;
+        else if (axis == Axis.Y)
+            return scale.height;
+
+        return 0;
     }
 
     public Size getGrowScale() {

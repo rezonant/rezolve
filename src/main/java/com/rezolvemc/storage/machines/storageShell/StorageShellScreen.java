@@ -1,6 +1,7 @@
 package com.rezolvemc.storage.machines.storageShell;
 
 import com.rezolvemc.Rezolve;
+import com.rezolvemc.common.gui.EnergyMeter;
 import com.rezolvemc.common.machines.MachineScreen;
 import com.rezolvemc.storage.view.IStorageViewContainer;
 import com.rezolvemc.storage.gui.StorageShellClearCrafterPacket;
@@ -41,7 +42,6 @@ public class StorageShellScreen extends MachineScreen<StorageShellMenu> implemen
 				panel.setGrowScale(1);
 				panel.addChild(
 						new Meter(
-								font,
 								Component.translatable("rezolve.screens.usage"),
 								Component.literal(""),
 								Rezolve.tex("gui/widgets/storage_meter.png")
@@ -61,14 +61,7 @@ public class StorageShellScreen extends MachineScreen<StorageShellMenu> implemen
 					});
 				});
 
-				panel.addChild(
-						new Meter(
-								font,
-								Component.translatable("screens.rezolve.energy_meter"),
-								Component.translatable("screens.rezolve.energy_unit"),
-								Rezolve.tex("gui/widgets/energy_meter.png")
-						)
-				);
+				panel.addChild(new EnergyMeter());
 			});
 
 			root.addChild(new SlotGrid(Component.translatable("screens.resolve.inventory_slot"), 9), grid -> {

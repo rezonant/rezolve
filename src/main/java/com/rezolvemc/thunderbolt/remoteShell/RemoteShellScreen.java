@@ -1,12 +1,12 @@
 package com.rezolvemc.thunderbolt.remoteShell;
 
-import org.torchmc.widgets.ListView;
-import org.torchmc.widgets.ListViewItem;
+import com.rezolvemc.common.gui.EnergyMeter;
+import net.minecraft.ChatFormatting;
+import org.torchmc.layout.*;
+import org.torchmc.widgets.*;
 import com.rezolvemc.common.machines.MachineScreen;
 import com.rezolvemc.common.util.RezolveItemUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -15,12 +15,14 @@ import net.minecraft.core.BlockPos;
 import java.util.Objects;
 
 public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
+
 	public RemoteShellScreen(RemoteShellMenu menu, Inventory playerInv, Component title) {
 		super(menu, playerInv, title, 255, 212);
 		twoToneHeight = 0;
 		enableInventoryLabel = false;
 	}
 
+	private Panel detailsLayout;
 	private ListView listView;
 	private Button securedBtn;
 	private EditBox nameField;
@@ -29,44 +31,79 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 	private int slotHeight = 22;
 	private MachineListing selectedMachine = null;
 	private String selectedMachineName = null;
+	private Label hintLbl;
+	private Label infoLbl;
 
 	@Override
 	protected void setup() {
 		super.setup();
 
-		this.nameField = new EditBox(this.font, this.leftPos + 11, this.topPos + 120, 211, 18, Component.translatable("screens.rezolve.name"));
-		this.nameField.setMaxLength(23);
-		this.nameField.setValue("");
-		this.nameField.changeFocus(false);
-		this.nameField.setVisible(false);
-		this.addRenderableWidget(this.nameField);
+		setPanel(new AxisLayoutPanel(Axis.Y), root -> {
+			root.addChild(new AxisLayoutPanel(Axis.X), topLayout -> {
+				topLayout.setGrowScale(1);
+				topLayout.addChild(new AxisLayoutPanel(Axis.Y), storageLayout -> {
+					storageLayout.setGrowScale(1);
 
-		this.searchField = new EditBox(this.font, this.leftPos + 56, this.topPos + 21, 165, 18, Component.translatable("screens.rezolve.search"));
-		this.searchField.setMaxLength(23);
-		this.searchField.setValue("");
-		this.searchField.changeFocus(true);
-		this.searchField.setVisible(true);
-		this.addRenderableWidget(this.searchField);
+					// Search label + field
 
-		this.securedBtn = new Button(this.leftPos + 50, this.topPos + 167, 100, 18, Component.translatable("screens.rezolve.not_secured"), (button) -> {
+					storageLayout.addChild(new AxisLayoutPanel(Axis.X), panel -> {
+						panel.addChild(new Label(Component.translatable("screens.rezolve.search")));
+						panel.addChild(new EditBox(Component.translatable("screens.rezolve.search")), field -> {
+							field.setMaxLength(23);
+							field.setGrowScale(1);
+							searchField = field;
+						});
+					});
 
-			if (this.selectedMachineSecure) {
-				this.securedBtn.setMessage(Component.translatable("screens.rezolve.secured"));
-			} else {
-				this.securedBtn.setMessage(Component.translatable("screens.rezolve.not_secured"));
-			}
-			this.selectedMachineSecure = !this.selectedMachineSecure;
+					storageLayout.addChild(new ListView(Component.translatable("screens.rezolve.machine_list")), listView -> {
+						listView.setGrowScale(1);
+						listView.setItemPadding(2);
+
+						this.listView = listView;
+					});
+				});
+
+				topLayout.addChild(new EnergyMeter());
+			});
+
+			root.addChild(new Label("Right click a machine for info."), label -> {
+				hintLbl = label;
+			});
+
+			root.addChild(new AxisLayoutPanel(Axis.Y), detailsLayout -> {
+				detailsLayout.setVisible(false);
+				this.detailsLayout = detailsLayout;
+
+				detailsLayout.addChild(new EditBox(Component.translatable("screens.rezolve.name")), field -> {
+					field.setMaxLength(23);
+					field.setVisible(false);
+					nameField = field;
+				});
+
+				detailsLayout.addChild(new AxisLayoutPanel(Axis.X), panel -> {
+					panel.addChild(new Label(), label -> {
+						label.setGrowScale(1);
+						infoLbl = label;
+					});
+
+					panel.addChild(new AxisLayoutPanel(Axis.Y), buttons -> {
+						buttons.addChild(new org.torchmc.widgets.Button(), button -> {
+							button.setHandler(mouseButton -> {
+								if (this.selectedMachineSecure) {
+									this.securedBtn.setText(Component.translatable("screens.rezolve.secured"));
+								} else {
+									this.securedBtn.setText(Component.translatable("screens.rezolve.not_secured"));
+								}
+								this.selectedMachineSecure = !this.selectedMachineSecure;
+							});
+							button.setVisible(false);
+
+							securedBtn = button;
+						});
+					});
+				});
+			});
 		});
-		this.securedBtn.visible = false;
-		this.addRenderableWidget(this.securedBtn);
-
-		addEnergyMeter(leftPos + 230, topPos + 43, 95);
-
-		listView = addChild(new ListView(Component.translatable("screens.rezolve.machine_list")), listView -> {
-			listView.move(leftPos + 13, topPos + 47, slotWidth, 81);
-		});
-
-		listView.setItemPadding(2);
 	}
 
 	@Override
@@ -88,37 +125,49 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 		}
 
 		this.selectedMachine = machine;
+		hintLbl.setVisible(false);
+		detailsLayout.setVisible(true);
 
 		ItemStack stack = machine.getItem();
 
-    	if (stack != null) {
+		if (stack == null) {
+			clearSelectedMachine();
+			return;
+		}
 
-    		// Set UI properties based on this machine
-    		this.selectedMachineSecure = false;
-    		this.selectedMachineName = machine.getName();
+		// Set UI properties based on this machine
+		this.selectedMachineSecure = false;
+		this.selectedMachineName = machine.getName();
 
-    		// Set fields
+		// Set fields
 
-    		if (selectedMachineName != null && !Objects.equals("", selectedMachineName))
-    			nameField.setValue(this.selectedMachineName);
-    		else
-    			nameField.setValue("");
+		if (selectedMachineName != null && !Objects.equals("", selectedMachineName))
+			nameField.setValue(this.selectedMachineName);
+		else
+			nameField.setValue("");
 
-    		this.nameField.setVisible(menu.hasDatabase);
-    		this.securedBtn.setMessage(Component.translatable(this.selectedMachineSecure ? "screens.rezolve.secured" : "screens.rezolve.not_secured"));
+		this.nameField.setVisible(menu.hasDatabase);
+		this.securedBtn.setText(Component.translatable(this.selectedMachineSecure ? "screens.rezolve.secured" : "screens.rezolve.not_secured"));
 
-    		// TODO: need to add Security Server
-    		//this.securedBtn.visible = true;
+		BlockPos pos = machine.getBlockPos();
 
-    	} else {
-    		this.clearSelectedMachine();
-    	}
+		String stackName = RezolveItemUtil.getName(stack);
+		String position = String.format("Position: %d, %d, %d", pos.getX(), pos.getY(), pos.getZ());
+		infoLbl.setContent(
+				Component.empty()
+						.append(Component.literal(stackName).withStyle(ChatFormatting.BLACK))
+						.append("\n")
+						.append(Component.literal(position).withStyle(ChatFormatting.GRAY))
+		);
+
+		// TODO: need to add Security Server
+		//this.securedBtn.visible = true;
 	}
 
 	private void clearSelectedMachine() {
-		this.selectedMachine = null;
-    	this.nameField.setVisible(false);
-		this.securedBtn.visible = false;
+		selectedMachine = null;
+		detailsLayout.setVisible(false);
+		hintLbl.setVisible(true);
 	}
 
 	boolean selectedMachineSecure = false;
@@ -161,11 +210,6 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 //    	}
 
     	return false;
-    }
-
-    @Override
-    protected void renderSubWindows(PoseStack pPoseStack, double mouseX, double mouseY) {
-		super.renderSubWindows(pPoseStack, mouseX, mouseY);
     }
 
 	MachineListingSearchResults currentResults;
@@ -237,41 +281,10 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 		}
 	}
 
-    @Override
-    protected void renderContents(PoseStack pPoseStack, int mouseX, int mouseY, float pPartialTick) {
+	@Override
+	public void updateStateFromMenu() {
 		if (currentResults != menu.searchResults) {
 			loadResults();
 		}
-
-        super.renderContents(pPoseStack, mouseX, mouseY, pPartialTick);
-
-		minecraft.font.draw(pPoseStack, "Search: ", searchField.x - leftPos - 45, searchField.y - topPos + 5, 0xFF000000);
-
-        this.nameField.setVisible(this.selectedMachine != null && menu.hasDatabase);
-
-		int infoSectionX = 10;
-		int infoSectionY = 135;
-		int lineHeight = 15;
-
-        if (this.selectedMachine != null) {
-			var machine = this.selectedMachine;
-			BlockPos pos = machine.getBlockPos();
-            ItemStack stack = machine.getItem();
-
-            if (stack != null) {
-                String stackName = RezolveItemUtil.getName(stack);
-                String position = String.format("Position: %d, %d, %d", pos.getX(), pos.getY(), pos.getZ());
-
-                if (!this.nameField.isVisible()) {
-                    this.font.draw(pPoseStack, stackName, infoSectionX, infoSectionY + lineHeight*0, 0xFF000000);
-                    this.font.draw(pPoseStack, position, infoSectionX, infoSectionY + lineHeight*1, 0xFF666666);
-                } else {
-                    this.font.draw(pPoseStack, stackName, infoSectionX, infoSectionY + lineHeight*0, 0xFF666666);
-                    this.font.draw(pPoseStack, position, infoSectionX, infoSectionY + lineHeight*1, 0xFF666666);
-                }
-            }
-        } else {
-            this.font.draw(pPoseStack, "Right click a machine for info.", infoSectionX, infoSectionY, 0xFF666666);
-        }
-    }
+	}
 }

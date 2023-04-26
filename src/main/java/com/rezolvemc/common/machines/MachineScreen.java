@@ -165,13 +165,14 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
             Component narrationTitle, Component label, ResourceLocation texture, int x, int y, int height,
             Function<MenuT, Double> stateFunc
     ) {
-        var meter = addRenderableWidget(new Meter(font, x, y, height, narrationTitle, label, texture) {
+
+        var meter = addChild(new Meter(narrationTitle, label, texture) {
             @Override
             public void updateState() {
                 if (stateFunc != null)
                     setValue(stateFunc.apply(menu));
             }
-        });
+        }, widget -> widget.move(x, y, widget.getWidth(), height));
 
         if (x < 0) {
             meter.move(imageWidth - meter.getWidth(), y);

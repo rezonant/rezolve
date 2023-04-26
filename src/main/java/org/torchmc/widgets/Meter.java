@@ -9,28 +9,20 @@ import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
 
 public class Meter extends WidgetBase {
-    public Meter(Font font, Component narrationTitle, Component label, ResourceLocation texture) {
-        this(font, 0, 0, 0, narrationTitle, label, texture);
-    }
-
-    public Meter(Font font, int x, int y, int height, Component narrationTitle, Component label, ResourceLocation texture) {
+    public Meter(Component narrationTitle, Component label, ResourceLocation texture) {
         super(narrationTitle);
 
-        this.font = font;
         this.label = label;
         this.narrationTitle = narrationTitle;
         this.texture = texture;
-        this.x = x;
-        this.y = y;
-        this.height = height;
         this.width = 16;
+        this.height = 48;
 
         setDesiredSize(new Size(16, 48));
     }
 
     private Component label;
     private ResourceLocation texture;
-    private Font font;
 
     double max = 1;
     double value = 0.5;
