@@ -88,6 +88,8 @@ public class Rezolve {
 		return loc("textures/" + name);
 	}
 
+	public static Component tr(String name) { return Component.translatable(name); };
+
 	public static void setPlayerOverridePosition(UUID playerID, LevelPosition pos) {
 		synchronized (playerOverridePositions) {
 			playerOverridePositions.put(playerID.toString(), pos);

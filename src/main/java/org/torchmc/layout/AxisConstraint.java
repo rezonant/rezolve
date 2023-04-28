@@ -15,6 +15,10 @@ public class AxisConstraint {
     public final int max;
     public final boolean fixed;
 
+    public AxisConstraint add(int i) {
+        return new AxisConstraint(min > 0 ? min + i : 0, desired + i, max > 0 ? max + i : 0);
+    }
+
     public static AxisConstraint union(AxisConstraint a, AxisConstraint b) {
         if (a == null)
             return b;

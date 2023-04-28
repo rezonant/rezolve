@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.Slot;
 import org.torchmc.TorchUI;
 import org.torchmc.WidgetBase;
+import org.torchmc.layout.AxisConstraint;
 import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
 
@@ -21,8 +22,6 @@ public class SlotWidget extends WidgetBase {
         this.y = slot.y;
         this.width = SIZE;
         this.height = SIZE;
-
-        setDesiredSize(new Size(18, 18));
     }
 
     private Slot slot;
@@ -30,8 +29,13 @@ public class SlotWidget extends WidgetBase {
     private ResourceLocation texture = TorchUI.builtInTex("gui/widgets/slot.png");
 
     @Override
-    public Size getDesiredSize() {
-        return new Size(SIZE, SIZE);
+    public AxisConstraint getDesiredWidth(int assumedHeight) {
+        return AxisConstraint.fixed(SIZE);
+    }
+
+    @Override
+    public AxisConstraint getDesiredHeight(int assumedHeight) {
+        return AxisConstraint.fixed(SIZE);
     }
 
     @Override

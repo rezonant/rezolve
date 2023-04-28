@@ -23,8 +23,6 @@ public class DiskManipulatorScreen extends MachineScreen<DiskManipulatorMenu> im
 
 		inventoryLabelX = 47;
 		inventoryLabelY = 113;
-
-		twoToneHeight = 125;
 	}
 
 	@Override

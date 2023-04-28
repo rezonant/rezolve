@@ -13,7 +13,6 @@ public class BundleBuilderScreen extends MachineScreen<BundleBuilderMenu> {
 
 		inventoryLabelX = 30;
 		inventoryLabelY = 116;
-		twoToneHeight = 125;
 	}
 
 	@Override

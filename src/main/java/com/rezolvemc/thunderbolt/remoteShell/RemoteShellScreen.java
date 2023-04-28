@@ -18,7 +18,6 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 
 	public RemoteShellScreen(RemoteShellMenu menu, Inventory playerInv, Component title) {
 		super(menu, playerInv, title, 255, 212);
-		twoToneHeight = 0;
 		enableInventoryLabel = false;
 	}
 
@@ -47,7 +46,10 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 					// Search label + field
 
 					storageLayout.addChild(new AxisLayoutPanel(Axis.X), panel -> {
-						panel.addChild(new Label(Component.translatable("screens.rezolve.search")));
+						panel.addChild(new Label(Component.translatable("screens.rezolve.search")), label -> {
+							//label.setAlignment(Label.Alignment.CENTERED);
+							label.setVerticalAlignment(Label.VerticalAlignment.CENTER);
+						});
 						panel.addChild(new EditBox(Component.translatable("screens.rezolve.search")), field -> {
 							field.setMaxLength(23);
 							field.setGrowScale(1);

@@ -3,6 +3,7 @@ package org.torchmc.widgets;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
 import org.torchmc.WidgetBase;
+import org.torchmc.layout.AxisConstraint;
 import org.torchmc.util.Size;
 
 public class EditBox extends WidgetBase {
@@ -12,6 +13,9 @@ public class EditBox extends WidgetBase {
         nativeWidget = new net.minecraft.client.gui.components.EditBox(font, 0, 0, 0, 0, Component.empty());
         positionNativeWidget();
         setFocusable(true);
+
+        setWidthConstraint(AxisConstraint.atLeast(18));
+        setHeightConstraint(AxisConstraint.fixed(18));
     }
 
     private void positionNativeWidget() {
@@ -21,20 +25,12 @@ public class EditBox extends WidgetBase {
         nativeWidget.setWidth(rect.getWidth());
         nativeWidget.setHeight(rect.getHeight());
     }
+
     public EditBox(String narrationTitle) {
         this(Component.literal(narrationTitle));
     }
 
     private net.minecraft.client.gui.components.EditBox nativeWidget;
-
-    @Override
-    public Size getDesiredSize() {
-        var size = super.getDesiredSize();
-        if (size == null)
-            size = new Size(0, 18);
-
-        return size;
-    }
 
     @Override
     protected void didResize() {

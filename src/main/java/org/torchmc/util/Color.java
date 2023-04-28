@@ -3,15 +3,17 @@ package org.torchmc.util;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 public class Color {
+    public static final Color WHITE         = Color.argb(0xFFFFFFFF);
+    public static final Color BLACK         = Color.argb(0xFF000000);
+    public static final Color TRANSPARENT   = Color.argb(0x00000000);
+    public static final Color PINK          = Color.argb(0xFFFFC0CB);
+
     public Color(float r, float g, float b, float a) {
         this.r = r;
         this.g = g;
         this.b = b;
         this.a = a;
     }
-
-    public static final Color WHITE = Color.of(1, 1, 1, 1);
-    public static final Color BLACK = Color.of(0, 0, 0, 1);
 
     public final float r;
     public final float g;

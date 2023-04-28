@@ -6,6 +6,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.torchmc.WidgetBase;
+import org.torchmc.layout.AxisConstraint;
 import org.torchmc.util.Color;
 import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
@@ -85,8 +86,13 @@ public class IconButton extends WidgetBase {
     }
 
     @Override
-    public Size getDesiredSize() {
-        return new Size(SIZE, SIZE);
+    public AxisConstraint getDesiredHeight(int assumedWidth) {
+        return AxisConstraint.fixed(SIZE);
+    }
+
+    @Override
+    public AxisConstraint getDesiredWidth(int assumedHeight) {
+        return AxisConstraint.fixed(SIZE);
     }
 
     @Override

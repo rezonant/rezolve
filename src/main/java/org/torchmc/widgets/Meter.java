@@ -5,6 +5,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.torchmc.WidgetBase;
+import org.torchmc.layout.AxisConstraint;
 import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
 
@@ -18,7 +19,8 @@ public class Meter extends WidgetBase {
         this.width = 16;
         this.height = 48;
 
-        setDesiredSize(new Size(16, 48));
+        setWidthConstraint(AxisConstraint.fixed(16));
+        setHeightConstraint(AxisConstraint.atLeast(font.lineHeight + 18));
     }
 
     private Component label;

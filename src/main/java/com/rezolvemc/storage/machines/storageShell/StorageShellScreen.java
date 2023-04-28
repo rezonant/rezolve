@@ -11,8 +11,9 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import org.torchmc.layout.HorizontalLayoutPanel;
-import org.torchmc.layout.VerticalLayoutPanel;
+import org.torchmc.layout.Axis;
+import org.torchmc.layout.AxisLayoutPanel;
+import org.torchmc.util.Size;
 import org.torchmc.widgets.EditBox;
 import org.torchmc.widgets.Meter;
 import org.torchmc.widgets.SlotGrid;
@@ -23,7 +24,7 @@ public class StorageShellScreen extends MachineScreen<StorageShellMenu> implemen
 		super(menu, playerInventory, pTitle, 255, 212);
 
 		enableInventoryLabel = false;
-		twoToneHeight = 125;
+		setMinSize(new Size(170, 200));
 	}
 
 	@Override
@@ -35,9 +36,9 @@ public class StorageShellScreen extends MachineScreen<StorageShellMenu> implemen
 	public void setup() {
 		super.setup();
 
-		setPanel(new VerticalLayoutPanel(), root -> {
+		setPanel(new AxisLayoutPanel(Axis.Y), root -> {
 			root.setSpace(3);
-			root.addChild(new HorizontalLayoutPanel(), panel -> {
+			root.addChild(new AxisLayoutPanel(Axis.X), panel -> {
 				panel.setSpace(3);
 				panel.setGrowScale(1);
 				panel.addChild(
@@ -48,7 +49,7 @@ public class StorageShellScreen extends MachineScreen<StorageShellMenu> implemen
 						)
 				);
 
-				panel.addChild(new VerticalLayoutPanel(), panel2 -> {
+				panel.addChild(new AxisLayoutPanel(Axis.Y), panel2 -> {
 					panel2.setGrowScale(1);
 					panel2.setSpace(3);
 

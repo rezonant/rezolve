@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
@@ -20,7 +21,9 @@ import org.torchmc.util.ResizeMode;
 import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public abstract class TorchScreen<T extends AbstractContainerMenu> extends AbstractContainerScreen<T> {
@@ -45,6 +48,16 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
     private boolean resizable = true;
     private boolean movable = true;
     private Size minSize = new Size(50, 50);
+    private List<Window> windows = new ArrayList<>();
+    private Window mainWindow;
+
+    public Window getMainWindow() {
+        return mainWindow;
+    }
+
+    protected void setMinSize(Size size) {
+        minSize = size;
+    }
 
     /**
      * True if the mouse is currently down on this widget.
@@ -93,8 +106,13 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
             initialized = true;
         }
 
+        mainWindow = addChild(new ScreenWindow());
+
         setup();
-        applyDimensions();
+
+        if (mainWindow != null) {
+            mainWindow.move(leftPos, topPos, imageWidth, imageHeight);
+        }
     }
 
     @Override
@@ -106,6 +124,16 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
 
     }
 
+    public int getMaxZ() {
+        int highZ = 0;
+        for (var window : windows) {
+            highZ = Math.max(highZ, window.z);
+        }
+
+        highZ = Math.max(highZ, z);
+        return highZ;
+    }
+
     protected <T extends Panel> T setPanel(T panel) {
         return setPanel(panel, p -> {});
     }
@@ -115,9 +143,15 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
     }
 
     protected <T extends WidgetBase> T addChild(T widget, Consumer<T> initializer) {
-        addRenderableWidget(widget);
+        if (widget instanceof Window window) {
+            window.z = getMaxZ() + 1;
+            windows.add(window);
+        } else {
+            addRenderableWidget(widget);
+        }
+
         widget.runInitializer(() -> initializer.accept(widget));
-        applyDimensions();
+        //applyDimensions();
         return widget;
     }
 
@@ -131,44 +165,31 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
      * @param <T>
      */
     protected <T extends Panel> T setPanel(T panel, Consumer<T> initializer) {
-        if (this.panel != null) {
-            removeWidget(this.panel);
-        }
-
-        this.panel = panel;
-        panel.setParentSize(new Size(imageWidth, imageHeight));
-        addRenderableWidget(panel);
-
-        initializer.accept(panel);
-
-        applyDimensions();
-
-        return panel;
+        return mainWindow.setPanel(panel, initializer);
+//
+//        if (this.panel != null) {
+//            removeWidget(this.panel);
+//        }
+//
+//        this.panel = panel;
+//        addRenderableWidget(panel);
+//
+//        initializer.accept(panel);
+//
+//        applyDimensions();
+//
+//        return panel;
     }
 
     protected int panelMargin = 8;
 
     protected void applyDimensions() {
-        if (panel != null) {
-            panel.move(
-                    panelMargin + leftPos,
-                    panelMargin + topPos + font.lineHeight + 2,
-                    imageWidth - panelMargin * 2,
-                    imageHeight - panelMargin * 2 - font.lineHeight - 2
-            );
-        }
     }
 
     @Override
     protected void renderLabels(PoseStack pPoseStack, int pMouseX, int pMouseY) {
-        enableScissor(leftPos, topPos, leftPos + imageWidth, topPos + imageHeight);
-
-        this.font.draw(pPoseStack, this.title, (float) this.titleLabelX, (float) this.titleLabelY, 4210752);
-
         if (enableInventoryLabel)
             this.font.draw(pPoseStack, this.playerInventoryTitle, (float) this.inventoryLabelX, (float) this.inventoryLabelY, 4210752);
-
-        disableScissor();
     }
 
     private boolean hoveringMenuBar(double pMouseX, double pMouseY) {
@@ -198,85 +219,120 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
         clickX = pMouseX;
         clickY = pMouseY;
 
-        if (movable) {
-            if (hoveringMenuBar(pMouseX, pMouseY)) {
-                moving = true;
-                moveStartLeftPos = leftPos;
-                moveStartTopPos = topPos;
-                return true;
+//        if (movable) {
+//            if (hoveringMenuBar(pMouseX, pMouseY)) {
+//                moving = true;
+//                moveStartLeftPos = leftPos;
+//                moveStartTopPos = topPos;
+//                return true;
+//            }
+//        }
+//
+//        if (resizable) {
+//            if (hoveringBottomEdge(pMouseX, pMouseY) && hoveringRightEdge(pMouseX, pMouseY)) {
+//                resizing = true;
+//                resizeMode = ResizeMode.BOTTOM_RIGHT;
+//                resizeStartWidth = imageWidth;
+//                resizeStartHeight = imageHeight;
+//                return true;
+//            } else if (hoveringBottomEdge(pMouseX, pMouseY)) {
+//                resizing = true;
+//                resizeMode = ResizeMode.BOTTOM;
+//                resizeStartWidth = imageWidth;
+//                resizeStartHeight = imageHeight;
+//                return true;
+//            } else if (hoveringRightEdge(pMouseX, pMouseY)) {
+//                resizing = true;
+//                resizeMode = ResizeMode.RIGHT;
+//                resizeStartWidth = imageWidth;
+//                resizeStartHeight = imageHeight;
+//                return true;
+//            }
+//        }
+
+
+
+        boolean handled = super.mouseClicked(pMouseX, pMouseY, pButton);
+
+        // Wouldn't this make sense? But no, Mojank strikes again.
+        // if (handled)
+        //    return true;
+
+        for (int i = windows.size() - 1; i >= 0; --i) {
+            var window = windows.get(i);
+
+            if (window.isMouseOver(pMouseX, pMouseY)) {
+                if (window.mouseClicked(pMouseX, pMouseY, pButton)) {
+                    this.setFocused(window);
+                    if (pButton == 0) {
+                        this.setDragging(true);
+                    }
+                    return true;
+                }
             }
         }
 
-        if (resizable) {
-            if (hoveringBottomEdge(pMouseX, pMouseY) && hoveringRightEdge(pMouseX, pMouseY)) {
-                resizing = true;
-                resizeMode = ResizeMode.BOTTOM_RIGHT;
-                resizeStartWidth = imageWidth;
-                resizeStartHeight = imageHeight;
-                return true;
-            } else if (hoveringBottomEdge(pMouseX, pMouseY)) {
-                resizing = true;
-                resizeMode = ResizeMode.BOTTOM;
-                resizeStartWidth = imageWidth;
-                resizeStartHeight = imageHeight;
-                return true;
-            } else if (hoveringRightEdge(pMouseX, pMouseY)) {
-                resizing = true;
-                resizeMode = ResizeMode.RIGHT;
-                resizeStartWidth = imageWidth;
-                resizeStartHeight = imageHeight;
-                return true;
+        return false;
+    }
+
+    @Override
+    public Optional<GuiEventListener> getChildAt(double pMouseX, double pMouseY) {
+        for (int i = windows.size() - 1; i >= 0; --i) {
+            var window = windows.get(i);
+
+            if (window.isHovered()) {
+                return Optional.of(window);
             }
         }
 
-        return super.mouseClicked(pMouseX, pMouseY, pButton);
+        return super.getChildAt(pMouseX, pMouseY);
     }
 
     @Override
     public boolean mouseDragged(double pMouseX, double pMouseY, int pButton, double pDragX, double pDragY) {
 
-        if (resizing) {
-            switch (resizeMode) {
-                case RIGHT -> {
-                    imageWidth = (int)(resizeStartWidth + (pMouseX - clickX));
-                }
-                case BOTTOM -> {
-                    imageHeight = (int)(resizeStartHeight + (pMouseY - clickY));
-                }
-                case BOTTOM_RIGHT -> {
-                    imageWidth = (int)(resizeStartWidth + (pMouseX - clickX));
-                    imageHeight = (int)(resizeStartHeight + (pMouseY - clickY));
-                }
-            }
-
-            imageWidth = Math.max(minSize.width, imageWidth);
-            imageHeight = Math.max(minSize.height, imageHeight);
-
-            if (!wasMoved) {
-                leftPos = (width - imageWidth) / 2;
-                topPos = (height - imageHeight) / 2;
-            }
-
-            if (panel != null) {
-                applyDimensions();
-            } else {
-                rebuildWidgets();
-            }
-
-            return true;
-        } else if (moving) {
-            leftPos = (int)(moveStartLeftPos + (pMouseX - clickX));
-            topPos = (int)(moveStartTopPos + (pMouseY - clickY));
-            wasMoved = true;
-
-            if (panel != null) {
-                applyDimensions();
-            } else {
-                rebuildWidgets();
-            }
-
-            return true;
-        }
+//        if (resizing) {
+//            switch (resizeMode) {
+//                case RIGHT -> {
+//                    imageWidth = (int)(resizeStartWidth + (pMouseX - clickX));
+//                }
+//                case BOTTOM -> {
+//                    imageHeight = (int)(resizeStartHeight + (pMouseY - clickY));
+//                }
+//                case BOTTOM_RIGHT -> {
+//                    imageWidth = (int)(resizeStartWidth + (pMouseX - clickX));
+//                    imageHeight = (int)(resizeStartHeight + (pMouseY - clickY));
+//                }
+//            }
+//
+//            imageWidth = Math.max(minSize.width, imageWidth);
+//            imageHeight = Math.max(minSize.height, imageHeight);
+//
+//            if (!wasMoved) {
+//                leftPos = (width - imageWidth) / 2;
+//                topPos = (height - imageHeight) / 2;
+//            }
+//
+//            if (panel != null) {
+//                applyDimensions();
+//            } else {
+//                rebuildWidgets();
+//            }
+//
+//            return true;
+//        } else if (moving) {
+//            leftPos = (int)(moveStartLeftPos + (pMouseX - clickX));
+//            topPos = (int)(moveStartTopPos + (pMouseY - clickY));
+//            wasMoved = true;
+//
+//            if (panel != null) {
+//                applyDimensions();
+//            } else {
+//                rebuildWidgets();
+//            }
+//
+//            return true;
+//        }
 
         // First, handle the ContainerScreen mouse drag stuff. This *always* returns true and does not call super(),
         // because Mojang does not know how to make a user interface framework.
@@ -297,27 +353,27 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
 
     @Override
     protected void renderBg(PoseStack pPoseStack, float pPartialTick, int pMouseX, int pMouseY) {
-        TorchUtil.insetBox(
-                pPoseStack,
-                 TorchUI.builtInTex("gui/widgets/screen_background.png"),
-                leftPos, topPos, imageWidth, imageHeight
-        );
-
-        if (twoToneHeight > 0) {
-            TorchUtil.insetBox(
-                    pPoseStack,
-                    TorchUI.builtInTex("gui/widgets/twotone_background.png"),
-                    leftPos, topPos, imageWidth, twoToneHeight
-            );
-        }
-
-        renderTitleBar(pPoseStack, pPartialTick, pMouseX, pMouseY);
+//        TorchUtil.insetBox(
+//                pPoseStack,
+//                 TorchUI.builtInTex("gui/widgets/screen_background.png"),
+//                leftPos, topPos, imageWidth, imageHeight
+//        );
+//
+//        if (twoToneHeight > 0) {
+//            TorchUtil.insetBox(
+//                    pPoseStack,
+//                    TorchUI.builtInTex("gui/widgets/twotone_background.png"),
+//                    leftPos, topPos, imageWidth, twoToneHeight
+//            );
+//        }
+//
+//        renderTitleBar(pPoseStack, pPartialTick, pMouseX, pMouseY);
     }
 
     protected void renderTitleBar(PoseStack poseStack, float partialTick, int mouseX, int mouseY) {
         var border = 2;
 
-        if (resizable) {
+        if (movable) {
             colorQuad(
                     poseStack, 0xFF999999,
                     leftPos + border, topPos + border,
@@ -396,52 +452,61 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
 
     }
 
+    private int z = 0;
+
     @Override
     public final void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+        RenderSystem.enableDepthTest();
         updateStateFromMenu();
+
         renderBackground(pPoseStack);
 
-//        var scissorBorder = 0;
-//        enableScissor(
-//                leftPos + scissorBorder,
-//                topPos + scissorBorder,
-//                leftPos + imageWidth - scissorBorder*2,
-//                topPos + imageHeight - scissorBorder*2
-//        );
+        for (var window : windows) {
+            window.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
+        }
 
         super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
-//        disableScissor();
 
         pPoseStack.pushPose();
-        pPoseStack.translate(leftPos, topPos, 1);
+        pPoseStack.translate(leftPos, topPos, 0);
         RenderSystem.applyModelViewMatrix();
         renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
         pPoseStack.popPose();
         RenderSystem.applyModelViewMatrix();
 
-        if (!resizing && resizable) {
-            if (hoveringRightEdge(pMouseX, pMouseY) && hoveringBottomEdge(pMouseX, pMouseY)) {
-                TorchUtil.colorQuad(
-                        pPoseStack, Color.WHITE.withAlpha(0.5f),
-                        getRightEdgeStart(), getBottomEdgeStart(),
-                        dragHandleSize, dragHandleSize
-                );
-            } else if (hoveringRightEdge(pMouseX, pMouseY)) {
-                TorchUtil.colorQuad(
-                        pPoseStack, Color.WHITE.withAlpha(0.5f),
-                        getRightEdgeStart(), topPos,
-                        dragHandleSize, imageHeight
-                );
-            } else if (hoveringBottomEdge(pMouseX, pMouseY)) {
-                TorchUtil.colorQuad(
-                        pPoseStack, Color.WHITE.withAlpha(0.5f),
-                        leftPos, getBottomEdgeStart(),
-                        imageWidth, dragHandleSize
-                );
-            }
-        }
+//        if (!resizing && resizable) {
+//            if (hoveringRightEdge(pMouseX, pMouseY) && hoveringBottomEdge(pMouseX, pMouseY)) {
+//                TorchUtil.colorQuad(
+//                        pPoseStack, Color.WHITE.withAlpha(0.5f),
+//                        getRightEdgeStart(), getBottomEdgeStart(),
+//                        dragHandleSize, dragHandleSize
+//                );
+//            } else if (hoveringRightEdge(pMouseX, pMouseY)) {
+//                TorchUtil.colorQuad(
+//                        pPoseStack, Color.WHITE.withAlpha(0.5f),
+//                        getRightEdgeStart(), topPos,
+//                        dragHandleSize, imageHeight
+//                );
+//            } else if (hoveringBottomEdge(pMouseX, pMouseY)) {
+//                TorchUtil.colorQuad(
+//                        pPoseStack, Color.WHITE.withAlpha(0.5f),
+//                        leftPos, getBottomEdgeStart(),
+//                        imageWidth, dragHandleSize
+//                );
+//            }
+//        }
 
         renderOver(pPoseStack, pMouseX, pMouseY);
+    }
+
+    public void sendWindowToTop(Window window) {
+        windows.remove(window);
+        windows.add(window);
+    }
+
+    public void sendWindowToBottom(Window window) {
+        windows.remove(window);
+        windows.add(0, window);
     }
 
     /**
@@ -494,13 +559,52 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
      * @return
      */
     protected List<Rect2i> getJeiAreas() {
-        return List.of();
+        var list = new ArrayList<Rect2i>();
+
+        for (var window : windows) {
+            list.add(window.getScreenRect());
+        }
+
+        return list;
     }
 
     public static class JeiHandler implements IGuiContainerHandler<TorchScreen<?>> {
         @Override
         public List<Rect2i> getGuiExtraAreas(TorchScreen<?> containerScreen) {
             return containerScreen.getJeiAreas();
+        }
+    }
+
+    public class ScreenWindow extends Window {
+        public ScreenWindow() {
+            super(title);
+        }
+
+        @Override
+        protected void wasMovedByUser(int x, int y) {
+            wasMoved = true;
+        }
+
+        @Override
+        protected void didMove() {
+            leftPos = x;
+            topPos = y;
+
+            TorchScreen.this.applyDimensions();
+            super.didMove();
+        }
+
+        @Override
+        protected void didResize() {
+            imageWidth = width;
+            imageHeight = height;
+
+            if (!wasMoved) {
+                mainWindow.move((TorchScreen.this.width - imageWidth) / 2, (TorchScreen.this.height - imageHeight) / 2);
+            }
+
+            TorchScreen.this.applyDimensions();
+            super.didResize();
         }
     }
 }

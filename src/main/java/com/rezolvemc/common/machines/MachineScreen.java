@@ -31,11 +31,11 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
 
     @Override
     protected void setup() {
-        addChild(leftShoulderButtons = new VerticalLayoutPanel());
+        getMainWindow().addChild(leftShoulderButtons = new VerticalLayoutPanel());
         leftShoulderButtons.setIsDecoration(true);
         leftShoulderButtons.setSpace(2);
 
-        addChild(rightShoulderButtons = new VerticalLayoutPanel());
+        getMainWindow().addChild(rightShoulderButtons = new VerticalLayoutPanel());
         rightShoulderButtons.setIsDecoration(true);
         rightShoulderButtons.setSpace(2);
 
@@ -50,10 +50,10 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
         super.applyDimensions();
 
         if (leftShoulderButtons != null)
-            leftShoulderButtons.move(leftPos - IconButton.SIZE - 3, topPos, IconButton.SIZE, imageHeight);
+            leftShoulderButtons.move(- IconButton.SIZE - 3, 0, IconButton.SIZE, imageHeight);
 
         if (rightShoulderButtons != null)
-            rightShoulderButtons.move(leftPos + imageWidth + 3, topPos, IconButton.SIZE, imageHeight);
+            rightShoulderButtons.move(imageWidth + 3, 0, IconButton.SIZE, imageHeight);
     }
 
     protected IconButton addLeftShoulderButton(String label, ResourceLocation icon) {
@@ -306,9 +306,11 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
 
     @Override
     protected List<Rect2i> getJeiAreas() {
-        return List.of(
-            leftShoulderButtons.getScreenDesiredRect(),
-            rightShoulderButtons.getScreenDesiredRect()
-        );
+        var list = super.getJeiAreas();
+
+        list.add(leftShoulderButtons.getDesiredScreenRect());
+        list.add(rightShoulderButtons.getDesiredScreenRect());
+
+        return list;
     }
 }

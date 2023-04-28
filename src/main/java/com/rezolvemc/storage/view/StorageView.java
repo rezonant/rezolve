@@ -50,9 +50,6 @@ public class StorageView extends WidgetBase {
 		this.width = width;
 		this.height = height;
 
-
-		setDesiredSize(new Size(0, 0));
-
 		this.sendStateToServer();
 
 

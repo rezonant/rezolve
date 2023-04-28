@@ -4,6 +4,8 @@ import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.Slot;
 import org.torchmc.WidgetBase;
+import org.torchmc.layout.AxisConstraint;
+import org.torchmc.util.Color;
 import org.torchmc.util.Size;
 
 import java.util.ArrayList;
@@ -20,6 +22,8 @@ public class SlotGrid extends WidgetBase {
     private Component label;
     private int breadth;
     private int cachedSlotCount;
+    private Label labelWidget;
+    private boolean labelVisible = true;
 
     public Component getLabel() {
         return label;
@@ -42,8 +46,21 @@ public class SlotGrid extends WidgetBase {
         setContents(slots);
     }
 
+    public boolean isLabelVisible() {
+        return labelVisible;
+    }
+
+    public void setLabelVisible(boolean labelVisible) {
+        this.labelVisible = labelVisible;
+        hierarchyDidChange();
+    }
+
     public void setContents(List<Slot> slots) {
         children.clear();
+
+        addChild(labelWidget = new Label());
+        labelWidget.setContent(label);
+        //labelWidget.setAlignment(Label.Alignment.CENTERED);
 
         int i = 0;
         cachedSlotCount = slots.size();
@@ -71,11 +88,18 @@ public class SlotGrid extends WidgetBase {
         return slots.toArray(new SlotWidget[slots.size()]);
     }
 
+    private int labelMargin = 5;
     @Override
-    public Size getDesiredSize() {
-        int rowCount = (int)Math.ceil(cachedSlotCount / (float)breadth);
-        return new Size(SlotWidget.SIZE * breadth, SlotWidget.SIZE * rowCount);
+    public AxisConstraint getDesiredWidth(int assumedHeight) {
+        return AxisConstraint.atLeast(SlotWidget.SIZE * breadth);
     }
+
+    @Override
+    public AxisConstraint getDesiredHeight(int assumedWidth) {
+        int rowCount = (int)Math.ceil(cachedSlotCount / (float)breadth);
+        return AxisConstraint.atLeast(SlotWidget.SIZE * rowCount + (labelVisible ? (font.lineHeight + labelMargin*2) : 0));
+    }
+
 
     @Override
     protected void didResize() {
@@ -89,9 +113,16 @@ public class SlotGrid extends WidgetBase {
         int rowCount = (int)Math.ceil(cachedSlotCount / (float)breadth);
 
         int gridWidth = SlotWidget.SIZE * breadth;
-        int gridHeight = SlotWidget.SIZE * rowCount;
+        int gridHeight = SlotWidget.SIZE * rowCount + (labelVisible ? font.lineHeight + labelMargin*2 : 0);
         int gridX = width / 2 - gridWidth / 2;
         int gridY = height / 2 - gridHeight / 2;
+
+        labelWidget.setVisible(labelVisible);
+        if (labelVisible) {
+            labelWidget.move(gridX + gridWidth / 2 - font.width(label) / 2, gridY + labelMargin, font.width(label), font.lineHeight);
+            labelWidget.setBackgroundColor(Color.PINK);
+            gridY += font.lineHeight + labelMargin*2;
+        }
 
         for (var row = 0; row < rowCount; ++row) {
             for (var col = 0; col < breadth; ++col) {

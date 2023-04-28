@@ -19,6 +19,7 @@ import org.torchmc.layout.AxisConstraint;
 import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -49,6 +50,52 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
     protected int height;
     protected Minecraft minecraft;
     protected Font font;
+
+    private int leftPadding = 0;
+    private int rightPadding = 0;
+    private int topPadding = 0;
+    private int bottomPadding = 0;
+
+    public int getPadding(Axis axis) {
+        if (axis == Axis.X)
+            return leftPadding + rightPadding;
+        else if (axis == Axis.Y)
+            return topPadding + bottomPadding;
+
+        return 0;
+    }
+
+    public int getLeftPadding() {
+        return leftPadding;
+    }
+
+    public int getTopPadding() {
+        return topPadding;
+    }
+
+    public int getRightPadding() {
+        return rightPadding;
+    }
+
+    public int getBottomPadding() {
+        return bottomPadding;
+    }
+
+    public void setLeftPadding(int leftPadding) {
+        this.leftPadding = leftPadding;
+    }
+
+    public void setRightPadding(int rightPadding) {
+        this.rightPadding = rightPadding;
+    }
+
+    public void setTopPadding(int topPadding) {
+        this.topPadding = topPadding;
+    }
+
+    public void setBottomPadding(int bottomPadding) {
+        this.bottomPadding = bottomPadding;
+    }
 
     public int getX() {
         return x;
@@ -82,6 +129,10 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
         this.tooltip = List.of(Component.literal(text));
     }
 
+    /**
+     * Find the screen rect for the widget's current location and size.
+     * @return
+     */
     public Rect2i getScreenRect() {
         var x = 0;
         var y = 0;
@@ -95,7 +146,11 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
         return new Rect2i(x, y, width, height);
     }
 
-    public Rect2i getScreenDesiredRect() {
+    /**
+     * Find the screen rect representing the current location and desired size of this widget.
+     * @return
+     */
+    public Rect2i getDesiredScreenRect() {
         var x = 0;
         var y = 0;
         var self = this;
@@ -148,17 +203,6 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
 
     void adoptParent(WidgetBase parent) {
         this.parent = parent;
-    }
-
-    /**
-     * For widgets which have no WidgetBase parent (for instance top level Panels adopted by Screens),
-     * this allows you to convey the size of the parent without assigning it as a parent (since you wouldn't be
-     * able to, as the Screen does not extend from WidgetBase). You don't need to use this directly.
-     * @param size
-     */
-    public void setParentSize(Size size) {
-        if (this.parent != null)
-            throw new RuntimeException("You cannot set the parent size on a widget which is already parented.");
     }
 
     public <T extends WidgetBase> T addChild(T widget) {
@@ -472,6 +516,7 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
     }
 
     protected Component narrationTitle;
+    protected int z = 0;
 
     @Override
     public final void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
@@ -480,16 +525,24 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
 
         hovered = isMouseOver(pMouseX, pMouseY);
 
-        screenScissor(() -> {
-            pushPose(pPoseStack, () -> {
-                repose(pPoseStack, () -> pPoseStack.translate(x, y, 0));
-                renderChildren(pPoseStack, pMouseX - x, pMouseY - y, pPartialTick);
+        pushPose(pPoseStack, () -> {
+            repose(pPoseStack, () -> pPoseStack.translate(0, 0, z));
+
+            screenScissor(() -> {
+                renderBackground(pPoseStack, pMouseX, pMouseY, pPartialTick);
+                pushPose(pPoseStack, () -> {
+                    repose(pPoseStack, () -> pPoseStack.translate(x, y, 0));
+                    renderChildren(pPoseStack, pMouseX - x, pMouseY - y, pPartialTick);
+                });
+                renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
             });
-            renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
         });
 
         if (isHovered())
             renderTooltip(pPoseStack, pMouseX, pMouseY);
+    }
+
+    protected void renderBackground(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
     }
 
     protected void renderTooltip(PoseStack poseStack, int mouseX, int mouseY) {
@@ -518,15 +571,35 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
         pNarrationElementOutput.add(NarratedElementType.TITLE, narrationTitle);
     }
 
+    public WidgetBase getRootParent() {
+        WidgetBase widget = this;
+        while (widget.parent != null)
+            widget = widget.parent;
+
+        return widget;
+    }
+
     protected void screenScissor(Runnable runnable) {
         var border = 2;
-        if (screen != null && !isDecoration())
+        var root = getRootParent();
+
+        if (screen != null && !isDecoration()) {
+            if (root instanceof Window window) {
+                var rect = window.getScreenRect();
+                displayScissor(
+                        rect.getX() + border, rect.getY() + border,
+                        rect.getWidth() - border * 2, rect.getHeight() - border * 2,
+                        runnable);
+                return;
+            }
+
             displayScissor(
                     screen.getGuiLeft() + border, screen.getGuiTop() + border,
                     screen.getXSize() - border * 2, screen.getYSize() - border * 2,
                     runnable);
-        else
+        } else {
             runnable.run();
+        }
     }
 
     /**
@@ -605,13 +678,14 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
     @Override
     public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
         mouseDown = true;
-        clickX = pMouseX;
-        clickY = pMouseY;
 
         // Pass to children, putting it into their parent coordinate space (ours)
 
         pMouseX -= x;
         pMouseY -= y;
+
+        clickX = pMouseX;
+        clickY = pMouseY;
 
         for (var child : children) {
             if (child.isMouseOver(pMouseX, pMouseY)) {
@@ -668,17 +742,13 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
         }
     }
 
-    Size desiredSize = null;
-
     /**
      * Set the size this widget desires to be. Used as an input to layout panels
      * @param desiredSize
      */
-    public void setDesiredSize(Size desiredSize) {
-        this.desiredSize = desiredSize;
+    public void setFixedSize(Size desiredSize) {
         this.setWidthConstraint(AxisConstraint.fixed(desiredSize.width));
         this.setHeightConstraint(AxisConstraint.fixed(desiredSize.height));
-        desiredSizeDidChange();
     }
 
     public int getAxis(Axis axis) {
@@ -724,12 +794,19 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
     private AxisConstraint widthConstraint = AxisConstraint.FREE;
     private AxisConstraint heightConstraint = AxisConstraint.FREE;
 
-    public void setWidthConstraint(AxisConstraint widthConstraint) {
+    public void setWidthConstraint(@Nonnull AxisConstraint widthConstraint) {
+        if (widthConstraint == null)
+            throw new IllegalArgumentException("widthConstraint cannot be null");
+
         this.widthConstraint = widthConstraint;
+        desiredSizeDidChange();
     }
 
-    public void setHeightConstraint(AxisConstraint heightConstraint) {
+    public void setHeightConstraint(@Nonnull AxisConstraint heightConstraint) {
+        if (heightConstraint == null)
+            throw new IllegalArgumentException("heightConstraint cannot be null");
         this.heightConstraint = heightConstraint;
+        desiredSizeDidChange();
     }
 
     public AxisConstraint getDesiredWidth(int assumedHeight) {
@@ -765,7 +842,10 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
      */
     @Deprecated
     public Size getDesiredSize() {
-        return this.desiredSize;
+        var width = getDesiredWidth(0);
+        var height = getDesiredHeight(0);
+
+        return new Size(width.desired > 0 ? width.desired : width.min, height.desired > 0 ? height.desired : height.min);
     }
 
     private Size growScale;

@@ -9,16 +9,13 @@ import org.torchmc.util.Size;
 import org.torchmc.widgets.Button;
 import org.torchmc.widgets.Label;
 import com.rezolvemc.common.machines.MachineScreen;
-import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -98,7 +95,7 @@ public class ThunderboltCableScreen extends MachineScreen<ThunderboltCableMenu> 
                             button.setHandler(btn ->
                                     menu.cycleTransmissionMode(configurator.getSelectedSide(), type, btn == 0 ? 1 : -1)
                             );
-                            button.setDesiredSize(new Size(transmissionTypeWidth, transmissionTypeHeight));
+                            button.setFixedSize(new Size(transmissionTypeWidth, transmissionTypeHeight));
                             transmissionTypeButtons.put(type, button);
                         });
                     }

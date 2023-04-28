@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.torchmc.WidgetBase;
+import org.torchmc.layout.AxisConstraint;
 import org.torchmc.util.Color;
 import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
@@ -32,7 +33,7 @@ public class Button extends WidgetBase {
         super(Component.empty());
 
         this.text = text;
-        setDesiredSize(new Size(width, 20));
+        setHeightConstraint(AxisConstraint.fixed(20));
         setFocusable(true);
     }
 
@@ -113,7 +114,8 @@ public class Button extends WidgetBase {
             int i = this.getYImage(this.isHoveredOrFocused());
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            RenderSystem.enableDepthTest();
+            //RenderSystem.enableDepthTest();
+
             this.blit(pPoseStack, this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
             this.blit(
                     pPoseStack,
@@ -167,5 +169,13 @@ public class Button extends WidgetBase {
     @Override
     public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
         pNarrationElementOutput.add(NarratedElementType.TITLE, text);
+    }
+
+    @Override
+    public AxisConstraint getDesiredWidth(int assumedHeight) {
+        if (super.getDesiredWidth(assumedHeight) != AxisConstraint.FREE)
+            return super.getDesiredWidth(assumedHeight);
+
+        return AxisConstraint.atLeast(font.width(text) + 4);
     }
 }

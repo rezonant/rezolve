@@ -16,7 +16,6 @@ public class BundlerScreen extends MachineScreen<BundlerMenu> {
 
 		this.inventoryLabelX = 49;
 		this.inventoryLabelY = 113;
-		this.twoToneHeight = 125;
 	}
 
 	@Override

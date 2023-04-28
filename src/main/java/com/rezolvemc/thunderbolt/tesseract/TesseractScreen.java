@@ -5,7 +5,9 @@ import com.rezolvemc.common.machines.MachineScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import org.torchmc.Window;
 import org.torchmc.layout.VerticalLayoutPanel;
+import org.torchmc.util.Color;
 import org.torchmc.widgets.*;
 
 public class TesseractScreen extends MachineScreen<TesseractMenu> {
@@ -22,6 +24,16 @@ public class TesseractScreen extends MachineScreen<TesseractMenu> {
     @Override
     protected void setup() {
         super.setup();
+
+        addChild(new Window("Side Window"), window -> {
+            window.setPanel(new VerticalLayoutPanel(), panel -> {
+                panel.addChild(new Label("Cool!"), label -> {
+                    label.setBackgroundColor(Color.PINK);
+                });
+            });
+
+            window.move(100, 100, 100, 100);
+        });
 
         leftShoulderButtons.addChild(new IconButton("Security?!", TEX_SECURITY_OPTIONS));
         leftShoulderButtons.addChild(new IconButton("Database", TEX_DATABASE_OPTIONS));

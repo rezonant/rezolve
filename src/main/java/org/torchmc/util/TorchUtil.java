@@ -117,8 +117,8 @@ public class TorchUtil {
 
     public static void colorQuad(PoseStack stack, Color color, double x, double y, double width, double height) {
         RenderSystem.disableTexture();
-        RenderSystem.disableDepthTest();
-        RenderSystem.colorMask(true, true, true, false);
+        //RenderSystem.disableDepthTest();
+        //RenderSystem.colorMask(true, true, true, false);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
@@ -147,6 +147,6 @@ public class TorchUtil {
         tesselator.end();
         RenderSystem.disableBlend();
         RenderSystem.enableTexture();
-        RenderSystem.enableDepthTest();
+        //RenderSystem.enableDepthTest();
     }
 }
