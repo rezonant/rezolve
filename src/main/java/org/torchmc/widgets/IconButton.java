@@ -21,10 +21,17 @@ public class IconButton extends WidgetBase {
     }
 
     public IconButton(Component text, ResourceLocation icon) {
+        this(text, icon, SIZE);
+    }
+
+    public IconButton(Component text, ResourceLocation icon, int size) {
         super(Component.empty());
 
         this.text = text;
         this.icon = icon;
+        this.size = size;
+        this.width = size;
+        this.height = size;
 
         setFocusable(true);
     }
@@ -35,6 +42,7 @@ public class IconButton extends WidgetBase {
     private Component text;
     private ResourceLocation icon;
     private float alpha = 1;
+    private int size = SIZE;
 
     @Override
     public List<Component> getTooltip() {
@@ -86,13 +94,42 @@ public class IconButton extends WidgetBase {
     }
 
     @Override
+    public int getConstrainedHeight(int width) {
+        return size;
+    }
+
+    @Override
+    public int getConstrainedWidth(int height) {
+        return size;
+    }
+
+    @Override
     public AxisConstraint getDesiredHeight(int assumedWidth) {
-        return AxisConstraint.fixed(SIZE);
+        return AxisConstraint.fixed(size);
     }
 
     @Override
     public AxisConstraint getDesiredWidth(int assumedHeight) {
-        return AxisConstraint.fixed(SIZE);
+        return AxisConstraint.fixed(size);
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+        this.resize(size, size);
+    }
+
+    private Color backgroundColor = Color.BLACK;
+
+    public Color getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    public void setBackgroundColor(Color backgroundColor) {
+        this.backgroundColor = backgroundColor;
     }
 
     @Override
@@ -101,7 +138,7 @@ public class IconButton extends WidgetBase {
             TorchUtil.colorQuad(pPoseStack, 0xFFFFFFFF, x, y, width, height);
         }
 
-        TorchUtil.colorQuad(pPoseStack, 0xFF000000, x + 1, y + 1, width - 2, height - 2);
+        TorchUtil.colorQuad(pPoseStack, backgroundColor, x + 1, y + 1, width - 2, height - 2);
         TorchUtil.textureQuad(pPoseStack, icon, x + 1, y + 1, width - 2, height - 2, 0, 0, 1, 1);
     }
 

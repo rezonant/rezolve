@@ -88,6 +88,6 @@ public class RezolveMenuPacket extends RezolvePacket {
         if (direction == NetworkDirection.PLAY_TO_CLIENT)
             packetReceiver.receivePacketOnClient(this);
         else if (direction == NetworkDirection.PLAY_TO_SERVER)
-            packetReceiver.receivePacketOnServer(this);
+            packetReceiver.receivePacketOnServer(this, player);
     }
 }

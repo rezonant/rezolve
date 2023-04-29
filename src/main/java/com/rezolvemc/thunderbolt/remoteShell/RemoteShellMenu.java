@@ -10,7 +10,9 @@ import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.thunderbolt.remoteShell.packets.RemoteShellActivatePacket;
 import com.rezolvemc.thunderbolt.remoteShell.packets.RemoteShellMenuReturnPacket;
 import com.rezolvemc.thunderbolt.remoteShell.packets.RemoteShellRenameMachinePacket;
+import com.rezolvemc.thunderbolt.remoteShell.packets.RemoteShellStatePacket;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -20,6 +22,7 @@ import java.util.UUID;
 @RegistryId("remote_shell")
 @WithScreen(RemoteShellScreen.class)
 @WithPacket(RemoteShellActivatePacket.class)
+@WithPacket(RemoteShellStatePacket.class)
 public class RemoteShellMenu extends MachineMenu<RemoteShellEntity> {
 	public RemoteShellMenu(int containerId, Inventory playerInv) {
 		this(containerId, playerInv, null);
@@ -62,12 +65,12 @@ public class RemoteShellMenu extends MachineMenu<RemoteShellEntity> {
 		for (var endpoint : this.machine.getConnectedMachines()) {
 			var machinePos = endpoint.getPosition();
 			var machineBlockState = endpoint.getBlockState();
-			var name = machineBlockState.getBlock().getName().getString();
+			var name = machineBlockState.getBlock().getName();
 			if (db != null)
-				name = db.getMachineName(machinePos);
+				name = Component.literal(db.getMachineName(machinePos));
 			var item = new ItemStack(machineBlockState.getBlock().asItem(), 1);
 
-			searchResults.machines.add(new MachineListing(endpoint.getLevelKey(), machinePos, name, item));
+			searchResults.machines.add(new MachineListing(endpoint.getLevelKey(), machinePos, null, item));
 		}
 	}
 
@@ -84,7 +87,7 @@ public class RemoteShellMenu extends MachineMenu<RemoteShellEntity> {
 	}
 
 	@Override
-	public void receivePacketOnServer(RezolvePacket rezolvePacket) {
+	public void receivePacketOnServer(RezolvePacket rezolvePacket, Player player) {
 		if (rezolvePacket instanceof RemoteShellActivatePacket activation) {
 			machine.activate(activation.getLevel(), activation.getActivatedMachine(), machine.getLevel().getPlayerByUUID(UUID.fromString(activation.getPlayerId())));
 		} else if (rezolvePacket instanceof RemoteShellRenameMachinePacket rename) {
@@ -92,7 +95,7 @@ public class RemoteShellMenu extends MachineMenu<RemoteShellEntity> {
 		} else if (rezolvePacket instanceof RemoteShellMenuReturnPacket ret) {
 			machine.returnToShell(machine.getLevel().getPlayerByUUID(UUID.fromString(ret.getPlayerId())));
 		} else {
-			super.receivePacketOnServer(rezolvePacket);
+			super.receivePacketOnServer(rezolvePacket, player);
 		}
 	}
 }

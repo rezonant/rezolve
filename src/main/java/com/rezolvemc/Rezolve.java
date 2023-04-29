@@ -88,6 +88,10 @@ public class Rezolve {
 		return loc("textures/" + name);
 	}
 
+	public static Logger logger(Class<?> klass) {
+		return LogManager.getLogger("rezolve/" + klass.getName());
+	}
+
 	public static Component tr(String name) { return Component.translatable(name); };
 
 	public static void setPlayerOverridePosition(UUID playerID, LevelPosition pos) {

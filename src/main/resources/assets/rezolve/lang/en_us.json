@@ -112,6 +112,7 @@
   "screens.rezolve.bundle_pattern_output_slot": "Encoded patterns (output)",
   "screens.rezolve.bundle_input_slot": "Bundles (input)",
   "screens.rezolve.storage_view": "Storage View",
+  "screens.rezolve.close": "Close",
 
   "rezolve.screens.usage": "Usage",
   "rezolve.screens.disks": "Disks",

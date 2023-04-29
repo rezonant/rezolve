@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
@@ -14,6 +15,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.NetworkDirection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Objects;
 
 public class RezolveBlockEntityPacket extends RezolvePacket {
     private static Logger LOGGER = LogManager.getLogger(Rezolve.ID);
@@ -40,7 +43,9 @@ public class RezolveBlockEntityPacket extends RezolvePacket {
     @OnlyIn(Dist.CLIENT)
     protected final void receiveOnClient() {
         receiveForLevel(
-                Minecraft.getInstance().level, "server",
+                Minecraft.getInstance().level,
+                Minecraft.getInstance().player,
+                "server",
                 NetworkDirection.PLAY_TO_CLIENT
         );
     }
@@ -49,16 +54,17 @@ public class RezolveBlockEntityPacket extends RezolvePacket {
     protected final void receiveOnServer(ServerPlayer sender) {
         receiveForLevel(
                 sender.level,
+                sender,
                 String.format("player %s [%s]", sender.getName().getString(), sender.getStringUUID()),
                 NetworkDirection.PLAY_TO_SERVER
         );
     }
 
-    private void receiveForLevel(Level level, String source, NetworkDirection direction) {
+    private void receiveForLevel(Level level, Player player, String source, NetworkDirection direction) {
 
         String currentDimension = level.dimension().location().getPath();
 
-        if (currentDimension != dimension) {
+        if (!Objects.equals(currentDimension, dimension)) {
             LOGGER.warn(
                     "Received BlockEntity packet for dimension {} from {}, "
                             + "but player is currently in dimension {}. Ignoring.",
@@ -100,6 +106,6 @@ public class RezolveBlockEntityPacket extends RezolvePacket {
         if (direction == NetworkDirection.PLAY_TO_CLIENT)
             packetReceiver.receivePacketOnClient(this);
         else if (direction == NetworkDirection.PLAY_TO_SERVER)
-            packetReceiver.receivePacketOnServer(this);
+            packetReceiver.receivePacketOnServer(this, player);
     }
 }

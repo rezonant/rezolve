@@ -43,6 +43,7 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
     private boolean focused = false;
     private boolean active = true;
     private List<Component> tooltip = null;
+    private Runnable onTick = null;
 
     protected int x;
     protected int y;
@@ -127,6 +128,14 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
 
     public void setTooltip(String text) {
         this.tooltip = List.of(Component.literal(text));
+    }
+
+    public void setOnTick(Runnable onTick) {
+        this.onTick = onTick;
+    }
+
+    public Runnable getOnTick() {
+        return onTick;
     }
 
     /**
@@ -282,7 +291,7 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
 
     @Override
     public boolean isMouseOver(double pMouseX, double pMouseY) {
-        return x < pMouseX && pMouseX < x + width && y < pMouseY && pMouseY < y + height;
+        return visible && x < pMouseX && pMouseX < x + width && y < pMouseY && pMouseY < y + height;
     }
 
     public boolean isHoveredOrFocused() {
@@ -520,6 +529,9 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
 
     @Override
     public final void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+        if (this.onTick != null)
+            this.onTick.run();
+
         if (!visible)
             return;
 
@@ -547,7 +559,7 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
 
     protected void renderTooltip(PoseStack poseStack, int mouseX, int mouseY) {
         var tooltip = getTooltip(); // Important to allow customization of tooltip behavior in widget classes
-        if (tooltip != null && tooltip.size() > 0)
+        if (tooltip != null && tooltip.size() > 0 && screen != null)
             screen.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY);
     }
 
@@ -662,7 +674,7 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
         pMouseY -= y;
 
         for (var child : children) {
-            if (child.isMouseOver(pMouseX, pMouseY)) {
+            if (child.isVisible() && child.isMouseOver(pMouseX, pMouseY)) {
                 if (child.mouseScrolled(pMouseX, pMouseY, pDelta)) {
                     return true;
                 }
@@ -827,10 +839,20 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
     }
 
     public int getConstrainedWidth(int height) {
+        var constraint = getDesiredWidth(height);
+
+        if (constraint.fixed)
+            return constraint.desired;
+
         return width;
     }
 
     public int getConstrainedHeight(int width) {
+        var constraint = getDesiredHeight(width);
+
+        if (constraint.fixed)
+            return constraint.desired;
+
         return height;
     }
 

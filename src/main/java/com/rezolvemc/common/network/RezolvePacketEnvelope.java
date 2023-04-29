@@ -22,7 +22,7 @@ public class RezolvePacketEnvelope extends RezolvePacket {
             throw new RuntimeException(
                     String.format(
                             "Packet %s is missing @RegistryId(), which implies it was not registered.",
-                            getClass().getCanonicalName()
+                            packet.getClass().getCanonicalName()
                     )
             );
         }

@@ -1,12 +1,18 @@
 package org.torchmc;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.rezolvemc.Rezolve;
 import net.minecraft.network.chat.Component;
+import org.torchmc.layout.AxisAlignment;
+import org.torchmc.layout.HorizontalLayoutPanel;
 import org.torchmc.layout.Panel;
 import org.torchmc.util.Color;
 import org.torchmc.util.ResizeMode;
 import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
+import org.torchmc.widgets.IconButton;
+import org.torchmc.widgets.Label;
+import org.torchmc.widgets.Spacer;
 
 import java.util.function.Consumer;
 
@@ -18,15 +24,40 @@ public class Window extends WidgetBase {
         this.z = 100;
 
         setIsDecoration(true);
+
+        titlebarPanel = addChild(new HorizontalLayoutPanel(), titlebarRoot -> {
+            titlebarRoot.setAlignment(AxisAlignment.CENTER);
+            titlebarRoot.addChild(new Label(title), label -> {
+                label.setColor(Color.argb(0xFF404040));
+                label.setTopPadding(1);
+                label.setLeftPadding(5);
+                titlebarLabel = label;
+            });
+            titlebarRoot.addChild(new Spacer());
+            titlebarRoot.addChild(new IconButton(Rezolve.tr("screens.rezolve.close"), Rezolve.tex("gui/x.png"), titlebarHeight - 7), btn -> {
+                btn.setBackgroundColor(Color.TRANSPARENT);
+                btn.setHandler(() -> onClose());
+
+                btn.setVisible(closable);
+                closeButton = btn;
+            });
+        });
+
+        titlebarPanel.setVisible(titleBarVisible);
     }
 
     public Window(String title) {
         this(Component.literal(title));
     }
 
+    private Panel titlebarPanel;
+    private Label titlebarLabel;
+    private IconButton closeButton;
     private Component title;
     private boolean resizable = true;
     private boolean movable = true;
+    private boolean closable = true;
+    private boolean titleBarVisible = true;
     private Panel panel;
     private Size minSize = new Size(50, 50);
     private boolean resizing = false;
@@ -58,6 +89,7 @@ public class Window extends WidgetBase {
 
     public void setTitle(Component title) {
         this.title = title;
+        this.titlebarLabel.setContent(title);
     }
 
     public boolean isResizable() {
@@ -66,6 +98,36 @@ public class Window extends WidgetBase {
 
     public void setResizable(boolean resizable) {
         this.resizable = resizable;
+    }
+
+    public boolean isClosable() {
+        return closable;
+    }
+
+    public boolean isTitleBarVisible() {
+        return titleBarVisible;
+    }
+
+    public void setTitleBarVisible(boolean titleBarVisible) {
+        if (this.titleBarVisible == titleBarVisible)
+            return;
+
+        this.titleBarVisible = titleBarVisible;
+        this.titlebarPanel.setVisible(titleBarVisible);
+
+        if (titleBarVisible) {
+            resize(width, height + titlebarHeight);
+        } else {
+            resize(width, height - titlebarHeight);
+        }
+
+        applyDimensions();
+    }
+
+    public void setClosable(boolean closable) {
+        this.closable = closable;
+        if (closeButton != null)
+            closeButton.setVisible(closable);
     }
 
     public <T extends Panel> T setPanel(T panel) {
@@ -86,16 +148,25 @@ public class Window extends WidgetBase {
     protected void renderTitleBar(PoseStack poseStack, float partialTick, int mouseX, int mouseY) {
         var border = 2;
 
-        if (movable) {
+        if (movable && titleBarVisible) {
             TorchUtil.colorQuad(
                     poseStack, 0xFF999999,
                     x + border, y + border,
                     width - border * 2, titlebarHeight - border * 2
             );
-
-            if (getTitle() != null)
-                font.draw(poseStack, getTitle(), x + 8, y + 6, 4210752);
         }
+    }
+
+    public boolean isMovable() {
+        return movable;
+    }
+
+    public void setMovable(boolean movable) {
+        this.movable = movable;
+    }
+
+    public void onClose() {
+        setVisible(false);
     }
 
     @Override
@@ -144,12 +215,15 @@ public class Window extends WidgetBase {
 
     @Override
     public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
-        clickX = pMouseX;
-        clickY = pMouseY;
-
         if (screen instanceof TorchScreen<?> torchScreen) {
             torchScreen.sendWindowToTop(this);
         }
+
+        if (super.mouseClicked(pMouseX, pMouseY, pButton))
+            return true;
+
+        clickX = pMouseX;
+        clickY = pMouseY;
 
         if (movable) {
             if (hoveringMenuBar(pMouseX, pMouseY)) {
@@ -185,7 +259,7 @@ public class Window extends WidgetBase {
             }
         }
 
-        return super.mouseClicked(pMouseX, pMouseY, pButton);
+        return false;
     }
 
     @Override
@@ -249,7 +323,7 @@ public class Window extends WidgetBase {
     }
 
     private boolean hoveringBottomEdge(double pMouseX, double pMouseY) {
-        return getBottomEdgeStart() < pMouseY && pMouseY < getBottomEdgeStart() + dragHandleSize;
+        return getBottomEdgeStart() < pMouseY && pMouseY < getBottomEdgeStart() + dragHandleSize && x < pMouseX && pMouseX < x + width + dragHandleSize / 2;
     }
 
     private int getRightEdgeStart() {
@@ -257,7 +331,7 @@ public class Window extends WidgetBase {
     }
 
     private boolean hoveringRightEdge(double mouseX, double mouseY) {
-        return getRightEdgeStart() < mouseX && mouseX < getRightEdgeStart() + dragHandleSize;
+        return getRightEdgeStart() < mouseX && mouseX < getRightEdgeStart() + dragHandleSize && y < mouseY && mouseY < y + height + dragHandleSize / 2;
     }
 
     private int getBottomEdgeStart() {
@@ -265,12 +339,17 @@ public class Window extends WidgetBase {
     }
 
     protected void applyDimensions() {
+        int border = 3;
+        titlebarPanel.move(border, border, width - border*2, titlebarHeight - border*2);
+
+        int effectiveTitlebarHeight = titleBarVisible ? titlebarHeight : 0;
+
         if (panel != null) {
             panel.move(
                     panelMargin,
-                    panelMargin + font.lineHeight + 2,
+                    effectiveTitlebarHeight + panelMargin,
                     width - panelMargin * 2,
-                    height - panelMargin * 2 - font.lineHeight - 2
+                    height - panelMargin * 2 - effectiveTitlebarHeight
             );
         }
     }

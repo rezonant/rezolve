@@ -101,6 +101,7 @@ public class Label extends WidgetBase {
     public void setContent(Component content) {
         this.content = content;
         this.narrationTitle = content;
+        constructLabel();
         hierarchyDidChange();
     }
 

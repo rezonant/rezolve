@@ -29,7 +29,7 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 	private int slotWidth = 207;
 	private int slotHeight = 22;
 	private MachineListing selectedMachine = null;
-	private String selectedMachineName = null;
+	private Component selectedMachineName = null;
 	private Label hintLbl;
 	private Label infoLbl;
 
@@ -139,12 +139,12 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 
 		// Set UI properties based on this machine
 		this.selectedMachineSecure = false;
-		this.selectedMachineName = machine.getName();
+		this.selectedMachineName = machine.getName() != null ? Component.literal(machine.getName()) : machine.getItem().getDisplayName();
 
 		// Set fields
 
 		if (selectedMachineName != null && !Objects.equals("", selectedMachineName))
-			nameField.setValue(this.selectedMachineName);
+			nameField.setValue(this.selectedMachineName.toString());
 		else
 			nameField.setValue("");
 

@@ -24,7 +24,7 @@ public class BundlerEntity extends MachineEntity {
 	public BundlerEntity(BlockPos pPos, BlockState pBlockState) {
 		super(RezolveRegistry.blockEntityType(BundlerEntity.class), pPos, pBlockState);
 		this.updateInterval = 5;
-		this.maxEnergyStored = 50000;
+		this.setEnergyCapacity(50000);
 
 		int nextSlotNumber = 0;
 

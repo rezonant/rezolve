@@ -176,6 +176,11 @@ public class Button extends WidgetBase {
         if (super.getDesiredWidth(assumedHeight) != AxisConstraint.FREE)
             return super.getDesiredWidth(assumedHeight);
 
-        return AxisConstraint.atLeast(font.width(text) + 4);
+        return AxisConstraint.atLeast(font.width(text) + 12);
+    }
+
+    @Override
+    public AxisConstraint getDesiredHeight(int assumedWidth) {
+        return AxisConstraint.fixed(20);
     }
 }

@@ -10,6 +10,7 @@ import com.rezolvemc.common.network.WithPacket;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.common.registry.WithScreen;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 
 @WithScreen(BundleBuilderScreen.class)
 @WithPacket(SetPatternSettingsPacket.class)
@@ -74,12 +75,12 @@ public class BundleBuilderMenu extends MachineMenu<BundleBuilderEntity> {
 	}
 
 	@Override
-	public void receivePacketOnServer(RezolvePacket rezolvePacket) {
+	public void receivePacketOnServer(RezolvePacket rezolvePacket, Player player) {
 		if (rezolvePacket instanceof SetPatternSettingsPacket settings) {
 			machine.setPatternName(settings.name);
 			machine.setLockedPositions(settings.lockPositions);
 		} else {
-			super.receivePacketOnServer(rezolvePacket);
+			super.receivePacketOnServer(rezolvePacket, player);
 		}
 	}
 }

@@ -38,22 +38,26 @@ import java.util.Objects;
 
 public class MachineEntity extends BlockEntityBase implements Container, IMachineInventory, ICapabilityProvider, RezolvePacketReceiver, GameEventListener {
 	protected Operation currentOperation;
-	protected EnergyStorage energy;
+	protected MachineEnergyStorage energy;
 	protected MachineItemHandler itemHandler;
 
 	private static final Logger LOGGER = LogManager.getLogger();
 
 	public MachineEntity(BlockEntityType<?> pType, BlockPos pPos, BlockState pBlockState) {
 		super(pType, pPos, pBlockState);
-		this.energy = new EnergyStorage(this.getEnergyCapacity(), getMaxEnergyTransfer());
+		this.energy = new MachineEnergyStorage(20000, 20000);
 		this.itemHandler = new MachineItemHandler(this);
 	}
 
-	int getEnergyCapacity() {
-		return 50000;
+	public int getEnergyCapacity() {
+		return energy.getMaxEnergyStored();
 	}
 
-	int getMaxEnergyTransfer() {
+	protected void setEnergyCapacity(int capacity) {
+		energy.setCapacity(capacity);
+	}
+	
+	public int getMaxEnergyTransfer() {
 		return this.getEnergyCapacity();
 	}
 
@@ -339,8 +343,6 @@ public class MachineEntity extends BlockEntityBase implements Container, IMachin
 
 	}
 
-	protected int maxEnergyStored = 20000;
-
 	@Override
 	public void outputSlotActivated(int index) {
 	}
@@ -593,5 +595,28 @@ public class MachineEntity extends BlockEntityBase implements Container, IMachin
 		}
 
 		return 0;
+	}
+
+	public class MachineEnergyStorage extends EnergyStorage {
+		public MachineEnergyStorage(int capacity, int maxTransfer) {
+			super(capacity, maxTransfer);
+		}
+
+		void setCapacity(int capacity) {
+			this.capacity = capacity;
+		}
+
+		void setMaxTransfer(int value) {
+			this.maxExtract = value;
+			this.maxReceive = value;
+		}
+
+		void setMaxExtract(int value) {
+			this.maxExtract = value;
+		}
+
+		void setMaxReceive(int value) {
+			this.maxReceive = value;
+		}
 	}
 }

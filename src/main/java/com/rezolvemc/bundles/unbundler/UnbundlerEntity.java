@@ -23,7 +23,7 @@ public class UnbundlerEntity extends MachineEntity {
 		super(RezolveRegistry.blockEntityType(UnbundlerEntity.class), pPos, pBlockState);
 
 		this.updateInterval = 5;
-		this.maxEnergyStored = 50000;
+		this.setEnergyCapacity(50000);
 
 		// 25 slots expected
 

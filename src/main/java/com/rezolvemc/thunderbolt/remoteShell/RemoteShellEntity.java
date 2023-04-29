@@ -1,12 +1,15 @@
 package com.rezolvemc.thunderbolt.remoteShell;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.machines.MachineEntity;
+import com.rezolvemc.common.network.RezolvePacket;
+import com.rezolvemc.common.network.WithPacket;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.thunderbolt.cable.CableNetwork;
 import com.rezolvemc.thunderbolt.databaseServer.DatabaseServerEntity;
+import com.rezolvemc.thunderbolt.remoteShell.packets.RemoteShellEntityReturnPacket;
 import com.rezolvemc.thunderbolt.remoteShell.packets.RemoteShellStatePacket;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -36,7 +39,8 @@ import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
 
-public class RemoteShellEntity extends MachineEntity implements ContainerListener {
+@WithPacket(RemoteShellEntityReturnPacket.class)
+public class RemoteShellEntity extends MachineEntity {
 	private static final Logger LOGGER = LogManager.getLogger(Rezolve.ID);
 
 	public RemoteShellEntity(BlockPos pPos, BlockState pBlockState) {
@@ -164,11 +168,11 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 			// Open was successful.
 
 			synchronized (this.activatedPlayers) {
-				var activation = this.activatedPlayers.stream().filter(s -> s.player == player).findFirst().orElse(null);
+				var activation = getPlayerState(player);
 				var machineListing = new MachineListing(
 						endpoint.getLevelKey(),
 						machinePos,
-						"TODO",
+						null, // TODO
 						new ItemStack(endpoint.getBlockItem(), 1)
 				);
 
@@ -184,7 +188,58 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 
 			// Track events in the container
 
-			remoteContainer.addSlotListener(this);
+			remoteContainer.addSlotListener(new ContainerListener() {
+				Map<Integer, ItemStack> itemState = new HashMap<>();
+				ItemStack carried = remoteContainer.getCarried();
+
+				{
+					for (int i = 0, max = remoteContainer.slots.size(); i < max; ++i) {
+						itemState.put(i, remoteContainer.getSlot(i).getItem());
+					}
+				}
+
+				@Override
+				public void slotChanged(AbstractContainerMenu containerToSend, int dataSlotIndex, ItemStack stack) {
+
+					ItemStack oldItem = itemState.get(dataSlotIndex);
+					ItemStack oldCarried = carried;
+
+					itemState.put(dataSlotIndex, stack);
+					carried = remoteContainer.getCarried();
+
+					Slot slot = containerToSend.getSlot(dataSlotIndex);
+					boolean charge = true;
+
+					if (slot != null) {
+						if (slot.container instanceof Inventory) {
+							// We don't charge for changes to the player's inventory.
+							charge = false;
+						}
+					}
+
+					ItemStack netStack = null;
+					if (oldItem.sameItem(stack)) {
+						netStack = new ItemStack(oldItem.getItem(), Math.abs(stack.getCount() - oldItem.getCount()));
+					} else if (!oldItem.isEmpty()) {
+						netStack = oldItem.copy();
+					} else if (!stack.isEmpty()) {
+						netStack = stack.copy();
+					}
+
+//					System.out.println("[Slot] "+dataSlotIndex+": "+ oldItem.toString() + " -> " + stack.toString());
+//					System.out.println("[Carried] "+dataSlotIndex+": "+ oldCarried.toString() + " -> " + carried.toString());
+
+					if (charge && netStack != null) {
+						chargeForAccess(netStack);
+					}
+
+				}
+
+				@Override
+				public void dataChanged(AbstractContainerMenu pContainerMenu, int pDataSlotIndex, int pValue) {
+
+				}
+			});
 		}
 
 	}
@@ -233,20 +288,26 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 			}
 
 			for (var activationState : deactivatedPlayers) {
-				var player = activationState.player;
 				System.out.println("Player has closed remote inventory, clearing override...");
-				Rezolve.clearPlayerOverridePosition(player.getUUID());
-
-				var level = getServer().getLevel(activationState.activeMachine.getLevel());
-				var chunkPos = new ChunkPos(activationState.activeMachine.getBlockPos());
-
-				ForgeChunkManager.forceChunk(level, Rezolve.ID, activationState.player, chunkPos.x, chunkPos.z, false, false);
-
-				activationState.active = false;
-				activationState.activeMachine = null;
-				this.activatedPlayers.remove(activationState);
+				deactivatePlayer(activationState);
 			}
 		}
+	}
+
+	private void deactivatePlayer(PlayerActivationState activationState) {
+		var player = activationState.player;
+		Rezolve.clearPlayerOverridePosition(player.getUUID());
+
+		var level = getServer().getLevel(activationState.activeMachine.getLevel());
+		var chunkPos = new ChunkPos(activationState.activeMachine.getBlockPos());
+
+		ForgeChunkManager.forceChunk(level, Rezolve.ID, activationState.player, chunkPos.x, chunkPos.z, false, false);
+
+		activationState.active = false;
+		activationState.activeMachine = null;
+
+		sendPlayerState(activationState);
+		this.activatedPlayers.remove(activationState);
 	}
 
 	private void sendPlayerState(PlayerActivationState state) {
@@ -255,16 +316,27 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 		packet.remoteShellPosition = getBlockPos();
 		packet.active = state.activeMachine != null;
 		packet.activeMachine = state.activeMachine;
+		packet.remoteShellEnergy = getStoredEnergy();
+		packet.remoteShellEnergyCapacity = getEnergyCapacity();
+		packet.sendToPlayer((ServerPlayer) state.player);
+	}
+
+	public PlayerActivationState getPlayerState(Player player) {
+		if (player == null)
+			return null;
+		return this.activatedPlayers.stream().filter(s -> Objects.equals(s.player.getStringUUID(), player.getStringUUID())).findFirst().orElse(null);
 	}
 
 	public void returnToShell(Player player) {
 		if (this.getLevel().isClientSide)
 			return;
 
-		if (!this.activatedPlayers.contains(player))
+		var state = getPlayerState(player);
+
+		if (state == null)
 			return;
 
-		this.activatedPlayers.remove(player);
+		deactivatePlayer(state);
 
 		NetworkHooks.openScreen(
 			(ServerPlayer)player,
@@ -274,8 +346,11 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 
 	private int accessCharge = 10;
 
-	private void chargeForAccess(int itemCount) {
-		this.energy.extractEnergy(this.accessCharge * itemCount, false);
+	private void chargeForAccess(ItemStack items) {
+		int charge = this.accessCharge * items.getCount();
+		//System.out.println("** Charging " + charge + " FE for transferring "+items);
+
+		this.energy.extractEnergy(charge, false);
 
 		// If we are out of energy, we'll let the tile entity update handle closing all connections.
 		this.setChanged();
@@ -305,37 +380,6 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 		return getNetwork().getDatabaseServer();
 	}
 
-
-	@Override
-	public void dataChanged(AbstractContainerMenu pContainerMenu, int pDataSlotIndex, int pValue) {
-
-	}
-
-	@Override
-	public void slotChanged(AbstractContainerMenu containerToSend, int dataSlotIndex, ItemStack stack) {
-		Slot slot = containerToSend.getSlot(dataSlotIndex);
-		boolean charge = true;
-
-		if (slot != null) {
-			if (slot.container instanceof Inventory) {
-				// We don't charge for changes to the player's inventory.
-				charge = false;
-			}
-		}
-
-		System.out.println("Send slot contents for "+dataSlotIndex+":");
-		if (stack == null)
-			System.out.println(" - No contents");
-		else
-			System.out.println(" - "+stack.getCount()+" "+stack.getDisplayName());
-
-		if (charge) {
-			System.out.println("Charging a fee for data transfer...");
-			this.chargeForAccess(1);
-		}
-
-	}
-
 	public void renameMachine(BlockPos machinePos, String name) {
 		System.out.println("Rename machine server side");
 
@@ -344,5 +388,14 @@ public class RemoteShellEntity extends MachineEntity implements ContainerListene
 			return;
 
 		dbServer.setMachineName(machinePos, name);
+	}
+
+	@Override
+	public void receivePacketOnServer(RezolvePacket rezolvePacket, Player player) {
+		if (rezolvePacket instanceof RemoteShellEntityReturnPacket returnPacket) {
+			this.returnToShell(player);
+		} else {
+			super.receivePacketOnServer(rezolvePacket, player);
+		}
 	}
 }

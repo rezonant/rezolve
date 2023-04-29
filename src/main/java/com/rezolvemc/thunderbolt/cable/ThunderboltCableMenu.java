@@ -10,6 +10,7 @@ import com.rezolvemc.thunderbolt.cable.packets.SetTransmissionModePacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 
 @WithScreen(ThunderboltCableScreen.class)
@@ -62,14 +63,14 @@ public class ThunderboltCableMenu extends MachineMenu<ThunderboltCableEntity> {
     }
 
     @Override
-    public void receivePacketOnServer(RezolvePacket rezolvePacket) {
+    public void receivePacketOnServer(RezolvePacket rezolvePacket, Player player) {
         if (rezolvePacket instanceof SetTransmissionModePacket setTransmissionMode) {
             configuration.getFace(setTransmissionMode.face)
                     .getTransmissionConfiguration(setTransmissionMode.type)
                     .setMode(setTransmissionMode.mode)
             ;
         } else {
-            super.receivePacketOnServer(rezolvePacket);
+            super.receivePacketOnServer(rezolvePacket, player);
         }
     }
 }

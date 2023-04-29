@@ -1,6 +1,7 @@
 package org.torchmc.layout;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -13,6 +14,25 @@ public class AxisLayoutPanel extends LayoutPanel {
 
     private Axis axis;
 
+    private AxisAlignment alignment;
+    private AxisAlignment justification;
+
+    public AxisAlignment getAlignment() {
+        return alignment;
+    }
+
+    public AxisAlignment getJustification() {
+        return justification;
+    }
+
+    public void setAlignment(AxisAlignment alignment) {
+        this.alignment = alignment;
+    }
+
+    public void setJustification(AxisAlignment justification) {
+        this.justification = justification;
+    }
+
     @Override
     protected void updateLayout() {
 
@@ -22,16 +42,36 @@ public class AxisLayoutPanel extends LayoutPanel {
             return;
         }
 
-        int[] plan = plan(getAxis(axis) - space * (countVisibleChildren() - 1), getAxis(axis.opposite()));
+        int totalSize = getAxis(axis);
+        int[] plan = plan(totalSize - space * (countVisibleChildren() - 1), getAxis(axis.opposite()));
         int pos = 0;
         int crossSize = getAxis(axis.opposite());
+        int planSize = Arrays.stream(plan).sum();
+
+        if (planSize < totalSize) {
+            if (justification == AxisAlignment.CENTER)
+                pos = (totalSize - planSize) / 2;
+            else if (justification == AxisAlignment.END)
+                pos = totalSize - planSize;
+            else if (justification == AxisAlignment.START)
+                pos = 0;
+        }
 
         for (int i = 0, max = children.size(); i < max; ++i) {
             var child = children.get(i);
             child.setAxis(axis.opposite(), crossSize);
             child.setAxis(axis, plan[i]);
 
-            child.move((axis == Axis.X ? pos : 0) + child.getLeftPadding(), (axis == Axis.Y ? pos : 0) + child.getTopPadding());
+            int crossPos = 0;
+
+            if (alignment == AxisAlignment.START)
+                crossPos = 0;
+            else if (alignment == AxisAlignment.CENTER)
+                crossPos = (crossSize - child.getAxis(axis.opposite())) / 2;
+            else if (alignment == AxisAlignment.END)
+                crossPos = crossSize - child.getAxis(axis.opposite());
+
+            child.move((axis == Axis.X ? pos : crossPos) + child.getLeftPadding(), (axis == Axis.Y ? pos : crossPos) + child.getTopPadding());
 
             pos += child.getAxis(axis) + space;
         }

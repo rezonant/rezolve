@@ -3,6 +3,8 @@ package org.torchmc;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.ResourceLocation;
 
 @JeiPlugin
@@ -14,6 +16,6 @@ public class TorchJeiIntegration implements IModPlugin {
 
     @Override
     public void registerGuiHandlers(IGuiHandlerRegistration registration) {
-        registration.addGenericGuiContainerHandler(TorchScreen.class, new TorchScreen.JeiHandler());
+        registration.addGenericGuiContainerHandler(AbstractContainerScreen.class, new TorchScreen.JeiHandler());
     }
 }

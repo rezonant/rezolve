@@ -10,6 +10,7 @@ import com.rezolvemc.thunderbolt.securityServer.packets.AddSecurityRulePacket;
 import com.rezolvemc.thunderbolt.securityServer.packets.EditSecurityRulePacket;
 import com.rezolvemc.thunderbolt.securityServer.packets.RemoveSecurityRulePacket;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 
 @WithScreen(SecurityServerScreen.class)
 @WithPacket(AddSecurityRulePacket.class)
@@ -56,7 +57,7 @@ public class SecurityServerMenu extends MachineMenu<SecurityServerEntity> {
 	}
 
 	@Override
-	public void receivePacketOnServer(RezolvePacket rezolvePacket) {
+	public void receivePacketOnServer(RezolvePacket rezolvePacket, Player player) {
 		if (rezolvePacket instanceof RemoveSecurityRulePacket removeSecurityRule) {
 			machine.removeRule(removeSecurityRule.rule);
 		} else if (rezolvePacket instanceof AddSecurityRulePacket addSecurityRule) {
@@ -64,7 +65,7 @@ public class SecurityServerMenu extends MachineMenu<SecurityServerEntity> {
 		} else if (rezolvePacket instanceof EditSecurityRulePacket editSecurityRule) {
 			machine.editRule(editSecurityRule.rule);
 		} else {
-			super.receivePacketOnServer(rezolvePacket);
+			super.receivePacketOnServer(rezolvePacket, player);
 		}
 	}
 }

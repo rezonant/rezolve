@@ -7,7 +7,7 @@ public class AxisConstraint {
         this.min = min;
         this.desired = desired;
         this.max = max;
-        this.fixed = this.min == this.max;
+        this.fixed = this.min > 0 && this.max > 0 && this.min == this.max && this.max == desired;
     }
 
     public final int min;
@@ -24,7 +24,7 @@ public class AxisConstraint {
             return b;
         if (b == null)
             return a;
-        return new AxisConstraint(Math.min(a.min, b.min), Math.max(a.desired, b.desired), a.max == 0 || b.max == 0 ? 0 : Math.max(a.max, b.max));
+        return new AxisConstraint(Math.max(a.min, b.min), Math.max(a.desired, b.desired), a.max == 0 || b.max == 0 ? 0 : Math.min(a.max, b.max));
     }
 
     public static AxisConstraint fixed(int size) {

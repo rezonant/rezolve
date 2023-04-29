@@ -80,27 +80,44 @@ public class TorchUtil {
             float minU, float minV,
             float maxU, float maxV
     ) {
+        rotatedTextureQuad(stack, location, color, x, y, width, height, minU, minV, maxU, maxV, 0);
+    }
+
+    public static void rotatedTextureQuad(
+            PoseStack stack, ResourceLocation location,
+            Color color,
+            double x, double y,
+            double width, double height,
+            float minU, float minV,
+            float maxU, float maxV,
+            int rotation
+    ) {
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderTexture(0, location);
         color.applyToShader();
+
+        float[] u = { minU, maxU, maxU, minU };
+        float[] v = { maxV, maxV, minV, minV };
+
 
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferbuilder = tesselator.getBuilder();
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
         bufferbuilder.vertex(stack.last().pose(), (float)x, (float) (y + height), 0.0f)
-                .uv(minU, maxV)
+                .uv(u[(rotation + 0) % 4], v[(rotation + 0) % 4])
                 .color(255, 255, 255, 255)
                 .endVertex();
         bufferbuilder.vertex(stack.last().pose(), (float) (x + width), (float) (y + height), 0.0F)
-                .uv(maxU, maxV)
+                .uv(u[(rotation + 1) % 4], v[(rotation + 1) % 4])
                 .color(255, 255, 255, 255)
                 .endVertex();
         bufferbuilder.vertex(stack.last().pose(), (float) (x + width), (float) y, 0.0F)
-                .uv(maxU, minV)
+                .uv(u[(rotation + 2) % 4], v[(rotation + 2) % 4])
                 .color(255, 255, 255, 255)
                 .endVertex();
         bufferbuilder.vertex(stack.last().pose(), (float) x, (float) y, 0.0F)
-                .uv(minU, minV)
+                .uv(u[(rotation + 3) % 4], v[(rotation + 3) % 4])
+                .uv(u[3], v[3])
                 .color(255, 255, 255, 255)
                 .endVertex();
 

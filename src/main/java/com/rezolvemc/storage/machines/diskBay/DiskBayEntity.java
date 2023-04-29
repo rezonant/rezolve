@@ -20,7 +20,7 @@ public class DiskBayEntity extends MachineEntity implements IStorageTileEntity {
 	public DiskBayEntity(BlockPos pos, BlockState state) {
 		super(RezolveRegistry.blockEntityType(DiskBayEntity.class), pos, state);
 		this.updateInterval = 5;
-		this.maxEnergyStored = 50000;
+		this.setEnergyCapacity(50000);
 		this.multiplexedAccessor = new MultiplexedStorageAccessor(new ArrayList<>());
 
 		for (int i = 0, max = 27; i < max; ++i)

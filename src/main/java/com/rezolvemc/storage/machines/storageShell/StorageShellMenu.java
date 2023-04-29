@@ -38,11 +38,11 @@ public class StorageShellMenu extends MachineMenu<StorageShellEntity> {
 
 
     @Override
-    public void receivePacketOnServer(RezolvePacket rezolvePacket) {
+    public void receivePacketOnServer(RezolvePacket rezolvePacket, Player player) {
         if (rezolvePacket instanceof StorageViewPacket storageViewPacket) {
             session.handlePacket(storageViewPacket);
         } else {
-            super.receivePacketOnServer(rezolvePacket);
+            super.receivePacketOnServer(rezolvePacket, player);
         }
     }
 

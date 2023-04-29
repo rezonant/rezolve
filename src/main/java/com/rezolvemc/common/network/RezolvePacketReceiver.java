@@ -1,6 +1,7 @@
 package com.rezolvemc.common.network;
 
 import com.rezolvemc.Rezolve;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkDirection;
 
 /**
@@ -15,6 +16,6 @@ public interface RezolvePacketReceiver {
             Rezolve.LOGGER.warn("Packet {} is not handled by {} on the server", rezolvePacket.getClass().getCanonicalName(), this.getClass().getCanonicalName());
     }
 
-    default void receivePacketOnServer(RezolvePacket rezolvePacket) { receivePacket(rezolvePacket, NetworkDirection.PLAY_TO_SERVER); };
+    default void receivePacketOnServer(RezolvePacket rezolvePacket, Player player) { receivePacket(rezolvePacket, NetworkDirection.PLAY_TO_SERVER); };
     default void receivePacketOnClient(RezolvePacket rezolvePacket) { receivePacket(rezolvePacket, NetworkDirection.PLAY_TO_CLIENT); }
 }

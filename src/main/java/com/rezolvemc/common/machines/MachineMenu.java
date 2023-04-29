@@ -187,7 +187,7 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 	@Sync public Operation operation;
 
 	protected void updateState() {
-		energyCapacity = this.machine.maxEnergyStored;
+		energyCapacity = this.machine.getEnergyCapacity();
 		energyStored = this.machine.getStoredEnergy();
 		progress = this.machine.getProgress();
 		operation = this.machine.getCurrentOperation();
@@ -286,7 +286,7 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 	}
 
 	@Override
-	public void receivePacketOnServer(RezolvePacket rezolvePacket) {
+	public void receivePacketOnServer(RezolvePacket rezolvePacket, Player player) {
 		if (rezolvePacket instanceof SetIngredientSlotPacket slotUpdate) {
 			if (slotUpdate.slotId < 0 || slotUpdate.slotId >= slots.size()) {
 				LOGGER.error("Received ingredient slot packet for invalid slot ID {}", slotUpdate.slotId);
@@ -308,7 +308,7 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 			}
 
 		} else {
-			RezolvePacketReceiver.super.receivePacketOnServer(rezolvePacket);
+			RezolvePacketReceiver.super.receivePacketOnServer(rezolvePacket, player);
 		}
 	}
 

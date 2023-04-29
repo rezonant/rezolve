@@ -22,7 +22,7 @@ public class BundleBuilderEntity extends MachineEntity {
 
 	public BundleBuilderEntity(BlockPos pPos, BlockState pBlockState) {
 		super(RezolveRegistry.blockEntityType(BundleBuilderEntity.class), pPos, pBlockState);
-		maxEnergyStored = 20000;
+		setEnergyCapacity(20000);
 
 		addSlot(new BundlePatternSlot(this, PATTERN_INPUT_SLOT, 0, 0));
 		addSlot(new MachineOutputSlot(this, PATTERN_OUTPUT_SLOT, 0, 0));

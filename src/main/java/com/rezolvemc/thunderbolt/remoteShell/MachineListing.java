@@ -47,7 +47,8 @@ public class MachineListing implements INBTSerializable<CompoundTag> {
         var tag = new CompoundTag();
         tag.putString("level", level.location().toString());
         tag.put("blockPos", NbtUtils.writeBlockPos(blockPos));
-        tag.putString("name", name);
+        if (name != null)
+            tag.putString("name", name);
         tag.put("item", item.serializeNBT());
         return tag;
     }
@@ -61,7 +62,10 @@ public class MachineListing implements INBTSerializable<CompoundTag> {
         }
 
         blockPos = NbtUtils.readBlockPos(nbt.getCompound("blockPos"));
-        name = nbt.getString("name");
+        if (nbt.contains("name"))
+            name = nbt.getString("name");
+        else
+            name = null;
         item = ItemStack.of(nbt.getCompound("item"));
     }
 

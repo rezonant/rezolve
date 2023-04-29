@@ -106,6 +106,7 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
             initialized = true;
         }
 
+        windows.clear();
         mainWindow = addChild(new ScreenWindow());
 
         setup();
@@ -153,6 +154,10 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
         widget.runInitializer(() -> initializer.accept(widget));
         //applyDimensions();
         return widget;
+    }
+
+    public void addWindow(Window window) {
+        addChild(window);
     }
 
     /**
@@ -560,18 +565,28 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
      */
     protected List<Rect2i> getJeiAreas() {
         var list = new ArrayList<Rect2i>();
-
         for (var window : windows) {
-            list.add(window.getScreenRect());
+            if (window.isVisible())
+                list.add(window.getScreenRect());
         }
 
         return list;
     }
 
-    public static class JeiHandler implements IGuiContainerHandler<TorchScreen<?>> {
+    public static class JeiHandler implements IGuiContainerHandler<AbstractContainerScreen<?>> {
         @Override
-        public List<Rect2i> getGuiExtraAreas(TorchScreen<?> containerScreen) {
-            return containerScreen.getJeiAreas();
+        public List<Rect2i> getGuiExtraAreas(AbstractContainerScreen<?> containerScreen) {
+            List<Rect2i> list = new ArrayList<>();
+            for (var child : containerScreen.children()) {
+                if (child instanceof Window window && window.isVisible()) {
+                    list.add(((Window) child).getScreenRect());
+                }
+            }
+
+            if (containerScreen instanceof TorchScreen<?> torchScreen)
+                list.addAll(torchScreen.getJeiAreas());
+
+            return list;
         }
     }
 
@@ -583,6 +598,11 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
         @Override
         protected void wasMovedByUser(int x, int y) {
             wasMoved = true;
+        }
+
+        @Override
+        public void onClose() {
+            TorchScreen.this.onClose();
         }
 
         @Override
