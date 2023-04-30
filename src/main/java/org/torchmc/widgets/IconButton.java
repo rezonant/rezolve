@@ -16,14 +16,6 @@ import java.util.List;
 public class IconButton extends WidgetBase {
     public static final int SIZE = 18;
 
-    public IconButton(String text, ResourceLocation icon) {
-        this(Component.literal(text), icon);
-    }
-
-    public IconButton(Component text, ResourceLocation icon) {
-        this(text, icon, SIZE);
-    }
-
     public IconButton(Component text, ResourceLocation icon, int size) {
         super(Component.empty());
 
@@ -36,6 +28,18 @@ public class IconButton extends WidgetBase {
         setFocusable(true);
     }
 
+    public IconButton() {
+        this(Component.empty(), null, SIZE);
+    }
+
+    public IconButton(String text, ResourceLocation icon) {
+        this(Component.literal(text), icon);
+    }
+
+    public IconButton(Component text, ResourceLocation icon) {
+        this(text, icon, SIZE);
+    }
+
     private Runnable handler;
     private Color activeTextColor = Color.argb(0xFFFFFFFF);
     private Color inactiveTextColor = Color.argb(0xFFA0A0A0);
@@ -43,6 +47,14 @@ public class IconButton extends WidgetBase {
     private ResourceLocation icon;
     private float alpha = 1;
     private int size = SIZE;
+
+    public void setIcon(ResourceLocation icon) {
+        this.icon = icon;
+    }
+
+    public ResourceLocation getIcon() {
+        return icon;
+    }
 
     @Override
     public List<Component> getTooltip() {
@@ -139,7 +151,8 @@ public class IconButton extends WidgetBase {
         }
 
         TorchUtil.colorQuad(pPoseStack, backgroundColor, x + 1, y + 1, width - 2, height - 2);
-        TorchUtil.textureQuad(pPoseStack, icon, x + 1, y + 1, width - 2, height - 2, 0, 0, 1, 1);
+        if (icon != null)
+            TorchUtil.textureQuad(pPoseStack, icon, x + 1, y + 1, width - 2, height - 2, 0, 0, 1, 1);
     }
 
     boolean pressed = false;

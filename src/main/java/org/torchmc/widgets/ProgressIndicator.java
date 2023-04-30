@@ -5,14 +5,43 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.torchmc.TorchUI;
 import org.torchmc.WidgetBase;
+import org.torchmc.layout.AxisConstraint;
 import org.torchmc.util.Color;
 import org.torchmc.util.TorchUtil;
 
 public class ProgressIndicator extends WidgetBase {
     public static final ResourceLocation ARROW_TEXTURE = TorchUI.builtInTex("gui/widgets/arrow.png");
 
-    public ProgressIndicator(int x, int y, Component narrationTitle) {
+    public ProgressIndicator(Component narrationTitle, int size) {
         super(narrationTitle);
+
+        this.size = size;
+        setWidthConstraint(AxisConstraint.fixed(size));
+        setHeightConstraint(AxisConstraint.fixed(size));
+    }
+
+    public ProgressIndicator(Component narrationTitle) {
+        this(narrationTitle, 32);
+    }
+
+    public ProgressIndicator() {
+        this(Component.empty(), 32);
+    }
+
+    public ProgressIndicator(int size) {
+        this(Component.empty(), size);
+    }
+
+    int size = 32;
+
+    @Override
+    public int getConstrainedWidth(int height) {
+        return size;
+    }
+
+    @Override
+    public int getConstrainedHeight(int width) {
+        return size;
     }
 
     private double value;
@@ -33,7 +62,6 @@ public class ProgressIndicator extends WidgetBase {
     public void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
         updateState();
 
-        double size = 32;
         double width = size * value;
 
         TorchUtil.textureQuad(

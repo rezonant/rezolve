@@ -7,6 +7,7 @@ public class Color {
     public static final Color BLACK         = Color.argb(0xFF000000);
     public static final Color TRANSPARENT   = Color.argb(0x00000000);
     public static final Color PINK          = Color.argb(0xFFFFC0CB);
+    public static final Color PURPLE        = Color.argb(0xFF800080);
 
     public Color(float r, float g, float b, float a) {
         this.r = r;

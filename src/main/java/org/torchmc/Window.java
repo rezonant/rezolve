@@ -34,7 +34,7 @@ public class Window extends WidgetBase {
                 titlebarLabel = label;
             });
             titlebarRoot.addChild(new Spacer());
-            titlebarRoot.addChild(new IconButton(Rezolve.tr("screens.rezolve.close"), Rezolve.tex("gui/x.png"), titlebarHeight - 7), btn -> {
+            titlebarRoot.addChild(new IconButton(Rezolve.tr("screens.rezolve.close"), Rezolve.icon("x"), titlebarHeight - 7), btn -> {
                 btn.setBackgroundColor(Color.TRANSPARENT);
                 btn.setHandler(() -> onClose());
 

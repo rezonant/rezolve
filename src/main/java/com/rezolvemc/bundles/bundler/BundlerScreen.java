@@ -1,5 +1,8 @@
 package com.rezolvemc.bundles.bundler;
 
+import com.rezolvemc.Rezolve;
+import com.rezolvemc.common.gui.EnergyMeter;
+import com.rezolvemc.common.machines.MachineProgressIndicator;
 import com.rezolvemc.common.machines.MachineScreen;
 import com.rezolvemc.common.machines.Operation;
 
@@ -8,6 +11,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import org.torchmc.layout.AxisAlignment;
+import org.torchmc.layout.HorizontalLayoutPanel;
+import org.torchmc.layout.VerticalLayoutPanel;
+import org.torchmc.widgets.PlayerSlotGrid;
+import org.torchmc.widgets.SlotGrid;
 
 public class BundlerScreen extends MachineScreen<BundlerMenu> {
 
@@ -22,23 +30,34 @@ public class BundlerScreen extends MachineScreen<BundlerMenu> {
 	protected void setup() {
 		super.setup();
 
-		addEnergyMeter(leftPos + 231, topPos + 20, 88);
-		addOperationProgressIndicator(leftPos + 133, topPos + 54);
+		setPanel(new VerticalLayoutPanel(), root -> {
+			root.addChild(new HorizontalLayoutPanel(), row -> {
+				row.setJustification(AxisAlignment.CENTER);
+				row.setAlignment(AxisAlignment.CENTER);
+				row.setGrowScale(1);
 
-		addSlotGrid(
-				Component.translatable("screens.rezolve.input_items"),
-				3, 0, 9
-		);
+				row.addChild(new SlotGrid(Rezolve.str("input_items"), 3), grid -> {
+					grid.setContents(0, 9);
+				});
 
-		addSlotGrid(
-				Component.translatable("screens.rezolve.patterns"),
-				3, 9, 9
-		);
+				row.addChild(new SlotGrid(Rezolve.str("patterns"), 3), grid -> {
+					grid.setContents(9, 9);
+				});
 
-		addSlotGrid(
-				Component.translatable("screens.rezolve.bundles"),
-				3, 18, 9
-		);
+				row.addChild(new MachineProgressIndicator());
+
+				row.addChild(new SlotGrid(Rezolve.str("bundles"), 3), grid -> {
+					grid.setContents(18, 9);
+				});
+
+				row.addChild(new EnergyMeter());
+			});
+
+			root.addChild(new PlayerSlotGrid());
+		});
+
+		getMainWindow().resize(249, 212);
+		getMainWindow().setResizable(false);
 	}
 
 	@Override

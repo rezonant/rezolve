@@ -120,7 +120,6 @@ public class SlotGrid extends WidgetBase {
         labelWidget.setVisible(labelVisible);
         if (labelVisible) {
             labelWidget.move(gridX + gridWidth / 2 - font.width(label) / 2, gridY + labelMargin, font.width(label), font.lineHeight);
-            labelWidget.setBackgroundColor(Color.PINK);
             gridY += font.lineHeight + labelMargin*2;
         }
 

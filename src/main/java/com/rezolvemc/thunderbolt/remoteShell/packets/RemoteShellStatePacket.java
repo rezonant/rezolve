@@ -6,6 +6,7 @@ import com.rezolvemc.thunderbolt.remoteShell.MachineListing;
 import com.rezolvemc.thunderbolt.remoteShell.RemoteShellOverlay;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.item.ItemStack;
 
 @RegistryId("remote_shell_state")
 public class RemoteShellStatePacket extends RezolvePacket {
@@ -15,6 +16,7 @@ public class RemoteShellStatePacket extends RezolvePacket {
     public MachineListing activeMachine;
     public int remoteShellEnergy;
     public int remoteShellEnergyCapacity;
+    public ItemStack recordedPattern;
 
     @Override
     public void read(FriendlyByteBuf buf) {
@@ -44,6 +46,6 @@ public class RemoteShellStatePacket extends RezolvePacket {
 
     @Override
     protected void receiveOnClient() {
-        RemoteShellOverlay.INSTANCE.updateState(this);
+        RemoteShellOverlay.updateState(this);
     }
 }

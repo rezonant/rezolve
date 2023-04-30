@@ -61,6 +61,10 @@
   "screens.rezolve.default_machine_policy": "Default Machine Policy",
   "screens.rezolve.default_user_policy": "Default User Policy",
   "screens.rezolve.root": "root",
+  "screens.rezolve.upgrades": "Upgrades",
+  "screens.rezolve.record": "Record",
+  "screens.rezolve.recording": "Recording",
+  "screens.rezolve.stop": "Stop",
 
   "rezolve.thunderbolt.select_a_side": "Select a side",
   "rezolve.thunderbolt.transmission_modes.none": "None",

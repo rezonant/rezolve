@@ -13,6 +13,7 @@ import org.torchmc.util.TorchUtil;
 
 public class Meter extends WidgetBase {
     public static final int TEXTURE_HEIGHT = 16;
+
     public Meter(Component narrationTitle, Component label, ResourceLocation texture) {
         super(narrationTitle);
 
@@ -23,6 +24,18 @@ public class Meter extends WidgetBase {
         this.height = 48;
 
         setOrientation(Axis.Y);
+    }
+
+    public Meter(String label, ResourceLocation texture) {
+        this(Component.literal(label), texture);
+    }
+
+    public Meter(Component label, ResourceLocation texture) {
+        this(label, label, texture);
+    }
+
+    public Meter(String narrationTitle, String label, ResourceLocation texture) {
+        this(Component.literal(narrationTitle), Component.literal(label), texture);
     }
 
     private Component label;

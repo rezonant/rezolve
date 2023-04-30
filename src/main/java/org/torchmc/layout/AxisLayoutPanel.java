@@ -46,7 +46,7 @@ public class AxisLayoutPanel extends LayoutPanel {
         int[] plan = plan(totalSize - space * (countVisibleChildren() - 1), getAxis(axis.opposite()));
         int pos = 0;
         int crossSize = getAxis(axis.opposite());
-        int planSize = Arrays.stream(plan).sum();
+        int planSize = Arrays.stream(plan).sum() - plan[plan.length - 1];
 
         if (planSize < totalSize) {
             if (justification == AxisAlignment.CENTER)

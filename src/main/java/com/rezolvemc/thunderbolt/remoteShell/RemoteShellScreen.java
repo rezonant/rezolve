@@ -1,5 +1,6 @@
 package com.rezolvemc.thunderbolt.remoteShell;
 
+import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.gui.EnergyMeter;
 import net.minecraft.ChatFormatting;
 import org.torchmc.layout.*;
@@ -37,15 +38,18 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 	protected void setup() {
 		super.setup();
 
+		leftShoulderButtons.addChild(new IconButton(Rezolve.str("upgrades"), Rezolve.icon("upgrade")));
+
 		setPanel(new AxisLayoutPanel(Axis.Y), root -> {
-			root.addChild(new AxisLayoutPanel(Axis.X), topLayout -> {
+			root.addChild(new HorizontalLayoutPanel(), topLayout -> {
 				topLayout.setGrowScale(1);
-				topLayout.addChild(new AxisLayoutPanel(Axis.Y), storageLayout -> {
+				topLayout.setAlignment(AxisAlignment.CENTER);
+				topLayout.addChild(new VerticalLayoutPanel(), storageLayout -> {
 					storageLayout.setGrowScale(1);
 
 					// Search label + field
 
-					storageLayout.addChild(new AxisLayoutPanel(Axis.X), panel -> {
+					storageLayout.addChild(new HorizontalLayoutPanel(), panel -> {
 						panel.addChild(new Label(Component.translatable("screens.rezolve.search")), label -> {
 							//label.setAlignment(Label.Alignment.CENTERED);
 							label.setVerticalAlignment(Label.VerticalAlignment.CENTER);
@@ -72,7 +76,7 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 				hintLbl = label;
 			});
 
-			root.addChild(new AxisLayoutPanel(Axis.Y), detailsLayout -> {
+			root.addChild(new VerticalLayoutPanel(), detailsLayout -> {
 				detailsLayout.setVisible(false);
 				this.detailsLayout = detailsLayout;
 

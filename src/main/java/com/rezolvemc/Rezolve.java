@@ -80,19 +80,45 @@ public class Rezolve {
 		);
 	}
 
+	private static Map<String, ResourceLocation> resourceLocationCache = new HashMap<>();
 	public static ResourceLocation loc(String name) {
-		return new ResourceLocation(Rezolve.ID, name);
+		if (resourceLocationCache.containsKey(name))
+			return resourceLocationCache.get(name);
+
+		var loc = new ResourceLocation(Rezolve.ID, name);
+		resourceLocationCache.put(name, loc);
+		return loc;
 	}
 
 	public static ResourceLocation tex(String name) {
 		return loc("textures/" + name);
 	}
 
+	public static ResourceLocation icon(String name) {
+		return loc("textures/gui/icons/" + name + ".png");
+	}
+
 	public static Logger logger(Class<?> klass) {
 		return LogManager.getLogger("rezolve/" + klass.getName());
 	}
 
-	public static Component tr(String name) { return Component.translatable(name); };
+	/**
+	 * Translation (tr)
+	 * @param name
+	 * @return
+	 */
+	public static Component tr(String name) {
+		return Component.translatable(name);
+	};
+
+	/**
+	 * Screen translation (str)
+	 * @param name
+	 * @return
+	 */
+	public static Component str(String name) {
+		return tr("screens.rezolve."+name);
+	};
 
 	public static void setPlayerOverridePosition(UUID playerID, LevelPosition pos) {
 		synchronized (playerOverridePositions) {

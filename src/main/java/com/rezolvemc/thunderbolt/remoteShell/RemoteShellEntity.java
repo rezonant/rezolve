@@ -10,7 +10,9 @@ import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.thunderbolt.cable.CableNetwork;
 import com.rezolvemc.thunderbolt.databaseServer.DatabaseServerEntity;
 import com.rezolvemc.thunderbolt.remoteShell.packets.RemoteShellEntityReturnPacket;
+import com.rezolvemc.thunderbolt.remoteShell.packets.RemoteShellStartRecordingPacket;
 import com.rezolvemc.thunderbolt.remoteShell.packets.RemoteShellStatePacket;
+import com.rezolvemc.thunderbolt.remoteShell.packets.RemoteShellStopRecordingPacket;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -40,6 +42,8 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nonnull;
 
 @WithPacket(RemoteShellEntityReturnPacket.class)
+@WithPacket(RemoteShellStartRecordingPacket.class)
+@WithPacket(RemoteShellStopRecordingPacket.class)
 public class RemoteShellEntity extends MachineEntity {
 	private static final Logger LOGGER = LogManager.getLogger(Rezolve.ID);
 
@@ -115,6 +119,36 @@ public class RemoteShellEntity extends MachineEntity {
 		public Player player;
 		public boolean active;
 		public MachineListing activeMachine;
+
+		private boolean recording;
+		private List<RecordedAction> recordedActions;
+
+		public boolean isRecording() {
+			return recording;
+		}
+
+		private record RecordedAction(ResourceKey<Level> level, BlockPos block, int slot, Action action, ItemStack items) {}
+
+		public void startRecording() {
+			recording = true;
+			recordedActions = new ArrayList<>();
+		}
+
+		public void record(ResourceKey<Level> level, BlockPos block, int slot, Action action, ItemStack items) {
+			recordedActions.add(new RecordedAction(level, block, slot, action, items));
+		}
+
+		public RecordedAction[] finishRecording() {
+			recording = false;
+			var set = recordedActions.toArray(new RecordedAction[recordedActions.size()]);
+			recordedActions = null;
+			return set;
+		}
+
+		public enum Action {
+			INSERT,
+			EXTRACT
+		}
 	}
 
 	List<PlayerActivationState> activatedPlayers = new ArrayList<>();
@@ -218,12 +252,15 @@ public class RemoteShellEntity extends MachineEntity {
 					}
 
 					ItemStack netStack = null;
+					PlayerActivationState.Action action = null;
 					if (oldItem.sameItem(stack)) {
 						netStack = new ItemStack(oldItem.getItem(), Math.abs(stack.getCount() - oldItem.getCount()));
 					} else if (!oldItem.isEmpty()) {
 						netStack = oldItem.copy();
+						action = PlayerActivationState.Action.EXTRACT;
 					} else if (!stack.isEmpty()) {
 						netStack = stack.copy();
+						action = PlayerActivationState.Action.INSERT;
 					}
 
 //					System.out.println("[Slot] "+dataSlotIndex+": "+ oldItem.toString() + " -> " + stack.toString());
@@ -231,6 +268,11 @@ public class RemoteShellEntity extends MachineEntity {
 
 					if (charge && netStack != null) {
 						chargeForAccess(netStack);
+
+						var activation = getPlayerState(player);
+						if (activation != null && activation.isRecording() && action != null) {
+							activation.record(levelKey, machinePos, dataSlotIndex, action, netStack);
+						}
 					}
 
 				}
@@ -327,6 +369,30 @@ public class RemoteShellEntity extends MachineEntity {
 		return this.activatedPlayers.stream().filter(s -> Objects.equals(s.player.getStringUUID(), player.getStringUUID())).findFirst().orElse(null);
 	}
 
+	public void startRecording(Player player) {
+		if (this.getLevel().isClientSide)
+			return;
+
+		var state = getPlayerState(player);
+		if (state == null)
+			return;
+
+		state.startRecording();
+	}
+
+	public void stopRecording(Player player) {
+		if (this.getLevel().isClientSide)
+			return;
+
+		var state = getPlayerState(player);
+		if (state == null)
+			return;
+
+		var actions = state.finishRecording();
+		LOGGER.info("Would make the pattern!");
+		// TODO
+	}
+
 	public void returnToShell(Player player) {
 		if (this.getLevel().isClientSide)
 			return;
@@ -393,7 +459,11 @@ public class RemoteShellEntity extends MachineEntity {
 	@Override
 	public void receivePacketOnServer(RezolvePacket rezolvePacket, Player player) {
 		if (rezolvePacket instanceof RemoteShellEntityReturnPacket returnPacket) {
-			this.returnToShell(player);
+			returnToShell(player);
+		} else if (rezolvePacket instanceof RemoteShellStartRecordingPacket) {
+			startRecording(player);
+		} else if (rezolvePacket instanceof RemoteShellStopRecordingPacket) {
+			stopRecording(player);
 		} else {
 			super.receivePacketOnServer(rezolvePacket, player);
 		}

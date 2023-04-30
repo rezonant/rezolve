@@ -82,12 +82,14 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
         });
     }
 
+    @Deprecated
     protected ProgressIndicator addOperationProgressIndicator(int x, int y) {
         return addProgressIndicator(x, y, Component.translatable("rezolve.screens.progress"), () -> (double)menu.progress);
     }
 
+    @Deprecated
     protected ProgressIndicator addProgressIndicator(int x, int y, Component label, Supplier<Double> stateProvider) {
-        return addRenderableWidget(new ProgressIndicator(x, y, label) {
+        return addRenderableWidget(new ProgressIndicator(label) {
             @Override
             protected void updateState() {
                 super.updateState();
