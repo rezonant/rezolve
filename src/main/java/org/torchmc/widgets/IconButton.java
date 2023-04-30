@@ -115,12 +115,12 @@ public class IconButton extends TorchWidget {
     }
 
     @Override
-    public AxisConstraint getDesiredHeight(int assumedWidth) {
+    public AxisConstraint getHeightConstraint(int assumedWidth) {
         return AxisConstraint.fixed(size);
     }
 
     @Override
-    public AxisConstraint getDesiredWidth(int assumedHeight) {
+    public AxisConstraint getWidthConstraint(int assumedHeight) {
         return AxisConstraint.fixed(size);
     }
 

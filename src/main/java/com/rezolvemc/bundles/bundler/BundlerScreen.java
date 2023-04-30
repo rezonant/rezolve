@@ -36,7 +36,7 @@ public class BundlerScreen extends MachineScreen<BundlerMenu> {
 			root.addChild(new HorizontalLayoutPanel(), row -> {
 				row.setJustification(AxisAlignment.CENTER);
 				row.setAlignment(AxisAlignment.CENTER);
-				row.setGrowScale(1);
+				row.setExpansionFactor(1);
 
 				row.addChild(new SlotGrid(Rezolve.str("input_items"), 3), grid -> {
 					grid.setContents(0, 9);

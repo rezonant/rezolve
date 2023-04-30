@@ -6,7 +6,6 @@ import com.rezolvemc.thunderbolt.remoteShell.packets.RemoteShellStartRecordingPa
 import com.rezolvemc.thunderbolt.remoteShell.packets.RemoteShellStatePacket;
 import com.rezolvemc.thunderbolt.remoteShell.packets.RemoteShellStopRecordingPacket;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
@@ -52,7 +51,7 @@ public class RemoteShellOverlay extends Window {
                 label.setRightPadding(10);
             });
             status.addChild(new Label(""), label -> {
-                label.setGrowScale(1);
+                label.setExpansionFactor(1);
                 label.setOnTick(() -> {
                     if (state != null && state.activeMachine != null) {
                         var itemStack = state.activeMachine.getItem();

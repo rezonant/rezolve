@@ -5,12 +5,10 @@ import com.rezolvemc.common.gui.EnergyMeter;
 import com.rezolvemc.common.machines.MachineScreen;
 import com.rezolvemc.common.registry.ScreenFor;
 import com.rezolvemc.storage.view.IStorageViewContainer;
-import com.rezolvemc.storage.gui.StorageShellClearCrafterPacket;
 import com.rezolvemc.storage.view.StorageView;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import org.torchmc.layout.Axis;
 import org.torchmc.layout.AxisLayoutPanel;
@@ -42,7 +40,7 @@ public class StorageShellScreen extends MachineScreen<StorageShellMenu> implemen
 			root.setSpace(3);
 			root.addChild(new AxisLayoutPanel(Axis.X), panel -> {
 				panel.setSpace(3);
-				panel.setGrowScale(1);
+				panel.setExpansionFactor(1);
 				panel.addChild(
 						new Meter(
 								Component.translatable("rezolve.screens.usage"),
@@ -52,14 +50,14 @@ public class StorageShellScreen extends MachineScreen<StorageShellMenu> implemen
 				);
 
 				panel.addChild(new AxisLayoutPanel(Axis.Y), panel2 -> {
-					panel2.setGrowScale(1);
+					panel2.setExpansionFactor(1);
 					panel2.setSpace(3);
 
 					panel2.addChild(new EditBox(Component.translatable("screens.rezolve.search")), editBox -> {
 						searchField = editBox;
 					});
 					panel2.addChild(new StorageView(), view -> {
-						view.setGrowScale(1);
+						view.setExpansionFactor(1);
 						storageView = view;
 					});
 				});

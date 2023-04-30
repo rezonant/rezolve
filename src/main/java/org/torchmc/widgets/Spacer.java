@@ -6,6 +6,6 @@ import org.torchmc.TorchWidget;
 public class Spacer extends TorchWidget {
     public Spacer() {
         super(Component.empty());
-        setGrowScale(1);
+        setExpansionFactor(1);
     }
 }

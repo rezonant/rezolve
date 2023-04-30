@@ -256,9 +256,7 @@ public class StorageView extends TorchWidget {
 			windowColumnCount = 1;
 
 		pushPose(pPoseStack, () -> {
-			repose(pPoseStack, () -> {
-				pPoseStack.translate(this.x, this.y, 0);
-			});
+			repose(() -> pPoseStack.translate(this.x, this.y, 0));
 
 			//enableScissor(x, y + 1, x + width, y + height - 1);
 			scissor(pPoseStack, 0, 0 + 1, width, height - 3, () -> {

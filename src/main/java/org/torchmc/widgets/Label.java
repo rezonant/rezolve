@@ -137,12 +137,12 @@ public class Label extends TorchWidget {
     }
 
     @Override
-    public AxisConstraint getDesiredWidth(int assumedHeight) {
+    public AxisConstraint getWidthConstraint(int assumedHeight) {
         return AxisConstraint.between(0, font.width(content), 0);
     }
 
     @Override
-    public AxisConstraint getDesiredHeight(int assumedWidth) {
+    public AxisConstraint getHeightConstraint(int assumedWidth) {
         var label = MultiLineLabel.create(font, content, assumedWidth);
 
         if (assumedWidth > 0)

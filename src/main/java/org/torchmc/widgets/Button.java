@@ -171,15 +171,15 @@ public class Button extends TorchWidget {
     }
 
     @Override
-    public AxisConstraint getDesiredWidth(int assumedHeight) {
-        if (super.getDesiredWidth(assumedHeight) != AxisConstraint.FREE)
-            return super.getDesiredWidth(assumedHeight);
+    public AxisConstraint getWidthConstraint(int assumedHeight) {
+        if (super.getWidthConstraint(assumedHeight) != AxisConstraint.FREE)
+            return super.getWidthConstraint(assumedHeight);
 
         return AxisConstraint.atLeast(font.width(text) + 12);
     }
 
     @Override
-    public AxisConstraint getDesiredHeight(int assumedWidth) {
+    public AxisConstraint getHeightConstraint(int assumedWidth) {
         return AxisConstraint.fixed(20);
     }
 }

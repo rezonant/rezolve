@@ -26,7 +26,7 @@ public class DiskBayScreen extends MachineScreen<DiskBayMenu> {
 
 		setPanel(new VerticalLayoutPanel(), root -> {
 			root.addChild(new HorizontalLayoutPanel(), top -> {
-				top.setGrowScale(1);
+				top.setExpansionFactor(1);
 
 				top.addChild(new Spacer());
 				top.addChild(new Meter(

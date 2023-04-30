@@ -8,7 +8,6 @@ import com.rezolvemc.storage.view.IStorageViewContainer;
 import com.rezolvemc.storage.view.StorageView;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import org.torchmc.layout.HorizontalLayoutPanel;
 import org.torchmc.layout.VerticalLayoutPanel;
@@ -43,7 +42,7 @@ public class DiskManipulatorScreen extends MachineScreen<DiskManipulatorMenu> im
 
 		setPanel(new VerticalLayoutPanel(), root -> {
 			root.addChild(new HorizontalLayoutPanel(), panel -> {
-				panel.setGrowScale(1);
+				panel.setExpansionFactor(1);
 
 				panel.addChild(new VerticalLayoutPanel(), panel2 -> {
 					panel2.addChild(new SlotWidget(Component.empty(), menu.getSlot(0)));
@@ -53,20 +52,20 @@ public class DiskManipulatorScreen extends MachineScreen<DiskManipulatorMenu> im
 									Component.literal(""),
 									Rezolve.tex("gui/widgets/storage_meter.png")
 							), meter -> {
-								meter.setGrowScale(1);
+								meter.setExpansionFactor(1);
 							}
 					);
 				});
 
 				panel.addChild(new VerticalLayoutPanel(), panel2 -> {
-					panel2.setGrowScale(1);
+					panel2.setExpansionFactor(1);
 					panel2.setSpace(3);
 
 					panel2.addChild(new org.torchmc.widgets.EditBox(Component.translatable("screens.rezolve.search")), editBox -> {
 						searchField = editBox;
 					});
 					panel2.addChild(new StorageView(), view -> {
-						view.setGrowScale(1);
+						view.setExpansionFactor(1);
 						storageView = view;
 					});
 				});

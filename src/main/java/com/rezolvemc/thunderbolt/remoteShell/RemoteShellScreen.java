@@ -44,10 +44,10 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 
 		setPanel(new AxisLayoutPanel(Axis.Y), root -> {
 			root.addChild(new HorizontalLayoutPanel(), topLayout -> {
-				topLayout.setGrowScale(1);
+				topLayout.setExpansionFactor(1);
 				topLayout.setAlignment(AxisAlignment.CENTER);
 				topLayout.addChild(new VerticalLayoutPanel(), storageLayout -> {
-					storageLayout.setGrowScale(1);
+					storageLayout.setExpansionFactor(1);
 
 					// Search label + field
 
@@ -58,13 +58,13 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 						});
 						panel.addChild(new EditBox(Component.translatable("screens.rezolve.search")), field -> {
 							field.setMaxLength(23);
-							field.setGrowScale(1);
+							field.setExpansionFactor(1);
 							searchField = field;
 						});
 					});
 
 					storageLayout.addChild(new ListView(Component.translatable("screens.rezolve.machine_list")), listView -> {
-						listView.setGrowScale(1);
+						listView.setExpansionFactor(1);
 						listView.setItemPadding(2);
 
 						this.listView = listView;
@@ -90,7 +90,7 @@ public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 
 				detailsLayout.addChild(new AxisLayoutPanel(Axis.X), panel -> {
 					panel.addChild(new Label(), label -> {
-						label.setGrowScale(1);
+						label.setExpansionFactor(1);
 						infoLbl = label;
 					});
 

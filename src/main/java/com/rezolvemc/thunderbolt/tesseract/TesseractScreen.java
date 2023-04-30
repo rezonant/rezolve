@@ -49,7 +49,7 @@ public class TesseractScreen extends MachineScreen<TesseractMenu> {
             vert.addChild(new Button("Here's a button!"));
             vert.addChild(new EditBox("Edit box"));
             vert.addChild(new ListView("Channels"), listView -> {
-                listView.setGrowScale(1);
+                listView.setExpansionFactor(1);
 
                 for (int i = 0, max = 25; i < max; ++i) {
                     listView.addItem("Test item");

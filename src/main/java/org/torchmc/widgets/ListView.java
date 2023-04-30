@@ -210,7 +210,7 @@ public class ListView extends TorchWidget {
 
         scissor(poseStack, x, y, width, height, () -> {
             pushPose(poseStack, () -> {
-                repose(poseStack, () -> poseStack.translate(x + itemPadding, y - scrollPos + itemPadding, 0));
+                repose(() -> poseStack.translate(x + itemPadding, y - scrollPos + itemPadding, 0));
 
                 visitItems((item, x, y, i) -> {
                     int itemY = y;
@@ -231,7 +231,7 @@ public class ListView extends TorchWidget {
                         TorchUtil.colorQuad(poseStack, 0x33000000, -itemPadding, -itemPadding, width - scrollBarWidth, item.getHeight()+itemPadding*2);
                     }
 
-                    repose(poseStack, () -> poseStack.translate(0, item.getHeight() + itemPadding*2, 0));
+                    repose(() -> poseStack.translate(0, item.getHeight() + itemPadding*2, 0));
 
                     return true;
                 });

@@ -95,11 +95,11 @@ public class AxisLayoutPanel extends LayoutPanel {
                 continue;
             }
 
-            var constraint = child.getDesiredSize(axis, crossSize).add(child.getPadding(axis));
+            var constraint = child.getConstraint(axis, crossSize).add(child.getPadding(axis));
 
             plan[i] = constraint.min;
             available = Math.max(0, available - plan[i]);
-            growthFactors[i] = child.getGrowScale(axis);
+            growthFactors[i] = child.getExpansionFactor(axis);
             growthMax += growthFactors[i];
             maxSizes[i] = constraint.max;
 
@@ -160,7 +160,7 @@ public class AxisLayoutPanel extends LayoutPanel {
     }
 
     @Override
-    public AxisConstraint getDesiredSize(Axis axis, int crossSize) {
+    public AxisConstraint getConstraint(Axis axis, int assumedCrossSize) {
         if (axis == this.axis) {
             return AxisConstraint.between(getMinimumSize(), getMaximumSize());
         } else {
@@ -168,7 +168,7 @@ public class AxisLayoutPanel extends LayoutPanel {
 
             AxisConstraint size = null;
             for (int i = 0, max = plan.length - 1; i < max; ++i) {
-                size = AxisConstraint.union(size, children.get(i).getDesiredSize(axis, 0).add(children.get(i).getPadding(axis)));
+                size = AxisConstraint.union(size, children.get(i).getConstraint(axis, 0).add(children.get(i).getPadding(axis)));
             }
 
             if (size == null)
@@ -179,13 +179,13 @@ public class AxisLayoutPanel extends LayoutPanel {
     }
 
     @Override
-    public AxisConstraint getDesiredHeight(int assumedWidth) {
-        return getDesiredSize(Axis.Y, assumedWidth);
+    public AxisConstraint getHeightConstraint(int assumedWidth) {
+        return getConstraint(Axis.Y, assumedWidth);
     }
 
     @Override
-    public AxisConstraint getDesiredWidth(int assumedHeight) {
-        return getDesiredSize(Axis.X, assumedHeight);
+    public AxisConstraint getWidthConstraint(int assumedHeight) {
+        return getConstraint(Axis.X, assumedHeight);
     }
 
     private int space = 3;
@@ -201,7 +201,7 @@ public class AxisLayoutPanel extends LayoutPanel {
     private int getMinimumSize() {
         int minSize = 0;
         for (var child : children) {
-            minSize += child.getDesiredSize(axis, 0).min;
+            minSize += child.getConstraint(axis, 0).min;
         }
 
         return minSize + space * (countVisibleChildren() - 1);
@@ -220,7 +220,7 @@ public class AxisLayoutPanel extends LayoutPanel {
     private int getMaximumSize() {
         int maxSize = 0;
         for (var child : children) {
-            int size = child.getDesiredSize(axis, 0).max;
+            int size = child.getConstraint(axis, 0).max;
             if (size == 0)
                 return 0;
             maxSize += size;

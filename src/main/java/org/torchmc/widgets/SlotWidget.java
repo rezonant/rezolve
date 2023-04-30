@@ -28,12 +28,12 @@ public class SlotWidget extends TorchWidget {
     private ResourceLocation texture = TorchUI.builtInTex("gui/widgets/slot.png");
 
     @Override
-    public AxisConstraint getDesiredWidth(int assumedHeight) {
+    public AxisConstraint getWidthConstraint(int assumedHeight) {
         return AxisConstraint.fixed(SIZE);
     }
 
     @Override
-    public AxisConstraint getDesiredHeight(int assumedHeight) {
+    public AxisConstraint getHeightConstraint(int assumedHeight) {
         return AxisConstraint.fixed(SIZE);
     }
 

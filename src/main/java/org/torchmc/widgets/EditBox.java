@@ -53,7 +53,7 @@ public class EditBox extends TorchWidget {
         positionNativeWidget();
 
         pushPose(pPoseStack, () -> {
-            repose(pPoseStack, () -> {
+            repose(() -> {
                 var rect = getScreenRect();
                 pPoseStack.translate(-rect.getX() + x, -rect.getY() + y, 0);
             });

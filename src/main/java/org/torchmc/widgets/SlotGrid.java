@@ -87,12 +87,12 @@ public class SlotGrid extends TorchWidget {
 
     private int labelMargin = 5;
     @Override
-    public AxisConstraint getDesiredWidth(int assumedHeight) {
+    public AxisConstraint getWidthConstraint(int assumedHeight) {
         return AxisConstraint.atLeast(SlotWidget.SIZE * breadth);
     }
 
     @Override
-    public AxisConstraint getDesiredHeight(int assumedWidth) {
+    public AxisConstraint getHeightConstraint(int assumedWidth) {
         int rowCount = (int)Math.ceil(cachedSlotCount / (float)breadth);
         return AxisConstraint.atLeast(SlotWidget.SIZE * rowCount + (labelVisible ? (font.lineHeight + labelMargin*2) : 0));
     }

@@ -58,7 +58,7 @@ public class ThunderboltCableScreen extends MachineScreen<ThunderboltCableMenu> 
             root.setSpace(4);
 
             root.addChild(new Configurator(), configurator -> {
-                configurator.setGrowScale(1);
+                configurator.setExpansionFactor(1);
                 configurator.setVisible(menu != null); // until we have a menu
 
                 if (this.configurator != null) {
@@ -81,7 +81,7 @@ public class ThunderboltCableScreen extends MachineScreen<ThunderboltCableMenu> 
                 sideConfigPanel = panel;
 
                 panel.addChild(new Label(), label -> {
-                    label.setGrowScale(1);
+                    label.setExpansionFactor(1);
 
                     if (sideInfoLbl != null) {
                         label.setContent(sideInfoLbl.getContent());
