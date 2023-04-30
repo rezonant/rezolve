@@ -364,7 +364,8 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
 
     /**
      * Fired when a widget has been added or removed somewhere below this widget, or when such a widget
-     * has changed its desired size.
+     * has changed its desired size. Also should be fired if the content of this widget has changed in such a way
+     * as to require layout to be reflowed.
      */
     protected void hierarchyDidChange() {
         if (hierarchyChangesHeld) {

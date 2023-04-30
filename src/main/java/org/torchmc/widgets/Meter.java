@@ -9,6 +9,9 @@ import org.torchmc.layout.AxisConstraint;
 import org.torchmc.util.Color;
 import org.torchmc.util.TorchUtil;
 
+/**
+ * A themable meter/progress bar widget which can be vertical or horizontal.
+ */
 public class Meter extends TorchWidget {
     public static final int TEXTURE_HEIGHT = 16;
 

@@ -25,6 +25,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+/**
+ * Superclass of screens which use the Torch UI and layout system. Such screens use Torch's windowing system,
+ * so contents of the screen are added to the screen's "main window". Though children are actually parented to the
+ * screen's main window, the main window's dimensions and position are automatically synced to the screen's size.
+ * @param <T>
+ */
 public abstract class TorchScreen<T extends AbstractContainerMenu> extends AbstractContainerScreen<T> {
     public TorchScreen(T pMenu, Inventory pPlayerInventory, Component pTitle, int width, int height) {
         super(pMenu, pPlayerInventory, pTitle);
@@ -34,18 +40,8 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
         this.titleLabelY = 6;
     }
 
-    private double moveStartLeftPos = 0;
-    private double moveStartTopPos = 0;
-    private int resizeStartWidth = 0;
-    private int resizeStartHeight = 0;
-    private boolean resizing = false;
-    private boolean moving = false;
-    private ResizeMode resizeMode;
     private boolean wasMoved = false;
     private boolean initialized = false;
-    private Panel panel;
-    private boolean resizable = true;
-    private boolean movable = true;
     private Size minSize = new Size(50, 50);
     private List<Window> windows = new ArrayList<>();
     private Window mainWindow;
@@ -76,26 +72,10 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
     protected double clickY = 0;
 
     /**
-     * How tall the title bar is
-     */
-    protected int titlebarHeight = 18;
-
-    /**
-     * How wide the drag area is on the window
-     */
-    protected int dragHandleSize = 4;
-
-    /**
      * Whether to render the Inventory label provided by Vanilla Minecraft.
      * Use inventoryLabelX/Y to position it.
      */
     protected boolean enableInventoryLabel = false;
-
-    /**
-     * What amount of the top portion of the window should receive a darker background color than the rest.
-     * This is typically used to create a visual separation between the machine's UI and the user's inventory.
-     */
-    protected int twoToneHeight = 0;
 
     @Override
     protected final void init() {
@@ -124,16 +104,6 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
 
     }
 
-    public int getMaxZ() {
-        int highZ = 0;
-        for (var window : windows) {
-            highZ = Math.max(highZ, window.z);
-        }
-
-        highZ = Math.max(highZ, z);
-        return highZ;
-    }
-
     protected <T extends Panel> T setPanel(T panel) {
         return setPanel(panel, p -> {});
     }
@@ -144,14 +114,12 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
 
     protected <T extends TorchWidget> T addChild(T widget, Consumer<T> initializer) {
         if (widget instanceof Window window) {
-            window.z = getMaxZ() + 1;
             windows.add(window);
         } else {
             addRenderableWidget(widget);
         }
 
         widget.runInitializer(() -> initializer.accept(widget));
-        //applyDimensions();
         return widget;
     }
 
@@ -170,51 +138,13 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
      */
     protected <T extends Panel> T setPanel(T panel, Consumer<T> initializer) {
         return mainWindow.setPanel(panel, initializer);
-//
-//        if (this.panel != null) {
-//            removeWidget(this.panel);
-//        }
-//
-//        this.panel = panel;
-//        addRenderableWidget(panel);
-//
-//        initializer.accept(panel);
-//
-//        applyDimensions();
-//
-//        return panel;
     }
-
-    protected int panelMargin = 8;
 
     protected void applyDimensions() {
     }
 
     @Override
     protected void renderLabels(PoseStack pPoseStack, int pMouseX, int pMouseY) {
-        if (enableInventoryLabel)
-            this.font.draw(pPoseStack, this.playerInventoryTitle, (float) this.inventoryLabelX, (float) this.inventoryLabelY, 4210752);
-    }
-
-    private boolean hoveringMenuBar(double pMouseX, double pMouseY) {
-        return leftPos < pMouseX && pMouseX < leftPos + imageWidth
-                && topPos < pMouseY && pMouseY < topPos + titlebarHeight;
-    }
-
-    private boolean hoveringBottomEdge(double pMouseX, double pMouseY) {
-        return getBottomEdgeStart() < pMouseY && pMouseY < getBottomEdgeStart() + dragHandleSize;
-    }
-
-    private int getRightEdgeStart() {
-        return leftPos + imageWidth - dragHandleSize / 2;
-    }
-
-    private boolean hoveringRightEdge(double mouseX, double mouseY) {
-        return getRightEdgeStart() < mouseX && mouseX < getRightEdgeStart() + dragHandleSize;
-    }
-
-    private int getBottomEdgeStart() {
-        return topPos + imageHeight - dragHandleSize / 2;
     }
 
     @Override
@@ -223,44 +153,7 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
         clickX = pMouseX;
         clickY = pMouseY;
 
-//        if (movable) {
-//            if (hoveringMenuBar(pMouseX, pMouseY)) {
-//                moving = true;
-//                moveStartLeftPos = leftPos;
-//                moveStartTopPos = topPos;
-//                return true;
-//            }
-//        }
-//
-//        if (resizable) {
-//            if (hoveringBottomEdge(pMouseX, pMouseY) && hoveringRightEdge(pMouseX, pMouseY)) {
-//                resizing = true;
-//                resizeMode = ResizeMode.BOTTOM_RIGHT;
-//                resizeStartWidth = imageWidth;
-//                resizeStartHeight = imageHeight;
-//                return true;
-//            } else if (hoveringBottomEdge(pMouseX, pMouseY)) {
-//                resizing = true;
-//                resizeMode = ResizeMode.BOTTOM;
-//                resizeStartWidth = imageWidth;
-//                resizeStartHeight = imageHeight;
-//                return true;
-//            } else if (hoveringRightEdge(pMouseX, pMouseY)) {
-//                resizing = true;
-//                resizeMode = ResizeMode.RIGHT;
-//                resizeStartWidth = imageWidth;
-//                resizeStartHeight = imageHeight;
-//                return true;
-//            }
-//        }
-
-
-
-        boolean handled = super.mouseClicked(pMouseX, pMouseY, pButton);
-
-        // Wouldn't this make sense? But no, Mojank strikes again.
-        // if (handled)
-        //    return true;
+        super.mouseClicked(pMouseX, pMouseY, pButton);
 
         for (int i = windows.size() - 1; i >= 0; --i) {
             var window = windows.get(i);
@@ -295,49 +188,6 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
     @Override
     public boolean mouseDragged(double pMouseX, double pMouseY, int pButton, double pDragX, double pDragY) {
 
-//        if (resizing) {
-//            switch (resizeMode) {
-//                case RIGHT -> {
-//                    imageWidth = (int)(resizeStartWidth + (pMouseX - clickX));
-//                }
-//                case BOTTOM -> {
-//                    imageHeight = (int)(resizeStartHeight + (pMouseY - clickY));
-//                }
-//                case BOTTOM_RIGHT -> {
-//                    imageWidth = (int)(resizeStartWidth + (pMouseX - clickX));
-//                    imageHeight = (int)(resizeStartHeight + (pMouseY - clickY));
-//                }
-//            }
-//
-//            imageWidth = Math.max(minSize.width, imageWidth);
-//            imageHeight = Math.max(minSize.height, imageHeight);
-//
-//            if (!wasMoved) {
-//                leftPos = (width - imageWidth) / 2;
-//                topPos = (height - imageHeight) / 2;
-//            }
-//
-//            if (panel != null) {
-//                applyDimensions();
-//            } else {
-//                rebuildWidgets();
-//            }
-//
-//            return true;
-//        } else if (moving) {
-//            leftPos = (int)(moveStartLeftPos + (pMouseX - clickX));
-//            topPos = (int)(moveStartTopPos + (pMouseY - clickY));
-//            wasMoved = true;
-//
-//            if (panel != null) {
-//                applyDimensions();
-//            } else {
-//                rebuildWidgets();
-//            }
-//
-//            return true;
-//        }
-
         // First, handle the ContainerScreen mouse drag stuff. This *always* returns true and does not call super(),
         // because Mojang does not know how to make a user interface framework.
 
@@ -351,46 +201,9 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
                 ;
     }
 
-    public boolean hoveringOverMainWindow(double pMouseX, double pMouseY) {
-        return leftPos < pMouseX && pMouseX < leftPos + imageWidth && topPos < pMouseY && pMouseY < topPos + imageHeight;
-    }
-
-    @Override
-    protected void renderBg(PoseStack pPoseStack, float pPartialTick, int pMouseX, int pMouseY) {
-//        TorchUtil.insetBox(
-//                pPoseStack,
-//                 TorchUI.builtInTex("gui/widgets/screen_background.png"),
-//                leftPos, topPos, imageWidth, imageHeight
-//        );
-//
-//        if (twoToneHeight > 0) {
-//            TorchUtil.insetBox(
-//                    pPoseStack,
-//                    TorchUI.builtInTex("gui/widgets/twotone_background.png"),
-//                    leftPos, topPos, imageWidth, twoToneHeight
-//            );
-//        }
-//
-//        renderTitleBar(pPoseStack, pPartialTick, pMouseX, pMouseY);
-    }
-
-    protected void renderTitleBar(PoseStack poseStack, float partialTick, int mouseX, int mouseY) {
-        var border = 2;
-
-        if (movable) {
-            colorQuad(
-                    poseStack, 0xFF999999,
-                    leftPos + border, topPos + border,
-                    imageWidth - border * 2, titlebarHeight - border * 2
-            );
-        }
-    }
-
     @Override
     public boolean mouseReleased(double pMouseX, double pMouseY, int pButton) {
         mouseDown = false;
-        resizing = false;
-        moving = false;
 
         boolean wasDragging = isDragging();
         var focusedListener = getFocused();
@@ -439,24 +252,12 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
         return super.keyPressed(pKeyCode, pScanCode, pModifiers);
     }
 
-//    @Override
-//    public boolean charTyped(char pCodePoint, int pModifiers) {
-//        boolean textFocused = false;
-//
-//        if (!textFocused || pCodePoint != 'e')
-//            return super.charTyped(pCodePoint, pModifiers);
-//
-//        return false;
-//    }
-
     /**
      * Responsible for updating UI widgets state based on state changes that happen in the Menu.
      */
     public void updateStateFromMenu() {
 
     }
-
-    private int z = 0;
 
     @Override
     public final void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
@@ -477,28 +278,6 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
         renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
         pPoseStack.popPose();
         RenderSystem.applyModelViewMatrix();
-
-//        if (!resizing && resizable) {
-//            if (hoveringRightEdge(pMouseX, pMouseY) && hoveringBottomEdge(pMouseX, pMouseY)) {
-//                TorchUtil.colorQuad(
-//                        pPoseStack, Color.WHITE.withAlpha(0.5f),
-//                        getRightEdgeStart(), getBottomEdgeStart(),
-//                        dragHandleSize, dragHandleSize
-//                );
-//            } else if (hoveringRightEdge(pMouseX, pMouseY)) {
-//                TorchUtil.colorQuad(
-//                        pPoseStack, Color.WHITE.withAlpha(0.5f),
-//                        getRightEdgeStart(), topPos,
-//                        dragHandleSize, imageHeight
-//                );
-//            } else if (hoveringBottomEdge(pMouseX, pMouseY)) {
-//                TorchUtil.colorQuad(
-//                        pPoseStack, Color.WHITE.withAlpha(0.5f),
-//                        leftPos, getBottomEdgeStart(),
-//                        imageWidth, dragHandleSize
-//                );
-//            }
-//        }
 
         renderOver(pPoseStack, pMouseX, pMouseY);
     }

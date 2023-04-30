@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * A LayoutPanel which lays out child elements along the given axis.
+ */
 public class AxisLayoutPanel extends LayoutPanel {
     public AxisLayoutPanel(Axis axis) {
         super();
@@ -25,10 +28,19 @@ public class AxisLayoutPanel extends LayoutPanel {
         return justification;
     }
 
+    /**
+     * Change how widgets are aligned along the cross-axis.
+     * @param alignment
+     */
     public void setAlignment(AxisAlignment alignment) {
         this.alignment = alignment;
     }
 
+    /**
+     * Change how widgets are aligned along the primary axis when there is extra space left over which was not consumed
+     * by children which have defined expansion factors.
+     * @param justification
+     */
     public void setJustification(AxisAlignment justification) {
         this.justification = justification;
     }
@@ -194,6 +206,10 @@ public class AxisLayoutPanel extends LayoutPanel {
         return space;
     }
 
+    /**
+     * Change how much space should be added between children when they are laid out.
+     * @param space
+     */
     public void setSpace(int space) {
         this.space = space;
     }

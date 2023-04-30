@@ -5,6 +5,9 @@ import net.minecraft.network.chat.Component;
 import org.torchmc.TorchWidget;
 import org.torchmc.layout.AxisConstraint;
 
+/**
+ * A Torch widget that acts just like the vanilla EditBox with a few improvements.
+ */
 public class EditBox extends TorchWidget {
     public EditBox(Component narrationTitle) {
         super(narrationTitle);

@@ -16,12 +16,16 @@ import org.torchmc.widgets.Spacer;
 
 import java.util.function.Consumer;
 
+/**
+ * Represents a floating window rendered as part of a TorchScreen. Windows are movable, resizable, and support
+ * Z positioning. Though intended to be used primarily with TorchScreen, Windows can also be added to other kinds of
+ * Screen, though not all features are supported. Notably, Z ordering is not supported in such a configuration.
+ */
 public class Window extends TorchWidget {
     public Window(Component title) {
         super(title);
 
         this.title = title;
-        this.z = 100;
 
         setIsDecoration(true);
 
@@ -87,6 +91,10 @@ public class Window extends TorchWidget {
         return title;
     }
 
+    /**
+     * Set the current title for this window (as shown in the titlebar).
+     * @param title
+     */
     public void setTitle(Component title) {
         this.title = title;
         this.titlebarLabel.setContent(title);
@@ -96,6 +104,10 @@ public class Window extends TorchWidget {
         return resizable;
     }
 
+    /**
+     * Change whether this window is resizable by the user.
+     * @param resizable
+     */
     public void setResizable(boolean resizable) {
         this.resizable = resizable;
     }
@@ -108,6 +120,12 @@ public class Window extends TorchWidget {
         return titleBarVisible;
     }
 
+    /**
+     * Change whether this window should render its titlebar. The height of the window will be automatically adjusted
+     * when the titlebar's visibility changes.
+     *
+     * @param titleBarVisible
+     */
     public void setTitleBarVisible(boolean titleBarVisible) {
         if (this.titleBarVisible == titleBarVisible)
             return;
@@ -124,27 +142,63 @@ public class Window extends TorchWidget {
         applyDimensions();
     }
 
+    /**
+     * Change whether this window is closable.
+     * @param closable
+     */
     public void setClosable(boolean closable) {
         this.closable = closable;
         if (closeButton != null)
             closeButton.setVisible(closable);
     }
 
+    /**
+     * Set the primary panel of this window. The primary panel will be automatically positioned to take up the entire
+     * space of the window.
+     * @param panel
+     * @return
+     * @param <T>
+     */
     public <T extends Panel> T setPanel(T panel) {
         return setPanel(panel, p -> {});
     }
 
+    /**
+     * Set the primary panel of this window and run the given initializer against it. The primary panel will be
+     * automatically positioned to take up the entire space of the window.
+     *
+     * @param panel
+     * @param initializer
+     * @return
+     * @param <T>
+     */
     public <T extends Panel> T setPanel(T panel, Consumer<T> initializer) {
         this.panel = addChild(panel, initializer);
         applyDimensions();
         return panel;
     }
 
+    /**
+     * Check if the given mouse coordinates fall within the bounding box of this window.
+     * @param pMouseX The X coordinate within the rectangle of this widget's parent widget (typically the Screen)
+     * @param pMouseY The Y coordinate within the rectangle of this widget's parent widget (typically the Screen)
+     *
+     * @return
+     */
     @Override
     public boolean isMouseOver(double pMouseX, double pMouseY) {
         return x < pMouseX && pMouseX < x + width + dragHandleSize / 2 && y < pMouseY && pMouseY < y + height + dragHandleSize / 2;
     }
 
+    /**
+     * Renders the window's title bar. Can be overridden to customize. Note that the titlebar contents itself are
+     * rendered using Torch's layout system and widgets, so the default implementation of this method only draws the
+     * colored rectangle background.
+     * @param poseStack
+     * @param partialTick
+     * @param mouseX
+     * @param mouseY
+     */
     protected void renderTitleBar(PoseStack poseStack, float partialTick, int mouseX, int mouseY) {
         var border = 2;
 
@@ -161,6 +215,10 @@ public class Window extends TorchWidget {
         return movable;
     }
 
+    /**
+     * Change whether this window is movable by the user.
+     * @param movable
+     */
     public void setMovable(boolean movable) {
         this.movable = movable;
     }
@@ -169,6 +227,11 @@ public class Window extends TorchWidget {
         setVisible(false);
     }
 
+    /**
+     * Window's implementation of screenScissor() is effectively a no-op since windows are not constrained to the
+     * bounding box of the Screen which contains it.
+     * @param runnable
+     */
     @Override
     protected void screenScissor(Runnable runnable) {
         runnable.run();
@@ -302,10 +365,20 @@ public class Window extends TorchWidget {
         return super.mouseDragged(pMouseX, pMouseY, pButton, pDragX, pDragY);
     }
 
+    /**
+     * Called when the user has moved the window.
+     * @param x
+     * @param y
+     */
     protected void wasMovedByUser(int x, int y) {
 
     }
 
+    /**
+     * Called when the user has resized the window.
+     * @param x
+     * @param y
+     */
     protected void wasResizedByUser(int x, int y) {
 
     }

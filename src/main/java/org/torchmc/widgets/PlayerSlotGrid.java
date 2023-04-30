@@ -6,6 +6,10 @@ import org.torchmc.TorchUI;
 import org.torchmc.layout.VerticalLayoutPanel;
 import org.torchmc.util.TorchUtil;
 
+/**
+ * A specialized item slot grid widget which automatically renders the player's inventory slots. Only useful when the
+ * associated AbstractContainerMenu contains slots that connect to the player's inventory (player.getInventory())
+ */
 public class PlayerSlotGrid extends VerticalLayoutPanel {
     public PlayerSlotGrid() {
         int firstSlot = firstPlayerSlotId();

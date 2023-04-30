@@ -8,6 +8,9 @@ import org.torchmc.layout.AxisConstraint;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A grid of item slots
+ */
 public class SlotGrid extends TorchWidget {
     public SlotGrid(Component label, int breadth) {
         super(label);

@@ -9,6 +9,9 @@ import org.torchmc.TorchWidget;
 import org.torchmc.layout.AxisConstraint;
 import org.torchmc.util.TorchUtil;
 
+/**
+ * Item slot widget. Adds the slot texture and can manipulate menu slots to change their position as the widget is moved.
+ */
 public class SlotWidget extends TorchWidget {
     public static final int SIZE = 18;
 

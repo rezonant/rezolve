@@ -9,6 +9,9 @@ import org.torchmc.layout.AxisConstraint;
 import org.torchmc.util.Color;
 import org.torchmc.util.TorchUtil;
 
+/**
+ * Renders as an arrow, and can show progress by rendering a portion of the arrow as red/gray.
+ */
 public class ProgressIndicator extends TorchWidget {
     public static final ResourceLocation ARROW_TEXTURE = TorchUI.builtInTex("gui/widgets/arrow.png");
 

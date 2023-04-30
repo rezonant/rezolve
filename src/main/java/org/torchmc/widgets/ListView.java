@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * An extensible scrollable list view
+ */
 public class ListView extends TorchWidget {
     public ListView(Component narrationTitle) {
         super(narrationTitle);

@@ -7,6 +7,9 @@ import org.torchmc.TorchWidget;
 import org.torchmc.util.Color;
 import org.torchmc.util.TorchUtil;
 
+/**
+ * A scrollbar which can be composed into another view to add support for scrolling to any Torch widget.
+ */
 public class ScrollBar extends TorchWidget {
     public ScrollBar() {
         super(Component.literal(""));

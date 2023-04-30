@@ -2,6 +2,10 @@ package org.torchmc.layout;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
+/**
+ * A panel which shows a single child at a time and allows for switching which child is shown.
+ * The visible child always occupies the entire available space of the switcher panel.
+ */
 public class SwitcherPanel extends LayoutPanel {
     int activeIndex = 0;
 

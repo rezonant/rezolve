@@ -12,6 +12,9 @@ import org.torchmc.util.TorchUtil;
 
 import java.util.List;
 
+/**
+ * A simple square button which only shows an icon texture and a tooltip.
+ */
 public class IconButton extends TorchWidget {
     public static final int SIZE = 18;
 

@@ -2,6 +2,9 @@ package org.torchmc.layout;
 
 import org.torchmc.TorchWidget;
 
+/**
+ * Base class for all layout panels
+ */
 public abstract class LayoutPanel extends Panel {
 
     @Override
