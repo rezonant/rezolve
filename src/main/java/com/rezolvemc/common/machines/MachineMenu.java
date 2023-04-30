@@ -8,7 +8,6 @@ import com.rezolvemc.common.inventory.SetIngredientSlotPacket;
 import com.rezolvemc.common.inventory.VirtualInventory;
 import com.rezolvemc.common.network.RezolvePacket;
 import com.rezolvemc.common.network.RezolvePacketReceiver;
-import com.rezolvemc.common.network.WithPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -34,8 +33,6 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.*;
 
-@WithPacket(MachineMenuStatePacket.class)
-@WithPacket(SetIngredientSlotPacket.class)
 public class MachineMenu<MachineT extends MachineEntity> extends AbstractContainerMenu implements RezolvePacketReceiver {
 	private static final Logger LOGGER = LogManager.getLogger(Rezolve.ID);
 

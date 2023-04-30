@@ -5,7 +5,6 @@ import java.util.*;
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.machines.MachineEntity;
 import com.rezolvemc.common.network.RezolvePacket;
-import com.rezolvemc.common.network.WithPacket;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.thunderbolt.cable.CableNetwork;
 import com.rezolvemc.thunderbolt.databaseServer.DatabaseServerEntity;
@@ -41,9 +40,6 @@ import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
 
-@WithPacket(RemoteShellEntityReturnPacket.class)
-@WithPacket(RemoteShellStartRecordingPacket.class)
-@WithPacket(RemoteShellStopRecordingPacket.class)
 public class RemoteShellEntity extends MachineEntity {
 	private static final Logger LOGGER = LogManager.getLogger(Rezolve.ID);
 

@@ -5,7 +5,6 @@ import com.rezolvemc.common.blocks.BlockBase;
 import com.rezolvemc.common.machines.WithOperation;
 import com.rezolvemc.common.network.RezolvePacket;
 import com.rezolvemc.common.machines.Operation;
-import com.rezolvemc.common.network.WithPacket;
 import com.rezolvemc.common.util.RezolveReflectionUtil;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
@@ -58,13 +57,13 @@ public class RezolveRegistry {
      * @param classes
      */
     public static void register(Class<?> ...classes) {
-        for (var klass : classes) {
-            registeredClasses.add(klass);
-
-            if (RezolvePacket.class.isAssignableFrom(klass)) {
-                registerPacket((Class<RezolvePacket>)klass);
-            }
-        }
+//        for (var klass : classes) {
+//            registeredClasses.add(klass);
+//
+//            if (RezolvePacket.class.isAssignableFrom(klass)) {
+//                registerPacket((Class<RezolvePacket>)klass);
+//            }
+//        }
     }
 
     private static Map<String, Class<? extends RezolvePacket>> packetsById = new HashMap<>();
@@ -88,12 +87,6 @@ public class RezolveRegistry {
         return packetsById.get(id);
     }
 
-    private static void registerAssociatedPackets(Class<?> klass) {
-        var annotations = RezolveReflectionUtil.getHeirarchicalAnnotations(klass, WithPacket.class);
-        for (var annotation : annotations)
-            registerPacket(annotation.value());
-    }
-
     private static Map<String, Class<? extends Operation>> operationsById = new HashMap<>();
     private static Map<Class<? extends Operation>, String> operationIdsByClass = new HashMap<>();
 
@@ -115,19 +108,26 @@ public class RezolveRegistry {
         return operationsById.get(id);
     }
 
+    private static boolean hasDiscoveredClasses = false;
     @SubscribeEvent
     public static void handleRegisterEvent(RegisterEvent event) {
         RezolvePacket.init();
+
+        if (!hasDiscoveredClasses) {
+            hasDiscoveredClasses = true;
+            for (var klass : RezolveReflectionUtil.findAnnotatedClasses(RegistryId.class)) {
+                if (!registeredClasses.contains(klass))
+                    registeredClasses.add(klass);
+            }
+        }
 
         for (var klass : registeredClasses)  {
             if (Block.class.isAssignableFrom(klass)) {
                 registerBlock(event, (Class<Block>)klass);
             } else if (Item.class.isAssignableFrom(klass)) {
                 registerItem(event, (Class<Item>)klass);
-            } else if (BlockEntity.class.isAssignableFrom(klass)) {
-                registerBlockEntity(event, (Class<BlockEntity>)klass, new Block[]{}); // TODO: this is probably not useful
-            } else if (AbstractContainerMenu.class.isAssignableFrom(klass)) {
-                registerMenu(event, (Class<AbstractContainerMenu>)klass);
+            } else if (RezolvePacket.class.isAssignableFrom(klass)) {
+                registerPacket((Class<RezolvePacket>)klass);
             }
         }
     }
@@ -281,8 +281,6 @@ public class RezolveRegistry {
         if (register.getRegistryKey() != ForgeRegistries.Keys.MENU_TYPES)
             return;
 
-        registerAssociatedPackets(menuClass);
-
         if (registryId == null)
             registryId = requireRegistryId(menuClass);
 
@@ -335,8 +333,6 @@ public class RezolveRegistry {
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException("Failed to register BlockEntity class "+entityClass.getCanonicalName()+": "+e.getMessage(), e);
         }
-
-        registerAssociatedPackets(entityClass);
 
         var operationAnnotation = entityClass.getAnnotation(WithOperation.class);
         if (operationAnnotation != null) {

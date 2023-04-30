@@ -56,28 +56,6 @@ public class Rezolve {
 
 	public Rezolve() {
 		_instance = this;
-		RezolveRegistry.register(
-			Bundler.class,
-			Unbundler.class,
-			SecurityServer.class,
-			DatabaseServer.class,
-			BundleBuilder.class,
-			BundleItem.class,
-			BundlePatternItem.class,
-			ThunderboltCable.class,
-//			BlueThunderboltCable.class,
-//			GreenThunderboltCable.class,
-//			OrangeThunderboltCable.class,
-			RemoteShellBlock.class,
-			ProxyBlock.class,
-			DiskBayBlock.class,
-			DiskManipulatorBlock.class,
-			StorageShellBlock.class,
-			StorageMonitorBlock.class,
-			MachineFrameBlock.class,
-			Extender.class,
-			Tesseract.class
-		);
 	}
 
 	private static Map<String, ResourceLocation> resourceLocationCache = new HashMap<>();

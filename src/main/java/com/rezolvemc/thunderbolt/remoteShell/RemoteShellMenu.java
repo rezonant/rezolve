@@ -4,13 +4,10 @@ import com.rezolvemc.common.registry.WithScreen;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.machines.Sync;
 import com.rezolvemc.common.network.RezolvePacket;
-import com.rezolvemc.common.network.WithPacket;
-import com.rezolvemc.common.registry.RegistryId;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.thunderbolt.remoteShell.packets.RemoteShellActivatePacket;
 import com.rezolvemc.thunderbolt.remoteShell.packets.RemoteShellMenuReturnPacket;
 import com.rezolvemc.thunderbolt.remoteShell.packets.RemoteShellRenameMachinePacket;
-import com.rezolvemc.thunderbolt.remoteShell.packets.RemoteShellStatePacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -19,10 +16,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.UUID;
 
-@RegistryId("remote_shell")
 @WithScreen(RemoteShellScreen.class)
-@WithPacket(RemoteShellActivatePacket.class)
-@WithPacket(RemoteShellStatePacket.class)
 public class RemoteShellMenu extends MachineMenu<RemoteShellEntity> {
 	public RemoteShellMenu(int containerId, Inventory playerInv) {
 		this(containerId, playerInv, null);

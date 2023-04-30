@@ -6,14 +6,12 @@ import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.machines.MachineOutputSlot;
 import com.rezolvemc.common.machines.Sync;
 import com.rezolvemc.common.network.RezolvePacket;
-import com.rezolvemc.common.network.WithPacket;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.common.registry.WithScreen;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 
 @WithScreen(BundleBuilderScreen.class)
-@WithPacket(SetPatternSettingsPacket.class)
 public class BundleBuilderMenu extends MachineMenu<BundleBuilderEntity> {
 	public BundleBuilderMenu(int containerId, Inventory playerInventory) {
 		this(containerId, playerInventory, null);

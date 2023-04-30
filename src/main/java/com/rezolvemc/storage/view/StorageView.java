@@ -6,7 +6,6 @@ import org.torchmc.WidgetBase;
 import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
 import com.rezolvemc.common.machines.MachineScreen;
-import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.storage.view.packets.StorageViewChangeRequest;
 import com.rezolvemc.storage.view.packets.StorageViewContentPacket;
 import com.rezolvemc.util.ItemStackUtil;
@@ -16,28 +15,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import com.rezolvemc.storage.view.packets.StorageViewChangeResponse;
 import com.rezolvemc.storage.view.packets.StorageViewQuery;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.Widget;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
 public class StorageView extends WidgetBase {
-
-	static {
-		RezolveRegistry.register(
-				StorageViewChangeRequest.class,
-				StorageViewChangeResponse.class,
-				StorageViewContentPacket.class,
-				StorageViewQuery.class
-		);
-	}
-
 	public StorageView() {
 		this(0, 0, 0, 0);
 	}
