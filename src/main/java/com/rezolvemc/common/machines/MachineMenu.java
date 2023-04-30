@@ -251,8 +251,6 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 							serializable.deserializeNBT(propTag);
 							value = serializable;
 						} catch (ReflectiveOperationException e) {
-							Errors.reportException(Minecraft.getInstance().level, e, "While deserializing %s", propertyClass.getCanonicalName());
-
 							throw new RuntimeException(
 								String.format(
 									"Failed to create instance of NBT-serializable class %s",

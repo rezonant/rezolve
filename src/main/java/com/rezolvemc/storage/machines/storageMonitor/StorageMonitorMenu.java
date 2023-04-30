@@ -1,11 +1,9 @@
 package com.rezolvemc.storage.machines.storageMonitor;
 
-import com.rezolvemc.common.registry.WithScreen;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import net.minecraft.world.entity.player.Inventory;
 
-@WithScreen(StorageMonitorScreen.class)
 public class StorageMonitorMenu extends MachineMenu<StorageMonitorEntity> {
     public StorageMonitorMenu(int pContainerId, Inventory playerInventory) {
         this(pContainerId, playerInventory, null);

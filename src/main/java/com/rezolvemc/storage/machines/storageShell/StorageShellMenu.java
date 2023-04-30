@@ -1,6 +1,5 @@
 package com.rezolvemc.storage.machines.storageShell;
 
-import com.rezolvemc.common.registry.WithScreen;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.network.RezolvePacket;
 import com.rezolvemc.common.registry.RezolveRegistry;
@@ -11,7 +10,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-@WithScreen(StorageShellScreen.class)
 public class StorageShellMenu extends MachineMenu<StorageShellEntity> {
     public StorageShellMenu(int pContainerId, Inventory playerInventory) {
         this(pContainerId, playerInventory, null);

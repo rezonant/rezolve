@@ -3,6 +3,7 @@ package com.rezolvemc.storage.machines.storageShell;
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.gui.EnergyMeter;
 import com.rezolvemc.common.machines.MachineScreen;
+import com.rezolvemc.common.registry.ScreenFor;
 import com.rezolvemc.storage.view.IStorageViewContainer;
 import com.rezolvemc.storage.gui.StorageShellClearCrafterPacket;
 import com.rezolvemc.storage.view.StorageView;
@@ -18,6 +19,7 @@ import org.torchmc.widgets.EditBox;
 import org.torchmc.widgets.Meter;
 import org.torchmc.widgets.SlotGrid;
 
+@ScreenFor(StorageShellMenu.class)
 public class StorageShellScreen extends MachineScreen<StorageShellMenu> implements IStorageViewContainer {
 
 	public StorageShellScreen(StorageShellMenu menu, Inventory playerInventory, Component pTitle) {

@@ -1,6 +1,5 @@
 package com.rezolvemc.thunderbolt.securityServer;
 
-import com.rezolvemc.common.registry.WithScreen;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.machines.Sync;
 import com.rezolvemc.common.network.RezolvePacket;
@@ -11,7 +10,6 @@ import com.rezolvemc.thunderbolt.securityServer.packets.RemoveSecurityRulePacket
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 
-@WithScreen(SecurityServerScreen.class)
 public class SecurityServerMenu extends MachineMenu<SecurityServerEntity> {
 	public SecurityServerMenu(int containerId, Inventory playerInventory, SecurityServerEntity entity) {
 		super(RezolveRegistry.menuType(SecurityServerMenu.class), containerId, playerInventory, entity);

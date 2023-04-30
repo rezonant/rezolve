@@ -5,10 +5,8 @@ import com.rezolvemc.common.machines.InputSlot;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.machines.MachineOutputSlot;
 import com.rezolvemc.common.registry.RezolveRegistry;
-import com.rezolvemc.common.registry.WithScreen;
 import net.minecraft.world.entity.player.Inventory;
 
-@WithScreen(BundlerScreen.class)
 public class BundlerMenu extends MachineMenu<BundlerEntity> {
 	public BundlerMenu(int containerId, Inventory playerInv) {
 		this(containerId, playerInv, null);

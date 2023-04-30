@@ -2,6 +2,7 @@ package com.rezolvemc.thunderbolt.securityServer;
 
 import com.rezolvemc.common.machines.MachineScreen;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.rezolvemc.common.registry.ScreenFor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
@@ -9,6 +10,7 @@ import net.minecraft.world.entity.player.Inventory;
 
 import java.util.Locale;
 
+@ScreenFor(SecurityServerMenu.class)
 public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 
 	public SecurityServerScreen(SecurityServerMenu menu, Inventory playerInventory, Component title) {

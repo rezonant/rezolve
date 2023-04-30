@@ -1,6 +1,5 @@
 package com.rezolvemc.storage.machines.diskManipulator;
 
-import com.rezolvemc.common.registry.WithScreen;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.network.RezolvePacket;
 import com.rezolvemc.common.registry.RezolveRegistry;
@@ -13,7 +12,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
-@WithScreen(DiskManipulatorScreen.class)
 public class DiskManipulatorMenu extends MachineMenu<DiskManipulatorEntity> {
     public DiskManipulatorMenu(int containerId, Inventory playerInv) {
         this(containerId, playerInv, null);

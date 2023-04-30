@@ -1,12 +1,10 @@
 package com.rezolvemc.storage.machines.diskBay;
 
-import com.rezolvemc.common.registry.WithScreen;
 import com.rezolvemc.common.inventory.ValidatedSlot;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import net.minecraft.world.entity.player.Inventory;
 
-@WithScreen(DiskBayScreen.class)
 public class DiskBayMenu extends MachineMenu<DiskBayEntity> {
     public DiskBayMenu(int containerId, Inventory playerInv) {
         this(containerId, playerInv, null);

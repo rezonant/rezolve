@@ -1,6 +1,5 @@
 package com.rezolvemc.thunderbolt.cable;
 
-import com.rezolvemc.common.registry.WithScreen;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.machines.Sync;
 import com.rezolvemc.common.network.RezolvePacket;
@@ -12,7 +11,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 
-@WithScreen(ThunderboltCableScreen.class)
 public class ThunderboltCableMenu extends MachineMenu<ThunderboltCableEntity> {
     public ThunderboltCableMenu(int pContainerId, Inventory playerInventory) {
         this(pContainerId, playerInventory, null);

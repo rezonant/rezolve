@@ -1,0 +1,9 @@
+{
+  "forge_marker": 1,
+  "variants": {
+    "facing=north": { "model": "rezolve:block/manufacturer" },
+    "facing=south": { "model": "rezolve:block/manufacturer", "y": 180 },
+    "facing=west": { "model": "rezolve:block/manufacturer", "y": 270 },
+    "facing=east": { "model": "rezolve:block/manufacturer", "y": 90 }
+  }
+}

@@ -6,8 +6,11 @@ import com.rezolvemc.common.machines.WithOperation;
 import com.rezolvemc.common.network.RezolvePacket;
 import com.rezolvemc.common.machines.Operation;
 import com.rezolvemc.common.util.RezolveReflectionUtil;
+
+import io.netty.util.internal.ReflectionUtil;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.core.BlockPos;
 import net.minecraft.data.tags.BlockTagsProvider;
@@ -135,25 +138,13 @@ public class RezolveRegistry {
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public static void handleClientSetup(FMLClientSetupEvent event) {
-        for (var klass : registeredClasses) {
-            if (AbstractContainerMenu.class.isAssignableFrom(klass)) {
-                var menuClass = (Class<? extends AbstractContainerMenu>)klass;
-                var screenAnnotation = klass.getAnnotation(WithScreen.class);
-                if (screenAnnotation != null) {
-                    var screenClass = screenAnnotation.value();
-                    registerScreen(event, menuClass, screenClass);
-                }
-            } else if (Block.class.isAssignableFrom(klass)) {
-                var menuAnnotation = klass.getAnnotation(WithMenu.class);
-                if (menuAnnotation != null) {
-                    var menuClass = menuAnnotation.value();
-                    var screenAnnotation = menuClass.getAnnotation(WithScreen.class);
-                    if (screenAnnotation != null) {
-                        var screenClass = screenAnnotation.value();
-                        registerScreen(event, menuClass, screenClass);
-                    }
-                }
-            }
+        var klasses = RezolveReflectionUtil.findAnnotatedClasses(ScreenFor.class);
+
+        for (var klass : klasses) {
+            var screenFor = klass.getAnnotation(ScreenFor.class);
+            var screenClass = (Class<? extends AbstractContainerScreen>)klass;
+            var menuClass = (Class<? extends AbstractContainerMenu>)screenFor.value();
+            registerScreen(event, menuClass, screenClass);
         }
     }
 
@@ -285,6 +276,8 @@ public class RezolveRegistry {
             registryId = requireRegistryId(menuClass);
 
         try {
+            LOGGER.debug("Registering menu " + menuClass.getCanonicalName());
+
             var ctor = menuClass.getConstructor(int.class, Inventory.class);
 
             var type = new MenuType((containerId, playerInventory) -> {

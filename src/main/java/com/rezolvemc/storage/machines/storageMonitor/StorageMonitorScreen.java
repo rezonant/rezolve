@@ -1,6 +1,7 @@
 package com.rezolvemc.storage.machines.storageMonitor;
 
 import com.rezolvemc.common.machines.MachineScreen;
+import com.rezolvemc.common.registry.ScreenFor;
 import com.rezolvemc.storage.view.IStorageViewContainer;
 import com.rezolvemc.storage.view.StorageView;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -8,6 +9,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
+@ScreenFor(StorageMonitorMenu.class)
 public class StorageMonitorScreen extends MachineScreen<StorageMonitorMenu> implements IStorageViewContainer {
 	public StorageMonitorScreen(StorageMonitorMenu menu, Inventory playerInventory, Component pTitle) {
 		super(menu, playerInventory, pTitle, 255, 212);

@@ -8,6 +8,7 @@ import com.rezolvemc.common.machines.Operation;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.rezolvemc.common.registry.ScreenFor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -17,6 +18,7 @@ import org.torchmc.layout.VerticalLayoutPanel;
 import org.torchmc.widgets.PlayerSlotGrid;
 import org.torchmc.widgets.SlotGrid;
 
+@ScreenFor(BundlerMenu.class)
 public class BundlerScreen extends MachineScreen<BundlerMenu> {
 
 	public BundlerScreen(BundlerMenu menu, Inventory playerInv, Component title) {

@@ -1,5 +1,6 @@
 package com.rezolvemc.thunderbolt.cable;
 
+import com.rezolvemc.common.registry.ScreenFor;
 import com.rezolvemc.common.util.RezolveDirectionUtil;
 import net.minecraft.ChatFormatting;
 import org.torchmc.layout.HorizontalLayoutPanel;
@@ -20,6 +21,7 @@ import net.minecraft.world.phys.Vec3;
 import java.util.HashMap;
 import java.util.Map;
 
+@ScreenFor(ThunderboltCableMenu.class)
 public class ThunderboltCableScreen extends MachineScreen<ThunderboltCableMenu> {
     private static final Component SELECT_A_SIDE = Component.translatable("rezolve.thunderbolt.select_a_side");
 

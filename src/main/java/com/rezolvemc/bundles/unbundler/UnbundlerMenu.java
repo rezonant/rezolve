@@ -1,14 +1,11 @@
 package com.rezolvemc.bundles.unbundler;
 
 import com.rezolvemc.bundles.bundler.BundleSlot;
-import com.rezolvemc.common.registry.WithScreen;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.machines.MachineOutputSlot;
-
 import com.rezolvemc.common.registry.RezolveRegistry;
 import net.minecraft.world.entity.player.Inventory;
 
-@WithScreen(UnbundlerScreen.class)
 public class UnbundlerMenu extends MachineMenu<UnbundlerEntity> {
 	public UnbundlerMenu(int containerId, Inventory playerInv) {
 		this(containerId, playerInv, null);

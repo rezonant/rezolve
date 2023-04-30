@@ -2,6 +2,7 @@ package com.rezolvemc.thunderbolt.remoteShell;
 
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.gui.EnergyMeter;
+import com.rezolvemc.common.registry.ScreenFor;
 import net.minecraft.ChatFormatting;
 import org.torchmc.layout.*;
 import org.torchmc.widgets.*;
@@ -15,6 +16,7 @@ import net.minecraft.core.BlockPos;
 
 import java.util.Objects;
 
+@ScreenFor(RemoteShellMenu.class)
 public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {
 
 	public RemoteShellScreen(RemoteShellMenu menu, Inventory playerInv, Component title) {

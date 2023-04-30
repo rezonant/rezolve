@@ -2,6 +2,7 @@ package com.rezolvemc.storage.machines.diskBay;
 
 import com.rezolvemc.common.gui.EnergyMeter;
 import com.rezolvemc.common.machines.MachineScreen;
+import com.rezolvemc.common.registry.ScreenFor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -9,6 +10,7 @@ import org.torchmc.layout.HorizontalLayoutPanel;
 import org.torchmc.layout.VerticalLayoutPanel;
 import org.torchmc.widgets.*;
 
+@ScreenFor(DiskBayMenu.class)
 public class DiskBayScreen extends MachineScreen<DiskBayMenu> {
 	public DiskBayScreen(DiskBayMenu menu, Inventory playerInventory, Component pTitle) {
 		super(menu, playerInventory, pTitle, 255, 212);

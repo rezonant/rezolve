@@ -4,6 +4,7 @@ import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.gui.EnergyMeter;
 import com.rezolvemc.common.machines.MachineProgressIndicator;
 import com.rezolvemc.common.machines.MachineScreen;
+import com.rezolvemc.common.registry.ScreenFor;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -12,6 +13,7 @@ import org.torchmc.layout.HorizontalLayoutPanel;
 import org.torchmc.layout.VerticalLayoutPanel;
 import org.torchmc.widgets.*;
 
+@ScreenFor(BundleBuilderMenu.class)
 public class BundleBuilderScreen extends MachineScreen<BundleBuilderMenu> {
 
 	public BundleBuilderScreen(BundleBuilderMenu menu, Inventory playerInv, Component title) {

@@ -2,6 +2,7 @@ package com.rezolvemc.thunderbolt.tesseract;
 
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.machines.MachineScreen;
+import com.rezolvemc.common.registry.ScreenFor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -10,6 +11,7 @@ import org.torchmc.layout.VerticalLayoutPanel;
 import org.torchmc.util.Color;
 import org.torchmc.widgets.*;
 
+@ScreenFor(TesseractMenu.class)
 public class TesseractScreen extends MachineScreen<TesseractMenu> {
     public static final ResourceLocation TEX_SECURITY_OPTIONS = Rezolve.tex("blocks/block_security_server_front.png");
     public static final ResourceLocation TEX_DATABASE_OPTIONS = Rezolve.tex("blocks/block_database_server_front.png");

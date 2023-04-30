@@ -3,6 +3,7 @@ package com.rezolvemc.storage.machines.diskManipulator;
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.gui.EnergyMeter;
 import com.rezolvemc.common.machines.MachineScreen;
+import com.rezolvemc.common.registry.ScreenFor;
 import com.rezolvemc.storage.view.IStorageViewContainer;
 import com.rezolvemc.storage.view.StorageView;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -16,6 +17,7 @@ import org.torchmc.widgets.Meter;
 import org.torchmc.widgets.SlotGrid;
 import org.torchmc.widgets.SlotWidget;
 
+@ScreenFor(DiskManipulatorMenu.class)
 public class DiskManipulatorScreen extends MachineScreen<DiskManipulatorMenu> implements IStorageViewContainer {
 
 	public DiskManipulatorScreen(DiskManipulatorMenu menu, Inventory playerInventory, Component pTitle) {
