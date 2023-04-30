@@ -1,17 +1,15 @@
 package org.torchmc.widgets;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.torchmc.WidgetBase;
+import org.torchmc.TorchWidget;
 import org.torchmc.layout.Axis;
 import org.torchmc.layout.AxisConstraint;
 import org.torchmc.util.Color;
-import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
 
-public class Meter extends WidgetBase {
+public class Meter extends TorchWidget {
     public static final int TEXTURE_HEIGHT = 16;
 
     public Meter(Component narrationTitle, Component label, ResourceLocation texture) {

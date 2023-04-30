@@ -5,7 +5,7 @@ import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.torchmc.TorchUI;
-import org.torchmc.WidgetBase;
+import org.torchmc.TorchWidget;
 import org.torchmc.util.Color;
 import org.torchmc.util.TorchUtil;
 
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ListView extends WidgetBase {
+public class ListView extends TorchWidget {
     public ListView(Component narrationTitle) {
         super(narrationTitle);
 

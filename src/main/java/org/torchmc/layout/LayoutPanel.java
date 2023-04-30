@@ -1,11 +1,11 @@
 package org.torchmc.layout;
 
-import org.torchmc.WidgetBase;
+import org.torchmc.TorchWidget;
 
 public abstract class LayoutPanel extends Panel {
 
     @Override
-    public <T extends WidgetBase> T addChild(T widget) {
+    public <T extends TorchWidget> T addChild(T widget) {
         super.addChild(widget);
         updateLayout();
         return widget;

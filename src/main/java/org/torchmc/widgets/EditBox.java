@@ -2,11 +2,10 @@ package org.torchmc.widgets;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
-import org.torchmc.WidgetBase;
+import org.torchmc.TorchWidget;
 import org.torchmc.layout.AxisConstraint;
-import org.torchmc.util.Size;
 
-public class EditBox extends WidgetBase {
+public class EditBox extends TorchWidget {
     public EditBox(Component narrationTitle) {
         super(narrationTitle);
 

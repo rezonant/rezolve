@@ -3,11 +3,11 @@ package org.torchmc.widgets;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
-import org.torchmc.WidgetBase;
+import org.torchmc.TorchWidget;
 import org.torchmc.util.Color;
 import org.torchmc.util.TorchUtil;
 
-public class ScrollBar extends WidgetBase {
+public class ScrollBar extends TorchWidget {
     public ScrollBar() {
         super(Component.literal(""));
     }

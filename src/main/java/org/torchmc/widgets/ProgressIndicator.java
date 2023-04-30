@@ -4,12 +4,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.torchmc.TorchUI;
-import org.torchmc.WidgetBase;
+import org.torchmc.TorchWidget;
 import org.torchmc.layout.AxisConstraint;
 import org.torchmc.util.Color;
 import org.torchmc.util.TorchUtil;
 
-public class ProgressIndicator extends WidgetBase {
+public class ProgressIndicator extends TorchWidget {
     public static final ResourceLocation ARROW_TEXTURE = TorchUI.builtInTex("gui/widgets/arrow.png");
 
     public ProgressIndicator(Component narrationTitle, int size) {

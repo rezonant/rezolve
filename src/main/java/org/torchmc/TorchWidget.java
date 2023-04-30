@@ -24,8 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public abstract class WidgetBase extends GuiComponent implements Widget, GuiEventListener, NarratableEntry {
-    public WidgetBase(Component narrationTitle) {
+public abstract class TorchWidget extends GuiComponent implements Widget, GuiEventListener, NarratableEntry {
+    public TorchWidget(Component narrationTitle) {
         this.narrationTitle = narrationTitle;
 
         if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> acScreen)
@@ -36,7 +36,7 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
     }
 
     private boolean visible = true;
-    private WidgetBase parent;
+    private TorchWidget parent;
     protected AbstractContainerScreen screen;
     private boolean isDecoration = false;
     private boolean hovered = false;
@@ -208,17 +208,17 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
 
     }
 
-    protected List<WidgetBase> children = new ArrayList<>();
+    protected List<TorchWidget> children = new ArrayList<>();
 
-    void adoptParent(WidgetBase parent) {
+    void adoptParent(TorchWidget parent) {
         this.parent = parent;
     }
 
-    public <T extends WidgetBase> T addChild(T widget) {
+    public <T extends TorchWidget> T addChild(T widget) {
         return addChild(widget, w -> {});
     }
 
-    public <T extends WidgetBase> T addChild(T widget, Consumer<T> initializer) {
+    public <T extends TorchWidget> T addChild(T widget, Consumer<T> initializer) {
         children.add(widget);
         widget.adoptParent(this);
         widget.runInitializer(() -> initializer.accept(widget));
@@ -285,8 +285,8 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
         }
     }
 
-    public WidgetBase[] getChildren() {
-        return children.toArray(new WidgetBase[children.size()]);
+    public TorchWidget[] getChildren() {
+        return children.toArray(new TorchWidget[children.size()]);
     }
 
     @Override
@@ -331,7 +331,7 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
             becameUnfocused();
     }
 
-    private WidgetBase focusedChild;
+    private TorchWidget focusedChild;
     private boolean focusable = false;
 
     /**
@@ -429,7 +429,7 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
             if (renderable == child)
                 continue;
 
-            if (renderable instanceof WidgetBase widget) {
+            if (renderable instanceof TorchWidget widget) {
                 widget.clearFocus();
             }
         }
@@ -583,8 +583,8 @@ public abstract class WidgetBase extends GuiComponent implements Widget, GuiEven
         pNarrationElementOutput.add(NarratedElementType.TITLE, narrationTitle);
     }
 
-    public WidgetBase getRootParent() {
-        WidgetBase widget = this;
+    public TorchWidget getRootParent() {
+        TorchWidget widget = this;
         while (widget.parent != null)
             widget = widget.parent;
 

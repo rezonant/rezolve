@@ -5,15 +5,14 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.torchmc.WidgetBase;
+import org.torchmc.TorchWidget;
 import org.torchmc.layout.AxisConstraint;
 import org.torchmc.util.Color;
-import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
 
 import java.util.List;
 
-public class IconButton extends WidgetBase {
+public class IconButton extends TorchWidget {
     public static final int SIZE = 18;
 
     public IconButton(Component text, ResourceLocation icon, int size) {

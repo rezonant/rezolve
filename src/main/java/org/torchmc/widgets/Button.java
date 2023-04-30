@@ -10,10 +10,9 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
-import org.torchmc.WidgetBase;
+import org.torchmc.TorchWidget;
 import org.torchmc.layout.AxisConstraint;
 import org.torchmc.util.Color;
-import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
 
 import java.util.function.Consumer;
@@ -21,7 +20,7 @@ import java.util.function.Consumer;
 /**
  * A button
  */
-public class Button extends WidgetBase {
+public class Button extends TorchWidget {
     /**
      * Minecraft buttons are always 20 (virtual) pixels tall.
      * You can't do anything about it, and you should ask yourself why you want to.

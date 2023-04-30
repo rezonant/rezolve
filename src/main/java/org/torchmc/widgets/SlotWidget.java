@@ -5,12 +5,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.Slot;
 import org.torchmc.TorchUI;
-import org.torchmc.WidgetBase;
+import org.torchmc.TorchWidget;
 import org.torchmc.layout.AxisConstraint;
-import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
 
-public class SlotWidget extends WidgetBase {
+public class SlotWidget extends TorchWidget {
     public static final int SIZE = 18;
 
     public SlotWidget(Component narrationLabel, Slot slot) {

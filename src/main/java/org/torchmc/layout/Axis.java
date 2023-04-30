@@ -1,7 +1,5 @@
 package org.torchmc.layout;
 
-import org.torchmc.WidgetBase;
-
 public enum Axis {
     X, Y;
 

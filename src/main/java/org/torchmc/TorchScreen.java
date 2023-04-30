@@ -16,7 +16,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 import org.torchmc.layout.Panel;
-import org.torchmc.util.Color;
 import org.torchmc.util.ResizeMode;
 import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
@@ -139,11 +138,11 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
         return setPanel(panel, p -> {});
     }
 
-    protected <T extends WidgetBase> T addChild(T widget) {
+    protected <T extends TorchWidget> T addChild(T widget) {
         return addChild(widget, w -> {});
     }
 
-    protected <T extends WidgetBase> T addChild(T widget, Consumer<T> initializer) {
+    protected <T extends TorchWidget> T addChild(T widget, Consumer<T> initializer) {
         if (widget instanceof Window window) {
             window.z = getMaxZ() + 1;
             windows.add(window);

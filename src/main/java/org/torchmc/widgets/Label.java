@@ -5,16 +5,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import org.torchmc.WidgetBase;
+import org.torchmc.TorchWidget;
 import org.torchmc.layout.AxisConstraint;
 import org.torchmc.util.Color;
-import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
 
 import javax.annotation.Nonnull;
 
-public class Label extends WidgetBase {
+public class Label extends TorchWidget {
     public Label(String text) {
         this(Component.literal(text));
     }

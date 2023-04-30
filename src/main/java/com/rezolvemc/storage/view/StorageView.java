@@ -2,8 +2,7 @@ package com.rezolvemc.storage.view;
 
 import com.rezolvemc.Rezolve;
 import net.minecraft.network.chat.Component;
-import org.torchmc.WidgetBase;
-import org.torchmc.util.Size;
+import org.torchmc.TorchWidget;
 import org.torchmc.util.TorchUtil;
 import com.rezolvemc.common.machines.MachineScreen;
 import com.rezolvemc.storage.view.packets.StorageViewChangeRequest;
@@ -20,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-public class StorageView extends WidgetBase {
+public class StorageView extends TorchWidget {
 	public StorageView() {
 		this(0, 0, 0, 0);
 	}

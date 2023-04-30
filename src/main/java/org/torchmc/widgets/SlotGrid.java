@@ -1,17 +1,14 @@
 package org.torchmc.widgets;
 
-import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.Slot;
-import org.torchmc.WidgetBase;
+import org.torchmc.TorchWidget;
 import org.torchmc.layout.AxisConstraint;
-import org.torchmc.util.Color;
-import org.torchmc.util.Size;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SlotGrid extends WidgetBase {
+public class SlotGrid extends TorchWidget {
     public SlotGrid(Component label, int breadth) {
         super(label);
 

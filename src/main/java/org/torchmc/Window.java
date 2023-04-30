@@ -16,7 +16,7 @@ import org.torchmc.widgets.Spacer;
 
 import java.util.function.Consumer;
 
-public class Window extends WidgetBase {
+public class Window extends TorchWidget {
     public Window(Component title) {
         super(title);
 
