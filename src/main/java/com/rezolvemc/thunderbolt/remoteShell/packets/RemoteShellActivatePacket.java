@@ -1,5 +1,6 @@
 package com.rezolvemc.thunderbolt.remoteShell.packets;
 
+import com.rezolvemc.common.blocks.RezolveBlockEntityPacket;
 import com.rezolvemc.common.network.RezolveMenuPacket;
 import com.rezolvemc.common.registry.RegistryId;
 import com.rezolvemc.common.util.RezolveByteBufUtils;
@@ -11,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
 @RegistryId("remote_shell_activate")
-public class RemoteShellActivatePacket extends RezolveMenuPacket {
+public class RemoteShellActivatePacket extends RezolveBlockEntityPacket {
 
 	public RemoteShellActivatePacket() { }
 

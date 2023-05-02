@@ -6,6 +6,8 @@ import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.torchmc.TorchUI;
 import org.torchmc.TorchWidget;
+import org.torchmc.events.Event;
+import org.torchmc.events.EventType;
 import org.torchmc.util.Color;
 import org.torchmc.util.TorchUtil;
 
@@ -31,6 +33,16 @@ public class ListView extends TorchWidget {
 
     public ListView(String narrationTitle) {
         this(Component.literal(narrationTitle));
+    }
+
+    public static final EventType<ListViewItemEvent> ITEM_HOVERED = new EventType<ListViewItemEvent>();
+
+    public static class ListViewItemEvent extends Event {
+        public ListViewItemEvent(ListViewItem item) {
+            this.item = item;
+        }
+
+        public final ListViewItem item;
     }
 
     private int scrollBarWidth = 3;
@@ -197,6 +209,16 @@ public class ListView extends TorchWidget {
         }
     }
 
+    private ListViewItem hoveredItem;
+
+    public ListViewItem getHoveredItem() {
+        return hoveredItem;
+    }
+
+    protected void hoveredItemDidChange(ListViewItem item) {
+
+    }
+
     @Override
     public void renderContents(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
 
@@ -231,6 +253,12 @@ public class ListView extends TorchWidget {
                     }
 
                     if (mouseInView && xInBounds && itemY < mouseY && mouseY < itemY + itemPadding*2 + item.getHeight()) {
+                        if (hoveredItem != item) {
+                            hoveredItem = item;
+                            hoveredItemDidChange(item);
+                            emitEvent(ITEM_HOVERED, new ListViewItemEvent(item));
+                        }
+
                         TorchUtil.colorQuad(poseStack, 0x33000000, -itemPadding, -itemPadding, width - scrollBarWidth, item.getHeight()+itemPadding*2);
                     }
 

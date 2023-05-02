@@ -298,8 +298,6 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
         RenderSystem.applyModelViewMatrix();
         this.renderSubWindows(pPoseStack, (double)(pMouseX - this.leftPos), (double)(pMouseY - this.topPos));
         pPoseStack.popPose();
-
-        super.renderBg(pPoseStack, pPartialTick, pMouseX, pMouseY);
     }
 
     public MachineMenu getMachineMenu() {
@@ -310,8 +308,11 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
     protected List<Rect2i> getJeiAreas() {
         var list = super.getJeiAreas();
 
-        list.add(leftShoulderButtons.getDesiredScreenRect());
-        list.add(rightShoulderButtons.getDesiredScreenRect());
+        if (leftShoulderButtons != null)
+            list.add(leftShoulderButtons.getDesiredScreenRect());
+
+        if (rightShoulderButtons != null)
+            list.add(rightShoulderButtons.getDesiredScreenRect());
 
         return list;
     }

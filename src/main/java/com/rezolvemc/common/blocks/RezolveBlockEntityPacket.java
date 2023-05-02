@@ -62,7 +62,7 @@ public class RezolveBlockEntityPacket extends RezolvePacket {
 
     private void receiveForLevel(Level level, Player player, String source, NetworkDirection direction) {
 
-        String currentDimension = level.dimension().location().getPath();
+        String currentDimension = level.dimension().location().toString();
 
         if (!Objects.equals(currentDimension, dimension)) {
             LOGGER.warn(

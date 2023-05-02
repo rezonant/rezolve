@@ -32,6 +32,7 @@
   "item.rezolve.bundle_white": "Bundle (White)",
   "item.rezolve.bundle_yellow": "Bundle (Yellow)",
   "item.rezolve.bundle_pattern": "Bundle Pattern",
+  "item.rezolve.manufacturing_pattern": "Manufacturing Pattern",
   "item.rezolve.bundle_pattern_blank": "Blank Bundle Pattern",
   "item.rezolve.item_disk": "Storage Disk",
 
@@ -50,6 +51,10 @@
   "screens.rezolve.dye,":  "Dye",
 
   "screens.rezolve.slot": "Slot",
+  "screens.rezolve.return": "Return",
+  "screens.rezolve.switch": "Switch",
+  "screens.rezolve.machines": "Machines",
+  "screens.rezolve.recorded_pattern": "Recorded Pattern",
   "screens.rezolve.input_items": "Input Items",
   "screens.rezolve.patterns": "Patterns",
   "screens.rezolve.energy_unit": "FE",

@@ -11,6 +11,7 @@ import org.torchmc.util.Color;
 import org.torchmc.util.TorchUtil;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public class Label extends TorchWidget {
     public Label(String text) {
@@ -97,10 +98,12 @@ public class Label extends TorchWidget {
     }
 
     public void setContent(Component content) {
+        if (this.content == content || (this.content != null && content != null && Objects.equals(this.content.toString(), content.toString())))
+            return;
         this.content = content;
         this.narrationTitle = content;
         constructLabel();
-        hierarchyDidChange();
+        notifyHierarchyChange();
     }
 
     private void constructLabel() {

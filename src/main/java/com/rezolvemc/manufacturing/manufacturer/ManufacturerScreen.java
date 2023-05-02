@@ -1,6 +1,5 @@
-package com.rezolvemc.manufacturer;
+package com.rezolvemc.manufacturing.manufacturer;
 
-import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.machines.MachineScreen;
 import com.rezolvemc.common.registry.ScreenFor;
 import net.minecraft.network.chat.Component;

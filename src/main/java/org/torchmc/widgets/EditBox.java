@@ -3,6 +3,8 @@ package org.torchmc.widgets;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
 import org.torchmc.TorchWidget;
+import org.torchmc.events.Event;
+import org.torchmc.events.EventType;
 import org.torchmc.layout.AxisConstraint;
 
 /**
@@ -13,11 +15,21 @@ public class EditBox extends TorchWidget {
         super(narrationTitle);
 
         nativeWidget = new net.minecraft.client.gui.components.EditBox(font, 0, 0, 0, 0, Component.empty());
+        nativeWidget.setResponder(value -> {
+            valueDidChange(value);
+            emitEvent(VALUE_CHANGED, new ValueEvent(value));
+        });
         positionNativeWidget();
         setFocusable(true);
 
         setWidthConstraint(AxisConstraint.atLeast(18));
         setHeightConstraint(AxisConstraint.fixed(18));
+    }
+
+    public static final EventType<ValueEvent> VALUE_CHANGED = new EventType<>();
+
+    protected void valueDidChange(String value) {
+
     }
 
     private void positionNativeWidget() {
@@ -134,5 +146,13 @@ public class EditBox extends TorchWidget {
 
     public int getMaxLength() {
         return maxLength;
+    }
+
+    public class ValueEvent extends Event {
+        public ValueEvent(String value) {
+            this.value = value;
+        }
+
+        public final String value;
     }
 }

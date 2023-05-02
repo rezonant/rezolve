@@ -1,4 +1,4 @@
-package com.rezolvemc.manufacturer;
+package com.rezolvemc.manufacturing.manufacturer;
 
 import com.rezolvemc.common.machines.Machine;
 import com.rezolvemc.common.registry.RegistryId;

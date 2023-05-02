@@ -58,7 +58,7 @@ public class AxisLayoutPanel extends LayoutPanel {
         int[] plan = plan(totalSize - space * (countVisibleChildren() - 1), getAxis(axis.opposite()));
         int pos = 0;
         int crossSize = getAxis(axis.opposite());
-        int planSize = Arrays.stream(plan).sum() - plan[plan.length - 1];
+        int planSize = Arrays.stream(plan).sum() - plan[plan.length - 1] + (plan.length - 2) * space;
 
         if (planSize < totalSize) {
             if (justification == AxisAlignment.CENTER)
@@ -99,6 +99,7 @@ public class AxisLayoutPanel extends LayoutPanel {
         int available = size;
         int growthMax = 0;
         List<Entry> desired = new ArrayList<>();
+        int visibleComponents = 0;
 
         for (int i = 0, imax = children.size(); i < imax; ++i) {
             var child = children.get(i);
@@ -107,6 +108,7 @@ public class AxisLayoutPanel extends LayoutPanel {
                 continue;
             }
 
+            visibleComponents += 1;
             var constraint = child.getConstraint(axis, crossSize).add(child.getPadding(axis));
 
             plan[i] = constraint.min;
@@ -118,6 +120,8 @@ public class AxisLayoutPanel extends LayoutPanel {
             if (constraint.desired > 0 && constraint.desired > constraint.min)
                 desired.add(new Entry(i, constraint.desired));
         }
+
+        available -= space * (visibleComponents - 1);
 
         // Apply desired sizes to the plan
 

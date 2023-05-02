@@ -59,6 +59,10 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 
 	private List<SyncedProperty> syncedProperties;
 
+	public MachineT getMachine() {
+		return machine;
+	}
+
 	private void setupProperties() {
 		List<SyncedProperty> props = new ArrayList<>();
 		for (var field : getClass().getFields()) {
@@ -178,16 +182,23 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 		sendMachineStatePacket();
 	}
 
+	@Sync public String dimension;
+	@Sync public BlockPos blockPos;
 	@Sync public int energyCapacity;
 	@Sync public int energyStored;
 	@Sync public float progress;
 	@Sync public Operation operation;
 
 	protected void updateState() {
-		energyCapacity = this.machine.getEnergyCapacity();
-		energyStored = this.machine.getStoredEnergy();
-		progress = this.machine.getProgress();
-		operation = this.machine.getCurrentOperation();
+		if (this.machine != null) {
+			dimension = this.machine.getLevel().dimension().location().toString();
+			blockPos = this.machine.getBlockPos();
+
+			energyCapacity = this.machine.getEnergyCapacity();
+			energyStored = this.machine.getStoredEnergy();
+			progress = this.machine.getProgress();
+			operation = this.machine.getCurrentOperation();
+		}
 	}
 
 	private void sendMachineStatePacket() {

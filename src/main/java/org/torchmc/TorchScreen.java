@@ -15,8 +15,11 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
+import org.torchmc.events.Event;
+import org.torchmc.events.EventEmitter;
+import org.torchmc.events.EventType;
+import org.torchmc.events.Subscription;
 import org.torchmc.layout.Panel;
-import org.torchmc.util.ResizeMode;
 import org.torchmc.util.Size;
 import org.torchmc.util.TorchUtil;
 
@@ -31,7 +34,7 @@ import java.util.function.Consumer;
  * screen's main window, the main window's dimensions and position are automatically synced to the screen's size.
  * @param <T>
  */
-public abstract class TorchScreen<T extends AbstractContainerMenu> extends AbstractContainerScreen<T> {
+public abstract class TorchScreen<T extends AbstractContainerMenu> extends AbstractContainerScreen<T> implements EventEmitter {
     public TorchScreen(T pMenu, Inventory pPlayerInventory, Component pTitle, int width, int height) {
         super(pMenu, pPlayerInventory, pTitle);
         this.imageWidth = width;
@@ -40,11 +43,19 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
         this.titleLabelY = 6;
     }
 
+    public static final EventType<Event> CLOSED = new EventType<Event>();
+
     private boolean wasMoved = false;
     private boolean initialized = false;
     private Size minSize = new Size(50, 50);
     private List<Window> windows = new ArrayList<>();
     private Window mainWindow;
+    private EventEmitter.EventMap eventMap = new EventEmitter.EventMap();
+
+    @Override
+    public EventMap eventMap() {
+        return eventMap;
+    }
 
     public Window getMainWindow() {
         return mainWindow;
@@ -86,13 +97,58 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
         }
 
         windows.clear();
-        mainWindow = addChild(new ScreenWindow());
-
+        setupMainWindow();
         setup();
 
-        if (mainWindow != null) {
-            mainWindow.move(leftPos, topPos, imageWidth, imageHeight);
-        }
+    }
+
+    private void setupMainWindow() {
+        mainWindow = addChild(createMainWindow());
+        mainWindow.move(leftPos, topPos, imageWidth, imageHeight);
+
+        mainWindow.addEventListener(Window.MOVED_BY_USER, e -> wasMoved = true);
+        mainWindow.addEventListener(Window.CLOSED, e -> TorchScreen.this.onClose());
+        mainWindow.addEventListener(Window.MOVED, e -> {
+            leftPos = e.x;
+            topPos = e.y;
+            TorchScreen.this.applyDimensions();
+        });
+        mainWindow.addEventListener(Window.RESIZED, e -> {
+            imageWidth = e.width;
+            imageHeight = e.height;
+
+            if (!wasMoved) {
+                mainWindow.move((TorchScreen.this.width - imageWidth) / 2, (TorchScreen.this.height - imageHeight) / 2);
+            }
+
+            TorchScreen.this.applyDimensions();
+        });
+    }
+
+    @Override
+    public final void onClose() {
+        super.onClose();
+        emitEvent(CLOSED);
+        wasClosed();
+    }
+
+    /**
+     * Called when this screen has been closed.
+     */
+    protected void wasClosed() {
+
+    }
+
+    /**
+     * Unsubscribe the given subscription when this widget is destroyed.
+     * @param subscription
+     */
+    public void removeWhenClosed(Subscription subscription) {
+        addEventListener(CLOSED, e -> subscription.unsubscribe());
+    }
+
+    protected Window createMainWindow() {
+        return new Window(title);
     }
 
     @Override
@@ -145,6 +201,7 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
 
     @Override
     protected void renderLabels(PoseStack pPoseStack, int pMouseX, int pMouseY) {
+        // Intentionally do nothing. Do not remove.
     }
 
     @Override
@@ -336,6 +393,10 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
         TorchUtil.colorQuad(stack, r, g, b, a, x, y, width, height);
     }
 
+    public boolean isKeyDown(int key) {
+        return InputConstants.isKeyDown(minecraft.getWindow().getWindow(), key);
+    }
+
     /**
      * Override to tell JEI about parts of your screen that are not contained within the screen's primary rectangle
      * (as defined by leftPos/topPos/imageWidth/imageHeight)
@@ -365,44 +426,6 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
                 list.addAll(torchScreen.getJeiAreas());
 
             return list;
-        }
-    }
-
-    public class ScreenWindow extends Window {
-        public ScreenWindow() {
-            super(title);
-        }
-
-        @Override
-        protected void wasMovedByUser(int x, int y) {
-            wasMoved = true;
-        }
-
-        @Override
-        public void onClose() {
-            TorchScreen.this.onClose();
-        }
-
-        @Override
-        protected void didMove() {
-            leftPos = x;
-            topPos = y;
-
-            TorchScreen.this.applyDimensions();
-            super.didMove();
-        }
-
-        @Override
-        protected void didResize() {
-            imageWidth = width;
-            imageHeight = height;
-
-            if (!wasMoved) {
-                mainWindow.move((TorchScreen.this.width - imageWidth) / 2, (TorchScreen.this.height - imageHeight) / 2);
-            }
-
-            TorchScreen.this.applyDimensions();
-            super.didResize();
         }
     }
 }

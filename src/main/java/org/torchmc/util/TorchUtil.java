@@ -1,11 +1,13 @@
 package org.torchmc.util;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
@@ -165,5 +167,9 @@ public class TorchUtil {
         RenderSystem.disableBlend();
         RenderSystem.enableTexture();
         //RenderSystem.enableDepthTest();
+    }
+
+    public static boolean isKeyDown(int key) {
+        return InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), key);
     }
 }

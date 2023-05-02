@@ -1,11 +1,14 @@
 package com.rezolvemc.thunderbolt.remoteShell.packets;
 
+import com.rezolvemc.common.blocks.RezolveBlockEntityPacket;
 import com.rezolvemc.common.network.RezolveMenuPacket;
+import com.rezolvemc.common.registry.RegistryId;
 import com.rezolvemc.common.util.RezolveByteBufUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.core.BlockPos;
 
-public class RemoteShellRenameMachinePacket extends RezolveMenuPacket {
+@RegistryId("remote_shell_rename_machine")
+public class RemoteShellRenameMachinePacket extends RezolveBlockEntityPacket {
 
 	public RemoteShellRenameMachinePacket() { }
 

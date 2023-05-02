@@ -1,5 +1,6 @@
 package com.rezolvemc.thunderbolt.remoteShell;
 
+import com.rezolvemc.thunderbolt.remoteShell.common.MachineListing;
 import net.minecraft.nbt.ListTag;
 import net.minecraftforge.common.util.INBTSerializable;
 

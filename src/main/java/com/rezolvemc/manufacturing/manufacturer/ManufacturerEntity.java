@@ -1,8 +1,7 @@
-package com.rezolvemc.manufacturer;
+package com.rezolvemc.manufacturing.manufacturer;
 
 import com.rezolvemc.common.machines.MachineEntity;
 import com.rezolvemc.common.registry.RezolveRegistry;
-import com.rezolvemc.common.registry.WithMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 

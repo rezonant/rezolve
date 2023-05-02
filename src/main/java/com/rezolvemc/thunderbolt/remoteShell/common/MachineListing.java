@@ -1,4 +1,4 @@
-package com.rezolvemc.thunderbolt.remoteShell;
+package com.rezolvemc.thunderbolt.remoteShell.common;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -30,15 +30,15 @@ public class MachineListing implements INBTSerializable<CompoundTag> {
         return level;
     }
 
-    BlockPos getBlockPos() {
+    public BlockPos getBlockPos() {
         return blockPos;
     }
 
-    String getName() {
+    public String getName() {
         return name;
     }
 
-    ItemStack getItem() {
+    public ItemStack getItem() {
         return item;
     }
 

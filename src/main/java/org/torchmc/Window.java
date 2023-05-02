@@ -1,8 +1,17 @@
 package org.torchmc;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.rezolvemc.Rezolve;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.torchmc.events.Event;
+import org.torchmc.events.EventType;
+import org.torchmc.events.PositionEvent;
+import org.torchmc.inspector.Inspector;
 import org.torchmc.layout.AxisAlignment;
 import org.torchmc.layout.HorizontalLayoutPanel;
 import org.torchmc.layout.Panel;
@@ -40,7 +49,10 @@ public class Window extends TorchWidget {
             titlebarRoot.addChild(new Spacer());
             titlebarRoot.addChild(new IconButton(Rezolve.tr("screens.rezolve.close"), Rezolve.icon("x"), titlebarHeight - 7), btn -> {
                 btn.setBackgroundColor(Color.TRANSPARENT);
-                btn.setHandler(() -> onClose());
+                btn.setHandler(() -> {
+                    onClose();
+                    emitEvent(CLOSED);
+                });
 
                 btn.setVisible(closable);
                 closeButton = btn;
@@ -48,11 +60,20 @@ public class Window extends TorchWidget {
         });
 
         titlebarPanel.setVisible(titleBarVisible);
+
+        setup();
+    }
+
+    protected void setup() {
+
     }
 
     public Window(String title) {
         this(Component.literal(title));
     }
+
+    public static final EventType<PositionEvent> MOVED_BY_USER = new EventType<PositionEvent>();
+    public static final EventType<Event> CLOSED = new EventType<Event>();
 
     private Panel titlebarPanel;
     private Label titlebarLabel;
@@ -358,6 +379,7 @@ public class Window extends TorchWidget {
 
             move(newX, newY);
             wasMovedByUser(newX, newY);
+            emitEvent(MOVED_BY_USER, new PositionEvent(newX, newY));
 
             return true;
         }
@@ -430,5 +452,37 @@ public class Window extends TorchWidget {
     @Override
     protected void didResize() {
         applyDimensions();
+    }
+
+    @Override
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (pKeyCode == InputConstants.KEY_F12) {
+            addToScreen(new Inspector(this));
+            return true;
+        }
+
+        return super.keyPressed(pKeyCode, pScanCode, pModifiers);
+    }
+
+    public static void addToScreen(Window window) {
+        var screen = Minecraft.getInstance().screen;
+
+        if (screen instanceof TorchScreen<?> torchScreen) {
+            torchScreen.addWindow(window);
+        } else {
+            screen.renderables.add(window);
+            screen.children.add(window);
+            screen.narratables.add(window);
+        }
+    }
+
+    @SubscribeEvent
+    void screenMouseDrag(ScreenEvent.MouseDragged.Pre event) {
+        if (screen instanceof TorchScreen<?> || !(screen instanceof AbstractContainerScreen<?>))
+            return;
+
+        // This re-establishes drag events on Windows placed into non-Torch AbstractContainerScreen-derived screens.
+        // This is needed because ACS does not call super.mouseDragged.
+        mouseDragged(event.getMouseX(), event.getMouseY(), event.getMouseButton(), event.getDragX(), event.getDragY());
     }
 }

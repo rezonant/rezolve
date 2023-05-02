@@ -1,5 +1,6 @@
 package org.torchmc;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.rezolvemc.common.util.RezolveUtil;
@@ -14,6 +15,9 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import org.torchmc.events.*;
 import org.torchmc.layout.Axis;
 import org.torchmc.layout.AxisConstraint;
 import org.torchmc.util.Size;
@@ -23,11 +27,12 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Base class of all Torch widgets.
  */
-public abstract class TorchWidget extends GuiComponent implements Widget, GuiEventListener, NarratableEntry {
+public abstract class TorchWidget extends GuiComponent implements Widget, GuiEventListener, NarratableEntry, EventEmitter {
     public TorchWidget(Component narrationTitle) {
         this.narrationTitle = narrationTitle;
 
@@ -36,6 +41,37 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
 
         minecraft = Minecraft.getInstance();
         font = minecraft.font;
+
+        Mod.EventBusSubscriber.Bus.FORGE.bus().get().register(this);
+    }
+
+    public static final EventType<SizeEvent> RESIZED = new EventType<SizeEvent>();
+    public static final EventType<PositionEvent> MOVED = new EventType<PositionEvent>();
+    public static final EventType<Event> DISPOSED = new EventType<>();
+    public static final EventType<Event> HIERARCHY_CHANGED = new EventType<>();
+    public static final EventType<RenderEvent> BEFORE_RENDER = new EventType<>();
+    public static final EventType<RenderEvent> AFTER_RENDER = new EventType<>();
+    public static final EventType<RenderEvent> BEFORE_RENDER_BACKGROUND = new EventType<>();
+    public static final EventType<RenderEvent> AFTER_RENDER_BACKGROUND = new EventType<>();
+    public static final EventType<RenderEvent> BEFORE_RENDER_CHILDREN = new EventType<>();
+    public static final EventType<RenderEvent> AFTER_RENDER_CHILDREN = new EventType<>();
+    public static final EventType<RenderEvent> BEFORE_RENDER_CONTENTS = new EventType<>();
+    public static final EventType<RenderEvent> AFTER_RENDER_CONTENTS = new EventType<>();
+    public static final EventType<RenderEvent> BEFORE_RENDER_TOOLTIP = new EventType<>();
+    public static final EventType<RenderEvent> AFTER_RENDER_TOOLTIP = new EventType<>();
+
+    public class RenderEvent extends Event {
+        public RenderEvent(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+            this.poseStack = poseStack;
+            this.mouseX = mouseX;
+            this.mouseY = mouseY;
+            this.partialTick = partialTick;
+        }
+
+        public final PoseStack poseStack;
+        public final int mouseX;
+        public final int mouseY;
+        public final float partialTick;
     }
 
     private boolean visible = true;
@@ -59,6 +95,34 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
     private int rightPadding = 0;
     private int topPadding = 0;
     private int bottomPadding = 0;
+    private EventMap eventMap = new EventMap();
+
+    @Override
+    public EventMap eventMap() {
+        return eventMap;
+    }
+
+    @SubscribeEvent
+    void screenWasClosed(net.minecraftforge.client.event.ScreenEvent.Closing event) {
+        wasDisposed();
+        emitEvent(DISPOSED);
+        Mod.EventBusSubscriber.Bus.FORGE.bus().get().unregister(this);
+    }
+
+    /**
+     * Called when this widget is disposed because its corresponding Screen has been closed.
+     */
+    protected void wasDisposed() {
+
+    }
+
+    /**
+     * Unsubscribe the given subscription when this widget is destroyed.
+     * @param subscription
+     */
+    public void removeWhenDisposed(Subscription subscription) {
+        addEventListener(DISPOSED, e -> subscription.unsubscribe());
+    }
 
     public int getPadding(Axis axis) {
         if (axis == Axis.X)
@@ -158,7 +222,10 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      * @param tooltip
      */
     public void setTooltip(Component tooltip) {
-        this.tooltip = List.of(tooltip);
+        if (tooltip == null)
+            this.tooltip = null;
+        else
+            this.tooltip = List.of(tooltip);
     }
 
     /**
@@ -257,6 +324,7 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
         this.x = x;
         this.y = y;
         didMove();
+        emitEvent(MOVED, new PositionEvent(x, y));
     }
 
     /**
@@ -295,7 +363,9 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      * @param <T> The type of widget
      */
     public <T extends TorchWidget> T addChild(T widget) {
-        return addChild(widget, w -> {});
+        addChild(widget, w -> {});
+        notifyHierarchyChange();
+        return widget;
     }
 
     /**
@@ -316,7 +386,7 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
         widget.runInitializer(() -> initializer.accept(widget));
 
         if (parent != null)
-            parent.hierarchyDidChange();
+            parent.notifyHierarchyChange();
 
         return widget;
     }
@@ -330,6 +400,15 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      * @param runnable
      */
     public void runInitializer(Runnable runnable) {
+        suppressHierarchyChanges(runnable);
+    }
+
+    /**
+     * Suppress any hierarchy change event which occurs during the runnable until after the
+     * runnable completes.
+     * @param runnable
+     */
+    public void suppressHierarchyChanges(Runnable runnable) {
         boolean didHoldChanges = false;
         boolean wasChanged = false;
 
@@ -350,7 +429,7 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
         }
 
         if (wasChanged && parent != null)
-            parent.hierarchyDidChange();
+            parent.notifyHierarchyChange();
     }
 
     /**
@@ -359,7 +438,18 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      */
     protected void desiredSizeDidChange() {
         if (parent != null)
-            parent.hierarchyDidChange();
+            parent.notifyHierarchyChange();
+    }
+
+    protected void notifyHierarchyChange() {
+        if (hierarchyChangesHeld) {
+            hierarchyIsChanging = true;
+        } else {
+            suppressHierarchyChanges(() -> hierarchyDidChange());
+            emitEvent(HIERARCHY_CHANGED);
+            if (parent != null)
+                parent.notifyHierarchyChange();
+        }
     }
 
     /**
@@ -368,12 +458,6 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      * as to require layout to be reflowed.
      */
     protected void hierarchyDidChange() {
-        if (hierarchyChangesHeld) {
-            hierarchyIsChanging = true;
-        } else {
-            if (parent != null)
-                parent.hierarchyDidChange();
-        }
     }
 
     /**
@@ -627,7 +711,6 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      * Called when this widget gains the current focus.
      */
     public void becameFocused() {
-
     }
 
     /**
@@ -659,7 +742,7 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
         // to send hierarchy change notifications when visibility changes to enable layouts to
         // update as appropriate.
         if (parent != null)
-            hierarchyDidChange();
+            notifyHierarchyChange();
     }
 
     /**
@@ -708,7 +791,16 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
 
         this.width = width;
         this.height = height;
-        didResize();
+        suppressHierarchyChanges(() -> didResize());
+        emitEvent(RESIZED, new SizeEvent(width, height));
+    }
+
+    /**
+     * Set the width and height of the widget to the same uniform value.
+     * @param size
+     */
+    public final void resize(int size) {
+        resize(size, size);
     }
 
     /**
@@ -731,6 +823,10 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      */
     @Override
     public final void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+        var renderEvent = new RenderEvent(pPoseStack, pMouseX, pMouseY, pPartialTick);
+
+        emitEvent(BEFORE_RENDER, renderEvent);
+
         if (this.onTick != null)
             this.onTick.run();
 
@@ -743,17 +839,31 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
             repose(() -> pPoseStack.translate(0, 0, 0));
 
             screenScissor(() -> {
+                emitEvent(BEFORE_RENDER_BACKGROUND, renderEvent);
                 renderBackground(pPoseStack, pMouseX, pMouseY, pPartialTick);
+                emitEvent(AFTER_RENDER_BACKGROUND, renderEvent);
+
                 pushPose(pPoseStack, () -> {
                     repose(() -> pPoseStack.translate(x, y, 0));
+
+                    emitEvent(BEFORE_RENDER_CHILDREN, renderEvent);
                     renderChildren(pPoseStack, pMouseX - x, pMouseY - y, pPartialTick);
+                    emitEvent(AFTER_RENDER_CHILDREN, renderEvent);
                 });
+
+                emitEvent(BEFORE_RENDER_CONTENTS, renderEvent);
                 renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
+                emitEvent(AFTER_RENDER_CONTENTS, renderEvent);
             });
         });
 
-        if (isHovered())
+        if (isHovered()) {
+            emitEvent(BEFORE_RENDER_TOOLTIP, renderEvent);
             renderTooltip(pPoseStack, pMouseX, pMouseY);
+            emitEvent(AFTER_RENDER_TOOLTIP, renderEvent);
+        }
+
+        emitEvent(AFTER_RENDER, renderEvent);
     }
 
     /**
@@ -1023,6 +1133,8 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      * not need to be within the bounds of this widget to receive this event as long as the mouseClick() happened within
      * the bounds of this widget.
      *
+     * Importantly, if you do not return `true` from `mouseClicked()`, this event will not be called!
+     *
      * @param pMouseX Mouse position relative to the parent widget's bounding box (not the screen)
      * @param pMouseY Mouse position relative to the parent widget's bounding box (not the screen)
      * @param pButton The button that was released. 0 for left, 1 for middle, 2 for right.
@@ -1037,13 +1149,14 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
         pMouseX -= x;
         pMouseY -= y;
 
+        boolean result = false;
+
         if (draggedWidget != null && draggedWidget instanceof GuiEventListener listener) {
-            listener.mouseReleased(pMouseX, pMouseY, pButton);
+            result = listener.mouseReleased(pMouseX, pMouseY, pButton);
         }
 
         draggedWidget = null;
-
-        return false;
+        return result;
     }
 
     private Widget draggedWidget = null;
@@ -1328,5 +1441,30 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
             return null;
 
         return expansionFactor.copy();
+    }
+
+    public boolean isKeyDown(int key) {
+        return InputConstants.isKeyDown(minecraft.getWindow().getWindow(), key);
+    }
+
+    public TorchWidget getParent() {
+        return parent;
+    }
+
+    public void visitAll(Consumer<TorchWidget> visitor) {
+        visitor.accept(this);
+        for (var child : children) {
+            child.visitAll(visitor);
+        }
+    }
+
+    public boolean visit(Function<TorchWidget, Boolean> visitor) {
+        visitor.apply(this);
+        for (var child : children) {
+            if (!child.visit(visitor))
+                return false;
+        }
+
+        return true;
     }
 }

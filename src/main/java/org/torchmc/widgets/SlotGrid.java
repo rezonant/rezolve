@@ -23,7 +23,7 @@ public class SlotGrid extends TorchWidget {
     private int breadth;
     private int cachedSlotCount;
     private Label labelWidget;
-    private boolean labelVisible = true;
+    private boolean labelVisible = false;
 
     public Component getLabel() {
         return label;
@@ -52,7 +52,7 @@ public class SlotGrid extends TorchWidget {
 
     public void setLabelVisible(boolean labelVisible) {
         this.labelVisible = labelVisible;
-        hierarchyDidChange();
+        notifyHierarchyChange();
     }
 
     public void setContents(List<Slot> slots) {
