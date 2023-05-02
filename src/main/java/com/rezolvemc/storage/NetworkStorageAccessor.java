@@ -34,7 +34,7 @@ public class NetworkStorageAccessor extends MultiplexedStorageAccessor {
 				IStorageTileEntity storageTileEntity = (IStorageTileEntity)entity;
 				IStorageAccessor accessor =  storageTileEntity.getStorageAccessor();
 
-				if (!(accessor instanceof NetworkStorageAccessor))
+				if (accessor != null && !(accessor instanceof NetworkStorageAccessor))
 					this.accessors.add(accessor);
 			} else {
 				var itemHandler = entity.getCapability(ForgeCapabilities.ITEM_HANDLER).orElse(null);
