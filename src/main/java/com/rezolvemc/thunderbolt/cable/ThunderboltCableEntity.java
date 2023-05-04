@@ -202,6 +202,9 @@ public class ThunderboltCableEntity extends MachineEntity {
 
                         for (int destinationSlot = 0, destSlotCount = destHandler.getSlots(); destinationSlot < destSlotCount; ++destinationSlot) {
                             var remainder = destHandler.insertItem(destinationSlot, itemsToTransfer, true);
+                            if (remainder == null)
+                                remainder = ItemStack.EMPTY;
+
                             var acceptedAmount = itemsToTransfer.getCount() - remainder.getCount();
 
                             var item = extractor.apply(acceptedAmount);

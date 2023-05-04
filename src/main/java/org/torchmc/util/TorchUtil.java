@@ -124,6 +124,7 @@ public class TorchUtil {
                 .endVertex();
 
         tesselator.end();
+        Color.WHITE.applyToShader();
     }
 
     public static void colorQuad(PoseStack stack, int color, double x, double y, double width, double height) {

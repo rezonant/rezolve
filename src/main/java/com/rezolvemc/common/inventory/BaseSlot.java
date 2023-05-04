@@ -17,4 +17,6 @@ public class BaseSlot extends Slot {
     public Component getLabel() {
         return null;
     }
+
+    public Component getHint() { return null; }
 }

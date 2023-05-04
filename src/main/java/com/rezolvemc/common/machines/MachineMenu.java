@@ -348,7 +348,7 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 
 			if (ItemStack.isSame(existingStack, quickMovedStack)) {
 				var takeAmount = Math.min(quickMovedStack.getCount(), destinationSlot.getItem().getMaxStackSize() - destinationSlot.getItem().getCount());
-				if (takeAmount == 0)
+				if (takeAmount <= 0)
 					continue;
 
 				var taken = quickMovedStack.split(takeAmount);

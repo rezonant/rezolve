@@ -58,6 +58,7 @@
   "screens.rezolve.input_items": "Input Items",
   "screens.rezolve.patterns": "Patterns",
   "screens.rezolve.energy_unit": "FE",
+  "screens.rezolve.bundler_input_slot_hint": "When automated, only items needed for\nloaded bundle patterns are accepted",
   "screens.rezolve.energy_meter": "Energy Meter",
   "screens.rezolve.none": "None",
   "screens.rezolve.open": "Open",

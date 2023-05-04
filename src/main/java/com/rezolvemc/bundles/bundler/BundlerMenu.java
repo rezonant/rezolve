@@ -1,15 +1,29 @@
 package com.rezolvemc.bundles.bundler;
 
+import com.rezolvemc.Rezolve;
 import com.rezolvemc.bundles.bundleBuilder.BundlePatternSlot;
 import com.rezolvemc.common.machines.InputSlot;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.machines.MachineOutputSlot;
 import com.rezolvemc.common.registry.RezolveRegistry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 
 public class BundlerMenu extends MachineMenu<BundlerEntity> {
 	public BundlerMenu(int containerId, Inventory playerInv) {
 		this(containerId, playerInv, null);
+	}
+
+	public static class BundlerInputSlot extends InputSlot {
+		public BundlerInputSlot(Container pContainer, int pSlot, int pX, int pY) {
+			super(pContainer, pSlot, pX, pY);
+		}
+
+		@Override
+		public Component getHint() {
+			return Rezolve.str("bundler_input_slot_hint");
+		}
 	}
 
 	public BundlerMenu(int containerId, Inventory playerInv, BundlerEntity te) {
@@ -26,7 +40,7 @@ public class BundlerMenu extends MachineMenu<BundlerEntity> {
 		
 	    for (int y = 0; y < inputItemsHeight; ++y) {
 	        for (int x = 0; x < inputItemsWidth; ++x) {
-	            this.addSlot(new InputSlot(container, firstInputItemSlot + x + y * inputItemsWidth, inputItemsOffsetX + x * invSlotSize, inputItemsOffsetY + y * invSlotSize));
+	            this.addSlot(new BundlerInputSlot(container, firstInputItemSlot + x + y * inputItemsWidth, inputItemsOffsetX + x * invSlotSize, inputItemsOffsetY + y * invSlotSize));
 	        }
 	    }
 	    

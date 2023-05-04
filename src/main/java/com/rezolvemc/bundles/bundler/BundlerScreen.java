@@ -71,11 +71,6 @@ public class BundlerScreen extends MachineScreen<BundlerMenu> {
 	    
 	    if (op != null) {
 			float progress = menu.progress;
-    		int width = (int)(32 * progress);
-
-    	    RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-			RenderSystem.enableBlend();
-			textureQuad(pPoseStack, new ResourceLocation("rezolve:textures/gui/container/arrow.png"), 133, 54, width, 32, 0, 0, (float)progress, 1);
     		statusStr = "Operation: "+(Math.floor(progress * 100))+"%";
 	    } else {
 	    	statusStr = "Idle.";

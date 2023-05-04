@@ -402,31 +402,30 @@ public class MachineEntity extends BlockEntityBase implements Container, IMachin
 		ItemStack existingStack = this.getStackInSlot(slotId);
 		Slot slot = this.getSlot(slotId);
 
-		if (existingStack != null && !Rezolve.areStacksSame(stack, existingStack)) {
+		if (!existingStack.isEmpty() && !Rezolve.areStacksSame(stack, existingStack)) {
 			return stack;
 		}
 
-		int itemsToKeep = stack.getCount();
-		ItemStack returnStack = null;
-		ItemStack keepStack = stack.copy();
+		int takeCount = stack.getCount();
 
-		if (existingStack != null && existingStack.getCount() + stack.getCount() > slot.getMaxStackSize()) {
-			itemsToKeep = slot.getMaxStackSize() - existingStack.getCount();
-			returnStack = keepStack.split(stack.getCount() - itemsToKeep);
-		}
+		takeCount = Math.min(slot.getMaxStackSize() - existingStack.getCount(), takeCount);
 
-		if (itemsToKeep == 0) {
+		if (!existingStack.isEmpty())
+			takeCount = Math.min(existingStack.getItem().getMaxStackSize(existingStack) - existingStack.getCount(), takeCount);
+
+		ItemStack returnStack = stack.copy();
+		ItemStack takeStack = returnStack.split(takeCount);
+
+		if (takeCount == 0) {
 			return returnStack;
 		}
 
-		if (existingStack != null)
-			keepStack.setCount(keepStack.getCount() + existingStack.getCount());
-
 		if (!simulate) {
-			this.items.set(slotId, keepStack);
+			if (!existingStack.isEmpty())
+				takeStack.setCount(takeStack.getCount() + existingStack.getCount());
+			this.items.set(slotId, takeStack);
+			fireOnSlotChanged(slot);
 		}
-
-		fireOnSlotChanged(slot);
 
 		return returnStack;
 	}

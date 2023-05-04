@@ -253,7 +253,15 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
                     }
                 }
 
-                tooltipContent.add(baseSlot.getLabel().copy().withStyle(ChatFormatting.GRAY));
+                if (baseSlot.getLabel() != null)
+                    tooltipContent.add(baseSlot.getLabel().copy().withStyle(ChatFormatting.GRAY));
+
+                if (baseSlot.getHint() != null) {
+                    var content = baseSlot.getHint().getString().split("\n");
+                    for (var line : content) {
+                        tooltipContent.add(Component.literal(line).withStyle(ChatFormatting.ITALIC, ChatFormatting.DARK_GRAY));
+                    }
+                }
 
                 tooltipContent.add(
                         Component.empty()
