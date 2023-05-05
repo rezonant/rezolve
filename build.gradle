@@ -4,11 +4,12 @@ buildscript {
         maven { url = "https://maven.minecraftforge.net" }
         maven { url = 'https://maven.parchmentmc.org' }
         maven { url = 'https://maven.moddingx.org' }
-
     }
     dependencies {
         classpath 'org.spongepowered:mixingradle:0.7.+'
         classpath 'org.moddingx:ModGradle:3.0.+'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.0"
+        classpath 'org.jetbrains.kotlin:kotlin-serialization:1.7.0'
     }
 }
 
@@ -19,10 +20,12 @@ plugins {
     id "com.modrinth.minotaur" version "2.+"
 }
 
+apply plugin: 'kotlin'
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.parchmentmc.librarian.forgegradle'
 apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'org.moddingx.modgradle.mapping'
+apply from: 'https://raw.githubusercontent.com/thedarkcolour/KotlinForForge/site/thedarkcolour/kotlinforforge/gradle/kff-3.7.1.gradle'
 
 def locals = new Properties()
 if (rootProject.file("local.properties").exists())
@@ -60,6 +63,7 @@ repositories {
     maven { url "https://dvs1.progwml6.com/files/maven" } // JEI
     maven { url = "https://modmaven.dev/" } // AE2
     maven { url 'https://maven.blamejared.com' } // Patchouli
+    //maven { url = "https://maven.dbotthepony.ru" }
 
 
     // Temp for TOP, https://github.com/McJtyMods/TheOneProbe/issues/506
@@ -100,6 +104,7 @@ dependencies {
     compileOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}:api")
     runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
     runtimeOnly fg.deobf("curse.maven:mekanism-268560:${mekanism_version}")
+    //runtimeOnly "ru.dbotthepony:overdrive-that-matters:1.0-SNAPSHOT:deobf"
 }
 
 mixin {

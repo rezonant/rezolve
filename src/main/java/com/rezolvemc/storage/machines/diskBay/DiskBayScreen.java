@@ -6,9 +6,12 @@ import com.rezolvemc.common.registry.ScreenFor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import org.torchmc.layout.HorizontalLayoutPanel;
-import org.torchmc.layout.VerticalLayoutPanel;
-import org.torchmc.widgets.*;
+import org.torchmc.ui.layout.HorizontalLayoutPanel;
+import org.torchmc.ui.layout.VerticalLayoutPanel;
+import org.torchmc.ui.widgets.Meter;
+import org.torchmc.ui.widgets.PlayerSlotGrid;
+import org.torchmc.ui.widgets.SlotGrid;
+import org.torchmc.ui.widgets.Spacer;
 
 @ScreenFor(DiskBayMenu.class)
 public class DiskBayScreen extends MachineScreen<DiskBayMenu> {

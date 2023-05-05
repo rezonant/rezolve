@@ -1,6 +1,6 @@
 package com.rezolvemc.storage.machines.diskBay;
 
-import com.rezolvemc.common.inventory.ValidatedSlot;
+import org.torchmc.inventory.ValidatedSlot;
 import com.rezolvemc.common.machines.MachineEntity;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.storage.DiskItem;
@@ -24,7 +24,7 @@ public class DiskBayEntity extends MachineEntity implements IStorageTileEntity {
 		this.multiplexedAccessor = new MultiplexedStorageAccessor(new ArrayList<>());
 
 		for (int i = 0, max = 27; i < max; ++i)
-			addSlot(new ValidatedSlot(this, i, 0, 0, stack -> isValidDisk(stack)));
+			addSlot(new ValidatedSlot(this, i, stack -> isValidDisk(stack)));
 	}
 
 	public static boolean isValidDisk(ItemStack stack) {

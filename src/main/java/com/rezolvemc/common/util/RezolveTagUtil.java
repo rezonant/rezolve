@@ -1,6 +1,6 @@
 package com.rezolvemc.common.util;
 
-import com.rezolvemc.common.inventory.ContainerItemHandler;
+import org.torchmc.inventory.ContainerItemHandler;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;

@@ -3,7 +3,7 @@ package com.rezolvemc.common.machines;
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.blocks.BlockEntityBase;
 import com.rezolvemc.common.util.RezolveTagUtil;
-import com.rezolvemc.common.inventory.InventorySnapshot;
+import org.torchmc.inventory.InventorySnapshot;
 import com.rezolvemc.common.network.RezolvePacketReceiver;
 import com.rezolvemc.thunderbolt.cable.CableNetwork;
 import net.minecraft.core.BlockPos;

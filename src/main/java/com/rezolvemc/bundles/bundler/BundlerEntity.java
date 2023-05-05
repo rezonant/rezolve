@@ -6,15 +6,15 @@ import com.rezolvemc.Rezolve;
 import com.rezolvemc.bundles.BundleItem;
 import com.rezolvemc.bundles.bundleBuilder.BundlePatternSlot;
 
-import com.rezolvemc.common.inventory.OutputSlot;
-import com.rezolvemc.common.inventory.VirtualInventory;
+import org.torchmc.inventory.OutputSlot;
+import org.torchmc.inventory.StandardSlot;
+import org.torchmc.inventory.VirtualInventory;
 import com.rezolvemc.common.machines.MachineEntity;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.common.machines.WithOperation;
 import com.rezolvemc.common.util.RezolveTagUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.BlockState;
@@ -29,13 +29,13 @@ public class BundlerEntity extends MachineEntity {
 		int nextSlotNumber = 0;
 
 		for (int i = 0, max = 9; i < max; ++i)
-			addSlot(new Slot(this, nextSlotNumber++, 0, 0));
+			addSlot(new StandardSlot(this, nextSlotNumber++));
 
 		for (int i = 0, max = 9; i < max; ++i)
-			addSlot(new BundlePatternSlot(this, nextSlotNumber++, 0, 0));
+			addSlot(new BundlePatternSlot(this, nextSlotNumber++));
 
 		for (int i = 0, max = 9; i < max; ++i)
-			addSlot(new OutputSlot(this, nextSlotNumber++, 0, 0));
+			addSlot(new OutputSlot(this, nextSlotNumber++));
 	}
 
 	class ItemMemo {

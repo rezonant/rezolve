@@ -1,7 +1,7 @@
 package com.rezolvemc.bundles.bundleBuilder;
 
 import com.rezolvemc.common.inventory.DyeSlot;
-import com.rezolvemc.common.inventory.VirtualInventory;
+import org.torchmc.inventory.VirtualInventory;
 import com.rezolvemc.common.machines.MachineEntity;
 import com.rezolvemc.common.machines.MachineOutputSlot;
 import com.rezolvemc.common.registry.RezolveRegistry;
@@ -24,9 +24,9 @@ public class BundleBuilderEntity extends MachineEntity {
 		super(RezolveRegistry.blockEntityType(BundleBuilderEntity.class), pPos, pBlockState);
 		setEnergyCapacity(20000);
 
-		addSlot(new BundlePatternSlot(this, PATTERN_INPUT_SLOT, 0, 0));
-		addSlot(new MachineOutputSlot(this, PATTERN_OUTPUT_SLOT, 0, 0));
-		addSlot(new DyeSlot(this, DYE_SLOT, 0, 0));
+		addSlot(new BundlePatternSlot(this, PATTERN_INPUT_SLOT));
+		addSlot(new MachineOutputSlot(this, PATTERN_OUTPUT_SLOT));
+		addSlot(new DyeSlot(this, DYE_SLOT));
 
 		// Item inventory
 		for (int i = this.getSlotCount(), max = this.getSlotCount() + 9; i < max; ++i)

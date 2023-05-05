@@ -3,7 +3,6 @@ package com.rezolvemc.thunderbolt.cable;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.machines.Sync;
 import com.rezolvemc.common.network.RezolvePacket;
-import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.thunderbolt.cable.packets.SetTransmissionModePacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,7 +16,7 @@ public class ThunderboltCableMenu extends MachineMenu<ThunderboltCableEntity> {
     }
 
     public ThunderboltCableMenu(int pContainerId, Inventory playerInventory, ThunderboltCableEntity machine) {
-        super(RezolveRegistry.menuType(ThunderboltCableMenu.class), pContainerId, playerInventory, machine);
+        super(pContainerId, playerInventory, machine);
     }
 
     @Sync

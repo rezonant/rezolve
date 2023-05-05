@@ -2,22 +2,21 @@ package com.rezolvemc.bundles.bundleBuilder;
 
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.gui.EnergyMeter;
-import com.rezolvemc.common.machines.MachineProgressIndicator;
 import com.rezolvemc.common.machines.MachineScreen;
 import com.rezolvemc.common.registry.ScreenFor;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import org.torchmc.layout.AxisAlignment;
-import org.torchmc.layout.HorizontalLayoutPanel;
-import org.torchmc.layout.VerticalLayoutPanel;
-import org.torchmc.widgets.*;
+import org.torchmc.ui.layout.AxisAlignment;
+import org.torchmc.ui.layout.HorizontalLayoutPanel;
+import org.torchmc.ui.layout.VerticalLayoutPanel;
+import org.torchmc.ui.widgets.*;
 
 @ScreenFor(BundleBuilderMenu.class)
 public class BundleBuilderScreen extends MachineScreen<BundleBuilderMenu> {
 
 	public BundleBuilderScreen(BundleBuilderMenu menu, Inventory playerInv, Component title) {
-		super(menu, playerInv, title, 218, 212);
+		super(menu, playerInv, title, 218, 200);
 
 		inventoryLabelX = 30;
 		inventoryLabelY = 116;
@@ -71,7 +70,6 @@ public class BundleBuilderScreen extends MachineScreen<BundleBuilderMenu> {
 			root.addChild(new PlayerSlotGrid());
 		});
 
-		getMainWindow().resize(218, 231);
 		getMainWindow().setResizable(false);
 
 //		addEnergyMeter(leftPos + 191, topPos + 17, 88);

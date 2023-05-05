@@ -10,12 +10,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import org.torchmc.layout.Axis;
-import org.torchmc.layout.AxisLayoutPanel;
-import org.torchmc.util.Size;
-import org.torchmc.widgets.EditBox;
-import org.torchmc.widgets.Meter;
-import org.torchmc.widgets.SlotGrid;
+import org.torchmc.ui.layout.Axis;
+import org.torchmc.ui.layout.AxisLayoutPanel;
+import org.torchmc.ui.util.Size;
+import org.torchmc.ui.widgets.EditBox;
+import org.torchmc.ui.widgets.Meter;
+import org.torchmc.ui.widgets.SlotGrid;
 
 @ScreenFor(StorageShellMenu.class)
 public class StorageShellScreen extends MachineScreen<StorageShellMenu> implements IStorageViewContainer {

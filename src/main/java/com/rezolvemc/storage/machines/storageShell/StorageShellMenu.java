@@ -2,7 +2,6 @@ package com.rezolvemc.storage.machines.storageShell;
 
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.network.RezolvePacket;
-import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.storage.view.StorageViewSession;
 import com.rezolvemc.storage.view.packets.StorageViewPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,10 +15,10 @@ public class StorageShellMenu extends MachineMenu<StorageShellEntity> {
     }
 
     public StorageShellMenu(int pContainerId, Inventory playerInventory, StorageShellEntity machine) {
-        super(RezolveRegistry.menuType(StorageShellMenu.class), pContainerId, playerInventory, machine);
+        super(pContainerId, playerInventory, machine);
 
-        addSlotGrid(0, 7, 131, 3, 3);
-        addPlayerSlots(88, 131);
+        addSlotGrid(0, 3, 3);
+        addPlayerSlots();
 
         if (machine != null) {
             session = new StorageViewSession(this, machine, (ServerPlayer) playerInventory.player);

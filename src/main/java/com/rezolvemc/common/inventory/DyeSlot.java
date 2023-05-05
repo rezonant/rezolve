@@ -6,8 +6,8 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 
 public class DyeSlot extends IngredientSlot {
-	public DyeSlot(Container inventoryIn, int index, int xPosition, int yPosition) {
-		super(inventoryIn, index, xPosition, yPosition, true);
+	public DyeSlot(Container inventoryIn, int index) {
+		super(inventoryIn, index, true);
 	}
 
 	@Override

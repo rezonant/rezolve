@@ -9,12 +9,12 @@ import com.rezolvemc.storage.view.StorageView;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import org.torchmc.layout.HorizontalLayoutPanel;
-import org.torchmc.layout.VerticalLayoutPanel;
-import org.torchmc.widgets.EditBox;
-import org.torchmc.widgets.Meter;
-import org.torchmc.widgets.SlotGrid;
-import org.torchmc.widgets.SlotWidget;
+import org.torchmc.ui.layout.HorizontalLayoutPanel;
+import org.torchmc.ui.layout.VerticalLayoutPanel;
+import org.torchmc.ui.widgets.EditBox;
+import org.torchmc.ui.widgets.Meter;
+import org.torchmc.ui.widgets.SlotGrid;
+import org.torchmc.ui.widgets.SlotWidget;
 
 @ScreenFor(DiskManipulatorMenu.class)
 public class DiskManipulatorScreen extends MachineScreen<DiskManipulatorMenu> implements IStorageViewContainer {
@@ -61,7 +61,7 @@ public class DiskManipulatorScreen extends MachineScreen<DiskManipulatorMenu> im
 					panel2.setExpansionFactor(1);
 					panel2.setSpace(3);
 
-					panel2.addChild(new org.torchmc.widgets.EditBox(Component.translatable("screens.rezolve.search")), editBox -> {
+					panel2.addChild(new EditBox(Component.translatable("screens.rezolve.search")), editBox -> {
 						searchField = editBox;
 					});
 					panel2.addChild(new StorageView(), view -> {

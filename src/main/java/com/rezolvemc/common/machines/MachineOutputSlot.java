@@ -1,13 +1,13 @@
 package com.rezolvemc.common.machines;
 
-import com.rezolvemc.common.inventory.OutputSlot;
+import org.torchmc.inventory.OutputSlot;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 public class MachineOutputSlot extends OutputSlot {
-	public MachineOutputSlot(Container inventoryIn, int index, int xPosition, int yPosition) {
-		super(inventoryIn, index, xPosition, yPosition);
+	public MachineOutputSlot(Container inventoryIn, int index) {
+		super(inventoryIn, index);
 	}
 
 	@Override

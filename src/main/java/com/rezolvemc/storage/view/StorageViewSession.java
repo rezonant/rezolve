@@ -43,6 +43,8 @@ public class StorageViewSession {
 			message.totalItemsCount = 0;
 			message.totalStackCount = 0;
 			message.startIndex = 0;
+			message.totalUsage = 0;
+			message.totalCapacity = 0;
 			message.setItems(new ArrayList<>());
 		}
 

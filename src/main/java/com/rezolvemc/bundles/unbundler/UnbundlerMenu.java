@@ -3,7 +3,6 @@ package com.rezolvemc.bundles.unbundler;
 import com.rezolvemc.bundles.bundler.BundleSlot;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.machines.MachineOutputSlot;
-import com.rezolvemc.common.registry.RezolveRegistry;
 import net.minecraft.world.entity.player.Inventory;
 
 public class UnbundlerMenu extends MachineMenu<UnbundlerEntity> {
@@ -12,7 +11,7 @@ public class UnbundlerMenu extends MachineMenu<UnbundlerEntity> {
 	}
 
 	public UnbundlerMenu(int containerId, Inventory playerInv, UnbundlerEntity te) {
-		super(RezolveRegistry.menuType(UnbundlerMenu.class), containerId, playerInv, te);
+		super(containerId, playerInv, te);
 
 		int invSlotSize = 18;
 
@@ -25,7 +24,7 @@ public class UnbundlerMenu extends MachineMenu<UnbundlerEntity> {
 		
 	    for (int y = 0; y < inputItemsHeight; ++y) {
 	        for (int x = 0; x < inputItemsWidth; ++x) {
-	            this.addSlot(new BundleSlot(container, firstInputItemSlot + x + y * inputItemsWidth, inputItemsOffsetX + x * invSlotSize, inputItemsOffsetY + y * invSlotSize));
+	            this.addSlot(new BundleSlot(container, firstInputItemSlot + x + y * inputItemsWidth));
 	        }
 	    }
 	    
@@ -39,10 +38,10 @@ public class UnbundlerMenu extends MachineMenu<UnbundlerEntity> {
 		
 	    for (int y = 0; y < patternsHeight; ++y) {
 	        for (int x = 0; x < patternsWidth; ++x) {
-	            this.addSlot(new MachineOutputSlot(container, firstPatternSlot + x + y * patternsWidth, patternsOffsetX + x * invSlotSize, patternsOffsetY + y * invSlotSize));
+	            this.addSlot(new MachineOutputSlot(container, firstPatternSlot + x + y * patternsWidth));
 	        }
 	    }
 
-		addPlayerSlots(47, 131);;
+		addPlayerSlots();
 	}
 }

@@ -12,9 +12,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
-import org.torchmc.TorchWidget;
-import org.torchmc.util.Color;
-import org.torchmc.util.TorchUtil;
+import org.torchmc.ui.TorchWidget;
+import org.torchmc.ui.util.Color;
+import org.torchmc.ui.util.TorchUtil;
 
 public abstract class BlockSideConfigurator extends TorchWidget {
     private static final int PACKED_LIGHT = 15728880;

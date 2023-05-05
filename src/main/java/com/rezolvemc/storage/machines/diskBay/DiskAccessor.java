@@ -160,13 +160,6 @@ public class DiskAccessor implements IStorageAccessor {
 		this.spaceUsed = totalCount;
 
 		if (this.types.size() == 0) {
-
-			Random r = new Random();
-
-			this.giveItemStack(new ItemStack(Items.DIAMOND, 20 + r.nextInt(100)), null, false);
-			this.giveItemStack(new ItemStack(Items.GOLD_INGOT, 20 + r.nextInt(100)), null, false);
-			this.giveItemStack(new ItemStack(Items.IRON_INGOT, 20 + r.nextInt(100)), null, false);
-
 			this.writeToNBT();
 		}
 	}

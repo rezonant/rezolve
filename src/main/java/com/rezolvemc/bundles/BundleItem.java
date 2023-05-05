@@ -2,7 +2,7 @@ package com.rezolvemc.bundles;
 
 import java.util.*;
 
-import com.rezolvemc.common.inventory.VirtualInventory;
+import org.torchmc.inventory.VirtualInventory;
 import com.rezolvemc.common.registry.RegistryId;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.common.util.RezolveTagUtil;

@@ -1,8 +1,7 @@
 package com.rezolvemc.storage.machines.diskBay;
 
-import com.rezolvemc.common.inventory.ValidatedSlot;
+import org.torchmc.inventory.ValidatedSlot;
 import com.rezolvemc.common.machines.MachineMenu;
-import com.rezolvemc.common.registry.RezolveRegistry;
 import net.minecraft.world.entity.player.Inventory;
 
 public class DiskBayMenu extends MachineMenu<DiskBayEntity> {
@@ -11,14 +10,14 @@ public class DiskBayMenu extends MachineMenu<DiskBayEntity> {
     }
 
     public DiskBayMenu(int containerId, Inventory playerInv, DiskBayEntity te) {
-        super(RezolveRegistry.menuType(DiskBayMenu.class), containerId, playerInv, te);
+        super(containerId, playerInv, te);
 
         addSlotGrid(
                 0,
-                (id, x, y) -> new ValidatedSlot(container, id, x, y, stack -> DiskBayEntity.isValidDisk(stack)),
-                47, 45, 9, 3
+                id -> new ValidatedSlot(container, id, stack -> DiskBayEntity.isValidDisk(stack)),
+                9, 3
         );
 
-        addPlayerSlots(47, 131);
+        addPlayerSlots();
     }
 }

@@ -11,21 +11,19 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.rezolvemc.common.registry.ScreenFor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import org.torchmc.layout.AxisAlignment;
-import org.torchmc.layout.AxisConstraint;
-import org.torchmc.layout.HorizontalLayoutPanel;
-import org.torchmc.layout.VerticalLayoutPanel;
-import org.torchmc.widgets.PlayerSlotGrid;
-import org.torchmc.widgets.ProgressIndicator;
-import org.torchmc.widgets.SlotGrid;
-import org.torchmc.widgets.Spacer;
+import org.torchmc.ui.layout.AxisAlignment;
+import org.torchmc.ui.layout.AxisConstraint;
+import org.torchmc.ui.layout.HorizontalLayoutPanel;
+import org.torchmc.ui.layout.VerticalLayoutPanel;
+import org.torchmc.ui.widgets.PlayerSlotGrid;
+import org.torchmc.ui.widgets.SlotGrid;
+import org.torchmc.ui.widgets.Spacer;
 
 @ScreenFor(UnbundlerMenu.class)
 public class UnbundlerScreen extends MachineScreen<UnbundlerMenu> {
 
 	public UnbundlerScreen(UnbundlerMenu menu, Inventory playerInv, Component title) {
-		super(menu, playerInv, title, 255, 212);
-
+		super(menu, playerInv, title, 221, 195);
 		this.inventoryLabelX = 49;
 		this.inventoryLabelY = 113;
 	}
@@ -62,7 +60,6 @@ public class UnbundlerScreen extends MachineScreen<UnbundlerMenu> {
 			root.addChild(new PlayerSlotGrid());
 		});
 
-		getMainWindow().resize(221, 212);
 		getMainWindow().setResizable(false);
 
 //		addOperationProgressIndicator(leftPos + 103, topPos + 81);

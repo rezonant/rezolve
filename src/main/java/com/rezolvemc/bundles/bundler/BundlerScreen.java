@@ -7,22 +7,21 @@ import com.rezolvemc.common.machines.MachineScreen;
 import com.rezolvemc.common.machines.Operation;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.rezolvemc.common.registry.ScreenFor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import org.torchmc.layout.AxisAlignment;
-import org.torchmc.layout.HorizontalLayoutPanel;
-import org.torchmc.layout.VerticalLayoutPanel;
-import org.torchmc.widgets.PlayerSlotGrid;
-import org.torchmc.widgets.SlotGrid;
+import org.torchmc.ui.Window;
+import org.torchmc.ui.layout.AxisAlignment;
+import org.torchmc.ui.layout.HorizontalLayoutPanel;
+import org.torchmc.ui.layout.VerticalLayoutPanel;
+import org.torchmc.ui.widgets.PlayerSlotGrid;
+import org.torchmc.ui.widgets.SlotGrid;
 
 @ScreenFor(BundlerMenu.class)
 public class BundlerScreen extends MachineScreen<BundlerMenu> {
 
 	public BundlerScreen(BundlerMenu menu, Inventory playerInv, Component title) {
-		super(menu, playerInv, title, 255, 212);
+		super(menu, playerInv, title, 249, 180);
 
 		this.inventoryLabelX = 49;
 		this.inventoryLabelY = 113;
@@ -55,10 +54,12 @@ public class BundlerScreen extends MachineScreen<BundlerMenu> {
 				row.addChild(new EnergyMeter());
 			});
 
-			root.addChild(new PlayerSlotGrid());
+			root.addChild(new PlayerSlotGrid(), grid -> {
+				grid.setExpansionFactor(1);
+			});
+
 		});
 
-		getMainWindow().resize(249, 212);
 		getMainWindow().setResizable(false);
 	}
 

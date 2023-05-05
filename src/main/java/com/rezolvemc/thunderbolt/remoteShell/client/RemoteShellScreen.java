@@ -5,7 +5,7 @@ import com.rezolvemc.common.registry.ScreenFor;
 import com.rezolvemc.thunderbolt.remoteShell.RemoteShellMenu;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import org.torchmc.Window;
+import org.torchmc.ui.Window;
 
 @ScreenFor(RemoteShellMenu.class)
 public class RemoteShellScreen extends MachineScreen<RemoteShellMenu> {

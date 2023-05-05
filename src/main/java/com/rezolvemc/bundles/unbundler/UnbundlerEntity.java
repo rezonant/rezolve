@@ -1,9 +1,9 @@
 package com.rezolvemc.bundles.unbundler;
 
 import com.rezolvemc.common.registry.WithMenu;
-import com.rezolvemc.common.inventory.InventorySnapshot;
-import com.rezolvemc.common.inventory.OutputSlot;
-import com.rezolvemc.common.inventory.VirtualInventory;
+import org.torchmc.inventory.InventorySnapshot;
+import org.torchmc.inventory.OutputSlot;
+import org.torchmc.inventory.VirtualInventory;
 import com.rezolvemc.common.machines.MachineEntity;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.common.machines.WithOperation;
@@ -32,7 +32,7 @@ public class UnbundlerEntity extends MachineEntity {
 			this.addSlot(new BundleSlot(this, nextSlotId++, 0, 0));
 
 		for (int i = 0, max = 16; i < max; ++i)
-			this.addSlot(new OutputSlot(this, nextSlotId++, 0, 0));
+			this.addSlot(new OutputSlot(this, nextSlotId++));
 
 	}
 	

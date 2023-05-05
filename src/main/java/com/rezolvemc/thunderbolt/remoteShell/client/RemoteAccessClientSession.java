@@ -13,12 +13,11 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.util.TriConsumer;
-import org.torchmc.TorchScreen;
+import org.torchmc.ui.TorchScreen;
 import org.torchmc.events.Event;
 import org.torchmc.events.EventEmitter;
 import org.torchmc.events.EventType;
-import org.torchmc.util.TorchUtil;
+import org.torchmc.ui.util.TorchUtil;
 
 import java.util.List;
 

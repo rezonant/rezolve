@@ -6,10 +6,10 @@ import com.rezolvemc.common.registry.ScreenFor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import org.torchmc.Window;
-import org.torchmc.layout.VerticalLayoutPanel;
-import org.torchmc.util.Color;
-import org.torchmc.widgets.*;
+import org.torchmc.ui.Window;
+import org.torchmc.ui.layout.VerticalLayoutPanel;
+import org.torchmc.ui.widgets.*;
+import org.torchmc.ui.util.Color;
 
 @ScreenFor(TesseractMenu.class)
 public class TesseractScreen extends MachineScreen<TesseractMenu> {

@@ -22,11 +22,17 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
+import net.minecraftforge.event.server.ServerStoppingEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
+
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class CableNetwork {
 	private static final Logger LOGGER = LogManager.getLogger(Rezolve.ID);
 	private static final Capability<Tunnel> TUNNEL_CAPABILITY = CapabilityManager.get(new CapabilityToken<>(){});
@@ -83,24 +89,26 @@ public class CableNetwork {
 
 		// TODO This is purely a debugging check. It is incredibly inefficient and should be removed.
 
-		network.visit((level, pos, state, entity) -> {
-			if (!network.cableType.canConnectTo(level, pos))
-				return true;
-
-			for (var otherNetwork : getActiveCableNetworks()) {
-				if (otherNetwork == network)
-					continue; // shouldn't be possible though
-
-				otherNetwork.visit((otherLevel, otherPos, otherState, otherEntity) -> {
-					if (level == otherLevel && pos.equals(otherPos)) {
-						LOGGER.warn("No two networks should contain the same cable!");
-					}
+		if (!FMLEnvironment.production) {
+			network.visit((level, pos, state, entity) -> {
+				if (!network.cableType.canConnectTo(level, pos))
 					return true;
-				});
-			}
 
-			return true;
-		});
+				for (var otherNetwork : getActiveCableNetworks()) {
+					if (otherNetwork == network)
+						continue; // shouldn't be possible though
+
+					otherNetwork.visit((otherLevel, otherPos, otherState, otherEntity) -> {
+						if (level == otherLevel && pos.equals(otherPos)) {
+							LOGGER.warn("No two networks should contain the same cable!");
+						}
+						return true;
+					});
+				}
+
+				return true;
+			});
+		}
 
 		activeCableNetworks.add(network);
 
@@ -404,5 +412,10 @@ public class CableNetwork {
 		public LevelPosition getLevelPosition() {
 			return levelPosition;
 		}
+	}
+
+	@SubscribeEvent
+	public static void serverIsStopping(ServerStoppingEvent event) {
+		activeCableNetworks.clear();
 	}
 }

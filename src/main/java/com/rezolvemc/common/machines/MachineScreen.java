@@ -2,18 +2,18 @@ package com.rezolvemc.common.machines;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.rezolvemc.common.inventory.BaseSlot;
+import org.torchmc.inventory.BaseSlot;
 import com.rezolvemc.common.inventory.IngredientSlot;
-import com.rezolvemc.common.inventory.OutputSlot;
+import org.torchmc.inventory.OutputSlot;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
-import org.torchmc.TorchScreen;
-import org.torchmc.layout.VerticalLayoutPanel;
-import org.torchmc.widgets.*;
+import org.torchmc.ui.TorchScreen;
+import org.torchmc.ui.layout.VerticalLayoutPanel;
+import org.torchmc.ui.widgets.*;
 
 import java.util.ArrayList;
 import java.util.List;

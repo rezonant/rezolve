@@ -14,7 +14,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import org.torchmc.util.TorchUtil;
+import org.torchmc.ui.util.TorchUtil;
 
 import java.util.ArrayList;
 import java.util.List;

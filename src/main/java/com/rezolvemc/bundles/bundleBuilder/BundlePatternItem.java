@@ -6,7 +6,7 @@ import com.rezolvemc.Rezolve;
 import com.rezolvemc.bundles.BundleItem;
 import com.rezolvemc.common.ITooltipHint;
 import com.rezolvemc.common.ItemBase;
-import com.rezolvemc.common.inventory.VirtualInventory;
+import org.torchmc.inventory.VirtualInventory;
 import com.rezolvemc.common.registry.RegistryId;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import net.minecraft.network.chat.Component;

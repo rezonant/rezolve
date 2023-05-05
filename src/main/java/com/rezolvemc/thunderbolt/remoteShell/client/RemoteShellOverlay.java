@@ -2,18 +2,16 @@ package com.rezolvemc.thunderbolt.remoteShell.client;
 
 import com.rezolvemc.Rezolve;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import org.torchmc.TorchScreen;
-import org.torchmc.Window;
-import org.torchmc.layout.Axis;
-import org.torchmc.layout.AxisAlignment;
-import org.torchmc.layout.AxisConstraint;
-import org.torchmc.layout.HorizontalLayoutPanel;
-import org.torchmc.util.Color;
-import org.torchmc.widgets.*;
+import org.torchmc.ui.Window;
+import org.torchmc.ui.layout.Axis;
+import org.torchmc.ui.layout.AxisAlignment;
+import org.torchmc.ui.layout.AxisConstraint;
+import org.torchmc.ui.layout.HorizontalLayoutPanel;
+import org.torchmc.ui.widgets.*;
+import org.torchmc.ui.util.Color;
 
 public class RemoteShellOverlay extends Window {
     public RemoteShellOverlay() {

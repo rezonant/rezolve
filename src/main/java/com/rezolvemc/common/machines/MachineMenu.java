@@ -1,14 +1,14 @@
 package com.rezolvemc.common.machines;
 
 import com.rezolvemc.Rezolve;
-import com.rezolvemc.common.Errors;
 import com.rezolvemc.common.network.RezolveMenuPacket;
 import com.rezolvemc.common.inventory.IngredientSlot;
 import com.rezolvemc.common.inventory.SetIngredientSlotPacket;
-import com.rezolvemc.common.inventory.VirtualInventory;
+import com.rezolvemc.common.registry.RezolveRegistry;
+import org.torchmc.inventory.StandardSlot;
+import org.torchmc.inventory.VirtualInventory;
 import com.rezolvemc.common.network.RezolvePacket;
 import com.rezolvemc.common.network.RezolvePacketReceiver;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -25,20 +25,22 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.network.NetworkDirection;
-import org.apache.commons.lang3.function.TriFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class MachineMenu<MachineT extends MachineEntity> extends AbstractContainerMenu implements RezolvePacketReceiver {
 	private static final Logger LOGGER = LogManager.getLogger(Rezolve.ID);
 
-	protected MachineMenu(MenuType<?> menuType, int pContainerId, Inventory playerInventory, MachineT machine) {
-		super(menuType, pContainerId);
+	protected MachineMenu(int pContainerId, Inventory playerInventory, MachineT machine) {
+		super(null, pContainerId);
 
+		this.menuType = RezolveRegistry.menuType(this.getClass());
 		this.playerInventory = playerInventory;
 		this.machine = machine;
 		this.container = machine != null ? machine : new VirtualInventory();
@@ -49,7 +51,7 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 	public final Container container;
 
 	protected MachineMenu(MenuType<MachineMenu> menuType, int pContainerId, Inventory playerInventory) {
-		this(menuType, pContainerId, playerInventory, null);
+		this(pContainerId, playerInventory, null);
 	}
 
 	protected Inventory playerInventory;
@@ -411,35 +413,39 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 		return firstPlayerInventorySlot;
 	}
 
-	protected void addSlotGrid(int firstSlot, int x, int y, int gridStride, int gridHeight) {
-		addSlotGrid(firstSlot, (id, sx, sy) -> new Slot(container, id, sx, sy), x, y, gridStride, gridHeight);
+	protected void addSlotGrid(int firstSlot, int gridStride, int gridHeight) {
+		addSlotGrid(firstSlot, id -> new StandardSlot(container, id), gridStride, gridHeight);
 	}
 
-	protected void addSlotGrid(int firstSlot, TriFunction<Integer, Integer, Integer, Slot> ctor, int x, int y, int gridStride, int gridHeight) {
+	protected void addSlotGrid(int gridStride, int gridHeight) {
+		addSlotGrid(slots.size(), gridStride, gridHeight);
+	}
+
+	protected void addSlotGrid(int firstSlot, BiFunction<Integer, Integer, Slot> ctor, int gridStride, int gridHeight) {
 		int slotSize = 18;
 		for (int j = 0, maxJ = gridHeight; j < maxJ; ++j) {
 			for (int i = 0, maxI = gridStride; i < maxI; ++i) {
-				addSlot(ctor.apply(j * gridStride + i, x + i * slotSize + 1, y + j * slotSize + 1));
+				addSlot(ctor.apply(firstSlot + j * gridStride + i, j * gridStride + i));
 			}
 		}
 	}
 
-	protected void addPlayerSlots(int offsetX, int offsetY) {
-		firstPlayerInventorySlot = this.slots.size();
-		for (int y = 0; y < 3; ++y) {
-			for (int x = 0; x < 9; ++x) {
-				this.addSlot(new Slot(playerInventory, 9 + x + y * 9, offsetX + x * SLOT_PIXEL_SIZE, offsetY + y * SLOT_PIXEL_SIZE));
-			}
-		}
+	protected void addSlotGrid(int firstSlot, Function<Integer, Slot> ctor, int gridStride, int gridHeight) {
+		addSlotGrid(firstSlot, (id, index) -> ctor.apply(id), gridStride, gridHeight);
+	}
 
-		int playerHotbarOffsetX = offsetX;
-		int playerHotbarOffsetY = offsetY + 58;
+	protected void addSlotGrid(BiFunction<Integer, Integer, Slot> ctor, int gridStride, int gridHeight) {
+		addSlotGrid(slots.size(), ctor, gridStride, gridHeight);
+	}
 
-		// Player Hotbar, slots 0-8
+	protected void addSlotGrid(Function<Integer, Slot> ctor, int gridStride, int gridHeight) {
+		addSlotGrid(slots.size(), ctor, gridStride, gridHeight);
+	}
 
-		for (int x = 0; x < 9; ++x) {
-			this.addSlot(new Slot(playerInventory, x, playerHotbarOffsetX + x * 18, playerHotbarOffsetY));
-		}
+	protected void addPlayerSlots() {
+		firstPlayerInventorySlot = slots.size();
+		addSlotGrid((id, i) -> new StandardSlot(playerInventory, 9 + i), 9, 3);
+		addSlotGrid((id, i) -> new StandardSlot(playerInventory, i), 9, 1);
 	}
 
 	public interface PacketSubscriber {

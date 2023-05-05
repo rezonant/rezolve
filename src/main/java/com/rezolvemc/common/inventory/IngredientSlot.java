@@ -4,15 +4,16 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.torchmc.inventory.BaseSlot;
 
 public class IngredientSlot extends BaseSlot {
 
-	public IngredientSlot(Container inventoryIn, int index, int xPosition, int yPosition) {
-		this(inventoryIn, index, xPosition, yPosition, true);
+	public IngredientSlot(Container inventoryIn, int index) {
+		this(inventoryIn, index, true);
 	}
 	
-	public IngredientSlot(Container inventoryIn, int index, int xPosition, int yPosition, boolean singleItemOnly) {
-		super(inventoryIn, index, xPosition, yPosition);
+	public IngredientSlot(Container inventoryIn, int index, boolean singleItemOnly) {
+		super(inventoryIn, index);
 		this.singleItemOnly = singleItemOnly;
 	}
 

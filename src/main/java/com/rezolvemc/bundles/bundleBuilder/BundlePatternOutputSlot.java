@@ -9,8 +9,8 @@ import net.minecraft.world.item.ItemStack;
 
 public class BundlePatternOutputSlot extends MachineOutputSlot {
 
-	public BundlePatternOutputSlot(Container inventoryIn, int index, int xPosition, int yPosition) {
-		super(inventoryIn, index, xPosition, yPosition);
+	public BundlePatternOutputSlot(Container inventoryIn, int index) {
+		super(inventoryIn, index);
 	}
 
 	@Override

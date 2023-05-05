@@ -2,8 +2,8 @@ package com.rezolvemc.storage.view;
 
 import com.rezolvemc.Rezolve;
 import net.minecraft.network.chat.Component;
-import org.torchmc.TorchWidget;
-import org.torchmc.util.TorchUtil;
+import org.torchmc.ui.TorchWidget;
+import org.torchmc.ui.util.TorchUtil;
 import com.rezolvemc.common.machines.MachineScreen;
 import com.rezolvemc.storage.view.packets.StorageViewChangeRequest;
 import com.rezolvemc.storage.view.packets.StorageViewContentPacket;

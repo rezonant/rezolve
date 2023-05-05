@@ -2,7 +2,6 @@ package com.rezolvemc.storage.machines.diskManipulator;
 
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.network.RezolvePacket;
-import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.storage.DiskItem;
 import com.rezolvemc.storage.view.StorageViewSession;
 import com.rezolvemc.storage.view.packets.StorageViewPacket;
@@ -18,10 +17,10 @@ public class DiskManipulatorMenu extends MachineMenu<DiskManipulatorEntity> {
     }
 
     public DiskManipulatorMenu(int containerId, Inventory playerInv, DiskManipulatorEntity te) {
-        super(RezolveRegistry.menuType(DiskManipulatorMenu.class), containerId, playerInv, te);
+        super(containerId, playerInv, te);
 
         addSlot(new Slot(container, 0, 5, 18));
-        addPlayerSlots(47, 131);
+        addPlayerSlots();
 
         if (te != null) {
             session = new StorageViewSession(this, te, (ServerPlayer) playerInv.player);

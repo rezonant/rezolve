@@ -3,7 +3,6 @@ package com.rezolvemc.thunderbolt.securityServer;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.machines.Sync;
 import com.rezolvemc.common.network.RezolvePacket;
-import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.thunderbolt.securityServer.packets.AddSecurityRulePacket;
 import com.rezolvemc.thunderbolt.securityServer.packets.EditSecurityRulePacket;
 import com.rezolvemc.thunderbolt.securityServer.packets.RemoveSecurityRulePacket;
@@ -12,11 +11,11 @@ import net.minecraft.world.entity.player.Player;
 
 public class SecurityServerMenu extends MachineMenu<SecurityServerEntity> {
 	public SecurityServerMenu(int containerId, Inventory playerInventory, SecurityServerEntity entity) {
-		super(RezolveRegistry.menuType(SecurityServerMenu.class), containerId, playerInventory, entity);
+		super(containerId, playerInventory, entity);
 	}
 
 	public SecurityServerMenu(int containerId, Inventory playerInventory) {
-		super(RezolveRegistry.menuType(SecurityServerMenu.class), containerId, playerInventory, null);
+		super(containerId, playerInventory, null);
 	}
 
 	@Sync

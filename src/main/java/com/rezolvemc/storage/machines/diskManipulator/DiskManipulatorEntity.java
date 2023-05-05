@@ -1,6 +1,6 @@
 package com.rezolvemc.storage.machines.diskManipulator;
 
-import com.rezolvemc.common.inventory.ValidatedSlot;
+import org.torchmc.inventory.ValidatedSlot;
 import com.rezolvemc.common.machines.MachineEntity;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.storage.IStorageAccessor;
@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class DiskManipulatorEntity extends MachineEntity implements IStorageTileEntity {
 	public DiskManipulatorEntity(BlockPos pPos, BlockState pBlockState) {
 		super(RezolveRegistry.blockEntityType(DiskManipulatorEntity.class), pPos, pBlockState);
-		addSlot(new ValidatedSlot(this, 0, 0, 0, s -> DiskBayEntity.isValidDisk(s)));
+		addSlot(new ValidatedSlot(this, 0, s -> DiskBayEntity.isValidDisk(s)));
 	}
 
 	@Override

@@ -1,12 +1,10 @@
 package com.rezolvemc.common.gui;
 
-import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.machines.MachineMenu;
 import com.rezolvemc.common.machines.MachineScreen;
-import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.torchmc.widgets.Meter;
+import org.torchmc.ui.widgets.Meter;
 
 public class EnergyMeter extends Meter {
     public EnergyMeter() {

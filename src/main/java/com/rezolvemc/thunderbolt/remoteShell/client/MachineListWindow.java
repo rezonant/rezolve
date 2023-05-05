@@ -9,10 +9,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import org.torchmc.Window;
-import org.torchmc.layout.*;
-import org.torchmc.util.TorchUtil;
-import org.torchmc.widgets.*;
+import org.torchmc.ui.Window;
+import org.torchmc.ui.layout.*;
+import org.torchmc.ui.widgets.*;
+import org.torchmc.ui.util.TorchUtil;
 
 import java.util.Objects;
 
@@ -93,7 +93,7 @@ public class MachineListWindow extends Window {
                     });
 
                     panel.addChild(new AxisLayoutPanel(Axis.Y), buttons -> {
-                        buttons.addChild(new org.torchmc.widgets.Button(), button -> {
+                        buttons.addChild(new Button(), button -> {
                             button.setHandler(mouseButton -> {
                                 if (this.selectedMachineSecure) {
                                     this.securedBtn.setText(Component.translatable("screens.rezolve.secured"));

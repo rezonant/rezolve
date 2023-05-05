@@ -1,7 +1,7 @@
 package com.rezolvemc.common.machines;
 
 import com.rezolvemc.Rezolve;
-import org.torchmc.widgets.ProgressIndicator;
+import org.torchmc.ui.widgets.ProgressIndicator;
 
 public class MachineProgressIndicator extends ProgressIndicator {
     public MachineProgressIndicator() {

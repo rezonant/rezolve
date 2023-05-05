@@ -14,6 +14,8 @@ public class StorageViewContentPacket extends RezolveMenuPacket {
 	public int totalStackCount;
 	public int totalItemsCount;
 	public int startIndex;
+	public int totalUsage;
+	public int totalCapacity;
 
 	public void setItems(List<ItemStack> items) {
 		itemEntries = new ArrayList<>();
@@ -44,6 +46,8 @@ public class StorageViewContentPacket extends RezolveMenuPacket {
 		this.totalStackCount = buf.readInt();
 		this.totalItemsCount = buf.readInt();
 		this.startIndex = buf.readInt();
+		this.totalUsage = buf.readInt();
+		this.totalCapacity = buf.readInt();
 		this.itemEntries = new ArrayList<>();
 
 		int itemCount = buf.readInt();
@@ -67,6 +71,8 @@ public class StorageViewContentPacket extends RezolveMenuPacket {
 		buf.writeInt(this.totalStackCount);
 		buf.writeInt(this.totalItemsCount);
 		buf.writeInt(startIndex);
+		buf.writeInt(totalUsage);
+		buf.writeInt(totalCapacity);
 
 		buf.writeInt(this.itemEntries.size());
 		for (ItemEntry item : this.itemEntries) {
