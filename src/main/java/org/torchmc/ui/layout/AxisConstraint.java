@@ -45,7 +45,7 @@ public class AxisConstraint {
             return b;
         if (b == null)
             return a;
-        return new AxisConstraint(Math.max(a.min, b.min), Math.max(a.desired, b.desired), a.max == 0 || b.max == 0 ? 0 : Math.min(a.max, b.max));
+        return new AxisConstraint(Math.max(a.min, b.min), Math.max(a.desired, b.desired), a.max == 0 ? b.max : b.max == 0 ? a.max : Math.min(a.max, b.max));
     }
 
     /**

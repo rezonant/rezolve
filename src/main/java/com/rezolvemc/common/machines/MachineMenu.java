@@ -5,6 +5,9 @@ import com.rezolvemc.common.network.RezolveMenuPacket;
 import com.rezolvemc.common.inventory.IngredientSlot;
 import com.rezolvemc.common.inventory.SetIngredientSlotPacket;
 import com.rezolvemc.common.registry.RezolveRegistry;
+import org.torchmc.events.Event;
+import org.torchmc.events.EventEmitter;
+import org.torchmc.events.EventType;
 import org.torchmc.inventory.StandardSlot;
 import org.torchmc.inventory.VirtualInventory;
 import com.rezolvemc.common.network.RezolvePacket;
@@ -27,6 +30,7 @@ import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.network.NetworkDirection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.torchmc.util.Values;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
@@ -34,7 +38,8 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class MachineMenu<MachineT extends MachineEntity> extends AbstractContainerMenu implements RezolvePacketReceiver {
+public class MachineMenu<MachineT extends MachineEntity> extends AbstractContainerMenu implements RezolvePacketReceiver, EventEmitter {
+	public static final int SLOT_PIXEL_SIZE = 18;
 	private static final Logger LOGGER = LogManager.getLogger(Rezolve.ID);
 
 	protected MachineMenu(int pContainerId, Inventory playerInventory, MachineT machine) {
@@ -42,24 +47,58 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 
 		this.menuType = RezolveRegistry.menuType(this.getClass());
 		this.playerInventory = playerInventory;
+		this.player = playerInventory.player;
 		this.machine = machine;
 		this.container = machine != null ? machine : new VirtualInventory();
 
+		if (machine != null)
+			machine.addActiveMenu(this);
+
 		this.setupProperties();
 	}
-
-	public final Container container;
 
 	protected MachineMenu(MenuType<MachineMenu> menuType, int pContainerId, Inventory playerInventory) {
 		this(pContainerId, playerInventory, null);
 	}
 
+	public static EventType<Event> READY = new EventType<>();
+
+	private EventMap eventMap = new EventMap();
+	public final Container container;
 	protected Inventory playerInventory;
+	protected Player player;
 	protected MachineT machine;
+	private List<SyncedProperty> syncedProperties;
+	private Map<String, WeakReference<Object>> propertyValueCache = new HashMap<>();
+	private Map<String, Tag> propertyTagCache = new HashMap<>();
+	private boolean isReady = false;
+	private int firstPlayerInventorySlot = -1;
+	private List<PacketSubscriber> packetSubscribers = new ArrayList<>();
+
+	@Sync public String dimension;
+	@Sync public BlockPos blockPos;
+	@Sync public int energyCapacity;
+	@Sync public int energyStored;
+	@Sync public float progress;
+	@Sync public Operation operation;
+
+	@Override
+	public EventMap eventMap() {
+		return eventMap;
+	}
+
+	public Player getPlayer() {
+		return player;
+	}
+
+	@Override
+	public void removed(Player pPlayer) {
+		super.removed(pPlayer);
+		if (machine != null)
+			machine.removeActiveMenu(this);
+	}
 
 	private record SyncedProperty(String name, Sync annotation, Field field) { }
-
-	private List<SyncedProperty> syncedProperties;
 
 	public MachineT getMachine() {
 		return machine;
@@ -76,13 +115,6 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 
 		this.syncedProperties = props;
 	}
-
-	private boolean instanceOf(Class<?> subclass, Class<?> superclass) {
-		return superclass.isAssignableFrom(subclass);
-	}
-
-	private Map<String, WeakReference<Object>> propertyValueCache = new HashMap<>();
-	private Map<String, Tag> propertyTagCache = new HashMap<>();
 
 	private CompoundTag gatherPropertyChanges() {
 		var newValues = new HashMap<String, Object>();
@@ -140,27 +172,27 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 
 			var propertyClass = property.field.getType();
 
-			if (instanceOf(propertyClass, String.class))
+			if (Values.instanceOf(propertyClass, String.class))
 				tag.putString(property.name, value == null ? "<NULL>" : (String)value);
-			else if (instanceOf(propertyClass, int.class))
+			else if (Values.instanceOf(propertyClass, int.class))
 				tag.putInt(property.name, (int)value);
-			else if (instanceOf(propertyClass, float.class))
+			else if (Values.instanceOf(propertyClass, float.class))
 				tag.putFloat(property.name, (float)value);
-			else if (instanceOf(propertyClass, double.class))
+			else if (Values.instanceOf(propertyClass, double.class))
 				tag.putDouble(property.name, (double)value);
-			else if (instanceOf(propertyClass, long.class))
+			else if (Values.instanceOf(propertyClass, long.class))
 				tag.putLong(property.name, (long)value);
-			else if (instanceOf(propertyClass, boolean.class))
+			else if (Values.instanceOf(propertyClass, boolean.class))
 				tag.putBoolean(property.name, (boolean)value);
-			else if (instanceOf(propertyClass, CompoundTag.class))
+			else if (Values.instanceOf(propertyClass, CompoundTag.class))
 				tag.put(property.name, (CompoundTag)value);
-			else if (instanceOf(propertyClass, Operation.class))
+			else if (Values.instanceOf(propertyClass, Operation.class))
 				tag.put(property.name, Operation.asTag((Operation) value));
-			else if (instanceOf(propertyClass, Direction.class))
+			else if (Values.instanceOf(propertyClass, Direction.class))
 				tag.putString(property.name, ((Direction)value).name());
-			else if (instanceOf(propertyClass, BlockPos.class))
+			else if (Values.instanceOf(propertyClass, BlockPos.class))
 				tag.put(property.name, NbtUtils.writeBlockPos((BlockPos)value));
-			else if (instanceOf(propertyClass, INBTSerializable.class)) {
+			else if (Values.instanceOf(propertyClass, INBTSerializable.class)) {
 				if (value == null)
 					tag.putString(property.name, "<NULL>");
 				else
@@ -184,13 +216,6 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 		sendMachineStatePacket();
 	}
 
-	@Sync public String dimension;
-	@Sync public BlockPos blockPos;
-	@Sync public int energyCapacity;
-	@Sync public int energyStored;
-	@Sync public float progress;
-	@Sync public Operation operation;
-
 	protected void updateState() {
 		if (this.machine != null) {
 			dimension = this.machine.getLevel().dimension().location().toString();
@@ -200,6 +225,8 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 			energyStored = this.machine.getStoredEnergy();
 			progress = this.machine.getProgress();
 			operation = this.machine.getCurrentOperation();
+
+			emitEvent(READY);
 		}
 	}
 
@@ -232,29 +259,29 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 				var propertyClass = property.field.getType();
 				Object value = null;
 
-				if (instanceOf(propertyClass, String.class)) {
+				if (Values.instanceOf(propertyClass, String.class)) {
 					value = tag.getString(property.name);
 					if (Objects.equals(value, "<NULL>"))
 						value = null;
-				} else if (instanceOf(propertyClass, int.class))
+				} else if (Values.instanceOf(propertyClass, int.class))
 					value = tag.getInt(property.name);
-				else if (instanceOf(propertyClass, float.class))
+				else if (Values.instanceOf(propertyClass, float.class))
 					value = tag.getFloat(property.name);
-				else if (instanceOf(propertyClass, double.class))
+				else if (Values.instanceOf(propertyClass, double.class))
 					value = tag.getDouble(property.name);
-				else if (instanceOf(propertyClass, long.class))
+				else if (Values.instanceOf(propertyClass, long.class))
 					value = tag.getLong(property.name);
-				else if (instanceOf(propertyClass, boolean.class))
+				else if (Values.instanceOf(propertyClass, boolean.class))
 					value = tag.getBoolean(property.name);
-				else if (instanceOf(propertyClass, CompoundTag.class))
+				else if (Values.instanceOf(propertyClass, CompoundTag.class))
 					value = tag.getCompound(property.name);
-				else if (instanceOf(propertyClass, Operation.class))
+				else if (Values.instanceOf(propertyClass, Operation.class))
 					value = Operation.of(tag.getCompound(property.name));
-				else if (instanceOf(propertyClass, Direction.class))
+				else if (Values.instanceOf(propertyClass, Direction.class))
 					value = Direction.valueOf(tag.getString(property.name));
-				else if (instanceOf(propertyClass, BlockPos.class))
+				else if (Values.instanceOf(propertyClass, BlockPos.class))
 					value = NbtUtils.readBlockPos(tag.getCompound(property.name));
-				else if (instanceOf(propertyClass, INBTSerializable.class)) {
+				else if (Values.instanceOf(propertyClass, INBTSerializable.class)) {
 					var propTag = tag.get(property.name);
 					if (propTag instanceof StringTag stringTag && Objects.equals("<NULL>", stringTag.getAsString())) {
 						value = null;
@@ -279,6 +306,11 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 				} catch (IllegalAccessException e) {
 					throw new RuntimeException(String.format("Incorrect access set on %s, must be public or protected.", property.name), e);
 				}
+			}
+
+			if (!isReady) {
+				isReady = true;
+				emitEvent(READY);
 			}
 		} else {
 			RezolvePacketReceiver.super.receivePacketOnClient(rezolvePacket);
@@ -401,10 +433,6 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 		return this.machine != null ? this.machine.stillValid(pPlayer) : true;
 	}
 
-	public static final int SLOT_PIXEL_SIZE = 18;
-
-	private int firstPlayerInventorySlot = -1;
-
 	public boolean hasPlayerInventorySlots() {
 		return firstPlayerInventorySlot >= 0;
 	}
@@ -451,8 +479,6 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 	public interface PacketSubscriber {
 		boolean handlePacket(RezolveMenuPacket packet);
 	}
-
-	private List<PacketSubscriber> packetSubscribers = new ArrayList<>();
 
 	public void addPacketHandler(PacketSubscriber subscriber) {
 		packetSubscribers.add(subscriber);

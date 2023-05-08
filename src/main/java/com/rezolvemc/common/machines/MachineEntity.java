@@ -2,7 +2,13 @@ package com.rezolvemc.common.machines;
 
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.blocks.BlockEntityBase;
+import com.rezolvemc.common.network.RezolvePacket;
 import com.rezolvemc.common.util.RezolveTagUtil;
+import net.minecraft.server.level.ServerPlayer;
+import org.torchmc.events.Event;
+import org.torchmc.events.EventEmitter;
+import org.torchmc.events.EventType;
+import org.torchmc.events.Subscription;
 import org.torchmc.inventory.InventorySnapshot;
 import com.rezolvemc.common.network.RezolvePacketReceiver;
 import com.rezolvemc.thunderbolt.cable.CableNetwork;
@@ -36,17 +42,48 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class MachineEntity extends BlockEntityBase implements Container, IMachineInventory, ICapabilityProvider, RezolvePacketReceiver, GameEventListener {
-	protected Operation currentOperation;
-	protected MachineEnergyStorage energy;
-	protected MachineItemHandler itemHandler;
-
+public class MachineEntity extends BlockEntityBase implements Container, IMachineInventory, ICapabilityProvider, RezolvePacketReceiver, GameEventListener, EventEmitter {
 	private static final Logger LOGGER = LogManager.getLogger();
 
 	public MachineEntity(BlockEntityType<?> pType, BlockPos pPos, BlockState pBlockState) {
 		super(pType, pPos, pBlockState);
 		this.energy = new MachineEnergyStorage(20000, 20000);
 		this.itemHandler = new MachineItemHandler(this);
+	}
+
+	public static EventType<Event> UNLOADED = new EventType<>();
+
+	protected Operation currentOperation;
+	protected MachineEnergyStorage energy;
+	protected MachineItemHandler itemHandler;
+	private List<MachineMenu> activeMenus = new ArrayList<>();
+	private EventMap eventMap = new EventMap();
+
+	@Override
+	public EventMap eventMap() {
+		return eventMap;
+	}
+
+	void addActiveMenu(MachineMenu menu) {
+		activeMenus.add(menu);
+	}
+
+	void removeActiveMenu(MachineMenu menu) {
+		activeMenus.remove(menu);
+	}
+
+	public void removeWhenDestroyed(Subscription subscription) {
+		listenForNextEvent(UNLOADED, e -> subscription.unsubscribe());
+	}
+
+	public MachineMenu[] getActiveMenus() {
+		return activeMenus.toArray(new MachineMenu[activeMenus.size()]);
+	}
+
+	public void  sendPacketToActivePlayers(RezolvePacket packet) {
+		for (var menu : activeMenus) {
+			packet.sendToPlayer((ServerPlayer) menu.getPlayer());
+		}
 	}
 
 	public int getEnergyCapacity() {

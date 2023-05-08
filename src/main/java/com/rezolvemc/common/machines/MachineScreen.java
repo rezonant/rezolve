@@ -2,6 +2,9 @@ package com.rezolvemc.common.machines;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.rezolvemc.Rezolve;
+import com.rezolvemc.common.network.RezolveScreenPacket;
+import org.apache.logging.log4j.Logger;
 import org.torchmc.inventory.BaseSlot;
 import com.rezolvemc.common.inventory.IngredientSlot;
 import org.torchmc.inventory.OutputSlot;
@@ -22,6 +25,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT> {
+    private static final Logger LOGGER = Rezolve.logger(MachineScreen.class);
     protected MachineScreen(MenuT menu, Inventory playerInventory, Component pTitle, int width, int height) {
         super(menu, playerInventory, pTitle, width, height);
     }
@@ -323,5 +327,9 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
             list.add(rightShoulderButtons.getDesiredScreenRect());
 
         return list;
+    }
+
+    public void receivePacket(RezolveScreenPacket rezolveScreenPacket) {
+        LOGGER.error("Screen {} does not handle packet {}", this.getClass().getCanonicalName(), rezolveScreenPacket.getClass().getCanonicalName());
     }
 }

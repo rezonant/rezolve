@@ -77,6 +77,14 @@ public class Inspector extends Window {
 
             TorchUtil.colorQuad(event.poseStack, Color.WHITE, - 2, - font.lineHeight - 2, font.width(text) + 4, font.lineHeight + 4);
             font.draw(event.poseStack, text, 0, - font.lineHeight, Color.BLACK.argb());
+
+            var wc = widget.getWidthConstraint(0);
+            var hc = widget.getHeightConstraint(0);
+
+            text = String.format("W: %d / %d / %d | H: %d / %d / %d", wc.min, wc.desired, wc.max, hc.min, hc.desired, hc.max);
+
+            TorchUtil.colorQuad(event.poseStack, Color.WHITE, -2, widget.getHeight(), font.width(text) + 4, font.lineHeight + 4);
+            font.draw(event.poseStack, text, 0, widget.getHeight(), Color.BLACK.argb());
         });
     }
 

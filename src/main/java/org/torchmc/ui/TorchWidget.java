@@ -12,6 +12,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
@@ -60,6 +61,17 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
     public static final EventType<RenderEvent> AFTER_RENDER_CONTENTS = new EventType<>();
     public static final EventType<RenderEvent> BEFORE_RENDER_TOOLTIP = new EventType<>();
     public static final EventType<RenderEvent> AFTER_RENDER_TOOLTIP = new EventType<>();
+    public static final EventType<AdoptionEvent> ADOPTED = new EventType<>();
+
+    public class AdoptionEvent extends Event {
+        public AdoptionEvent(TorchWidget parent, Screen screen) {
+            this.parent = parent;
+            this.screen = screen;
+        }
+
+        public final TorchWidget parent;
+        public final Screen screen;
+    }
 
     public class RenderEvent extends Event {
         public RenderEvent(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
@@ -354,6 +366,7 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      */
     void adoptParent(TorchWidget parent) {
         this.parent = parent;
+        emitEvent(ADOPTED, new AdoptionEvent(parent, screen));
     }
 
     /**
@@ -1391,10 +1404,13 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      * @return
      */
     public Size getDesiredSize() {
-        var width = getWidthConstraint(0);
-        var height = getHeightConstraint(0);
+        var widthConstraint = getWidthConstraint(0);
+        var width = widthConstraint.desired > 0 ? widthConstraint.desired : widthConstraint.min;
 
-        return new Size(width.desired > 0 ? width.desired : width.min, height.desired > 0 ? height.desired : height.min);
+        var heightConstraint = getHeightConstraint(width);
+        var height = heightConstraint.desired > 0 ? heightConstraint.desired : heightConstraint.min;
+
+        return new Size(width, height);
     }
 
     private Size expansionFactor;
@@ -1491,5 +1507,15 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
         }
 
         return true;
+    }
+
+    public void removeFromParent() {
+        if (parent != null) {
+            parent.children.remove(this);
+        } else {
+            screen.children.remove(this);
+            screen.renderables.remove(this);
+            screen.narratables.remove(this);
+        }
     }
 }

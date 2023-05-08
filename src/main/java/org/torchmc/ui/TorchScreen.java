@@ -371,8 +371,11 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
         renderBackground(pPoseStack);
 
         var originalItemBlit = this.itemRenderer.blitOffset;
+        var windowUnderCursor = getWindowAt(pMouseX, pMouseY);
         for (var window : windows) {
-            window.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
+            boolean receiveCursor = windowUnderCursor == null || windowUnderCursor == window;
+
+            window.render(pPoseStack, receiveCursor ? pMouseX : -1, receiveCursor ? pMouseY : -1, pPartialTick);
             this.itemRenderer.blitOffset += 200.0F;
         }
         this.itemRenderer.blitOffset = originalItemBlit;
@@ -496,6 +499,10 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
         }
 
         return list;
+    }
+
+    public void removeWindow(Window window) {
+        windows.remove(window);
     }
 
     public static class JeiHandler implements IGuiContainerHandler<AbstractContainerScreen<?>> {

@@ -3,7 +3,9 @@ package org.torchmc.ui;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.rezolvemc.Rezolve;
+import com.rezolvemc.thunderbolt.remoteShell.client.RemoteShellOverlay;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.client.event.ScreenEvent;
@@ -38,6 +40,12 @@ public class Window extends TorchWidget {
 
         setIsDecoration(true);
 
+        listenForNextEvent(BEFORE_RENDER, e -> {
+            emitEvent(PRESENTED);
+            willBePresented();
+            hasBeenPresented = true;
+        });
+
         titlebarPanel = addChild(new HorizontalLayoutPanel(), titlebarRoot -> {
             titlebarRoot.setAlignment(AxisAlignment.CENTER);
             titlebarRoot.addChild(new Label(title), label -> {
@@ -64,8 +72,90 @@ public class Window extends TorchWidget {
         setup();
     }
 
+    private boolean hasBeenPresented = false;
+    private boolean movedBeforePresentation = false;
+    private boolean sizedBeforePresentation = false;
+
+    /**
+     * Emitted when this Window is presented to the user within a Screen.
+     */
+    public static final EventType<Event> PRESENTED = new EventType<>();
+
     protected void setup() {
 
+    }
+
+    /**
+     * Fired when the Window has been added to a screen and is about to be presented for the first time to the user.
+     * Use this to place the window within the screen (ie centering), or any other initialization that should happen
+     * as late as possible.
+     */
+    protected void willBePresented() {
+        if (!sizedBeforePresentation) {
+            applyInferredSize();
+        }
+
+        if (!movedBeforePresentation) {
+            positionForPresentation();
+        }
+    }
+
+    private void applyInferredSize() {
+        if (this.panel != null) {
+            var desiredSize = this.panel.getDesiredSize();
+
+            desiredSize.width += getPanelBorder() * 2 + panelMargin*2;
+            desiredSize.height += getPanelBorder() * 2 + panelMargin*2;
+
+            if (isTitleBarVisible()) {
+                desiredSize.height += titlebarHeight;
+            }
+
+            desiredSize.width = Math.max(minSize.width, desiredSize.width);
+            desiredSize.height = Math.max(minSize.height, desiredSize.height);
+
+            resize(desiredSize.width, desiredSize.height);
+        }
+    }
+
+    /**
+     * Handle positioning this window just before it is presented to the user for the first time.
+     * Only called if the window was not positioned prior to it being presented. By default, the window is centered
+     * with respect to the display bounding box.
+     */
+    protected void positionForPresentation() {
+        move(screen.width / 2 - width / 2, screen.height / 2 - height / 2);
+    }
+
+    @Override
+    protected void didMove() {
+        super.didMove();
+
+        if (!hasBeenPresented)
+            movedBeforePresentation = true;
+    }
+
+    public void present() {
+        present(Minecraft.getInstance().screen);
+    }
+
+    /**
+     * Add this window to the given Screen and prepare it for view
+     * @param screen
+     */
+    public void present(Screen screen) {
+        if (screen instanceof AbstractContainerScreen<?>) {
+            var window = new RemoteShellOverlay();
+            if (screen instanceof TorchScreen<?> torchScreen) {
+                torchScreen.addWindow(this);
+            } else {
+                screen.children.add(this);
+                screen.narratables.add(this);
+                screen.renderables.add(this);
+            }
+        }
+
+        setVisible(true);
     }
 
     public Window(String title) {
@@ -171,6 +261,30 @@ public class Window extends TorchWidget {
         this.closable = closable;
         if (closeButton != null)
             closeButton.setVisible(closable);
+    }
+
+    @Override
+    public void removeFromParent() {
+        if (screen instanceof TorchScreen<?> torchScreen) {
+            torchScreen.removeWindow(this);
+        } else {
+            super.removeFromParent();
+        }
+    }
+
+    public Size getMinSize() {
+        return minSize;
+    }
+
+    /**
+     * Set the minimum size for this window. The user will not be able to resize the window smaller than this size,
+     * and it will also be used when inferring the initial size of the window (assuming you have not called resize()
+     * prior to the window being presented).
+     *
+     * @param minSize
+     */
+    public void setMinSize(Size minSize) {
+        this.minSize = minSize;
     }
 
     /**
@@ -433,8 +547,18 @@ public class Window extends TorchWidget {
         return y + height - dragHandleSize / 2;
     }
 
+    private int panelBorder = 3;
+
+    public int getPanelBorder() {
+        return panelBorder;
+    }
+
+    public void setPanelBorder(int panelBorder) {
+        this.panelBorder = panelBorder;
+    }
+
     protected void applyDimensions() {
-        int border = 3;
+        int border = getPanelBorder();
         titlebarPanel.move(border, border, width - border*2, titlebarHeight - border*2);
 
         int effectiveTitlebarHeight = titleBarVisible ? titlebarHeight : 0;
@@ -451,6 +575,8 @@ public class Window extends TorchWidget {
 
     @Override
     protected void didResize() {
+        if (!hasBeenPresented)
+            sizedBeforePresentation = true;
         applyDimensions();
     }
 

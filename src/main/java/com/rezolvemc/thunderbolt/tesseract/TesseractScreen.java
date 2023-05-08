@@ -1,15 +1,25 @@
 package com.rezolvemc.thunderbolt.tesseract;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.machines.MachineScreen;
+import com.rezolvemc.common.network.RezolveScreenPacket;
 import com.rezolvemc.common.registry.ScreenFor;
+import com.rezolvemc.thunderbolt.tesseract.network.*;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import org.torchmc.ui.ConfirmationDialog;
 import org.torchmc.ui.Window;
+import org.torchmc.ui.layout.AxisAlignment;
+import org.torchmc.ui.layout.HorizontalLayoutPanel;
 import org.torchmc.ui.layout.VerticalLayoutPanel;
 import org.torchmc.ui.widgets.*;
 import org.torchmc.ui.util.Color;
+import org.torchmc.util.Values;
+
+import java.util.List;
 
 @ScreenFor(TesseractMenu.class)
 public class TesseractScreen extends MachineScreen<TesseractMenu> {
@@ -23,20 +33,13 @@ public class TesseractScreen extends MachineScreen<TesseractMenu> {
         super(menu, playerInventory, pTitle, 256, 256);
     }
 
+    private TesseractChannelPicker channelPicker;
+
     @Override
     protected void setup() {
         super.setup();
 
-        addChild(new Window("Side Window"), window -> {
-            window.setPanel(new VerticalLayoutPanel(), panel -> {
-                panel.addChild(new Label("Cool!"), label -> {
-                    label.setBackgroundColor(Color.PINK);
-                });
-            });
-
-            window.move(100, 100, 100, 100);
-        });
-
+        channelPicker = new TesseractChannelPicker();
         leftShoulderButtons.addChild(new IconButton("Security?!", TEX_SECURITY_OPTIONS));
         leftShoulderButtons.addChild(new IconButton("Database", TEX_DATABASE_OPTIONS));
         leftShoulderButtons.addChild(new IconButton("Disk", TEX_DISK_OPTIONS));
@@ -45,18 +48,61 @@ public class TesseractScreen extends MachineScreen<TesseractMenu> {
 
         setPanel(new VerticalLayoutPanel(), vert -> {
             vert.setSpace(4);
-            vert.addChild(new Label("This is a test"));
-            vert.addChild(new Button("Here's a button!"));
-            vert.addChild(new EditBox("Edit box"));
-            vert.addChild(new ListView("Channels"), listView -> {
-                listView.setExpansionFactor(1);
-
-                for (int i = 0, max = 25; i < max; ++i) {
-                    listView.addItem("Test item");
-                }
+            vert.addChild(new Button(), button -> {
+                button.setOnTick(() -> {
+                    button.setText(Component.literal("Channel: <None>")); // TODO
+                    button.setHandler(x -> channelPicker.present(result -> {
+                        if (result instanceof ChannelPicker.ChannelChoiceResult choice) {
+                            new ConfirmationDialog("Great choice!", "You sure you want to set the channel to '" + choice.channel.name + "'?")
+                                    .present();
+                        }
+                    }));
+                });
             });
-            vert.addChild(new Label("This is another test"));
         });
 
+        menu.listenForNextEvent(menu.READY, e -> channelPicker.refreshChannels());
+    }
+
+    List<ChannelListing> channels;
+
+    @Override
+    public void receivePacket(RezolveScreenPacket rezolveScreenPacket) {
+        if (rezolveScreenPacket instanceof ChannelListSearchResults searchResults) {
+            channelPicker.setChannels(searchResults.results);
+        } else if (rezolveScreenPacket instanceof ChannelCreated || rezolveScreenPacket instanceof ChannelRemoved) {
+            channelPicker.refreshChannels();
+        } else {
+            super.receivePacket(rezolveScreenPacket);
+        }
+    }
+
+    public class TesseractChannelPicker extends ChannelPicker {
+        @Override
+        protected void removeChannel(ChannelListing channel) {
+            var packet = new RemoveChannel();
+            packet.dimension = menu.dimension;
+            packet.blockPos = menu.blockPos;
+            packet.uuid = channel.uuid;
+            packet.sendToServer();
+        }
+
+        @Override
+        protected void createChannel(String name) {
+            var packet = new CreateChannel();
+            packet.dimension = menu.dimension;
+            packet.blockPos = menu.blockPos;
+            packet.name = name;
+            packet.sendToServer();
+        }
+
+        @Override
+        protected void search(String query) {
+            var packet = new ChannelListSearch();
+            packet.dimension = menu.dimension;
+            packet.blockPos = menu.blockPos;
+            packet.query = query;
+            packet.sendToServer();
+        }
     }
 }

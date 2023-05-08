@@ -64,12 +64,26 @@ public abstract class RezolvePacket {
     }
 
     private final void handleOnServer(NetworkEvent.Context context) {
-        context.enqueueWork(() -> receiveOnServer(context.getSender()));
+        context.enqueueWork(() -> {
+            try {
+                receiveOnServer(context.getSender());
+            } catch (Exception e) {
+                LOGGER.error("Failed to handle packet " + getClass().getCanonicalName() + " on the server: " + e.getMessage(), e);
+                throw new RuntimeException("Failed to handle packet " + getClass().getCanonicalName() + " on the server: " + e.getMessage(), e);
+            }
+        });
         context.setPacketHandled(true);
     }
 
     private final void handleOnClient(NetworkEvent.Context context) {
-        context.enqueueWork(() -> receiveOnClient());
+        context.enqueueWork(() -> {
+            try {
+                receiveOnClient();
+            } catch (Exception e) {
+                LOGGER.error("Failed to handle packet " + getClass().getCanonicalName() + " on the client: " + e.getMessage(), e);
+                throw new RuntimeException("Failed to handle packet " + getClass().getCanonicalName() + " on the client: " + e.getMessage(), e);
+            }
+        });
         context.setPacketHandled(true);
     }
 
@@ -86,6 +100,10 @@ public abstract class RezolvePacket {
             inst.read(buf);
             return inst;
         } catch (ReflectiveOperationException e) {
+            LOGGER.error("Failed to parse packet {}: {}", klass.getCanonicalName(), e.getClass().getCanonicalName(), e.getMessage());
+            LOGGER.error("Details:");
+            LOGGER.error(e);
+
             throw new RuntimeException(String.format("Failed to parse packet %s: %s", klass.getCanonicalName(), e.getMessage()), e);
         }
     }

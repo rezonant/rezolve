@@ -178,7 +178,16 @@ public class AxisLayoutPanel extends LayoutPanel {
     @Override
     public AxisConstraint getConstraint(Axis axis, int assumedCrossSize) {
         if (axis == this.axis) {
-            return AxisConstraint.between(getMinimumSize(), getMaximumSize());
+            int minSize = getMinimumSize();
+            int maxSize = getMaximumSize();
+            int desiredSize = 0;
+            var plan = plan(0, assumedCrossSize);
+
+            for (int i = 0, max = plan.length - 1; i < max; ++i) {
+                desiredSize += plan[i];
+            }
+
+            return AxisConstraint.between(minSize, desiredSize, maxSize);
         } else {
             var plan = plan(0, 0);
 

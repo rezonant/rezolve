@@ -1,6 +1,7 @@
 package com.rezolvemc.thunderbolt.tesseract;
 
 import com.rezolvemc.common.machines.MachineMenu;
+import com.rezolvemc.common.machines.Sync;
 import net.minecraft.world.entity.player.Inventory;
 
 public class TesseractMenu extends MachineMenu<TesseractEntity> {

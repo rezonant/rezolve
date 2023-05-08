@@ -9,6 +9,7 @@ import org.torchmc.ui.TorchWidget;
 import org.torchmc.ui.layout.AxisConstraint;
 import org.torchmc.ui.util.Color;
 import org.torchmc.ui.util.TorchUtil;
+import org.torchmc.util.Values;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -106,8 +107,13 @@ public class Label extends TorchWidget {
         notifyHierarchyChange();
     }
 
+    private boolean wordWrapped = true;
+
+    public boolean isWordWrapped() {
+        return wordWrapped;
+    }
     private void constructLabel() {
-        this.label = MultiLineLabel.create(font, content, width);
+        this.label = MultiLineLabel.create(font, Values.coalesce(content, Component.empty()), width);
     }
 
     @Override
@@ -141,11 +147,27 @@ public class Label extends TorchWidget {
 
     @Override
     public AxisConstraint getWidthConstraint(int assumedHeight) {
-        return AxisConstraint.between(0, font.width(content), 0);
+        var custom = super.getWidthConstraint(assumedHeight);
+        var min = 0;
+        var max = 0;
+        var desired = font.width(content);
+        if (custom != null) {
+            min = custom.min;
+            max = custom.max;
+        }
+
+        if (max > 0)
+            desired = Math.min(max, desired);
+
+        if (min > 0)
+            desired = Math.max(min, desired);
+
+        return AxisConstraint.between(min, desired, max);
     }
 
     @Override
     public AxisConstraint getHeightConstraint(int assumedWidth) {
+        var content = Values.coalesce(this.content, Component.empty());
         var label = MultiLineLabel.create(font, content, assumedWidth);
 
         if (assumedWidth > 0)

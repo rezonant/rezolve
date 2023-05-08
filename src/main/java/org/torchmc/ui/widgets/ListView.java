@@ -36,6 +36,7 @@ public class ListView extends TorchWidget {
     }
 
     public static final EventType<ListViewItemEvent> ITEM_HOVERED = new EventType<ListViewItemEvent>();
+    public static final EventType<ListViewItemEvent> ITEM_SELECTED = new EventType<>();
 
     public static class ListViewItemEvent extends Event {
         public ListViewItemEvent(ListViewItem item) {
@@ -129,6 +130,9 @@ public class ListView extends TorchWidget {
             for (var item : items) {
                 if (itemY < mouseY && mouseY < itemY + itemPadding * 2 + item.getHeight()) {
                     item.mouseClicked(pButton);
+                    emitEvent(ITEM_SELECTED, new ListViewItemEvent(item));
+                    takeFocus();
+                    focusedItem = items.indexOf(item);
                     return true;
                 }
                 itemY += item.getHeight() + itemPadding * 2;
