@@ -121,7 +121,7 @@ public class ResourceChannel implements EventEmitter {
                 continue;
 
             var existingOwner = owners.get(resource);
-            if (existingOwner != owner) {
+            if (existingOwner != null && existingOwner != owner) {
                 ownedByOthers.add(resource);
                 continue;
             }

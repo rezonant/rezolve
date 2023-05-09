@@ -3,6 +3,7 @@ package com.rezolvemc.thunderbolt.tesseract;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
+import org.torchmc.util.Values;
 
 import java.util.List;
 
@@ -63,19 +64,27 @@ public abstract class MultiplexedFluidHandler implements IFluidHandler {
         return false;
     }
 
+    int fillCounter = 0;
+    int drainCounter = 0;
+
     @Override
     public int fill(FluidStack resource, FluidAction action) {
         int filled = 0;
 
         resource = resource.copy();
 
-        for (var handler : getHandlers()) {
+        var handlers = getHandlers();
+        for (int i = 0, max = handlers.size(); i < max; ++i) {
+            var handler = handlers.get((fillCounter + i) % max);
             var newlyFilled = handler.fill(resource, action);
             filled += newlyFilled;
             resource.shrink(newlyFilled);
             if (resource.isEmpty())
                 break;
         }
+
+        if (action == FluidAction.EXECUTE)
+            fillCounter += 1;
 
         return filled;
     }
@@ -84,35 +93,49 @@ public abstract class MultiplexedFluidHandler implements IFluidHandler {
     public @NotNull FluidStack drain(FluidStack resource, FluidAction action) {
         FluidStack drained = null;
 
-        for (var handler : getHandlers()) {
+        var handlers = getHandlers();
+        for (int i = 0, max = handlers.size(); i < max; ++i) {
+            var handler = handlers.get((drainCounter + i) % max);
             var newlyDrained = handler.drain(resource, action);
+            if (newlyDrained.isEmpty())
+                continue;
 
             if (drained == null)
-                drained = newlyDrained;
+                drained = newlyDrained.copy();
             else if (drained.isFluidEqual(newlyDrained))
                 drained.grow(newlyDrained.getAmount());
 
             resource.shrink(newlyDrained.getAmount());
         }
 
-        return drained;
+        if (action == FluidAction.EXECUTE)
+            drainCounter += 1;
+
+        return Values.coalesce(drained, FluidStack.EMPTY);
     }
 
     @Override
     public @NotNull FluidStack drain(int maxDrain, FluidAction action) {
         FluidStack drained = null;
 
-        for (var handler : getHandlers()) {
+        var handlers = getHandlers();
+        for (int i = 0, max = handlers.size(); i < max; ++i) {
+            var handler = handlers.get((drainCounter + i) % max);
             var newlyDrained = handler.drain(maxDrain, action);
+            if (newlyDrained.isEmpty())
+                continue;
 
             if (drained == null)
-                drained = newlyDrained;
+                drained = newlyDrained.copy();
             else if (drained.isFluidEqual(newlyDrained))
                 drained.grow(newlyDrained.getAmount());
 
             maxDrain -= newlyDrained.getAmount();
         }
 
-        return drained;
+        if (action == FluidAction.EXECUTE)
+            drainCounter += 1;
+
+        return Values.coalesce(drained, FluidStack.EMPTY);
     }
 }

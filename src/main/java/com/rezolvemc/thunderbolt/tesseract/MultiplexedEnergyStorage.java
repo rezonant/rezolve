@@ -4,6 +4,8 @@ import net.minecraftforge.energy.IEnergyStorage;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public abstract class MultiplexedEnergyStorage implements IEnergyStorage {
     @NotNull
@@ -13,15 +15,24 @@ public abstract class MultiplexedEnergyStorage implements IEnergyStorage {
         return getHandlers().isEmpty();
     }
 
+    private int receiveCounter = 0;
+    private int extractCounter = 0;
+
     @Override
     public int receiveEnergy(int maxReceive, boolean simulate) {
         int accepted = 0;
-        for (var handler : getHandlers()) {
+
+        var handlers = getHandlers();
+        for (int i = 0, max = handlers.size(); i < max; ++i) {
+            var handler = handlers.get((receiveCounter + i) % max);
             accepted = handler.receiveEnergy(maxReceive, simulate);
             maxReceive -= accepted;
             if (maxReceive <= 0)
                 break;
         }
+
+        if (!simulate)
+            receiveCounter += 1;
 
         return accepted;
     }
@@ -29,12 +40,18 @@ public abstract class MultiplexedEnergyStorage implements IEnergyStorage {
     @Override
     public int extractEnergy(int maxExtract, boolean simulate) {
         int extracted = 0;
-        for (var handler : getHandlers()) {
+
+        var handlers = getHandlers();
+        for (int i = 0, max = handlers.size(); i < max; ++i) {
+            var handler = handlers.get((extractCounter + i) % max);
             extracted = handler.extractEnergy(maxExtract, simulate);
             maxExtract -= extracted;
             if (maxExtract <= 0)
                 break;
         }
+
+        if (!simulate)
+            extractCounter += 1;
 
         return extracted;
     }

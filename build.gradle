@@ -104,6 +104,8 @@ dependencies {
     compileOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}:api")
     runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
     runtimeOnly fg.deobf("curse.maven:mekanism-268560:${mekanism_version}")
+    runtimeOnly fg.deobf("curse.maven:waystones-${waystones_curseforge_id}:${waystones_curseforge_file_id}")
+    runtimeOnly fg.deobf("curse.maven:balm-${balm_curseforge_id}:${balm_curseforge_file_id}")
     //runtimeOnly "ru.dbotthepony:overdrive-that-matters:1.0-SNAPSHOT:deobf"
 }
 

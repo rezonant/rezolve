@@ -32,6 +32,8 @@ public class ThunderboltCableEntity extends MachineEntity {
 
     public ThunderboltCableEntity(BlockPos pPos, BlockState pBlockState) {
         super(RezolveRegistry.blockEntityType(ThunderboltCableEntity.class), pPos, pBlockState);
+
+        updateInterval = 1;
     }
 
     @Override
@@ -299,7 +301,8 @@ public class ThunderboltCableEntity extends MachineEntity {
             FaceConfiguration face,
             BlockConfiguration inletBlock
     ) {
-        var amount = 500;
+        var amount = 1000000;
+
         var entity = level.getBlockEntity(inletBlock.getPosition());
         var sourceHandler = entity.getCapability(ForgeCapabilities.ENERGY, face.getDirection()).orElse(null);
         if (sourceHandler == null)
@@ -343,12 +346,14 @@ public class ThunderboltCableEntity extends MachineEntity {
                             continue;
 
                         var receivableAmount = destHandler.receiveEnergy(potentialEnergyStack.getAmount(), true);
+                        if (receivableAmount <= 0)
+                            continue;
 
                         var actualTransferred = extractor.apply(receivableAmount);
                         destHandler.receiveEnergy(actualTransferred.getAmount(), simulate);
                         potentialEnergyStack.split(actualTransferred.getAmount());
 
-                        if (actualTransferred.getAmount() <= 0)
+                        if (potentialEnergyStack.isEmpty())
                             return true;
                     }
                 }

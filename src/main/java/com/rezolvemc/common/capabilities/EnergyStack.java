@@ -21,6 +21,10 @@ public class EnergyStack {
         return immutable;
     }
 
+    public boolean isEmpty() {
+        return amount <= 0;
+    }
+
     public static final EnergyStack EMPTY = new EnergyStack(0, true);
 
     public static EnergyStack of(int amount) {

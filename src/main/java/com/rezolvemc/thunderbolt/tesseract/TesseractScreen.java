@@ -6,10 +6,12 @@ import com.rezolvemc.common.machines.MachineScreen;
 import com.rezolvemc.common.network.RezolveScreenPacket;
 import com.rezolvemc.common.registry.ScreenFor;
 import com.rezolvemc.thunderbolt.tesseract.network.*;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 import org.torchmc.ui.ConfirmationDialog;
 import org.torchmc.ui.Window;
 import org.torchmc.ui.layout.AxisAlignment;
@@ -50,14 +52,23 @@ public class TesseractScreen extends MachineScreen<TesseractMenu> {
             vert.setSpace(4);
             vert.addChild(new Button(), button -> {
                 button.setOnTick(() -> {
-                    button.setText(Component.literal("Channel: <None>")); // TODO
-                    button.setHandler(x -> channelPicker.present(result -> {
-                        if (result instanceof ChannelPicker.ChannelChoiceResult choice) {
-                            new ConfirmationDialog("Great choice!", "You sure you want to set the channel to '" + choice.channel.name + "'?")
-                                    .present();
-                        }
-                    }));
+                    button.setText(
+                        Component.empty()
+                            .append(Rezolve.str("channel"))
+                            .append(": ")
+                            .append(menu.activeChannel == null ? "--" : menu.activeChannel.name)
+                    );
                 });
+
+                button.setHandler(x -> channelPicker.present(result -> {
+                    if (result instanceof ChannelPicker.ChannelChoiceResult choice) {
+                        var packet = new SetActiveChannel();
+                        packet.dimension = menu.dimension;
+                        packet.blockPos = menu.blockPos;
+                        packet.uuid = choice.channel.uuid;
+                        packet.sendToServer();
+                    }
+                }));
             });
         });
 

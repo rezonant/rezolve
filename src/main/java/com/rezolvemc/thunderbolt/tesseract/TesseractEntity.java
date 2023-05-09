@@ -1,19 +1,17 @@
 package com.rezolvemc.thunderbolt.tesseract;
 
+import com.rezolvemc.common.LevelPosition;
 import com.rezolvemc.common.machines.MachineEntity;
 import com.rezolvemc.common.network.RezolvePacket;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.thunderbolt.tesseract.network.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -21,7 +19,6 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -32,9 +29,9 @@ public class TesseractEntity extends MachineEntity {
         super(RezolveRegistry.blockEntityType(TesseractEntity.class), pPos, pBlockState);
     }
 
-    private String channelName = null;
+    private String channelUuid = null;
     private ResourceChannel channel;
-    private List<Resource> resources = new ArrayList<>();
+    private List<Resource> resources = null;
     private ItemHandler itemHandler = new ItemHandler();
     private EnergyStorage energyStorage = new EnergyStorage();
     private FluidHandler fluidHandler = new FluidHandler();
@@ -43,26 +40,28 @@ public class TesseractEntity extends MachineEntity {
     public void load(CompoundTag tag) {
         super.load(tag);
 
-        for (var dir : Direction.values()) {
-            var adj = getBlockPos().relative(dir);
-            resources.add(new Resource(getLevel(), adj, dir.getOpposite()));
-        }
-
-        setChannel(tag.contains("channelName") ? tag.getString("channelName") : null);
+        channelUuid = tag.contains("channelUuid") ? tag.getString("channelUuid") : null;
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
 
-        if (channelName != null)
-            tag.putString("channelName", channelName);
+        if (channelUuid != null)
+            tag.putString("channelUuid", channelUuid);
     }
 
-    public void setChannel(String channelName) {
-        leaveChannel();
-        this.channelName = channelName;
+    @Override
+    public void setLevel(Level pLevel) {
+        super.setLevel(pLevel);
         joinChannel();
+    }
+
+    public void setChannel(String uuid) {
+        leaveChannel();
+        this.channelUuid = uuid;
+        joinChannel();
+        setChanged();
     }
 
     private ResourceNetwork resourceNetwork;
@@ -77,21 +76,38 @@ public class TesseractEntity extends MachineEntity {
         return resourceNetwork;
     }
 
+    private LevelPosition levelPos = null;
+
+    public LevelPosition getLevelPos() {
+        if (levelPos == null)
+            levelPos = new LevelPosition(getLevel(), getBlockPos());
+        return levelPos;
+    }
+
     private void leaveChannel() {
         if (channel != null)
-            channel.leave(this);
+            channel.leave(getLevelPos());
 
         channel = null;
     }
 
     private void joinChannel() {
-        if (channelName == null) {
+        if (channelUuid == null) {
             channel = null;
             return;
         }
 
-        channel = getResourceNetwork().getChannel(channelName);
-        channel.setResources(this, resources);
+        channel = getResourceNetwork().getChannel(channelUuid);
+
+        if (resources == null) {
+            resources = new ArrayList<>();
+            for (var dir : Direction.values()) {
+                var adj = getBlockPos().relative(dir);
+                resources.add(new Resource(getLevel(), adj, dir.getOpposite()));
+            }
+        }
+
+        channel.setResources(getLevelPos(), resources);
     }
 
     public ResourceChannel getChannel() {
@@ -121,7 +137,7 @@ public class TesseractEntity extends MachineEntity {
     }
 
     public <T> List<T> getReachableCapabilities(Capability<T> cap) {
-        return hasChannel() ? getChannel().getResourceCapabilitiesNotOwnedBy(TesseractEntity.this, cap) : new ArrayList<>();
+        return hasChannel() ? getChannel().getResourceCapabilitiesNotOwnedBy(getLevelPos(), cap) : new ArrayList<>();
     }
 
     private class ItemHandler extends MultiplexedItemHandler {
@@ -164,6 +180,8 @@ public class TesseractEntity extends MachineEntity {
             var channel = getResourceNetwork().getChannel(removeChannel.uuid);
             if (channel != null)
                 getResourceNetwork().removeChannel(channel);
+        } else if (rezolvePacket instanceof SetActiveChannel setActiveChannel) {
+            setChannel(setActiveChannel.uuid);
         } else {
             super.receivePacketOnServer(rezolvePacket, player);
         }
