@@ -76,8 +76,8 @@ public class ThunderboltCableEntity extends MachineEntity {
                 return;
 
             for (var inletBlock : configuration.values()) {
-                var pos = inletBlock.getPosition();
-                var entity = level.getBlockEntity(pos);
+                var inletPos = new LevelPosition(getLevel(), inletBlock.getPosition());
+                var entity = level.getBlockEntity(inletBlock.getPosition());
                 if (entity == null)
                     continue;
 
@@ -89,13 +89,13 @@ public class ThunderboltCableEntity extends MachineEntity {
                         if (transmitTypeConfig.getMode().canPull()) {
                             switch (transmitTypeConfig.getType()) {
                                 case ITEMS -> {
-                                    transferItem(cableNetwork, transmitTypeConfig, face, inletBlock);
+                                    getNetwork().transferItem(transmitTypeConfig, face, inletPos);
                                 }
                                 case FLUIDS -> {
-                                    transferFluid(cableNetwork, transmitTypeConfig, face, inletBlock);
+                                    getNetwork().transferFluid(transmitTypeConfig, face, inletPos);
                                 }
                                 case ENERGY -> {
-                                    transferEnergy(cableNetwork, transmitTypeConfig, face, inletBlock);
+                                    getNetwork().transferEnergy(transmitTypeConfig, face, inletPos);
                                 }
                             }
                         }
@@ -141,226 +141,6 @@ public class ThunderboltCableEntity extends MachineEntity {
             if (endpoint != null)
                 endpoint.addInterface(getBlockPos(), config);
         }
-    }
-
-    /**
-     * Perform an item transfer from the given start point to whatever end point will accept it.
-     * @param transmitTypeConfig
-     * @param face
-     * @param inletBlock
-     */
-    private void transferItem(
-            CableNetwork network,
-            TransmitConfiguration transmitTypeConfig,
-            FaceConfiguration face,
-            BlockConfiguration inletBlock)
-    {
-        var amount = 64;
-        var entity = level.getBlockEntity(inletBlock.getPosition());
-        var levelPos = new LevelPosition(getLevel(), inletBlock.getPosition());
-
-        var itemHandler = RezolveCapHelper.getItemHandler(entity, face.getDirection());
-        if (itemHandler != null) {
-            for (int sourceSlot = 0, max = itemHandler.getSlots(); sourceSlot < max; ++sourceSlot) {
-                var potentialStack = itemHandler.extractItem(sourceSlot, amount, true);
-                if (potentialStack != null && !potentialStack.isEmpty()) {
-                    int finalSourceSlot = sourceSlot;
-                    var success = pushItem(
-                            potentialStack,
-                            desiredAmount -> itemHandler.extractItem(finalSourceSlot, desiredAmount, false),
-                            levelPos, false
-                    );
-
-                    if (success)
-                        return;
-                }
-            }
-        }
-    }
-
-    private boolean pushItem(
-            ItemStack itemsToTransfer,
-            Function<Integer, ItemStack> extractor,
-            LevelPosition sourceEndpoint,
-            boolean simulate
-    ) {
-        if (!hasNetwork())
-            return false;
-
-        itemsToTransfer = itemsToTransfer.copy();
-        for (var dest : getExistingNetwork().getEndpoints()) {
-            if (dest.is(sourceEndpoint))
-                continue;
-
-            var destEntity = dest.getBlockEntity();
-
-            for (var blockInterface : dest.getInterfaces()) {
-                for (var destFace : blockInterface.getFaces()) {
-                    var itemInterface = destFace.getTransmissionConfiguration(TransmissionType.ITEMS);
-                    if (itemInterface.getMode().canPush()) {
-                        var destHandler = RezolveCapHelper.getItemHandler(destEntity, destFace.getDirection());
-                        if (destHandler == null)
-                            continue;
-
-                        for (int destinationSlot = 0, destSlotCount = destHandler.getSlots(); destinationSlot < destSlotCount; ++destinationSlot) {
-                            var remainder = destHandler.insertItem(destinationSlot, itemsToTransfer, true);
-                            if (remainder == null)
-                                remainder = ItemStack.EMPTY;
-
-                            var acceptedAmount = itemsToTransfer.getCount() - remainder.getCount();
-
-                            var item = extractor.apply(acceptedAmount);
-                            destHandler.insertItem(destinationSlot, item, simulate);
-
-                            itemsToTransfer = remainder;
-
-                            if (itemsToTransfer.isEmpty())
-                                return true;
-                        }
-                    }
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private void transferFluid(
-            CableNetwork cableNetwork,
-            TransmitConfiguration transmitTypeConfig,
-            FaceConfiguration face,
-            BlockConfiguration inletBlock
-    ) {
-        var amount = 1000;
-        var entity = level.getBlockEntity(inletBlock.getPosition());
-        var levelPos = new LevelPosition(getLevel(), inletBlock.getPosition());
-
-        var sourceHandler = entity.getCapability(ForgeCapabilities.FLUID_HANDLER, face.getDirection()).orElse(null);
-        if (sourceHandler == null)
-            return;
-
-        var potentialStack = sourceHandler.drain(amount, IFluidHandler.FluidAction.SIMULATE);
-        if (potentialStack != null && !potentialStack.isEmpty()) {
-            pushFluid(
-                    potentialStack,
-                    desiredAmount -> sourceHandler.drain(desiredAmount, IFluidHandler.FluidAction.EXECUTE),
-                    levelPos, false
-            );
-        }
-    }
-
-    private boolean pushFluid(
-            FluidStack fluidToTransfer,
-            Function<Integer, FluidStack> extractor,
-            LevelPosition sourceEndpoint,
-            boolean simulate
-    ) {
-        if (!hasNetwork())
-            return false;
-
-        fluidToTransfer = fluidToTransfer.copy();
-
-        for (var dest : getExistingNetwork().getEndpoints()) {
-            if (dest.is(sourceEndpoint))
-                continue;
-
-            var destEntity = dest.getBlockEntity();
-
-            for (var blockInterface : dest.getInterfaces()) {
-                for (var destFace : blockInterface.getFaces()) {
-                    var itemInterface = destFace.getTransmissionConfiguration(TransmissionType.FLUIDS);
-                    if (itemInterface.getMode().canPush()) {
-                        var destHandler = RezolveCapHelper.getFluidHandler(destEntity, destFace.getDirection());
-                        if (destHandler == null)
-                            continue;
-
-                        var receivableAmount = destHandler.fill(fluidToTransfer, IFluidHandler.FluidAction.SIMULATE);
-                        if (receivableAmount <= 0)
-                            continue;
-
-                        // This will work
-
-                        var actualStack = extractor.apply(receivableAmount);
-                        var filled = destHandler.fill(actualStack, simulate ? IFluidHandler.FluidAction.SIMULATE : IFluidHandler.FluidAction.EXECUTE);
-
-                        fluidToTransfer.setAmount(fluidToTransfer.getAmount() - filled);
-
-                        if (fluidToTransfer.isEmpty())
-                            return true;
-                    }
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private void transferEnergy(
-            CableNetwork cableNetwork,
-            TransmitConfiguration transmitTypeConfig,
-            FaceConfiguration face,
-            BlockConfiguration inletBlock
-    ) {
-        var amount = 1000000;
-
-        var entity = level.getBlockEntity(inletBlock.getPosition());
-        var sourceHandler = entity.getCapability(ForgeCapabilities.ENERGY, face.getDirection()).orElse(null);
-        if (sourceHandler == null)
-            return;
-
-        var levelPos = new LevelPosition(getLevel(), inletBlock.getPosition());
-        var availableAmount = sourceHandler.extractEnergy(amount, true);
-        if (availableAmount > 0) {
-            pushEnergy(
-                    new EnergyStack(availableAmount),
-                    desiredAmount -> EnergyStack.of(sourceHandler.extractEnergy(desiredAmount, false)),
-                    levelPos,
-                    false
-            );
-        }
-    }
-
-    private boolean pushEnergy(
-            EnergyStack potentialEnergyStack,
-            Function<Integer, EnergyStack> extractor,
-            LevelPosition sourceEndpoint,
-            boolean simulate
-    ) {
-        if (!hasNetwork())
-            return false;
-
-        potentialEnergyStack = potentialEnergyStack.copy();
-
-        for (var dest : getExistingNetwork().getEndpoints()) {
-            if (dest.is(sourceEndpoint))
-                continue;
-
-            var destEntity = dest.getBlockEntity();
-
-            for (var blockInterface : dest.getInterfaces()) {
-                for (var destFace : blockInterface.getFaces()) {
-                    var itemInterface = destFace.getTransmissionConfiguration(TransmissionType.ENERGY);
-                    if (itemInterface.getMode().canPush()) {
-                        var destHandler = RezolveCapHelper.getEnergyStorage(destEntity, destFace.getDirection());
-                        if (destHandler == null)
-                            continue;
-
-                        var receivableAmount = destHandler.receiveEnergy(potentialEnergyStack.getAmount(), true);
-                        if (receivableAmount <= 0)
-                            continue;
-
-                        var actualTransferred = extractor.apply(receivableAmount);
-                        destHandler.receiveEnergy(actualTransferred.getAmount(), simulate);
-                        potentialEnergyStack.split(actualTransferred.getAmount());
-
-                        if (potentialEnergyStack.isEmpty())
-                            return true;
-                    }
-                }
-            }
-        }
-
-        return false;
     }
 
     @Override
@@ -450,7 +230,11 @@ public class ThunderboltCableEntity extends MachineEntity {
                 return ItemStack.EMPTY;
 
             var copy = stack.copy();
-            pushItem(stack, amount -> copy.split(amount), sourceEndpoint, simulate);
+
+            if (!hasNetwork())
+                return copy;
+
+            getNetwork().pushItem(stack, amount -> copy.split(amount), sourceEndpoint, simulate);
             return copy;
         }
 
@@ -500,7 +284,10 @@ public class ThunderboltCableEntity extends MachineEntity {
         @Override
         public int fill(FluidStack resource, FluidAction action) {
             var copy = resource.copy();
-            pushFluid(resource, desiredAmount -> {
+            if (!hasNetwork())
+                return 0;
+
+            getNetwork().pushFluid(resource, desiredAmount -> {
                 desiredAmount = Math.min(copy.getAmount(), desiredAmount);
                 copy.setAmount(copy.getAmount() - desiredAmount);
                 return new FluidStack(resource.getFluid(), desiredAmount);
@@ -529,8 +316,11 @@ public class ThunderboltCableEntity extends MachineEntity {
 
         @Override
         public int receiveEnergy(int maxReceive, boolean simulate) {
+            if (!hasNetwork())
+                return 0;
+
             var stack = EnergyStack.of(maxReceive);
-            pushEnergy(stack, desiredAmount -> stack.split(desiredAmount), sourceEndpoint, simulate);
+            getNetwork().pushEnergy(stack, desiredAmount -> stack.split(desiredAmount), sourceEndpoint, simulate);
             return maxReceive - stack.getAmount();
         }
 

@@ -1,12 +1,12 @@
 package com.rezolvemc.thunderbolt.tesseract;
 
+import com.rezolvemc.common.LevelPosition;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import org.torchmc.events.Event;
 import org.torchmc.events.EventEmitter;
 import org.torchmc.events.EventType;
 
-import java.lang.ref.WeakReference;
 import java.util.*;
 
 public class ResourceChannel implements EventEmitter {
@@ -27,6 +27,8 @@ public class ResourceChannel implements EventEmitter {
     private final String uuid;
     private final String name;
     private final EventMap eventMap = new EventMap();
+    private final Map<LevelPosition, List<Resource>> resourcesByEndpoint = new HashMap<>();
+    private final Map<Resource, LevelPosition> endpointsByResource = new HashMap<>();
 
     @Override
     public EventMap eventMap() {
@@ -41,51 +43,61 @@ public class ResourceChannel implements EventEmitter {
         return name;
     }
 
-    private WeakHashMap<Object, List<Resource>> resourcesByOwner = new WeakHashMap<>();
-    private Map<Resource, WeakReference<Object>> owners = new HashMap<>();
-
     public void notifyRemoved() {
         emitEvent(CHANNEL_REMOVED);
     }
 
-    public void leave(Object owner) {
-        setResources(owner, new ArrayList<>());
-        resourcesByOwner.remove(owner);
+    public void leave(LevelPosition endpoint) {
+        setResources(endpoint, new ArrayList<>());
+        resourcesByEndpoint.remove(endpoint);
+    }
+
+    public LevelPosition[] getEndpoints() {
+        return resourcesByEndpoint.keySet().toArray(new LevelPosition[resourcesByEndpoint.size()]);
+    }
+
+    public LevelPosition[] getOtherEndpoints(LevelPosition self) {
+        return resourcesByEndpoint
+            .keySet()
+            .stream()
+            .filter(x -> x != self)
+            .toArray(size -> new LevelPosition[size])
+            ;
     }
 
     public Resource[] getAllResources() {
         var list = new ArrayList<Resource>();
 
-        for (var set : resourcesByOwner.values())
+        for (var set : resourcesByEndpoint.values())
             list.addAll(set);
 
         return list.toArray(new Resource[list.size()]);
     }
 
-    public Resource[] getResourcesOwnedBy(Object owner) {
-        var list = resourcesByOwner.get(owner);
+    public Resource[] getResourcesOwnedBy(LevelPosition endpoint) {
+        var list = resourcesByEndpoint.get(endpoint);
         if (list == null)
             return new Resource[0];
 
         return list.toArray(new Resource[list.size()]);
     }
 
-    public Resource[] getResourcesNotOwnedBy(Object owner) {
+    public Resource[] getResourcesNotOwnedBy(LevelPosition endpoint) {
         var list = new ArrayList<Resource>();
 
-        for (var otherOwner : resourcesByOwner.keySet()) {
-            if (owner == otherOwner)
+        for (var otherEndpoint : resourcesByEndpoint.keySet()) {
+            if (endpoint == otherEndpoint)
                 continue;
 
-            list.addAll(resourcesByOwner.get(otherOwner));
+            list.addAll(resourcesByEndpoint.get(otherEndpoint));
         }
 
         return list.toArray(new Resource[list.size()]);
     }
 
-    public <T> List<T> getResourceCapabilitiesNotOwnedBy(Object owner, Capability<T> capType) {
+    public <T> List<T> getResourceCapabilitiesNotOwnedBy(LevelPosition endpoint, Capability<T> capType) {
         var list = new ArrayList<T>();
-        for (var resource : getResourcesNotOwnedBy(owner)) {
+        for (var resource : getResourcesNotOwnedBy(endpoint)) {
             var cap = resource.getCapability(capType);
             if (cap.isPresent())
                 list.add(cap.orElse(null));
@@ -104,10 +116,10 @@ public class ResourceChannel implements EventEmitter {
      * @param owner
      * @param newResources
      */
-    public void setResources(Object owner, List<Resource> newResources) {
-        var ownedResources = resourcesByOwner.get(owner);
+    public void setResources(LevelPosition owner, List<Resource> newResources) {
+        var ownedResources = resourcesByEndpoint.get(owner);
         if (ownedResources == null)
-            resourcesByOwner.put(owner, ownedResources = new ArrayList<>());
+            resourcesByEndpoint.put(owner, ownedResources = new ArrayList<>());
 
         var added = new ArrayList<Resource>();
         var removed = new ArrayList<Resource>();
@@ -117,10 +129,10 @@ public class ResourceChannel implements EventEmitter {
         for (var resource : newResources) {
             removed.remove(resource);
 
-            if (resourcesByOwner.containsKey(resource)) // An owner cannot also be a resource.
+            if (resourcesByEndpoint.containsKey(resource)) // An owner cannot also be a resource.
                 continue;
 
-            var existingOwner = owners.get(resource);
+            var existingOwner = endpointsByResource.get(resource);
             if (existingOwner != null && existingOwner != owner) {
                 ownedByOthers.add(resource);
                 continue;
@@ -134,7 +146,7 @@ public class ResourceChannel implements EventEmitter {
 
         for (var resource : removed) {
             ownedResources.remove(resource);
-            owners.remove(resource);
+            endpointsByResource.remove(resource);
             emitEvent(RESOURCE_REMOVED, new ProviderEvent(resource));
         }
 

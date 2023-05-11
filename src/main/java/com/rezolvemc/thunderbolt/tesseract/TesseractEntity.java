@@ -1,9 +1,12 @@
 package com.rezolvemc.thunderbolt.tesseract;
 
+import com.rezolvemc.common.LevelBlockFace;
 import com.rezolvemc.common.LevelPosition;
+import com.rezolvemc.common.capabilities.Tunnel;
 import com.rezolvemc.common.machines.MachineEntity;
 import com.rezolvemc.common.network.RezolvePacket;
 import com.rezolvemc.common.registry.RezolveRegistry;
+import com.rezolvemc.thunderbolt.cable.CableNetwork;
 import com.rezolvemc.thunderbolt.tesseract.network.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,6 +25,8 @@ import net.minecraftforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class TesseractEntity extends MachineEntity {
@@ -35,6 +40,7 @@ public class TesseractEntity extends MachineEntity {
     private ItemHandler itemHandler = new ItemHandler();
     private EnergyStorage energyStorage = new EnergyStorage();
     private FluidHandler fluidHandler = new FluidHandler();
+    private Tunnel tunnelCapability = new TunnelCap();
 
     @Override
     public void load(CompoundTag tag) {
@@ -62,6 +68,7 @@ public class TesseractEntity extends MachineEntity {
         this.channelUuid = uuid;
         joinChannel();
         setChanged();
+        getLevel().blockUpdated(getBlockPos(), getBlockState().getBlock());
     }
 
     private ResourceNetwork resourceNetwork;
@@ -127,7 +134,8 @@ public class TesseractEntity extends MachineEntity {
             return energyStorage.isEmpty() ? LazyOptional.empty() : LazyOptional.of(() -> (T) energyStorage);
         } else if (capability == ForgeCapabilities.FLUID_HANDLER) {
             return fluidHandler.isEmpty() ? LazyOptional.empty() : LazyOptional.of(() -> (T) fluidHandler);
-        }
+        } else if (capability == CableNetwork.TUNNEL_CAPABILITY)
+            return LazyOptional.of(() -> (T) tunnelCapability);
 
         return super.getCapability(capability, facing);
     }
@@ -184,6 +192,15 @@ public class TesseractEntity extends MachineEntity {
             setChannel(setActiveChannel.uuid);
         } else {
             super.receivePacketOnServer(rezolvePacket, player);
+        }
+    }
+
+    private class TunnelCap implements Tunnel {
+        @Override
+        public List<LevelBlockFace> getProxyDestinations() {
+            return Arrays.stream(getChannel().getOtherEndpoints(getLevelPos()))
+                .map(x -> x.withFace())
+                .toList();
         }
     }
 }

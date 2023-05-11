@@ -69,9 +69,17 @@ public class SlotWidget extends TorchWidget {
         if (isHovered()) {
             TorchUtil.colorQuad(pPoseStack, highlightColor, x + 1, y + 1, width - 2, height - 2);
         }
-
     }
 
+    @Override
+    protected boolean renderTooltip(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+        var item = this.slot.getItem();
+
+        if (!item.isEmpty())
+            screen.renderTooltip(poseStack, screen.getTooltipFromItem(item), item.getTooltipImage(), mouseX, mouseY, font, item);
+
+        return super.renderTooltip(poseStack, mouseX, mouseY, partialTick);
+    }
 
     private void renderSlot(PoseStack pPoseStack, Slot pSlot) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);

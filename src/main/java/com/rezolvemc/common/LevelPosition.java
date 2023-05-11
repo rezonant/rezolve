@@ -1,42 +1,43 @@
 package com.rezolvemc.common;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
 import java.util.Objects;
 
 public class LevelPosition {
-    public LevelPosition(ResourceKey<Level> level, BlockPos pos) {
-        this.level = level;
-        this.position = pos;
+    public LevelPosition(ResourceKey<Level> levelKey, BlockPos blockPos) {
+        this.levelKey = levelKey;
+        this.blockPos = blockPos;
     }
 
-    public LevelPosition(Level level, BlockPos pos) {
-        this(level.dimension(), pos);
+    public LevelPosition(Level levelKey, BlockPos blockPos) {
+        this(levelKey.dimension(), blockPos);
     }
 
-    public static LevelPosition of(Level level, BlockPos pos) {
-        return new LevelPosition(level, pos);
+    public static LevelPosition of(Level level, BlockPos blockPos) {
+        return new LevelPosition(level, blockPos);
     }
 
-    public static LevelPosition of(ResourceKey<Level> level, BlockPos pos) {
-        return new LevelPosition(level, pos);
+    public static LevelPosition of(ResourceKey<Level> level, BlockPos blockPos) {
+        return new LevelPosition(level, blockPos);
     }
 
-    private final ResourceKey<Level> level;
-    private final BlockPos position;
-
-    public ResourceKey<Level> getLevelKey() {
-        return level;
-    }
-
-    public BlockPos getPosition() {
-        return position;
-    }
+    public final ResourceKey<Level> levelKey;
+    public final BlockPos blockPos;
 
     public boolean is(BlockPos pos) {
-        return Objects.equals(position, pos);
+        return Objects.equals(blockPos, pos);
+    }
+
+    public LevelBlockFace withFace() {
+        return withFace(null);
+    }
+
+    public LevelBlockFace withFace(Direction face) {
+        return new LevelBlockFace(levelKey, blockPos, face);
     }
 
     @Override
@@ -45,7 +46,7 @@ public class LevelPosition {
             return true;
 
         if (obj instanceof LevelPosition other) {
-            return level == other.level && Objects.equals(position, other.position);
+            return levelKey == other.levelKey && Objects.equals(blockPos, other.blockPos);
         }
 
         return false;
@@ -53,6 +54,6 @@ public class LevelPosition {
 
     @Override
     public int hashCode() {
-        return Objects.hash(level.location().toString(), position);
+        return Objects.hash(levelKey.location().toString(), blockPos);
     }
 }

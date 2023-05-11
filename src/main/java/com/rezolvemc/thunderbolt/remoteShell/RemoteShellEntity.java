@@ -139,14 +139,14 @@ public class RemoteShellEntity extends MachineEntity {
 			var list = new ArrayList<MachineListing>();
 
 			for (var endpoint : RemoteShellEntity.this.getConnectedMachines()) {
-				var machinePos = endpoint.getPosition();
+				var machinePos = endpoint.blockPos;
 				var machineBlockState = endpoint.getBlockState();
 				var name = machineBlockState.getBlock().getName();
 				if (db != null)
 					name = Component.literal(db.getMachineName(machinePos));
 				var item = new ItemStack(machineBlockState.getBlock().asItem(), 1);
 
-				list.add(new MachineListing(endpoint.getLevelKey(), machinePos, null, item));
+				list.add(new MachineListing(endpoint.levelKey, machinePos, null, item));
 			}
 
 			return list;
@@ -164,7 +164,7 @@ public class RemoteShellEntity extends MachineEntity {
 			CableNetwork.Endpoint machineEndpoint = null;
 
 			for (var network : getNetworks()) {
-				var potentialEndpoint = network.getEndpoint(position.getLevelKey(), position.getPosition());
+				var potentialEndpoint = network.getEndpoint(position.levelKey, position.blockPos);
 				if (potentialEndpoint != null) {
 					machineEndpoint = potentialEndpoint;
 					break;

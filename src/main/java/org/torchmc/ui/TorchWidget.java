@@ -16,6 +16,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
+import net.minecraftforge.client.event.RenderTooltipEvent;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.torchmc.events.*;
@@ -116,10 +118,16 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
     }
 
     @SubscribeEvent
-    void screenWasClosed(net.minecraftforge.client.event.ScreenEvent.Closing event) {
+    void screenWasClosed(ScreenEvent.Closing event) {
         wasDisposed();
         emitEvent(DISPOSED);
         Mod.EventBusSubscriber.Bus.FORGE.bus().get().unregister(this);
+    }
+
+    @SubscribeEvent
+    void postRender(ScreenEvent.Render.Post event) {
+        if (parent == null)
+            renderTooltipPass(event.getPoseStack(), event.getMouseX(), event.getMouseY(), event.getPartialTick());
     }
 
     /**
@@ -853,35 +861,56 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
 
         hovered = isMouseOver(pMouseX, pMouseY);
 
-        pushPose(pPoseStack, () -> {
-            repose(() -> pPoseStack.translate(0, 0, 0));
+        screenScissor(() -> {
+            emitEvent(BEFORE_RENDER_BACKGROUND, renderEvent);
+            renderBackground(pPoseStack, pMouseX, pMouseY, pPartialTick);
+            emitEvent(AFTER_RENDER_BACKGROUND, renderEvent);
 
-            screenScissor(() -> {
-                emitEvent(BEFORE_RENDER_BACKGROUND, renderEvent);
-                renderBackground(pPoseStack, pMouseX, pMouseY, pPartialTick);
-                emitEvent(AFTER_RENDER_BACKGROUND, renderEvent);
+            pushPose(pPoseStack, () -> {
+                repose(() -> pPoseStack.translate(x, y, 0));
 
-                pushPose(pPoseStack, () -> {
-                    repose(() -> pPoseStack.translate(x, y, 0));
-
-                    emitEvent(BEFORE_RENDER_CHILDREN, renderEvent);
-                    renderChildren(pPoseStack, pMouseX - x, pMouseY - y, pPartialTick);
-                    emitEvent(AFTER_RENDER_CHILDREN, renderEvent);
-                });
-
-                emitEvent(BEFORE_RENDER_CONTENTS, renderEvent);
-                renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
-                emitEvent(AFTER_RENDER_CONTENTS, renderEvent);
+                emitEvent(BEFORE_RENDER_CHILDREN, renderEvent);
+                renderChildren(pPoseStack, pMouseX - x, pMouseY - y, pPartialTick);
+                emitEvent(AFTER_RENDER_CHILDREN, renderEvent);
             });
+
+            emitEvent(BEFORE_RENDER_CONTENTS, renderEvent);
+            renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
+            emitEvent(AFTER_RENDER_CONTENTS, renderEvent);
         });
 
-        if (isHovered()) {
-            emitEvent(BEFORE_RENDER_TOOLTIP, renderEvent);
-            renderTooltip(pPoseStack, pMouseX, pMouseY);
-            emitEvent(AFTER_RENDER_TOOLTIP, renderEvent);
+        emitEvent(AFTER_RENDER, renderEvent);
+    }
+
+    public final boolean renderTooltipPass(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+
+        // Children
+
+        pPoseStack.pushPose();
+        pPoseStack.translate(x, y, 0);
+        RenderSystem.applyModelViewMatrix();
+
+        try {
+            for (var child : children) {
+                if (child.renderTooltipPass(pPoseStack, pMouseX - x, pMouseY - y, pPartialTick))
+                    return true;
+            }
+        } finally {
+            pPoseStack.popPose();;
+            RenderSystem.applyModelViewMatrix();
         }
 
-        emitEvent(AFTER_RENDER, renderEvent);
+        // Self
+
+        if (isHovered()) {
+            var renderEvent = new RenderEvent(pPoseStack, pMouseX, pMouseY, pPartialTick);
+            emitEvent(BEFORE_RENDER_TOOLTIP, renderEvent);
+            renderTooltip(pPoseStack, pMouseX, pMouseY, pPartialTick);
+            emitEvent(AFTER_RENDER_TOOLTIP, renderEvent);
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -895,10 +924,14 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
     protected void renderBackground(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
     }
 
-    protected void renderTooltip(PoseStack poseStack, int mouseX, int mouseY) {
+    protected boolean renderTooltip(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         var tooltip = getTooltip(); // Important to allow customization of tooltip behavior in widget classes
-        if (tooltip != null && tooltip.size() > 0 && screen != null)
+        if (tooltip != null && tooltip.size() > 0 && screen != null) {
             screen.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY);
+            return true;
+        }
+
+        return false;
     }
 
     /**
