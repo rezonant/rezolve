@@ -96,6 +96,8 @@
   "rezolve.thunderbolt.transmission_types.items": "Items",
   "rezolve.thunderbolt.transmission_types.fluids": "Fluids",
   "rezolve.thunderbolt.transmission_types.energy": "Energy",
+  "rezolve.thunderbolt.transmission_types.remoting": "Remoting",
+  "rezolve.thunderbolt.transmission_types.storage": "Storage",
 
   "screens.rezolve.machine_list": "Machine List",
   "screens.rezolve.restricted": "Restricted",
@@ -107,7 +109,9 @@
   "screens.rezolve.empty": "Empty",
   "screens.rezolve.unknown": "Unknown",
   "screens.rezolve.positions": "Positions",
+  "screens.rezolve.policies": "Policies",
   "screens.rezolve.name": "Name",
+  "screens.rezolve.edit_security_rule": "Edit security rule",
   "screens.rezolve.dye": "Dye",
   "screens.rezolve.search": "Search",
   "screens.rezolve.edit": "Edit",

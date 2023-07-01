@@ -62,6 +62,8 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 	}
 
 	public static EventType<Event> READY = new EventType<>();
+	public static EventType<PropertyEvent> PROPERTY_CHANGED = new EventType<>();
+	public static EventType<Event> PROPERTIES_CHANGED = new EventType<>();
 
 	private EventMap eventMap = new EventMap();
 	public final Container container;
@@ -190,9 +192,10 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 				tag.put(property.name, Operation.asTag((Operation) value));
 			else if (Values.instanceOf(propertyClass, Direction.class))
 				tag.putString(property.name, ((Direction)value).name());
-			else if (Values.instanceOf(propertyClass, BlockPos.class))
-				tag.put(property.name, NbtUtils.writeBlockPos((BlockPos)value));
-			else if (Values.instanceOf(propertyClass, INBTSerializable.class)) {
+			else if (Values.instanceOf(propertyClass, BlockPos.class)) {
+				if (value != null)
+					tag.put(property.name, NbtUtils.writeBlockPos((BlockPos) value));
+			} else if (Values.instanceOf(propertyClass, INBTSerializable.class)) {
 				if (value == null)
 					tag.putString(property.name, "<NULL>");
 				else
@@ -279,9 +282,12 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 					value = Operation.of(tag.getCompound(property.name));
 				else if (Values.instanceOf(propertyClass, Direction.class))
 					value = Direction.valueOf(tag.getString(property.name));
-				else if (Values.instanceOf(propertyClass, BlockPos.class))
-					value = NbtUtils.readBlockPos(tag.getCompound(property.name));
-				else if (Values.instanceOf(propertyClass, INBTSerializable.class)) {
+				else if (Values.instanceOf(propertyClass, BlockPos.class)) {
+					if (tag.contains(property.name))
+						value = NbtUtils.readBlockPos(tag.getCompound(property.name));
+					else
+						value = null;
+				} else if (Values.instanceOf(propertyClass, INBTSerializable.class)) {
 					var propTag = tag.get(property.name);
 					if (propTag instanceof StringTag stringTag && Objects.equals("<NULL>", stringTag.getAsString())) {
 						value = null;
@@ -306,7 +312,11 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 				} catch (IllegalAccessException e) {
 					throw new RuntimeException(String.format("Incorrect access set on %s, must be public or protected.", property.name), e);
 				}
+
+				emitEvent(PROPERTY_CHANGED, new PropertyEvent(property.name, value));
 			}
+
+			emitEvent(PROPERTIES_CHANGED);
 
 			if (!isReady) {
 				isReady = true;
@@ -492,5 +502,15 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 		}
 
 		RezolvePacketReceiver.super.receivePacket(rezolvePacket, direction);
+	}
+
+	public static class PropertyEvent extends Event {
+		public PropertyEvent(String name, Object value) {
+			this.name = name;
+			this.value = value;
+		}
+
+		public final String name;
+		public final Object value;
 	}
 }

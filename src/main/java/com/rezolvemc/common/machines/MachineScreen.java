@@ -197,10 +197,6 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
         );
     }
 
-    protected void renderSubWindows(PoseStack poseStack, double mouseX, double mouseY) {
-
-    }
-
     @Override
     public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
         Slot slot = this.getSlotUnderMouse();
@@ -305,11 +301,6 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
 
     @Override
     protected void renderBg(PoseStack pPoseStack, float pPartialTick, int pMouseX, int pMouseY) {
-        pPoseStack.pushPose();
-        pPoseStack.translate(this.leftPos, this.topPos, 0);
-        RenderSystem.applyModelViewMatrix();
-        this.renderSubWindows(pPoseStack, (double)(pMouseX - this.leftPos), (double)(pMouseY - this.topPos));
-        pPoseStack.popPose();
     }
 
     public MachineMenu getMachineMenu() {

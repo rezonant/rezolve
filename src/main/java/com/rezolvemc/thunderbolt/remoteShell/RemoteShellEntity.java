@@ -14,6 +14,7 @@ import com.rezolvemc.thunderbolt.remoteShell.packets.RemoteShellRenameMachinePac
 import com.rezolvemc.thunderbolt.remoteShell.server.RemoteAccessEndpoint;
 import com.rezolvemc.thunderbolt.remoteShell.server.RemoteAccessSession;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
@@ -85,20 +86,20 @@ public class RemoteShellEntity extends MachineEntity {
 		return getNetwork().getDatabaseServer();
 	}
 
-	public void renameMachine(BlockPos machinePos, String name) {
+	public void renameMachine(ResourceKey<Level> level, BlockPos machinePos, String name) {
 		System.out.println("Rename machine server side");
 
 		DatabaseServerEntity dbServer = this.getDatabase();
 		if (dbServer == null)
 			return;
 
-		dbServer.setMachineName(machinePos, name);
+		dbServer.setMachineName(level, machinePos, name);
 	}
 
 	@Override
 	public void receivePacketOnServer(RezolvePacket rezolvePacket, Player player) {
 		if (rezolvePacket instanceof RemoteShellRenameMachinePacket rename) {
-			renameMachine(rename.getMachinePos(), rename.getName());
+			renameMachine(rename.getLevel(), rename.getMachinePos(), rename.getName());
 			return;
 		}
 
@@ -110,7 +111,7 @@ public class RemoteShellEntity extends MachineEntity {
 
 	private class Endpoint extends RemoteAccessEndpoint {
 		public Endpoint() {
-			super(RemoteShellEntity.this);
+			super();
 		}
 
 		@Override
@@ -129,24 +130,26 @@ public class RemoteShellEntity extends MachineEntity {
 		}
 
 		@Override
+		public DatabaseServerEntity getDatabaseServer() {
+			return getNetwork().getDatabaseServer();
+		}
+
+		@Override
 		public int getStoredEnergy() {
 			return RemoteShellEntity.this.getStoredEnergy();
 		}
 
 		@Override
 		public List<MachineListing> getConnectedMachines() {
-			var db = getDatabase();
+			var db = getDatabaseServer();
 			var list = new ArrayList<MachineListing>();
 
 			for (var endpoint : RemoteShellEntity.this.getConnectedMachines()) {
-				var machinePos = endpoint.blockPos;
-				var machineBlockState = endpoint.getBlockState();
-				var name = machineBlockState.getBlock().getName();
-				if (db != null)
-					name = Component.literal(db.getMachineName(machinePos));
-				var item = new ItemStack(machineBlockState.getBlock().asItem(), 1);
+				var machineBlock = endpoint.getBlockState().getBlock();
+				var name = db != null ? db.getMachineName(endpoint.levelKey, endpoint.blockPos) : null;
+				var item = new ItemStack(machineBlock.asItem(), 1);
 
-				list.add(new MachineListing(endpoint.levelKey, machinePos, null, item));
+				list.add(new MachineListing(endpoint.levelKey, endpoint.blockPos, name, item));
 			}
 
 			return list;

@@ -4,12 +4,9 @@ package com.rezolvemc.thunderbolt.remoteShell.server;
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.LevelPosition;
 import com.rezolvemc.common.network.RezolvePacket;
-import com.rezolvemc.thunderbolt.databaseServer.DatabaseServer;
 import com.rezolvemc.thunderbolt.databaseServer.DatabaseServerEntity;
-import com.rezolvemc.thunderbolt.remoteShell.RemoteShellEntity;
 import com.rezolvemc.thunderbolt.remoteShell.common.MachineListing;
 import com.rezolvemc.thunderbolt.remoteShell.packets.*;
-import com.rezolvemc.thunderbolt.remoteShell.server.RemoteAccessSession;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -19,11 +16,9 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public abstract class RemoteAccessEndpoint {
-    public RemoteAccessEndpoint(RemoteShellEntity remoteShell) {
-        this.remoteShellx = remoteShell;
+    public RemoteAccessEndpoint() {
     }
 
-    private RemoteShellEntity remoteShellx;
     protected int openEnergyCost = 1000;
     protected int constantDrawCost = 50;
     protected int accessCharge = 10;
@@ -104,6 +99,8 @@ public abstract class RemoteAccessEndpoint {
     public abstract int getStoredEnergy();
 
     public abstract int getEnergyCapacity();
+
+    public abstract DatabaseServerEntity getDatabaseServer();
 
     public abstract int expendEnergy(int amount, boolean simulate);
 

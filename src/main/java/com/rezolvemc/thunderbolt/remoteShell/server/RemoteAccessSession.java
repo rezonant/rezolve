@@ -123,6 +123,7 @@ public class RemoteAccessSession {
         packet.remoteShellPosition = endpoint.getBlockPos();
         packet.remoteShellEnergy = endpoint.getStoredEnergy();
         packet.remoteShellEnergyCapacity = endpoint.getEnergyCapacity();
+        packet.hasDatabase = endpoint.getDatabaseServer() != null;
 
         // Session properties
         packet.active = active;

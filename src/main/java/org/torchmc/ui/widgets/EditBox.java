@@ -1,5 +1,6 @@
 package org.torchmc.ui.widgets;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
 import org.torchmc.ui.TorchWidget;
@@ -27,6 +28,7 @@ public class EditBox extends TorchWidget {
     }
 
     public static final EventType<ValueEvent> VALUE_CHANGED = new EventType<>();
+    public static final EventType<ValueEvent> ACTIVATED = new EventType<>();
 
     protected void valueDidChange(String value) {
 
@@ -115,7 +117,17 @@ public class EditBox extends TorchWidget {
 
     @Override
     public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (pKeyCode == InputConstants.KEY_RETURN) {
+            wasActivated();
+            emitEvent(ACTIVATED, new ValueEvent(getValue()));
+            return true;
+        }
+
         return nativeWidget.keyPressed(pKeyCode, pScanCode, pModifiers) || true;
+    }
+
+    protected void wasActivated() {
+
     }
 
     @Override

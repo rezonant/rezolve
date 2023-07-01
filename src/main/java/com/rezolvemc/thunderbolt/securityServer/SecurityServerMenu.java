@@ -18,8 +18,7 @@ public class SecurityServerMenu extends MachineMenu<SecurityServerEntity> {
 		super(containerId, playerInventory, null);
 	}
 
-	@Sync
-    public SecurityRuleSet ruleSet = new SecurityRuleSet();
+	@Sync public SecurityRuleSet ruleSet = new SecurityRuleSet();
 	@Sync public String rootUser;
 
 	@Override

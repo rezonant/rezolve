@@ -85,6 +85,18 @@ public class RemoteAccessClientSession implements EventEmitter {
         emitEvent(RESULTS_RECEIVED, new QueryResultsEvent(machines, machinesOffset, machinesCount));
     }
 
+    public void setMachineName(MachineListing listing, String name) {
+        if (!active) {
+            LOGGER.error("Should not attempt to rename a machine when the session is not active.");
+            return;
+        }
+
+        var packet = new RemoteShellRenameMachinePacket(listing.getLevel(), listing.getBlockPos(), name);
+        packet.dimension = remoteShellDimension;
+        packet.blockPos = remoteShellPosition;
+        packet.sendToServer();
+    }
+
     public void connectToMachine(MachineListing listing) {
         if (!active) {
             LOGGER.error("Should not attempt to connectToMachine() when the session is not active.");

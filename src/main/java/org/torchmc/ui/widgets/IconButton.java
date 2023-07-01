@@ -5,6 +5,7 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import org.torchmc.ui.TorchWidget;
 import org.torchmc.ui.layout.AxisConstraint;
 import org.torchmc.ui.util.Color;
@@ -30,23 +31,31 @@ public class IconButton extends TorchWidget {
         setFocusable(true);
     }
 
-    public IconButton() {
-        this(Component.empty(), null, SIZE);
+    public IconButton() { this(Component.empty(), (ResourceLocation)null, SIZE); }
+    public IconButton(String text, ResourceLocation icon) { this(Component.literal(text), icon); }
+    public IconButton(Component text, ResourceLocation icon) { this(text, icon, SIZE); }
+
+    public IconButton(Component text, ItemStack item, int size) {
+        super(Component.empty());
+
+        this.text = text;
+        this.item = item;
+        this.size = size;
+        this.width = size;
+        this.height = size;
+
+        setFocusable(true);
     }
 
-    public IconButton(String text, ResourceLocation icon) {
-        this(Component.literal(text), icon);
-    }
-
-    public IconButton(Component text, ResourceLocation icon) {
-        this(text, icon, SIZE);
-    }
+    public IconButton(String text, ItemStack item) { this(Component.literal(text), item); }
+    public IconButton(Component text, ItemStack item) { this(text, item, SIZE); }
 
     private Runnable handler;
     private Color activeTextColor = Color.argb(0xFFFFFFFF);
     private Color inactiveTextColor = Color.argb(0xFFA0A0A0);
     private Component text;
     private ResourceLocation icon;
+    private ItemStack item;
     private float alpha = 1;
     private int size = SIZE;
 
@@ -155,6 +164,8 @@ public class IconButton extends TorchWidget {
         TorchUtil.colorQuad(pPoseStack, backgroundColor, x + 1, y + 1, width - 2, height - 2);
         if (icon != null)
             TorchUtil.textureQuad(pPoseStack, icon, x + 1, y + 1, width - 2, height - 2, 0, 0, 1, 1);
+        else if (item != null)
+            TorchUtil.drawItem(pPoseStack, item, x + 1, y + 1);
     }
 
     boolean pressed = false;

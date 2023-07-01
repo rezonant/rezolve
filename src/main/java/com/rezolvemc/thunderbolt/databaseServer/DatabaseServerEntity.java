@@ -5,6 +5,8 @@ import com.rezolvemc.common.blocks.BlockEntityBase;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class DatabaseServerEntity extends BlockEntityBase {
@@ -30,17 +32,20 @@ public class DatabaseServerEntity extends BlockEntityBase {
 			this.db = new CompoundTag();
 	}
 
-	public void setMachineName(BlockPos pos, String name) {
-		String nameTag = "Name_"+pos.getX()+"_"+pos.getY()+"_"+pos.getZ();
+	private String getNameTag(ResourceKey<Level> level, BlockPos pos) {
+		return String.format("%s|%d,%d,%d|name", level.location(), pos.getX(), pos.getY(), pos.getZ());
+	}
+
+	public void setMachineName(ResourceKey<Level> level, BlockPos pos, String name) {
 		if (name == null || "".equals(name))
-			this.db.remove(nameTag);
+			this.db.remove(getNameTag(level, pos));
 		else
-			this.db.putString(nameTag, name);
+			this.db.putString(getNameTag(level, pos), name);
 		this.commit();
 	}
 	
-	public String getMachineName(BlockPos pos) {
-		return this.db.getString("Name_"+pos.getX()+"_"+pos.getY()+"_"+pos.getZ());	
+	public String getMachineName(ResourceKey<Level> level, BlockPos pos) {
+		return this.db.getString(getNameTag(level, pos));
 	}
 	
 	public CompoundTag getDB() {

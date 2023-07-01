@@ -9,10 +9,13 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import org.torchmc.ui.Window;
 import org.torchmc.ui.layout.*;
+import org.torchmc.ui.util.Color;
 import org.torchmc.ui.widgets.*;
 import org.torchmc.ui.util.TorchUtil;
+import org.torchmc.util.Values;
 
 import java.util.Objects;
 
@@ -82,6 +85,7 @@ public class MachineListWindow extends Window {
                 detailsLayout.addChild(new EditBox(Component.translatable("screens.rezolve.name")), field -> {
                     field.setMaxLength(23);
                     field.setVisible(false);
+                    field.addEventListener(field.ACTIVATED, e -> setName(selectedMachine, e.value));
 
                     nameField = field;
                 });
@@ -137,12 +141,12 @@ public class MachineListWindow extends Window {
 
         // Set UI properties based on this machine
         this.selectedMachineSecure = false;
-        this.selectedMachineName = machine.getName() != null ? Component.literal(machine.getName()) : machine.getItem().getDisplayName();
+        this.selectedMachineName = machine.getName() != null ? Component.literal(machine.getName()) : machine.getItem().getHoverName();
 
         // Set fields
 
         if (selectedMachineName != null && !Objects.equals("", selectedMachineName))
-            nameField.setValue(this.selectedMachineName.toString());
+            nameField.setValue(this.selectedMachineName.getString());
         else
             nameField.setValue("");
 
@@ -151,17 +155,25 @@ public class MachineListWindow extends Window {
 
         BlockPos pos = machine.getBlockPos();
 
+        var label = Component.empty();
+
         String stackName = RezolveItemUtil.getName(stack);
         String position = String.format("Position: %d, %d, %d", pos.getX(), pos.getY(), pos.getZ());
-        infoLbl.setContent(
-                Component.empty()
-                        .append(Component.literal(stackName).withStyle(ChatFormatting.BLACK))
-                        .append("\n")
-                        .append(Component.literal(position).withStyle(ChatFormatting.GRAY))
-        );
+
+        if (!nameField.isVisible())
+            label.append(Component.literal(stackName).withStyle(ChatFormatting.BLACK)).append("\n");
+
+        label.append(Component.literal(position).withStyle(ChatFormatting.DARK_GRAY));
+
+        infoLbl.setContent(label);
 
         // TODO: need to add Security Server
         //this.securedBtn.visible = true;
+    }
+
+    private void setName(MachineListing machine, String name) {
+        getSession().setMachineName(machine, name);
+        updateMachineList();
     }
 
     private void clearSelectedMachine() {
@@ -235,22 +247,24 @@ public class MachineListWindow extends Window {
             var stack = machine.getItem();
             var pos = machine.getBlockPos();
 
-            TorchUtil.drawItem(pPoseStack, stack, 2, 1);
+            TorchUtil.drawItem(pPoseStack, stack, 2, 2);
 
-            String name = stack.getDisplayName().getString();
-            String subName = pos.getX()+", "+pos.getY()+", "+pos.getZ();
+            int distance = (int)minecraft.player.position().distanceToSqr(Vec3.atCenterOf(pos));
+            String name = stack.getHoverName().getString();
+            String subName = String.format("%dm away", distance);
 
             String customName = machine.getName();
-            if (!Objects.equals(name, customName)) {
-                subName = name+" ["+subName+"]";
+            if (!Values.isNullOrEmpty(customName) && !Objects.equals(name, customName)) {
+                subName = subName + " [" + name + "]";
                 name = customName;
             }
 
+            int textY = 2;
             font.draw(
                     pPoseStack,
                     name,
                     iconWidth + 2,
-                    1,
+                    textY,
                     0xFF000000
             );
 
@@ -258,7 +272,7 @@ public class MachineListWindow extends Window {
                     pPoseStack,
                     subName,
                     iconWidth + 2,
-                    10,
+                    textY + font.lineHeight + 1,
                     0xFF666666
             );
         }

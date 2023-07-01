@@ -109,16 +109,17 @@ public class ListView extends TorchWidget {
     @Override
     protected void didResize() {
         scrollbar.move(width - scrollBarWidth, 0, scrollBarWidth, height);
+        setScrollPosition(scrollPos);
     }
 
     @Override
     public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
-        setScrollPosition(Math.min(Math.max(0, (int)(scrollPos - pDelta * scrollSpeed)), Math.max(0, getTotalItemsHeight() - height)));
+        setScrollPosition((int)(scrollPos - pDelta * scrollSpeed));
         return true;
     }
 
     void setScrollPosition(int pos) {
-        scrollPos = pos;
+        scrollPos = Math.min(Math.max(0, pos), Math.max(0, getTotalItemsHeight() - height));
         scrollbar.setScrollPosition(scrollPos);
     }
 

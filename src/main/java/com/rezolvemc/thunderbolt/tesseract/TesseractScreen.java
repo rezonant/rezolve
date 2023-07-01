@@ -12,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.torchmc.ui.ConfirmationDialog;
 import org.torchmc.ui.Window;
 import org.torchmc.ui.layout.AxisAlignment;
@@ -42,11 +43,6 @@ public class TesseractScreen extends MachineScreen<TesseractMenu> {
         super.setup();
 
         channelPicker = new TesseractChannelPicker();
-        leftShoulderButtons.addChild(new IconButton("Security?!", TEX_SECURITY_OPTIONS));
-        leftShoulderButtons.addChild(new IconButton("Database", TEX_DATABASE_OPTIONS));
-        leftShoulderButtons.addChild(new IconButton("Disk", TEX_DISK_OPTIONS));
-        rightShoulderButtons.addChild(new IconButton("Storage", TEX_STORAGE_OPTIONS));
-        rightShoulderButtons.addChild(new IconButton("Remoting", TEX_REMOTING_OPTIONS));
 
         setPanel(new VerticalLayoutPanel(), vert -> {
             vert.setSpace(4);
@@ -69,6 +65,15 @@ public class TesseractScreen extends MachineScreen<TesseractMenu> {
                         packet.sendToServer();
                     }
                 }));
+            });
+
+            vert.addChild(new HorizontalLayoutPanel(), modes -> {
+                modes.setJustification(AxisAlignment.CENTER);
+                modes.addChild(new IconButton(Rezolve.tr("rezolve.thunderbolt.transmission_types.items"), new ItemStack(Items.CHEST)));
+                modes.addChild(new IconButton(Rezolve.tr("rezolve.thunderbolt.transmission_types.fluids"), new ItemStack(Items.BUCKET)));
+                modes.addChild(new IconButton(Rezolve.tr("rezolve.thunderbolt.transmission_types.energy"), new ItemStack(Items.REDSTONE_LAMP)));
+                modes.addChild(new IconButton(Rezolve.tr("rezolve.thunderbolt.transmission_types.remoting"), TEX_REMOTING_OPTIONS));
+                modes.addChild(new IconButton(Rezolve.tr("rezolve.thunderbolt.transmission_types.storage"), TEX_DISK_OPTIONS));
             });
         });
 

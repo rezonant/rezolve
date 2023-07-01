@@ -22,6 +22,7 @@ public class RemoteShellStatePacket extends RezolvePacket {
 
     @Override
     public void read(FriendlyByteBuf buf) {
+        hasDatabase = buf.readBoolean();
         active = buf.readBoolean();
         if (active) {
             remoteShellPosition = buf.readBlockPos();
@@ -44,6 +45,7 @@ public class RemoteShellStatePacket extends RezolvePacket {
 
     @Override
     public void write(FriendlyByteBuf buf) {
+        buf.writeBoolean(hasDatabase);
         buf.writeBoolean(active);
         if (active) {
             buf.writeBlockPos(remoteShellPosition);
