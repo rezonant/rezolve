@@ -7,14 +7,14 @@ buildscript {
     }
     dependencies {
         classpath 'org.spongepowered:mixingradle:0.7.+'
-        classpath 'org.moddingx:ModGradle:3.0.+'
+        classpath 'org.moddingx:ModGradle:4.0.+'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.0"
         classpath 'org.jetbrains.kotlin:kotlin-serialization:1.7.0'
     }
 }
 
 plugins {
-    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'net.minecraftforge.gradle' version '[6.0.24,6.2)'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
     id 'com.matthewprenger.cursegradle' version '1.4.0'
     id "com.modrinth.minotaur" version "2.+"
@@ -60,19 +60,24 @@ println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty '
 
 repositories {
     maven { url = "https://maven.minecraftforge.net" } // Forge
-    maven { url "https://dvs1.progwml6.com/files/maven" } // JEI
-    maven { url = "https://modmaven.dev/" } // AE2
+    maven { url = "https://modmaven.dev/" } // AE2, JEI
     maven { url 'https://maven.blamejared.com' } // Patchouli
-    //maven { url = "https://maven.dbotthepony.ru" }
+    maven { url = "https://maven.tterrag.com/" } // TOP
 
-
-    // Temp for TOP, https://github.com/McJtyMods/TheOneProbe/issues/506
-    maven {
-        url "https://cursemaven.com"
-        content {
-            includeGroup "curse.maven"
+    // Modrinth
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        forRepositories(fg.repository) // Only add this if you're using ForgeGradle, otherwise remove this line
+        filter {
+            includeGroup "maven.modrinth"
         }
     }
+
 
 //    maven { url = "http://chickenbones.net/maven" }
 //    maven { url = "http://mobiusstrip.eu/maven" }
@@ -98,14 +103,15 @@ dependencies {
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}")
     runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-common:${jei_version}")
     runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")
-    compileOnly "appeng:appliedenergistics2:12.7.0:api"
-    runtimeOnly fg.deobf("appeng:appliedenergistics2:12.7.0")
-    implementation fg.deobf("curse.maven:the-one-probe-245211:${top_version}")
+    compileOnly "appeng:appliedenergistics2-forge:${ae_version}:api"
+    runtimeOnly fg.deobf("appeng:appliedenergistics2-forge:${ae_version}")
+    implementation fg.deobf("maven.modrinth:the-one-probe:${top_version}")
+    runtimeOnly fg.deobf("maven.modrinth:jade:${jade_version}")
     compileOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}:api")
     runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
-    runtimeOnly fg.deobf("curse.maven:mekanism-268560:${mekanism_version}")
-    runtimeOnly fg.deobf("curse.maven:waystones-${waystones_curseforge_id}:${waystones_curseforge_file_id}")
-    runtimeOnly fg.deobf("curse.maven:balm-${balm_curseforge_id}:${balm_curseforge_file_id}")
+    runtimeOnly fg.deobf("maven.modrinth:mekanism:${mekanism_version}")
+    runtimeOnly fg.deobf("maven.modrinth:waystones:${waystones_version}")
+    runtimeOnly fg.deobf("maven.modrinth:balm:${balm_version}")
     //runtimeOnly "ru.dbotthepony:overdrive-that-matters:1.0-SNAPSHOT:deobf"
 }
 
@@ -115,7 +121,7 @@ mixin {
 }
 
 minecraft {
-    mappings channel: mappings_channel, version: mappings_version
+    mappings channel: 'parchment', version: mappings_version
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
