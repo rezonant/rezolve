@@ -1,7 +1,7 @@
 package org.torchmc.ui.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.rezolvemc.Rezolve;
+import net.minecraft.client.gui.GuiGraphics;
 import org.torchmc.ui.TorchUI;
 import org.torchmc.ui.layout.VerticalLayoutPanel;
 import org.torchmc.ui.util.TorchUtil;
@@ -52,8 +52,8 @@ public class PlayerSlotGrid extends VerticalLayoutPanel {
     }
 
     @Override
-    protected void renderBackground(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-        TorchUtil.insetBox(pPoseStack, TorchUI.builtInTex("gui/widgets/twotone_background.png"), x - 6, y - 6, width + 12, height + 2);
-        super.renderBackground(pPoseStack, pMouseX, pMouseY, pPartialTick);
+    protected void renderBackground(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
+        TorchUtil.insetBox(gfx, TorchUI.builtInTex("gui/widgets/twotone_background.png"), getX() - 6, getY() - 6, width + 12, height + 2);
+        super.renderBackground(gfx, pMouseX, pMouseY, pPartialTick);
     }
 }

@@ -390,7 +390,7 @@ public class MachineMenu<MachineT extends MachineEntity> extends AbstractContain
 			if (destinationSlot instanceof IngredientSlot)
 				continue;
 
-			if (ItemStack.isSame(existingStack, quickMovedStack)) {
+			if (ItemStack.isSameItem(existingStack, quickMovedStack)) {
 				var takeAmount = Math.min(quickMovedStack.getCount(), destinationSlot.getItem().getMaxStackSize() - destinationSlot.getItem().getCount());
 				if (takeAmount <= 0)
 					continue;

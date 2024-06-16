@@ -71,7 +71,7 @@ public class UnbundlerEntity extends MachineEntity {
 				if (existingStack == null)
 					continue;
 				
-				if (!ItemStack.isSame(existingStack, stack))
+				if (!ItemStack.isSameItem(existingStack, stack))
 					continue;
 				
 				int maxStackSize = stack.getItem().getMaxStackSize(stack);
@@ -156,7 +156,7 @@ public class UnbundlerEntity extends MachineEntity {
 			
 			ItemStack inputStack = this.getStackInSlot(i);
 			
-			if (!ItemStack.isSame(inputStack, bundle))
+			if (!ItemStack.isSameItem(inputStack, bundle))
 				continue;
 			
 			return i;
@@ -239,7 +239,7 @@ public class UnbundlerEntity extends MachineEntity {
 		
 			ItemStack inputStack = this.getStackInSlot(i);
 			
-			if (!ItemStack.isSame(inputStack, bundle)) {
+			if (!ItemStack.isSameItem(inputStack, bundle)) {
 				continue;
 			}
 			

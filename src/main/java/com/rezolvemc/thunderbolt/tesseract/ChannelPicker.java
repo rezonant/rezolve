@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.thunderbolt.tesseract.network.ChannelListing;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import org.torchmc.ui.ConfirmationDialog;
 import org.torchmc.ui.Dialog;
 import org.torchmc.ui.layout.HorizontalLayoutPanel;
@@ -128,8 +129,8 @@ public class ChannelPicker extends Dialog {
         private ChannelListing channel;
 
         @Override
-        public void render(PoseStack poseStack, int width, int mouseX, int mouseY, float partialTicks) {
-            Minecraft.getInstance().font.draw(poseStack, channel.name, 0, 0, 0xFF000000);
+        public void render(GuiGraphics gfx, int width, int mouseX, int mouseY, float partialTicks) {
+            gfx.drawString(Minecraft.getInstance().font, channel.name, 0, 0, 0xFF000000, false);
         }
 
         @Override

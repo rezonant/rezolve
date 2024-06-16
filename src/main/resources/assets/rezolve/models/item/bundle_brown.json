@@ -1,6 +1,6 @@
 {
     "parent":"rezolve:item/standard_item",
     "textures": {
-        "layer0":"rezolve:items/item_bundle_brown"
+        "layer0":"rezolve:item/item_bundle_brown"
     }
 }

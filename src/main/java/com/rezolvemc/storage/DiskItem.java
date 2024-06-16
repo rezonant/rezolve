@@ -1,15 +1,19 @@
 package com.rezolvemc.storage;
 
 import com.rezolvemc.Rezolve;
+import com.rezolvemc.RezolveCreativeTab;
 import com.rezolvemc.common.ITooltipHint;
 import com.rezolvemc.common.ItemBase;
+import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.storage.machines.diskBay.DiskAccessor;
+import com.rezolvemc.worlds.Metal;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.data.event.GatherDataEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -134,9 +138,18 @@ public class DiskItem extends ItemBase implements ITooltipHint {
 		}
 	}
 
+	@SubscribeEvent
+	public static void buildCreativeTab(BuildCreativeModeTabContentsEvent event) {
+		if (event.getTab().getClass() == RezolveCreativeTab.class) {
+			for (var size : sizes.values()) {
+				event.accept(size);
+			}
+		}
+	}
+
 	private static class ItemsGenerator extends ItemModelProvider {
 		public ItemsGenerator(GatherDataEvent event) {
-			super(event.getGenerator(), Rezolve.ID, event.getExistingFileHelper());
+			super(event.getGenerator().getPackOutput(), Rezolve.ID, event.getExistingFileHelper());
 		}
 
 		@Override
@@ -144,9 +157,14 @@ public class DiskItem extends ItemBase implements ITooltipHint {
 			for (int i = 0, max = 16; i < max; ++i) {
 				getBuilder("disk_" + i)
 						.parent(new ModelFile.UncheckedModelFile(Rezolve.loc("item/standard_item")))
-						.texture("layer0", Rezolve.loc("disks/size_" + i))
+						.texture("layer0", Rezolve.loc("item/disks/size_" + i))
 				;
 			}
+		}
+
+		@Override
+		public String getName() {
+			return super.getName() + ".DiskItem";
 		}
 	}
 

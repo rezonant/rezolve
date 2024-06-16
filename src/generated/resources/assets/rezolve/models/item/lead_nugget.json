@@ -1,6 +1,6 @@
 {
   "parent": "rezolve:item/standard_item",
   "textures": {
-    "layer0": "rezolve:metals/lead/lead_nugget"
+    "layer0": "rezolve:block/metals/lead/lead_nugget"
   }
 }

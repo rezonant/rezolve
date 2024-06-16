@@ -1,6 +1,6 @@
 package org.torchmc.ui.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.torchmc.ui.TorchUI;
@@ -62,21 +62,21 @@ public class ProgressIndicator extends TorchWidget {
     }
 
     @Override
-    public void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    public void renderContents(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
         updateState();
 
         double width = size * value;
 
         TorchUtil.textureQuad(
-                pPoseStack, ARROW_TEXTURE,
+                gfx, ARROW_TEXTURE,
                 Color.of(0.6, 0.6, 0.6, 1),
-                x, y, size, size, 0, 0, 1, 1
+                getX(), getY(), size, size, 0, 0, 1, 1
         );
 
         TorchUtil.textureQuad(
-                pPoseStack, ARROW_TEXTURE,
+                gfx, ARROW_TEXTURE,
                 Color.of(1, 0, 0, 1),
-                x, y, width, size, 0, 0, (float)value, 1
+                getX(), getY(), width, size, 0, 0, (float)value, 1
         );
     }
 }

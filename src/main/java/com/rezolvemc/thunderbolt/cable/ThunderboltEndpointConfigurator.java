@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.rezolvemc.common.registry.RezolveRegistry;
 import com.rezolvemc.common.util.RezolveDirectionUtil;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -12,6 +13,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.torchmc.ui.util.TorchUtil;
@@ -31,10 +33,10 @@ class ThunderboltEndpointConfigurator extends BlockSideConfigurator {
     private Function<Direction, FaceConfiguration> sideAccessor;
 
     @Override
-    public void renderSide(PoseStack pPoseStack, Direction direction, float size, boolean hovered) {
+    public void renderSide(GuiGraphics gfx, Direction direction, float size, boolean hovered) {
 
         if (direction == getHoveredSide()) {
-            TorchUtil.colorQuad(pPoseStack, 0x8800FF00, 0, 0, size, size);
+            TorchUtil.colorQuad(gfx, 0x8800FF00, 0, 0, size, size);
         }
 
         var directionName = RezolveDirectionUtil.friendly(direction);
@@ -61,7 +63,7 @@ class ThunderboltEndpointConfigurator extends BlockSideConfigurator {
         var indicatorWidth = transmissionTypeSize * indicators.size();
         for (int i = 0, max = indicators.size(); i < max; ++i) {
             renderItemIn3D(
-                    pPoseStack, indicators.get(i),
+                    gfx, indicators.get(i),
                     size / 2 - indicatorWidth / 2 + transmissionTypeSize * i - transmissionTypeSize / 4,
                     size / 2 - transmissionTypeSize / 2,
                     0,
@@ -75,38 +77,41 @@ class ThunderboltEndpointConfigurator extends BlockSideConfigurator {
             var labelY = size - font.lineHeight;
 
             TorchUtil.colorQuad(
-                    pPoseStack,
+                    gfx,
                     0xFFFFFFFF,
                     labelX - padding,
                     labelY - padding * 2,
                     directionWidth + padding * 2,
                     font.lineHeight + padding * 2
             );
-            font.draw(pPoseStack, directionName, labelX, labelY, 0xFF000000);
+
+            gfx.drawString(font, directionName, (int)labelX, (int)labelY, 0xFF000000, false);
         }
     }
 
-    private void renderItemIn3D(PoseStack poseStack, ItemStack stack, double x, double y, double z, double size) {
-        poseStack.pushPose();
-        poseStack.translate(x, y, z);
+    private void renderItemIn3D(GuiGraphics gfx, ItemStack stack, double x, double y, double z, double size) {
+        gfx.pose().pushPose();
+        gfx.pose().translate(x, y, z);
         RenderSystem.applyModelViewMatrix();
 
         var bufferSource = minecraft.renderBuffers().bufferSource();
         BakedModel bakedmodel = minecraft.getItemRenderer().getModel(stack, minecraft.level, null, 0);
 
-        poseStack.translate(8, 8, 0);
-        poseStack.scale(1, -1, -0.001f);
-        poseStack.scale((float) size, (float) size, (float) size);
-        poseStack.translate(0, 0, -0.001f);
+        gfx.pose().translate(8, 8, 0);
+        gfx.pose().scale(1, -1, -0.001f);
+        gfx.pose().scale((float) size, (float) size, (float) size);
+        gfx.pose().translate(0, 0, -0.001f);
         RenderSystem.applyModelViewMatrix();
 
-        minecraft.getItemRenderer().render(stack, ItemTransforms.TransformType.GUI, false, poseStack, bufferSource, PACKED_LIGHT, OverlayTexture.NO_OVERLAY,
+        minecraft.getItemRenderer().render(
+                stack,
+                ItemDisplayContext.GUI, false, gfx.pose(), bufferSource, PACKED_LIGHT, OverlayTexture.NO_OVERLAY,
                 bakedmodel
         );
 
         bufferSource.endBatch();
 
-        poseStack.popPose();
+        gfx.pose().popPose();
         RenderSystem.applyModelViewMatrix();
     }
 

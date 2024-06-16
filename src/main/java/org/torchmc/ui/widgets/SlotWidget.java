@@ -1,14 +1,13 @@
 package org.torchmc.ui.widgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.torchmc.ui.TorchUI;
@@ -28,8 +27,8 @@ public class SlotWidget extends TorchWidget {
 
         this.narrationLabel = narrationLabel;
         this.slot = slot;
-        this.x = slot.x;
-        this.y = slot.y;
+        this.setX(slot.x);
+        this.setY(slot.y);
         this.width = SIZE;
         this.height = SIZE;
     }
@@ -58,30 +57,36 @@ public class SlotWidget extends TorchWidget {
     }
 
     @Override
-    public void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    public void renderContents(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
         var pos = getScreenRect();
         slot.x = pos.getX() - screen.getGuiLeft() + 1;
         slot.y = pos.getY() - screen.getGuiTop() + 1;
-        TorchUtil.textureQuad(pPoseStack, texture,  x, y, 18, 18);
+        TorchUtil.textureQuad(gfx, texture, getX(), getY(), 18, 18);
 
-        renderSlot(pPoseStack, this.slot);
+        renderSlot(gfx, this.slot);
 
         if (isHovered()) {
-            TorchUtil.colorQuad(pPoseStack, highlightColor, x + 1, y + 1, width - 2, height - 2);
+            TorchUtil.colorQuad(gfx, highlightColor, getX() + 1, getY() + 1, width - 2, height - 2);
         }
     }
 
     @Override
-    protected boolean renderTooltip(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+    protected boolean renderTooltip(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
         var item = this.slot.getItem();
 
-        if (!item.isEmpty())
-            screen.renderTooltip(poseStack, screen.getTooltipFromItem(item), item.getTooltipImage(), mouseX, mouseY, font, item);
+        if (!item.isEmpty()) {
+            gfx.renderTooltip(
+                    minecraft.font,
+                    Screen.getTooltipFromItem(minecraft, item),
+                    item.getTooltipImage(), item,
+                    mouseX, mouseY
+            );
+        }
 
-        return super.renderTooltip(poseStack, mouseX, mouseY, partialTick);
+        return super.renderTooltip(gfx, mouseX, mouseY, partialTick);
     }
 
-    private void renderSlot(PoseStack pPoseStack, Slot pSlot) {
+    private void renderSlot(GuiGraphics gfx, Slot pSlot) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
@@ -90,26 +95,23 @@ public class SlotWidget extends TorchWidget {
         int j = pSlot.y;
         ItemStack itemstack = pSlot.getItem();
 
-        this.setBlitOffset(100);
         if (itemstack.isEmpty() && pSlot.isActive()) {
             Pair<ResourceLocation, ResourceLocation> pair = pSlot.getNoItemIcon();
             if (pair != null) {
-                TextureAtlasSprite textureatlassprite = this.minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
-                RenderSystem.setShaderTexture(0, textureatlassprite.atlas().location());
-                blit(pPoseStack, i, j, this.getBlitOffset(), 16, 16, textureatlassprite);
+                TextureAtlasSprite sprite = this.minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
+                gfx.blit(i, j, 100, 16, 16, sprite);
             }
         }
 
-        //RenderSystem.enableDepthTest();
-
+        RenderSystem.enableDepthTest();
         var screenRect = getScreenRect();
-        itemRenderer.blitOffset += 100.0F;
-        itemRenderer.renderAndDecorateItem(this.minecraft.player, itemstack, screenRect.getX() + 1, screenRect.getY() + 1, screenRect.getX() + 1 + (screenRect.getY() + 1) * screen.getXSize());
-        itemRenderer.renderGuiItemDecorations(this.font, itemstack, screenRect.getX(), screenRect.getY());
-        itemRenderer.blitOffset -= 100.0F;
-        this.setBlitOffset(0);
-
-        RenderSystem.disableDepthTest();
+        gfx.renderItem(
+                itemstack,
+                getX() + 1,
+                getY() + 1
+        );
+        gfx.renderItemDecorations(this.font, itemstack, getX() + 1, getY() + 1);
+        //RenderSystem.disableDepthTest(); // TODO this was not matched
     }
 
     public Slot getSlot() {

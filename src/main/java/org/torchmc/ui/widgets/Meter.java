@@ -1,6 +1,6 @@
 package org.torchmc.ui.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.torchmc.ui.TorchWidget;
@@ -19,7 +19,6 @@ public class Meter extends TorchWidget {
         super(narrationTitle);
 
         this.label = label;
-        this.narrationTitle = narrationTitle;
         this.texture = texture;
         this.width = 16;
         this.height = 48;
@@ -98,44 +97,44 @@ public class Meter extends TorchWidget {
     private int labelMargin = 5;
 
     @Override
-    public void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    public void renderContents(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
         updateState();
 
         if (orientation == Axis.Y)
-            renderVertical(pPoseStack, pMouseX, pMouseY, pPartialTick);
+            renderVertical(gfx, pMouseX, pMouseY, pPartialTick);
         else if (orientation == Axis.X)
-            renderHorizontal(pPoseStack, pMouseX, pMouseY, pPartialTick);
+            renderHorizontal(gfx, pMouseX, pMouseY, pPartialTick);
     }
 
-    private void renderVertical(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    private void renderVertical(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
         var labelAreaHeight = font.lineHeight + labelMargin*2;
         var barHeight = height - labelAreaHeight;
 
         TorchUtil.textureQuad(
-                pPoseStack, texture, x, y, width, borderSize,
+                gfx, texture, getX(), getY(), width, borderSize,
                 0, 0, 1, borderSize/(float)TEXTURE_HEIGHT
         );
         TorchUtil.textureQuad(
-                pPoseStack, texture, x, y + borderSize, width, barHeight - borderSize*2,
+                gfx, texture, getX(), getY() + borderSize, width, barHeight - borderSize*2,
                 0, borderSize/(float)TEXTURE_HEIGHT,
                 1, (TEXTURE_HEIGHT - borderSize)/(float)TEXTURE_HEIGHT
         );
         TorchUtil.textureQuad(
-                pPoseStack, texture, x, y + barHeight - borderSize, width, borderSize,
+                gfx, texture, getX(), getY() + barHeight - borderSize, width, borderSize,
                 0, (TEXTURE_HEIGHT - borderSize)/(float)TEXTURE_HEIGHT,
                 1, 1
         );
 
         // Black out the unfilled portion
-        TorchUtil.colorQuad(pPoseStack, 0, 0, 0, 1, x, y, width, barHeight - getRenderedValue() * barHeight);
+        TorchUtil.colorQuad(gfx, 0, 0, 0, 1, getX(), getY(), width, barHeight - getRenderedValue() * barHeight);
 
         // Label
 
         var labelWidth = font.width(label);
-        font.draw(pPoseStack, label, x + width / 2 - labelWidth / 2, y + barHeight + labelMargin, 0xFF333333);
+        gfx.drawString(font, label, getX() + width / 2 - labelWidth / 2, getY() + barHeight + labelMargin, 0xFF333333, false);
     }
 
-    private void renderHorizontal(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    private void renderHorizontal(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
 
         var labelWidth = font.width(label) + labelMargin*2;
         var barWidth = width - labelWidth;
@@ -153,10 +152,10 @@ public class Meter extends TorchWidget {
 //        );
 
         TorchUtil.rotatedTextureQuad(
-                pPoseStack, texture,
+                gfx, texture,
                 Color.WHITE,
-                x + labelWidth,
-                y,
+                getX() + labelWidth,
+                getY(),
                 borderSize,
                 height,
                 0, (TEXTURE_HEIGHT - borderSize)/(float)TEXTURE_HEIGHT,
@@ -164,10 +163,10 @@ public class Meter extends TorchWidget {
                 1
         );
         TorchUtil.rotatedTextureQuad(
-                pPoseStack, texture,
+                gfx, texture,
                 Color.WHITE,
-                x + labelWidth + borderSize,
-                y,
+                getX() + labelWidth + borderSize,
+                getY(),
                 barWidth - borderSize *2,
                 height,
                 0, borderSize/(float)TEXTURE_HEIGHT,
@@ -175,10 +174,10 @@ public class Meter extends TorchWidget {
                 1
         );
         TorchUtil.rotatedTextureQuad(
-                pPoseStack, texture,
+                gfx, texture,
                 Color.WHITE,
-                x + labelWidth + barWidth - borderSize,
-                y,
+                getX() + labelWidth + barWidth - borderSize,
+                getY(),
                 borderSize,
                 height,
                 0, 0,
@@ -190,10 +189,11 @@ public class Meter extends TorchWidget {
         var unfilledWidth = barWidth - getRenderedValue() * barWidth;
 
         // Black out the unfilled portion
-        TorchUtil.colorQuad(pPoseStack, 0, 0, 0, 1, x + labelWidth + barWidth - unfilledWidth, y, unfilledWidth, height);
+        TorchUtil.colorQuad(gfx, 0, 0, 0, 1, getX() + labelWidth + barWidth - unfilledWidth, getY(), unfilledWidth, height);
 
         // Label
-        font.draw(pPoseStack, label, x + labelMargin, y + height / 2 - font.lineHeight / 2, 0xFF333333);
+
+        gfx.drawString(font, label, getX() + labelMargin, getY() + height / 2 - font.lineHeight / 2, 0xFF333333, false);
     }
 
 

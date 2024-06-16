@@ -53,7 +53,7 @@ public class RezolveBlockEntityPacket extends RezolvePacket {
     @Override
     protected final void receiveOnServer(ServerPlayer sender) {
         receiveForLevel(
-                sender.level,
+                sender.level(),
                 sender,
                 String.format("player %s [%s]", sender.getName().getString(), sender.getStringUUID()),
                 NetworkDirection.PLAY_TO_SERVER

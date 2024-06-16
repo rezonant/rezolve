@@ -5,6 +5,7 @@ import com.rezolvemc.common.network.RezolveMenuPacket;
 import com.rezolvemc.common.registry.RegistryId;
 import com.rezolvemc.common.util.RezolveByteBufUtils;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
@@ -45,7 +46,7 @@ public class RemoteShellRenameMachinePacket extends RezolveBlockEntityPacket {
 	@Override
 	public void read(FriendlyByteBuf buf) {
 		super.read(buf);
-		this.level = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(buf.readUtf()));
+		this.level = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(buf.readUtf()));
 		this.machinePos = RezolveByteBufUtils.readBlockPos(buf);
 		this.name = buf.readUtf();
 	}

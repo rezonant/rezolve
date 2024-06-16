@@ -3,8 +3,8 @@
 	"parent": "block/block",
 	"ambientocclusion": false,
 	"textures": {
-		"particle": "rezolve:blocks/thunderbolt/plain/thunderbolt_cable",
-		"cable": "rezolve:blocks/thunderbolt/plain/thunderbolt_cable"
+		"particle": "rezolve:block/thunderbolt/plain/thunderbolt_cable",
+		"cable": "rezolve:block/thunderbolt/plain/thunderbolt_cable"
 	},
 	"elements": [
 		{

@@ -1,6 +1,7 @@
 package org.torchmc.ui.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -10,6 +11,8 @@ import org.torchmc.ui.TorchWidget;
 import org.torchmc.ui.layout.AxisConstraint;
 import org.torchmc.ui.util.Color;
 import org.torchmc.ui.util.TorchUtil;
+
+import java.util.stream.Collectors;
 
 public class VirtualSlotWidget extends TorchWidget {
     public static final int SIZE = 18;
@@ -39,9 +42,16 @@ public class VirtualSlotWidget extends TorchWidget {
     public void setItem(ItemStack item) {
         this.item = item;
         if (item == null) {
-            setTooltip((Component) null);
+            setTooltip((Tooltip) null);
         } else {
-            setTooltip(item.getTooltipLines(minecraft.player, minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL));
+            var lines = item.getTooltipLines(minecraft.player, minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
+
+            setTooltip(
+                    Tooltip.create(
+                            // TODO: this sucks
+                            Component.literal(lines.stream().map(line -> line.getString()).collect(Collectors.joining()))
+                    )
+            );
         }
     }
 
@@ -68,15 +78,15 @@ public class VirtualSlotWidget extends TorchWidget {
     }
 
     @Override
-    protected void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-        super.renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
-        TorchUtil.textureQuad(pPoseStack, texture,  x, y, 18, 18);
+    protected void renderContents(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
+        super.renderContents(gfx, pMouseX, pMouseY, pPartialTick);
+        TorchUtil.textureQuad(gfx, texture, getX(), getY(), 18, 18);
 
         if (item != null)
-            TorchUtil.drawItem(pPoseStack, item, x + 1, y + 1);
+            TorchUtil.drawItem(gfx, item, getX() + 1, getY() + 1);
 
         if (isHovered()) {
-            TorchUtil.colorQuad(pPoseStack, highlightColor, x + 1, y + 1, width - 2, height - 2);
+            TorchUtil.colorQuad(gfx, highlightColor, getX() + 1, getY() + 1, width - 2, height - 2);
         }
     }
 

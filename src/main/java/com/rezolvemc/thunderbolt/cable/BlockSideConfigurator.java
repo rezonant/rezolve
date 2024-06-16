@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -12,6 +12,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.torchmc.ui.TorchWidget;
 import org.torchmc.ui.util.Color;
 import org.torchmc.ui.util.TorchUtil;
@@ -52,7 +54,7 @@ public abstract class BlockSideConfigurator extends TorchWidget {
         this.blockState = blockState;
     }
 
-    public abstract void renderSide(PoseStack poseStack, Direction side, float size, boolean hovered);
+    public abstract void renderSide(GuiGraphics gfx, Direction side, float size, boolean hovered);
 
 
     public float getRotationX() {
@@ -91,58 +93,58 @@ public abstract class BlockSideConfigurator extends TorchWidget {
 
     /**
      * Renders the background behind the block. Defaults to a black rectangle. Override to do something fancy.
-     * @param poseStack
+     * @param gfx
      * @param mouseX
      * @param mouseY
      * @param partialTick
      */
-    protected void renderBackground(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        TorchUtil.colorQuad(poseStack, Color.BLACK, 0, 0, width, height);
+    protected void renderBackground(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
+        TorchUtil.colorQuad(gfx, Color.BLACK, 0, 0, width, height);
     }
 
     @Override
-    protected void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    protected void renderContents(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
         updateHoveredSide(pMouseX, pMouseY);
 
-        renderBackground(pPoseStack, pMouseX, pMouseY, pPartialTick);
+        renderBackground(gfx, pMouseX, pMouseY, pPartialTick);
 
         if (blockVisible) {
-            scissor(pPoseStack, 0, 0, width, height, () -> renderBlock(pPoseStack));
+            scissor(gfx, 0, 0, width, height, () -> renderBlock(gfx));
         }
     }
 
     private int visualSize = 64;
 
-    protected void renderBlock(PoseStack pPoseStack) {
+    protected void renderBlock(GuiGraphics gfx) {
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableDepthTest();
         Lighting.setupFor3DItems();
 
-        pPoseStack.pushPose();
-        pPoseStack.translate(width / 2, height / 2, 100.0F);
-        //pPoseStack.translate(-8.0D, -8.0D, 0.0D);
-        pPoseStack.scale(1.0F, -1.0F, 1.0F); // models render with positive Y up
-        pPoseStack.scale(visualSize*2, visualSize*2, visualSize*2);
+        gfx.pose().pushPose();
+        gfx.pose().translate(width / 2, height / 2, 100.0F);
+        //gfx.pose().translate(-8.0D, -8.0D, 0.0D);
+        gfx.pose().scale(1.0F, -1.0F, 1.0F); // models render with positive Y up
+        gfx.pose().scale(visualSize*2, visualSize*2, visualSize*2);
         RenderSystem.applyModelViewMatrix();
 
-        pPoseStack.mulPose(Vector3f.YP.rotationDegrees(180));
-        pPoseStack.mulPose(Vector3f.XP.rotationDegrees(rotationY));
-        pPoseStack.mulPose(Vector3f.YP.rotationDegrees(rotationX));
+        gfx.pose().mulPose(TorchUtil.rotateAround(TorchUtil.YP, 180));
+        gfx.pose().mulPose(TorchUtil.rotateAround(TorchUtil.XP, rotationY));
+        gfx.pose().mulPose(TorchUtil.rotateAround(TorchUtil.YP, rotationX));
 
         var bufferSource = minecraft.renderBuffers().bufferSource();
 
         if (blockVisible && blockState != null) {
-            pPoseStack.pushPose();
-            pPoseStack.translate(-0.25f, -0.25f, -0.25f);
-            pPoseStack.scale(0.5f, 0.5f, 0.5f);
+            gfx.pose().pushPose();
+            gfx.pose().translate(-0.25f, -0.25f, -0.25f);
+            gfx.pose().scale(0.5f, 0.5f, 0.5f);
             RenderSystem.applyModelViewMatrix();
             minecraft.getBlockRenderer().renderSingleBlock(
-                    blockState, pPoseStack, bufferSource, PACKED_LIGHT,
+                    blockState, gfx.pose(), bufferSource, PACKED_LIGHT,
                     OverlayTexture.NO_OVERLAY
             );
-            pPoseStack.popPose();
+            gfx.pose().popPose();
             RenderSystem.applyModelViewMatrix();
         }
         bufferSource.endBatch();
@@ -152,45 +154,45 @@ public abstract class BlockSideConfigurator extends TorchWidget {
         for (var direction : Direction.values()) {
             // Set up rendering on the given side
 
-            pPoseStack.pushPose();
+            gfx.pose().pushPose();
 
             switch (direction) {
                 case DOWN -> {
-                    pPoseStack.mulPose(Vector3f.XN.rotationDegrees(90));
+                    gfx.pose().mulPose(TorchUtil.rotateAround(TorchUtil.XN, 90));
                 }
                 case UP -> {
-                    pPoseStack.mulPose(Vector3f.XN.rotationDegrees(-90));
+                    gfx.pose().mulPose(TorchUtil.rotateAround(TorchUtil.XN, -90));
                 }
                 case NORTH -> {
                     // None, this is the default
                 }
                 case SOUTH -> {
-                    pPoseStack.mulPose(Vector3f.YN.rotationDegrees(180));
+                    gfx.pose().mulPose(TorchUtil.rotateAround(TorchUtil.YN, 180));
                 }
                 case WEST -> {
-                    pPoseStack.mulPose(Vector3f.YN.rotationDegrees(-90));
+                    gfx.pose().mulPose(TorchUtil.rotateAround(TorchUtil.YN, -90));
                 }
                 case EAST -> {
-                    pPoseStack.mulPose(Vector3f.YN.rotationDegrees(90));
+                    gfx.pose().mulPose(TorchUtil.rotateAround(TorchUtil.YN, 90));
                 }
             }
 
             RenderSystem.applyModelViewMatrix();
 
-            pPoseStack.scale(-1 / 2.0f, -1 / 2.0f, 1 / 2.0f);
-            pPoseStack.translate(-0.5, -0.5, -0.51);
-            pPoseStack.scale(1 / blockFaceScale, 1 / blockFaceScale, 1);
+            gfx.pose().scale(-1 / 2.0f, -1 / 2.0f, 1 / 2.0f);
+            gfx.pose().translate(-0.5, -0.5, -0.51);
+            gfx.pose().scale(1 / blockFaceScale, 1 / blockFaceScale, 1);
 
             // Render overlay
-            renderSide(pPoseStack, direction, blockFaceScale, direction == hoveredSide);
+            renderSide(gfx, direction, blockFaceScale, direction == hoveredSide);
 
-            pPoseStack.popPose();
+            gfx.pose().popPose();
             RenderSystem.applyModelViewMatrix();
         }
 
         // Cleanup
 
-        pPoseStack.popPose();
+        gfx.pose().popPose();
         RenderSystem.applyModelViewMatrix();
     }
 

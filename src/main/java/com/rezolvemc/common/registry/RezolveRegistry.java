@@ -1,29 +1,33 @@
 package com.rezolvemc.common.registry;
 
 import com.rezolvemc.Rezolve;
+import com.rezolvemc.RezolveCreativeTab;
+import com.rezolvemc.common.ItemBase;
 import com.rezolvemc.common.blocks.BlockBase;
+import com.rezolvemc.common.machines.Operation;
 import com.rezolvemc.common.machines.WithOperation;
 import com.rezolvemc.common.network.RezolvePacket;
-import com.rezolvemc.common.machines.Operation;
 import com.rezolvemc.common.util.RezolveReflectionUtil;
-
-import io.netty.util.internal.ReflectionUtil;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.core.BlockPos;
-import net.minecraft.data.tags.BlockTagsProvider;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.tags.ItemTagsProvider;
+import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -31,7 +35,9 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.data.BlockTagsProvider;
 import net.minecraftforge.data.event.GatherDataEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -39,9 +45,14 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 /**
@@ -112,10 +123,21 @@ public class RezolveRegistry {
     }
 
     private static boolean hasDiscoveredClasses = false;
-    @SubscribeEvent
-    public static void handleRegisterEvent(RegisterEvent event) {
-        RezolvePacket.init();
 
+    @SubscribeEvent
+    public static void buildCreativeModeTabContents(BuildCreativeModeTabContentsEvent event) {
+        for (var obj : registryObjects.values()) {
+            if (obj instanceof BlockBase block) {
+                if (getCreativeModeTab(block.getClass()) == event.getTab().getClass())
+                    event.accept(block);
+            } else if (obj instanceof ItemBase item) {
+                if (getCreativeModeTab(item.getClass()) == event.getTab().getClass())
+                    event.accept(item);
+            }
+        }
+    }
+
+    private static List<Class<?>> getRegisteredClasses() {
         if (!hasDiscoveredClasses) {
             hasDiscoveredClasses = true;
             for (var klass : RezolveReflectionUtil.findAnnotatedClasses(RegistryId.class)) {
@@ -124,13 +146,25 @@ public class RezolveRegistry {
             }
         }
 
-        for (var klass : registeredClasses)  {
+        return registeredClasses;
+    }
+
+    private static List<CreativeModeTab> registeredTabs = new ArrayList<>();
+
+    @SubscribeEvent
+    public static void handleRegisterEvent(RegisterEvent event) {
+        LOGGER.info("Registry {}", event.getRegistryKey());
+        RezolvePacket.init();
+
+        for (var klass : getRegisteredClasses())  {
             if (Block.class.isAssignableFrom(klass)) {
                 registerBlock(event, (Class<Block>)klass);
             } else if (Item.class.isAssignableFrom(klass)) {
                 registerItem(event, (Class<Item>)klass);
             } else if (RezolvePacket.class.isAssignableFrom(klass)) {
                 registerPacket((Class<RezolvePacket>)klass);
+            } else if (CreativeModeTab.class.isAssignableFrom((klass))) {
+                registerCreativeModeTab(event, (Class<CreativeModeTab>)klass);
             }
         }
     }
@@ -187,6 +221,19 @@ public class RezolveRegistry {
         return null;
     }
 
+    public static Class<? extends CreativeModeTab> getCreativeModeTab(Class<?> klass) {
+        var registryAnnotation = klass.getAnnotation(WithinCreativeModeTab.class);
+        if (registryAnnotation != null)
+            return registryAnnotation.value();
+
+        return RezolveCreativeTab.class;
+    }
+
+    /**
+     * Obtain the registry ID for the given Rezolve registerable class.
+     * @param klass
+     * @return
+     */
     public static String requireRegistryId(Class<?> klass) {
         var registryId = getRegistryId(klass);
         if (registryId == null)
@@ -211,6 +258,17 @@ public class RezolveRegistry {
         }
     }
 
+    private static <T extends CreativeModeTab> void registerCreativeModeTab(RegisterEvent register, Class<T> tabClass) {
+        String id = requireRegistryId(tabClass);
+        try {
+            CreativeModeTab tab = tabClass.getDeclaredConstructor().newInstance();
+            registryObjects.put(tabClass, tab);
+            register.register(Registries.CREATIVE_MODE_TAB, new ResourceLocation(Rezolve.ID, id), () -> tab);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Failed to register CreativeModeTab class "+tabClass.getCanonicalName()+": "+e.getMessage(), e);
+        }
+    }
+
     private static <T extends Block> void registerBlock(RegisterEvent register, Class<T> blockClass) {
         String id = requireRegistryId(blockClass);
 
@@ -220,9 +278,7 @@ public class RezolveRegistry {
             if (register.getRegistryKey() == ForgeRegistries.Keys.BLOCKS) {
                 block = blockClass.getDeclaredConstructor().newInstance();
                 registryObjects.put(blockClass, block);
-                register.register(ForgeRegistries.Keys.BLOCKS, new ResourceLocation(Rezolve.ID, id), () -> {
-                    return block;
-                });
+                register.register(ForgeRegistries.Keys.BLOCKS, new ResourceLocation(Rezolve.ID, id), () -> block);
             } else {
                 block = block(blockClass);
             }
@@ -232,7 +288,7 @@ public class RezolveRegistry {
                         ForgeRegistries.Keys.ITEMS,
                         new ResourceLocation(Rezolve.ID, id),
                         () -> {
-                            var blockItem = new BlockItem(block, new Item.Properties().tab(Rezolve.CREATIVE_MODE_TAB));
+                            var blockItem = new BlockItem(block, new Item.Properties());
                             if (block instanceof BlockBase blockBase) {
                                 blockBase.initializeItem(blockItem);
                             }
@@ -268,7 +324,6 @@ public class RezolveRegistry {
     }
 
     private static <T extends AbstractContainerMenu> void registerMenu(RegisterEvent register, Class<T> menuClass, String registryId) {
-
         if (register.getRegistryKey() != ForgeRegistries.Keys.MENU_TYPES)
             return;
 
@@ -278,26 +333,35 @@ public class RezolveRegistry {
         try {
             LOGGER.debug("Registering menu " + menuClass.getCanonicalName());
 
-            var ctor = menuClass.getConstructor(int.class, Inventory.class);
-
-            var type = new MenuType((containerId, playerInventory) -> {
-                try {
-                    return ctor.newInstance(containerId, playerInventory);
-
-                } catch (Exception e) {
-                    // RuntimeExceptions get absorbed somewhere up the stack without being printed, so we need
-                    // to take care to print to the log here for debuggability.
-                    LOGGER.error("Cannot construct {}: {}", menuClass.getCanonicalName(), e.getMessage());
-                    throw new RuntimeException("Cannot construct " + menuClass.getCanonicalName(), e);
-                }
-            });
-
+            var type = getMenuType(menuClass);
             registryObjects.put(menuClass, type);
             register.register(ForgeRegistries.Keys.MENU_TYPES, new ResourceLocation(Rezolve.ID, registryId), () -> type);
 
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException("Failed to register Menu class "+menuClass.getCanonicalName()+": "+e.getMessage(), e);
         }
+    }
+
+    @NotNull
+    private static <T extends AbstractContainerMenu> MenuType<T> getMenuType(Class<T> menuClass) throws NoSuchMethodException {
+        Constructor<T> ctor;
+
+        try {
+            ctor = menuClass.getConstructor(int.class, Inventory.class);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Menu class "+menuClass.getCanonicalName()+" is missing constructor(int, Inventory): "+e.getMessage(), e);
+        }
+
+        return new MenuType<>((containerId, playerInventory) -> {
+            try {
+                return ctor.newInstance(containerId, playerInventory);
+            } catch (Exception e) {
+                // RuntimeExceptions get absorbed somewhere up the stack without being printed, so we need
+                // to take care to print to the log here for debuggability.
+                LOGGER.error("Cannot construct {}: {}", menuClass.getCanonicalName(), e.getMessage());
+                throw new RuntimeException("Cannot construct " + menuClass.getCanonicalName(), e);
+            }
+        }, FeatureFlags.DEFAULT_FLAGS);
     }
 
     private static <T extends BlockEntity> void registerBlockEntity(RegisterEvent register, Class<T> entityClass, Block[] validBlocks) {
@@ -337,6 +401,10 @@ public class RezolveRegistry {
         return (T)registryObjects.get(klass);
     }
 
+    public static <T extends CreativeModeTab> T creativeModeTab(Class<T> klass) {
+        return (T)registryObjects.get(klass);
+    }
+
     public static <T extends Item> T item(Class<T> klass) {
         return (T)registryObjects.get(klass);
     }
@@ -350,13 +418,13 @@ public class RezolveRegistry {
     }
 
     public interface Tagger<T> {
-        Tagger tag(TagKey<T> tag);
-        Tagger tag(String tag);
+        Tagger<T> tag(TagKey<T> tag);
+        Tagger<T> tag(String tag);
     }
 
-    private record TagProvider<T>(T object, Consumer<Tagger> configurer) {}
-    private static List<TagProvider<Block>> blocksForTagging = new ArrayList<>();
-    private static List<TagProvider<Item>> itemsForTagging = new ArrayList<>();
+    private record TagProvider<T>(T object, Consumer<Tagger<T>> configurer) {}
+    private static final List<TagProvider<Block>> blocksForTagging = new ArrayList<>();
+    private static final List<TagProvider<Item>> itemsForTagging = new ArrayList<>();
 
     public static void registerForTagging(Block block, Consumer<Tagger<Block>> configurer) {
         blocksForTagging.add(new TagProvider(block, configurer));
@@ -368,19 +436,19 @@ public class RezolveRegistry {
 
     @SubscribeEvent
     public static void gatherData(GatherDataEvent event) {
-        var blockTagsProvider = new BlockTagsGenerator(event);
+        var blockTagsProvider = new BlockTagsGenerator(event, event.getLookupProvider());
 
         event.getGenerator().addProvider(true, blockTagsProvider);
-        event.getGenerator().addProvider(true, new ItemTagsGenerator(event, blockTagsProvider));
+        event.getGenerator().addProvider(true, new ItemTagsGenerator(event, event.getLookupProvider(), blockTagsProvider.contentsGetter()));
     }
 
     public static class BlockTagsGenerator extends BlockTagsProvider {
-        public BlockTagsGenerator(GatherDataEvent event) {
-            super(event.getGenerator(), Rezolve.ID, event.getExistingFileHelper());
+        public BlockTagsGenerator(GatherDataEvent event, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+            super(event.getGenerator().getPackOutput(), lookupProvider, Rezolve.ID, event.getExistingFileHelper());
         }
 
         @Override
-        protected void addTags() {
+        protected void addTags(HolderLookup.Provider pProvider) {
             try {
                 for (var provider : blocksForTagging) {
                     provider.configurer.accept(new Tagger<Block>() {
@@ -403,12 +471,12 @@ public class RezolveRegistry {
     }
 
     public static class ItemTagsGenerator extends ItemTagsProvider {
-        public ItemTagsGenerator(GatherDataEvent event, BlockTagsProvider blockTagsProvider) {
-            super(event.getGenerator(), blockTagsProvider, Rezolve.ID, event.getExistingFileHelper());
+        public ItemTagsGenerator(GatherDataEvent event, CompletableFuture<HolderLookup.Provider> lookupProvider, CompletableFuture<TagsProvider.TagLookup<Block>> blockTags) {
+            super(event.getGenerator().getPackOutput(), lookupProvider, blockTags, Rezolve.ID, event.getExistingFileHelper());
         }
 
         @Override
-        protected void addTags() {
+        protected void addTags(HolderLookup.Provider pProvider) {
             try {
                 for (var provider : itemsForTagging) {
                     provider.configurer.accept(new Tagger<Item>() {

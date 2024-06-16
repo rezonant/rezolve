@@ -1,6 +1,7 @@
 package org.torchmc.ui.widgets;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
@@ -125,8 +126,8 @@ public class ListView extends TorchWidget {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int pButton) {
-        if (x < mouseX && mouseX < x + width - scrollBarWidth) {
-            int itemY = y - scrollPos;
+        if (getX() < mouseX && mouseX < getX() + width - scrollBarWidth) {
+            int itemY = getY() - scrollPos;
 
             for (var item : items) {
                 if (itemY < mouseY && mouseY < itemY + itemPadding * 2 + item.getHeight()) {
@@ -178,7 +179,7 @@ public class ListView extends TorchWidget {
     }
 
     public void visitItems(ListItemVisitor visitor, boolean includeInvisible) {
-        int itemY = y - scrollPos;
+        int itemY = getY() - scrollPos;
         int index = 0;
         for (var item : items) {
             if (!includeInvisible && !item.isVisible())
@@ -207,10 +208,10 @@ public class ListView extends TorchWidget {
 
     void ensureItemIsVisible(int index) {
         var rect = getItemPosition(index);
-        if (rect.getY() < y) {
-            setScrollPosition(rect.getY() - y + scrollPos);
-        } else if (rect.getY() + rect.getHeight() > y + height) {
-            setScrollPosition(rect.getY() - y + scrollPos + rect.getHeight() - height);
+        if (rect.getY() < getY()) {
+            setScrollPosition(rect.getY() - getY() + scrollPos);
+        } else if (rect.getY() + rect.getHeight() > getY() + height) {
+            setScrollPosition(rect.getY() - getY() + scrollPos + rect.getHeight() - height);
         }
     }
 
@@ -225,33 +226,33 @@ public class ListView extends TorchWidget {
     }
 
     @Override
-    public void renderContents(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+    public void renderContents(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
 
         scrollbar.setContentHeight(getTotalItemsHeight());
 
-        boolean xInBounds = x < mouseX && mouseX < x + width;
+        boolean xInBounds = getX() < mouseX && mouseX < getX() + width;
         boolean mouseInView = isMouseOver(mouseX, mouseY);
 
         TorchUtil.insetBox(
-                poseStack,
+                gfx,
                 TorchUI.builtInTex("gui/widgets/simple_frame.png"),
-                x, y, width, height
+                getX(), getY(), width, height
         );
 
-        scissor(poseStack, x, y, width, height, () -> {
-            pushPose(poseStack, () -> {
-                repose(() -> poseStack.translate(x + itemPadding, y - scrollPos + itemPadding, 0));
+        scissor(gfx, getX(), getY(), width, height, () -> {
+            pushPose(gfx.pose(), () -> {
+                repose(() -> gfx.pose().translate(getX() + itemPadding, getY() - scrollPos + itemPadding, 0));
 
                 visitItems((item, x, y, i) -> {
                     int itemY = y;
 
-                    item.render(poseStack, width - itemPadding*2 - scrollBarWidth, mouseX, mouseY, partialTick);
+                    item.render(gfx, width - itemPadding*2 - scrollBarWidth, mouseX, mouseY, partialTick);
 
-                    TorchUtil.colorQuad(poseStack, 0x33000000, -itemPadding, item.getHeight() + itemPadding - 1, width - scrollBarWidth, 1);
+                    TorchUtil.colorQuad(gfx, 0x33000000, -itemPadding, item.getHeight() + itemPadding - 1, width - scrollBarWidth, 1);
 
                     if (isFocused() && focusedItem == i) {
                         TorchUtil.colorOutline(
-                                poseStack, Color.WHITE, 2,
+                                gfx, Color.WHITE, 2,
                                 -itemPadding + 2, -itemPadding + 2,
                                 width - scrollBarWidth - 4, item.getHeight()+itemPadding*2 - 4
                         );
@@ -264,10 +265,10 @@ public class ListView extends TorchWidget {
                             emitEvent(ITEM_HOVERED, new ListViewItemEvent(item));
                         }
 
-                        TorchUtil.colorQuad(poseStack, 0x33000000, -itemPadding, -itemPadding, width - scrollBarWidth, item.getHeight()+itemPadding*2);
+                        TorchUtil.colorQuad(gfx, 0x33000000, -itemPadding, -itemPadding, width - scrollBarWidth, item.getHeight()+itemPadding*2);
                     }
 
-                    repose(() -> poseStack.translate(0, item.getHeight() + itemPadding*2, 0));
+                    repose(() -> gfx.pose().translate(0, item.getHeight() + itemPadding*2, 0));
 
                     return true;
                 });

@@ -1,8 +1,8 @@
 package org.torchmc.ui.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.network.chat.Component;
 import org.torchmc.ui.TorchWidget;
@@ -102,7 +102,7 @@ public class Label extends TorchWidget {
         if (this.content == content || (this.content != null && content != null && Objects.equals(this.content.toString(), content.toString())))
             return;
         this.content = content;
-        this.narrationTitle = content;
+        this.setMessage(content);
         constructLabel();
         notifyHierarchyChange();
     }
@@ -122,7 +122,7 @@ public class Label extends TorchWidget {
     }
 
     @Override
-    public void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    public void renderContents(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
         if (!isVisible())
             return;
 
@@ -135,13 +135,13 @@ public class Label extends TorchWidget {
         }
 
         if (backgroundColor != null && backgroundColor.a > 0)
-            TorchUtil.colorQuad(pPoseStack, backgroundColor, x, y, width, height);
+            TorchUtil.colorQuad(gfx, backgroundColor, getX(), getY(), width, height);
 
         if (label != null) {
             if (alignment == Alignment.CENTERED)
-                label.renderCentered(pPoseStack, width, x, y + yOffset, color.argb());
+                label.renderCentered(gfx, width, getX(), getY() + yOffset, color.argb());
             else if (alignment == Alignment.LEFT)
-                label.renderLeftAlignedNoShadow(pPoseStack, x, y + yOffset, font.lineHeight, color.argb());
+                label.renderLeftAlignedNoShadow(gfx, getX(), getY() + yOffset, font.lineHeight, color.argb());
         }
     }
 

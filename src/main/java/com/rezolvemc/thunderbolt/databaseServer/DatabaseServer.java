@@ -6,13 +6,13 @@ import com.rezolvemc.common.registry.WithBlockEntity;
 
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MapColor;
 
 @RegistryId("database_server")
 @WithBlockEntity(DatabaseServerEntity.class)
 public class DatabaseServer extends Machine {
 	public DatabaseServer() {
-		super(BlockBehaviour.Properties.of(Material.METAL));
+		super(BlockBehaviour.Properties.of().mapColor(MapColor.METAL));
 		this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH));
 	}
 

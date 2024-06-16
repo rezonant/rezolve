@@ -1,6 +1,7 @@
 package com.rezolvemc.storage.view;
 
 import com.rezolvemc.Rezolve;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import org.torchmc.ui.TorchWidget;
 import org.torchmc.ui.util.TorchUtil;
@@ -10,11 +11,8 @@ import com.rezolvemc.storage.view.packets.StorageViewContentPacket;
 import com.rezolvemc.util.ItemStackUtil;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
 import com.rezolvemc.storage.view.packets.StorageViewChangeResponse;
 import com.rezolvemc.storage.view.packets.StorageViewQuery;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -27,8 +25,9 @@ public class StorageView extends TorchWidget {
 	public StorageView(int x, int y, int width, int height) {
 		super(Component.translatable("screens.rezolve.storage_view"));
 
-		this.x = x;
-		this.y = y;
+		setX(x);
+		setY(y);
+
 		this.width = width;
 		this.height = height;
 
@@ -91,26 +90,22 @@ public class StorageView extends TorchWidget {
 	/**
 	 * Draws an ItemStack.
 	 */
-	private void drawItemStack(PoseStack poseStack, ItemStack stack, int x, int y, String altText)
+	private void drawItemStack(GuiGraphics gfx, ItemStack stack, int x, int y, String altText)
 	{
 		Lighting.setupForFlatItems();
 
 		float textWidth = font.width(altText);
 
-		TorchUtil.drawItem(poseStack, stack, x, y);
+		TorchUtil.drawItem(gfx, stack, x, y);
 		//minecraft.getItemRenderer().renderAndDecorateItem(stack, this.x + x, this.y + y);
 
-		poseStack.pushPose();
-			poseStack.translate(x + 17.0f - textWidth / 2, y + 11, 300);
-			poseStack.scale(0.5f, 0.5f, 0.5f);
+		gfx.pose().pushPose();
+			gfx.pose().translate(x + 17.0f - textWidth / 2, y + 11, 300);
+			gfx.pose().scale(0.5f, 0.5f, 0.5f);
 			RenderSystem.applyModelViewMatrix();
-
 			RenderSystem.enableDepthTest();
-
-			//this.font.draw(poseStack, altText, 0, 0, 16777215);
-			this.font.drawShadow(poseStack, altText, 0, 0, 16777215);
-
-		poseStack.popPose();
+			gfx.drawString(this.font, altText, 0, 0, 16777215, false);
+		gfx.pose().popPose();
 		RenderSystem.applyModelViewMatrix();
 
 	}
@@ -135,8 +130,8 @@ public class StorageView extends TorchWidget {
 		if (!this.inBounds(x, y))
 			return false;
 
-		x -= this.x;
-		y -= this.y;
+		x -= this.getX();
+		y -= this.getY();
 
 		ItemStack inHand = minecraft.player.containerMenu.getCarried();
 
@@ -236,30 +231,24 @@ public class StorageView extends TorchWidget {
 	private int margin = 3;
 
 	@Override
-	public void renderContents(PoseStack pPoseStack, int mouseX, int mouseY, float pPartialTick) {
+	public void renderContents(GuiGraphics gfx, int mouseX, int mouseY, float pPartialTick) {
 		TorchUtil.insetBox(
-				pPoseStack,
+				gfx,
 				Rezolve.loc("textures/gui/widgets/storage_view_background.png"),
-				x, y, width, height
+                getX(), getY(), width, height
 		);
 
-		int localMouseX = mouseX - this.x;
-		int localMouseY = mouseY - this.y;
-
-		var min = new Vector3f(x, y, 0);
-		min.transform(pPoseStack.last().normal());
-
-		var max = new Vector3f(x + width, y + width, 0);
-		max.transform(pPoseStack.last().normal());
+		int localMouseX = mouseX - this.getX();
+		int localMouseY = mouseY - this.getY();
 
 		if (windowColumnCount == 0)
 			windowColumnCount = 1;
 
-		pushPose(pPoseStack, () -> {
-			repose(() -> pPoseStack.translate(this.x, this.y, 0));
+		pushPose(gfx.pose(), () -> {
+			repose(() -> gfx.pose().translate(this.getX(), this.getY(), 0));
 
 			//enableScissor(x, y + 1, x + width, y + height - 1);
-			scissor(pPoseStack, 0, 0 + 1, width, height - 3, () -> {
+			scissor(gfx, 0, 0 + 1, width, height - 3, () -> {
 				if (this.visibleItems != null) {
 					int x = this.displayedOffset % this.windowColumnCount;
 					int y = this.displayedOffset / this.windowColumnCount;
@@ -277,7 +266,7 @@ public class StorageView extends TorchWidget {
 						}
 
 						if (slotPosY + this.itemSize >= 0 && slotPosY < this.height && slotPosX >= 0 && slotPosX < this.width) {
-							this.drawItemStack(pPoseStack, item.stack, slotPosX, slotPosY, this.shortenCount(item.amount));
+							this.drawItemStack(gfx, item.stack, slotPosX, slotPosY, this.shortenCount(item.amount));
 						}
 
 						x += 1;
@@ -302,11 +291,11 @@ public class StorageView extends TorchWidget {
 					if (puckPosition < 0)
 						puckPosition = 0;
 
-					TorchUtil.colorQuad(pPoseStack, 0x44000000, scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight);
-					TorchUtil.colorQuad(pPoseStack, 0x88FFFFFF, scrollBarX, scrollBarY + puckPosition, scrollBarWidth, puckHeight);
+					TorchUtil.colorQuad(gfx, 0x44000000, scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight);
+					TorchUtil.colorQuad(gfx, 0x88FFFFFF, scrollBarX, scrollBarY + puckPosition, scrollBarWidth, puckHeight);
 
 				} else {
-					this.font.draw(pPoseStack, noConnectionMessage, 7, 30, 0xFFFFFFFF);
+					gfx.drawString(font, noConnectionMessage, 7, 30, 0xFFFFFFFF, false);
 				}
 			});
 		});
@@ -413,10 +402,10 @@ public class StorageView extends TorchWidget {
 
 	public boolean inBounds(double mouseX, double mouseY) {
 		return (
-			mouseX > this.x
-			&& mouseX < this.x + this.width
-			&& mouseY > this.y
-			&& mouseY < this.y + this.height
+			mouseX > this.getX()
+			&& mouseX < this.getX() + this.width
+			&& mouseY > this.getY()
+			&& mouseY < this.getY() + this.height
 		);
 	}
 
@@ -433,12 +422,12 @@ public class StorageView extends TorchWidget {
 
 	@Override
 	public boolean isMouseOver(double pMouseX, double pMouseY) {
-		return x < pMouseX && pMouseX < x + width && y < pMouseY && pMouseY < y + height;
+		return getX() < pMouseX && pMouseX < getX() + width && getY() < pMouseY && pMouseY < getY() + height;
 	}
 
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double pDelta) {
-		boolean inFrame = (mouseX > this.x && mouseX < this.x + this.width && mouseY > this.y && mouseY < this.y + this.height);
+		boolean inFrame = (mouseX > this.getX() && mouseX < this.getX() + this.width && mouseY > this.getY() && mouseY < this.getY() + this.height);
 		if (inFrame) {
 			this.handleMouseWheel(pDelta);
 			return true;
@@ -471,10 +460,5 @@ public class StorageView extends TorchWidget {
 	@Override
 	public NarrationPriority narrationPriority() {
 		return NarrationPriority.HOVERED;
-	}
-
-	@Override
-	public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
-		// TODO
 	}
 }

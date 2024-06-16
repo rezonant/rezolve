@@ -7,6 +7,7 @@ import com.rezolvemc.common.registry.ScreenFor;
 import com.rezolvemc.storage.view.IStorageViewContainer;
 import com.rezolvemc.storage.view.StorageView;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -106,8 +107,8 @@ public class StorageShellScreen extends MachineScreen<StorageShellMenu> implemen
 	private StorageView storageView;
 
 	@Override
-	protected void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-		super.renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
+	protected void renderContents(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
+		super.renderContents(gfx, pMouseX, pMouseY, pPartialTick);
 		if (this.storageView != null && this.searchField != null)
 			this.storageView.setQuery(this.searchField.getValue());
 	}

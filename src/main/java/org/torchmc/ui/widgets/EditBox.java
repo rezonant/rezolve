@@ -1,7 +1,7 @@
 package org.torchmc.ui.widgets;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import org.torchmc.ui.TorchWidget;
 import org.torchmc.events.Event;
@@ -36,8 +36,8 @@ public class EditBox extends TorchWidget {
 
     private void positionNativeWidget() {
         var rect = getScreenRect();
-        nativeWidget.x = rect.getX();
-        nativeWidget.y = rect.getY();
+        nativeWidget.setX(rect.getX());
+        nativeWidget.setY(rect.getY());
         nativeWidget.setWidth(rect.getWidth());
         nativeWidget.setHeight(rect.getHeight());
     }
@@ -64,28 +64,28 @@ public class EditBox extends TorchWidget {
     }
 
     @Override
-    protected void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-        super.renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
+    protected void renderContents(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
+        super.renderContents(gfx, pMouseX, pMouseY, pPartialTick);
 
         positionNativeWidget();
 
-        pushPose(pPoseStack, () -> {
+        pushPose(gfx.pose(), () -> {
             repose(() -> {
                 var rect = getScreenRect();
-                pPoseStack.translate(-rect.getX() + x, -rect.getY() + y, 0);
+                gfx.pose().translate(-rect.getX() + getX(), -rect.getY() + getY(), 0);
             });
-            nativeWidget.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
+            nativeWidget.render(gfx, pMouseX, pMouseY, pPartialTick);
         });
     }
 
     @Override
     public void becameUnfocused() {
-        nativeWidget.setFocus(false);
+        nativeWidget.setFocused(false);
     }
 
     @Override
     public void becameFocused() {
-        nativeWidget.setFocus(true);
+        nativeWidget.setFocused(true);
     }
 
     @Override
@@ -97,7 +97,7 @@ public class EditBox extends TorchWidget {
         }
 
         var rect = getScreenRect();
-        return nativeWidget.mouseClicked(rect.getX() - x + pMouseX, rect.getY() - y + pMouseY, pButton);
+        return nativeWidget.mouseClicked(rect.getX() - getX() + pMouseX, rect.getY() - getY() + pMouseY, pButton);
     }
 
     @Override
@@ -107,7 +107,7 @@ public class EditBox extends TorchWidget {
 
     @Override
     public void mouseMoved(double pMouseX, double pMouseY) {
-        nativeWidget.mouseMoved(pMouseX - x, pMouseY - y);
+        nativeWidget.mouseMoved(pMouseX - getX(), pMouseY - getY());
     }
 
     @Override

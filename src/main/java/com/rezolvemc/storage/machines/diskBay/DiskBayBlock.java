@@ -5,14 +5,14 @@ import com.rezolvemc.common.registry.WithMenu;
 import com.rezolvemc.common.machines.Machine;
 import com.rezolvemc.common.registry.RegistryId;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MapColor;
 
 @RegistryId("disk_bay")
 @WithBlockEntity(DiskBayEntity.class)
 @WithMenu(DiskBayMenu.class)
 public class DiskBayBlock extends Machine {
 	public DiskBayBlock() {
-		super(BlockBehaviour.Properties.of(Material.METAL));
+		super(BlockBehaviour.Properties.of().mapColor(MapColor.METAL));
 	}
 
 //	@Override

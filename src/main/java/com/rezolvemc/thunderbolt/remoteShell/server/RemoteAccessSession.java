@@ -231,7 +231,7 @@ public class RemoteAccessSession {
 
                     ItemStack netStack = null;
                     ManufacturingPattern.Action action = null;
-                    if (oldItem.sameItem(stack)) {
+                    if (ItemStack.isSameItem(oldItem, stack)) {
                         netStack = new ItemStack(oldItem.getItem(), Math.abs(stack.getCount() - oldItem.getCount()));
 
                         if (stack.getCount() > oldItem.getCount())

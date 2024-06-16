@@ -6,6 +6,7 @@ import com.rezolvemc.common.gui.EnergyMeter;
 import com.rezolvemc.common.util.RezolveItemUtil;
 import com.rezolvemc.thunderbolt.remoteShell.common.MachineListing;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -243,11 +244,11 @@ public class MachineListWindow extends Window {
         }
 
         @Override
-        public void render(PoseStack pPoseStack, int width, int mouseX, int mouseY, float partialTicks) {
+        public void render(GuiGraphics gfx, int width, int mouseX, int mouseY, float partialTicks) {
             var stack = machine.getItem();
             var pos = machine.getBlockPos();
 
-            TorchUtil.drawItem(pPoseStack, stack, 2, 2);
+            TorchUtil.drawItem(gfx, stack, 2, 2);
 
             int distance = (int)minecraft.player.position().distanceToSqr(Vec3.atCenterOf(pos));
             String name = stack.getHoverName().getString();
@@ -260,21 +261,8 @@ public class MachineListWindow extends Window {
             }
 
             int textY = 2;
-            font.draw(
-                    pPoseStack,
-                    name,
-                    iconWidth + 2,
-                    textY,
-                    0xFF000000
-            );
-
-            font.draw(
-                    pPoseStack,
-                    subName,
-                    iconWidth + 2,
-                    textY + font.lineHeight + 1,
-                    0xFF666666
-            );
+            gfx.drawString(font, name, iconWidth + 2, textY, 0xFF000000, false);
+            gfx.drawString(font, subName, iconWidth + 2, textY + font.lineHeight + 1, 0xFF666666, false);
         }
 
         @Override

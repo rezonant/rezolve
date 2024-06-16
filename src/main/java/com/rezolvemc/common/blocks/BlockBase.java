@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraftforge.registries.DeferredRegister;
 
 import java.util.ArrayList;
@@ -45,13 +46,8 @@ public class BlockBase extends Block {
     }
 
     @Override
-    public List<ItemStack> getDrops(BlockState pState, LootContext.Builder pBuilder) {
+    public List<ItemStack> getDrops(BlockState pState, LootParams.Builder pBuilder) {
         return List.of(new ItemStack(asItem()));
-    }
-
-    @Override
-    public void fillItemCategory(CreativeModeTab pTab, NonNullList<ItemStack> pItems) {
-        super.fillItemCategory(pTab, pItems);
     }
 
     public void applyTags(Consumer<RezolveRegistry.Tagger<Block>> configurer) {

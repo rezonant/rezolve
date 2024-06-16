@@ -180,7 +180,7 @@ public class Rezolve {
 
 	@Deprecated
 	public static boolean areStacksSame(ItemStack stackA, ItemStack stackB) {
-		return ItemStack.isSame(stackA, stackB);
+		return ItemStack.isSameItem(stackA, stackB);
 	}
 
 	public boolean isDye(Item item) {

@@ -4,7 +4,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.network.RezolveScreenPacket;
+import net.minecraft.client.gui.GuiGraphics;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.torchmc.inventory.BaseSlot;
 import com.rezolvemc.common.inventory.IngredientSlot;
 import org.torchmc.inventory.OutputSlot;
@@ -226,12 +228,13 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
     }
 
     @Override
-    protected void renderOver(PoseStack poseStack, int mouseX, int mouseY) {
-        super.renderOver(poseStack, mouseX, mouseY);
-        renderTooltips(poseStack, mouseX, mouseY);
+    protected void renderOver(GuiGraphics gfx, int mouseX, int mouseY) {
+        super.renderOver(gfx, mouseX, mouseY);
+        renderTooltips(gfx, mouseX, mouseY);
     }
 
-    protected void renderTooltips(PoseStack pPoseStack, int pMouseX, int pMouseY) {
+    protected void renderTooltips(GuiGraphics gfx, int pMouseX, int pMouseY) {
+        // TODO: how? needed?
 
         var slot = getSlotUnderMouse();
         List<Component> tooltipContent = null;
@@ -290,17 +293,16 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
         }
 
         if (tooltipContent != null) {
-            renderTooltip(
-                    pPoseStack,
+            gfx.renderComponentTooltip(
+                    minecraft.font,
                     tooltipContent,
-                    Optional.empty(),
                     pMouseX, pMouseY
             );
         }
     }
 
     @Override
-    protected void renderBg(PoseStack pPoseStack, float pPartialTick, int pMouseX, int pMouseY) {
+    protected void renderBg(@NotNull GuiGraphics gfx, float pPartialTick, int pMouseX, int pMouseY) {
     }
 
     public MachineMenu getMachineMenu() {
@@ -311,11 +313,17 @@ public class MachineScreen<MenuT extends MachineMenu> extends TorchScreen<MenuT>
     protected List<Rect2i> getJeiAreas() {
         var list = super.getJeiAreas();
 
-        if (leftShoulderButtons != null)
-            list.add(leftShoulderButtons.getDesiredScreenRect());
+        if (leftShoulderButtons != null) {
+            var rect = leftShoulderButtons.getDesiredScreenRect();
+            if (rect.getWidth() > 0 && rect.getHeight() > 0)
+                list.add(rect);
+        }
 
-        if (rightShoulderButtons != null)
-            list.add(rightShoulderButtons.getDesiredScreenRect());
+        if (rightShoulderButtons != null) {
+            var rect = rightShoulderButtons.getDesiredScreenRect();
+            if (rect.getWidth() > 0 && rect.getHeight() > 0)
+                list.add(rect);
+        }
 
         return list;
     }

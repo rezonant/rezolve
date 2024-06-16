@@ -1,10 +1,10 @@
 package org.torchmc.ui;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.thunderbolt.remoteShell.client.RemoteShellOverlay;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -322,25 +322,25 @@ public class Window extends TorchWidget {
      */
     @Override
     public boolean isMouseOver(double pMouseX, double pMouseY) {
-        return x < pMouseX && pMouseX < x + width + dragHandleSize / 2 && y < pMouseY && pMouseY < y + height + dragHandleSize / 2;
+        return getX() < pMouseX && pMouseX < getX() + width + dragHandleSize / 2 && getY() < pMouseY && pMouseY < getY() + height + dragHandleSize / 2;
     }
 
     /**
      * Renders the window's title bar. Can be overridden to customize. Note that the titlebar contents itself are
      * rendered using Torch's layout system and widgets, so the default implementation of this method only draws the
      * colored rectangle background.
-     * @param poseStack
+     * @param gfx
      * @param partialTick
      * @param mouseX
      * @param mouseY
      */
-    protected void renderTitleBar(PoseStack poseStack, float partialTick, int mouseX, int mouseY) {
+    protected void renderTitleBar(GuiGraphics gfx, float partialTick, int mouseX, int mouseY) {
         var border = 2;
 
         if (movable && titleBarVisible) {
             TorchUtil.colorQuad(
-                    poseStack, 0xFF999999,
-                    x + border, y + border,
+                    gfx, 0xFF999999,
+                    getX() + border, getY() + border,
                     width - border * 2, titlebarHeight - border * 2
             );
         }
@@ -368,22 +368,22 @@ public class Window extends TorchWidget {
      * @param runnable
      */
     @Override
-    protected void screenScissor(Runnable runnable) {
+    protected void screenScissor(GuiGraphics gfx, Runnable runnable) {
         runnable.run();
     }
 
     @Override
-    protected void renderBackground(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    protected void renderBackground(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
         TorchUtil.insetBox(
-                pPoseStack,
+                gfx,
                 TorchUI.builtInTex("gui/widgets/screen_background.png"),
-                x, y, width, height
+                getX(), getY(), width, height
         );
 
-        renderTitleBar(pPoseStack, pPartialTick, pMouseX, pMouseY);
+        renderTitleBar(gfx, pPartialTick, pMouseX, pMouseY);
     }
 
-    protected void renderContents(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+    protected void renderContents(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
 
 //        if (panel != null)
 //            panel.render(poseStack, mouseX, mouseY, partialTick);
@@ -391,20 +391,20 @@ public class Window extends TorchWidget {
         if (!resizing && resizable) {
             if (hoveringRightEdge(mouseX, mouseY) && hoveringBottomEdge(mouseX, mouseY)) {
                 TorchUtil.colorQuad(
-                        poseStack, Color.WHITE.withAlpha(0.5f),
+                        gfx, Color.WHITE.withAlpha(0.5f),
                         getRightEdgeStart(), getBottomEdgeStart(),
                         dragHandleSize, dragHandleSize
                 );
             } else if (hoveringRightEdge(mouseX, mouseY)) {
                 TorchUtil.colorQuad(
-                        poseStack, Color.WHITE.withAlpha(0.5f),
-                        getRightEdgeStart(), y,
+                        gfx, Color.WHITE.withAlpha(0.5f),
+                        getRightEdgeStart(), getY(),
                         dragHandleSize, height
                 );
             } else if (hoveringBottomEdge(mouseX, mouseY)) {
                 TorchUtil.colorQuad(
-                        poseStack, Color.WHITE.withAlpha(0.5f),
-                        x, getBottomEdgeStart(),
+                        gfx, Color.WHITE.withAlpha(0.5f),
+                        getX(), getBottomEdgeStart(),
                         width, dragHandleSize
                 );
             }
@@ -426,8 +426,8 @@ public class Window extends TorchWidget {
         if (movable) {
             if (hoveringMenuBar(pMouseX, pMouseY)) {
                 moving = true;
-                moveStartLeftPos = x;
-                moveStartTopPos = y;
+                moveStartLeftPos = getX();
+                moveStartTopPos = getY();
 
 
 
@@ -527,24 +527,24 @@ public class Window extends TorchWidget {
     }
 
     private boolean hoveringMenuBar(double pMouseX, double pMouseY) {
-        return x < pMouseX && pMouseX < x + width
-                && y < pMouseY && pMouseY < y + titlebarHeight;
+        return getX() < pMouseX && pMouseX < getX() + width
+                && getY() < pMouseY && pMouseY < getY() + titlebarHeight;
     }
 
     private boolean hoveringBottomEdge(double pMouseX, double pMouseY) {
-        return getBottomEdgeStart() < pMouseY && pMouseY < getBottomEdgeStart() + dragHandleSize && x < pMouseX && pMouseX < x + width + dragHandleSize / 2;
+        return getBottomEdgeStart() < pMouseY && pMouseY < getBottomEdgeStart() + dragHandleSize && getX() < pMouseX && pMouseX < getX() + width + dragHandleSize / 2;
     }
 
     private int getRightEdgeStart() {
-        return x + width - dragHandleSize / 2;
+        return getX() + width - dragHandleSize / 2;
     }
 
     private boolean hoveringRightEdge(double mouseX, double mouseY) {
-        return getRightEdgeStart() < mouseX && mouseX < getRightEdgeStart() + dragHandleSize && y < mouseY && mouseY < y + height + dragHandleSize / 2;
+        return getRightEdgeStart() < mouseX && mouseX < getRightEdgeStart() + dragHandleSize && getY() < mouseY && mouseY < getY() + height + dragHandleSize / 2;
     }
 
     private int getBottomEdgeStart() {
-        return y + height - dragHandleSize / 2;
+        return getY() + height - dragHandleSize / 2;
     }
 
     private int panelBorder = 3;

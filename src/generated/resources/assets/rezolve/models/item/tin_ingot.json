@@ -1,6 +1,6 @@
 {
   "parent": "rezolve:item/standard_item",
   "textures": {
-    "layer0": "rezolve:metals/tin/tin_ingot"
+    "layer0": "rezolve:block/metals/tin/tin_ingot"
   }
 }

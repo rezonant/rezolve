@@ -1,6 +1,7 @@
 package org.torchmc.ui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import org.torchmc.ui.util.TorchUtil;
 
@@ -23,8 +24,8 @@ public class ModalWindow extends Window {
     }
 
     @Override
-    protected void renderBackground(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-        TorchUtil.colorQuad(pPoseStack,  0x80000000, 0, 0, screen.width, screen.height);
-        super.renderBackground(pPoseStack, pMouseX, pMouseY, pPartialTick);
+    protected void renderBackground(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
+        TorchUtil.colorQuad(gfx, 0x80000000, 0, 0, screen.width, screen.height);
+        super.renderBackground(gfx, pMouseX, pMouseY, pPartialTick);
     }
 }

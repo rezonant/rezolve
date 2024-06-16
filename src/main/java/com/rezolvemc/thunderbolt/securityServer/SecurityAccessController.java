@@ -15,7 +15,7 @@ public class SecurityAccessController {
 	@SubscribeEvent
 	public void handleBlockRightClick(PlayerInteractEvent.RightClickBlock evt) {
 		
-		BlockEntity entity = evt.getEntity().level.getBlockEntity(evt.getPos());
+		BlockEntity entity = evt.getEntity().level().getBlockEntity(evt.getPos());
 		SecurityServerEntity securityServer;
 		
 		if (entity instanceof SecurityServerEntity) {
@@ -27,7 +27,7 @@ public class SecurityAccessController {
 			return;
 		}
 		
-		securityServer = Rezolve.getGoverningSecurityServer(evt.getEntity().level, evt.getPos());
+		securityServer = Rezolve.getGoverningSecurityServer(evt.getEntity().level(), evt.getPos());
 		
 		if (securityServer != null) {
 			if (!securityServer.canPlayerUse(evt.getEntity(), evt.getPos())) {

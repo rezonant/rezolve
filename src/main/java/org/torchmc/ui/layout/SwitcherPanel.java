@@ -1,6 +1,7 @@
 package org.torchmc.ui.layout;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 
 /**
  * A panel which shows a single child at a time and allows for switching which child is shown.
@@ -129,10 +130,10 @@ public class SwitcherPanel extends LayoutPanel {
     }
 
     @Override
-    protected void renderChildren(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    protected void renderChildren(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
         var panel = getActivePanel();
         if (panel != null) {
-            panel.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
+            panel.render(gfx, pMouseX, pMouseY, pPartialTick);
         }
     }
 }

@@ -24,7 +24,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.gameevent.GameEventListener;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -58,7 +58,7 @@ public class ThunderboltCable extends Cable {
 
 	public ThunderboltCable() {
 		super(
-				BlockBehaviour.Properties.of(Material.METAL)
+				BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
 						.isViewBlocking((state, level, pos) -> false)
 						.noOcclusion()
 				// TODO: no torches

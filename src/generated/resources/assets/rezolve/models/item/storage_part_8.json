@@ -1,6 +1,6 @@
 {
   "parent": "rezolve:item/standard_item",
   "textures": {
-    "layer0": "rezolve:storage_parts/size_8"
+    "layer0": "rezolve:item/storage_parts/size_8"
   }
 }

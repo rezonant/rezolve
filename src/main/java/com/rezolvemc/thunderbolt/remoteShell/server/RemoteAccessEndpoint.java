@@ -144,7 +144,7 @@ public abstract class RemoteAccessEndpoint {
     }
 
     private void withPlayerState(Player player, Consumer<RemoteAccessSession> func) {
-        if (player.level.isClientSide)
+        if (player.level().isClientSide)
             return;
 
         var state = getPlayerState(player);
@@ -156,13 +156,13 @@ public abstract class RemoteAccessEndpoint {
 
     public boolean handlePacket(RezolvePacket rezolvePacket, Player player) {
         if (rezolvePacket instanceof RemoteShellEntityReturnPacket) {
-            withPlayerState(player, state -> state.returnToShell());
+            withPlayerState(player, RemoteAccessSession::returnToShell);
         } else if (rezolvePacket instanceof RemoteShellStartRecordingPacket) {
-            withPlayerState(player, state -> state.startRecording());
+            withPlayerState(player, RemoteAccessSession::startRecording);
         } else if (rezolvePacket instanceof RemoteShellStopRecordingPacket) {
-            withPlayerState(player, state -> state.stopRecording());
+            withPlayerState(player, RemoteAccessSession::stopRecording);
         } else if (rezolvePacket instanceof RemoteShellTakePatternPacket) {
-            withPlayerState(player, state -> state.takePattern());
+            withPlayerState(player, RemoteAccessSession::takePattern);
         } else if (rezolvePacket instanceof RemoteShellActivatePacket activatePacket) {
             withPlayerState(player, state -> state.connectToMachine(activatePacket.getLevel(), activatePacket.getActivatedMachine()));
         } else if (rezolvePacket instanceof RemoteShellSearchQuery query) {

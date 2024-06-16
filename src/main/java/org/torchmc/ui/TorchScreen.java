@@ -5,8 +5,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.Rect2i;
@@ -16,14 +17,15 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import org.joml.Vector3f;
 import org.torchmc.events.Event;
 import org.torchmc.events.EventEmitter;
 import org.torchmc.events.EventType;
 import org.torchmc.events.Subscription;
 import org.torchmc.ui.layout.Panel;
-import org.torchmc.ui.util.Point;
 import org.torchmc.ui.util.Size;
 import org.torchmc.ui.util.TorchUtil;
 import org.torchmc.ui.widgets.SlotWidget;
@@ -210,7 +212,7 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
     }
 
     @Override
-    protected void renderLabels(PoseStack pPoseStack, int pMouseX, int pMouseY) {
+    protected void renderLabels(@NotNull GuiGraphics gfx, int pMouseX, int pMouseY) {
         // Intentionally do nothing. Do not remove.
     }
 
@@ -337,21 +339,22 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
             return false;
         }
 
-        if (pKeyCode == GLFW.GLFW_KEY_TAB) {
-            boolean direction = !hasShiftDown();
-
-            // Try to move focus to the next/previous focusable widget.
-
-            if (!this.changeFocus(direction)) {
-                // This means there are no more widgets to focus, and the currently focused widget has now become null.
-                // Wrap around to the beginning of the list, because changeFocus is supposed to focus on the first focusable
-                // widget when there is no existing widget focused.
-
-                this.changeFocus(direction);
-            }
-
-            return false;
-        }
+        // TODO: hoping this won't be needed anymore
+//        if (pKeyCode == GLFW.GLFW_KEY_TAB) {
+//            boolean direction = !hasShiftDown();
+//
+//            // Try to move focus to the next/previous focusable widget.
+//
+//            if (!this.changeFocus(direction)) {
+//                // This means there are no more widgets to focus, and the currently focused widget has now become null.
+//                // Wrap around to the beginning of the list, because changeFocus is supposed to focus on the first focusable
+//                // widget when there is no existing widget focused.
+//
+//                this.changeFocus(direction);
+//            }
+//
+//            return false;
+//        }
 
         return super.keyPressed(pKeyCode, pScanCode, pModifiers);
     }
@@ -364,68 +367,69 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
     }
 
     @Override
-    public final void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    public final void render(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
         //RenderSystem.enableDepthTest();
         updateStateFromMenu();
 
-        renderBackground(pPoseStack);
+        renderBackground(gfx);
 
-        var originalItemBlit = this.itemRenderer.blitOffset;
+        gfx.pose().pushPose();
         var windowUnderCursor = getWindowAt(pMouseX, pMouseY);
         for (var window : windows) {
             boolean receiveCursor = windowUnderCursor == null || windowUnderCursor == window;
-
-            window.render(pPoseStack, receiveCursor ? pMouseX : -1, receiveCursor ? pMouseY : -1, pPartialTick);
-            this.itemRenderer.blitOffset += 200.0F;
+            window.render(gfx, receiveCursor ? pMouseX : -1, receiveCursor ? pMouseY : -1, pPartialTick);
+            gfx.pose().translate(0, 0, 200.0f); // TODO: is this still an appropriate amount to push?
         }
-        this.itemRenderer.blitOffset = originalItemBlit;
+        gfx.pose().popPose();
 
         // Background
-        renderBg(pPoseStack, pPartialTick, pMouseX, pMouseY);
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.ContainerScreenEvent.Render.Background(this, pPoseStack, pMouseX, pMouseY));
+        renderBg(gfx, pPartialTick, pMouseX, pMouseY);
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.ContainerScreenEvent.Render.Background(
+                this, gfx, pMouseX, pMouseY
+        ));
 
         // Children
         RenderSystem.disableDepthTest();
-        for(Widget widget : this.renderables)
-            widget.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
+        for(Renderable widget : this.renderables)
+            widget.render(gfx, pMouseX, pMouseY, pPartialTick);
 
         // Foreground
-        pPoseStack.pushPose();
-        pPoseStack.translate(leftPos, topPos, 0);
+        gfx.pose().pushPose();
+        gfx.pose().translate(leftPos, topPos, 0);
         RenderSystem.applyModelViewMatrix();
-        renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
-        pPoseStack.popPose();
+        renderContents(gfx, pMouseX, pMouseY, pPartialTick);
+        gfx.pose().popPose();
         RenderSystem.applyModelViewMatrix();
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.ContainerScreenEvent.Render.Foreground(this, pPoseStack, pMouseX, pMouseY));
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.ContainerScreenEvent.Render.Foreground(
+                this, gfx, pMouseX, pMouseY
+        ));
 
         // Overlay
-        renderOver(pPoseStack, pMouseX, pMouseY);
-        renderCarriedItem(pPoseStack, pMouseX, pMouseY, pPartialTick);
+        renderOver(gfx, pMouseX, pMouseY);
+        renderCarriedItem(gfx, pMouseX, pMouseY, pPartialTick);
 
         // Cleanup
         RenderSystem.enableDepthTest();
     }
 
-    public void renderCarriedItem(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    public void renderCarriedItem(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         ItemStack itemstack = this.menu.getCarried();
         if (!itemstack.isEmpty()) {
-            this.renderFloatingItem(itemstack, pMouseX - 8, pMouseY - 8);
+            this.renderFloatingItem(gfx, itemstack, pMouseX - 8, pMouseY - 8);
         }
     }
 
-    private void renderFloatingItem(ItemStack pStack, int pX, int pY) {
+    private void renderFloatingItem(GuiGraphics gfx, ItemStack pStack, int pX, int pY) {
         PoseStack posestack = RenderSystem.getModelViewStack();
-        posestack.translate(0.0D, 0.0D, 32.0D);
+        posestack.translate(0.0D, 0.0D, 1000.0D);
         RenderSystem.applyModelViewMatrix();
-        this.setBlitOffset(200);
-        this.itemRenderer.blitOffset += 200.0F;
-        var font = net.minecraftforge.client.extensions.common.IClientItemExtensions.of(pStack).getFont(pStack, net.minecraftforge.client.extensions.common.IClientItemExtensions.FontContext.ITEM_COUNT);
+
+        var font = IClientItemExtensions.of(pStack).getFont(pStack, IClientItemExtensions.FontContext.ITEM_COUNT);
         if (font == null) font = this.font;
-        this.itemRenderer.renderAndDecorateItem(pStack, pX, pY);
-        this.itemRenderer.renderGuiItemDecorations(font, pStack, pX, pY);
-        this.setBlitOffset(0);
-        this.itemRenderer.blitOffset -= 200.0F;
+
+        gfx.renderItem(pStack, pX, pY);
+        gfx.renderItemDecorations(font, pStack, pX, pY);
     }
 
     public void sendWindowToTop(Window window) {
@@ -440,46 +444,42 @@ public abstract class TorchScreen<T extends AbstractContainerMenu> extends Abstr
 
     /**
      * Render on top of all other drawing for this widget
-     * @param poseStack
+     * @param gfx
      * @param mouseX
      * @param mouseY
      */
-    protected void renderOver(PoseStack poseStack, int mouseX, int mouseY) {
+    protected void renderOver(GuiGraphics gfx, int mouseX, int mouseY) {
 
     }
 
-    protected void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    protected void renderContents(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
     }
 
-    protected void drawItem(PoseStack poseStack, ItemStack stack, int x, int y) {
+    protected void drawItem(GuiGraphics gfx, ItemStack stack, int x, int y) {
         RenderSystem.setShaderColor(1, 1, 1, 1);
-        poseStack.translate(0,0, 32);
+        gfx.pose().translate(0,0, 32);
         RenderSystem.applyModelViewMatrix();
         RenderSystem.enableDepthTest();
 
-        var tr = TorchUtil.getTranslation(poseStack.last().pose());
-        this.setBlitOffset(200);
-        this.itemRenderer.renderAndDecorateItem(stack, (int)tr.x() + x, (int)tr.y() + y);
-        this.setBlitOffset(0);
-        this.itemRenderer.blitOffset = 0.0F;
-
+        var tr = gfx.pose().last().pose().getTranslation(new Vector3f());
+        gfx.renderItem(stack, (int)tr.x() + x, (int)tr.y() + y);
         RenderSystem.disableDepthTest();
     }
 
-    protected void textureQuad(PoseStack stack, ResourceLocation location, double x, double y, double width, double height) {
-        TorchUtil.textureQuad(stack, location, x, y, width, height);
+    protected void textureQuad(GuiGraphics gfx, ResourceLocation location, double x, double y, double width, double height) {
+        TorchUtil.textureQuad(gfx, location, x, y, width, height);
     }
 
-    protected void textureQuad(PoseStack stack, ResourceLocation location, double x, double y, double width, double height, float minU, float minV, float maxU, float maxV) {
-        TorchUtil.textureQuad(stack, location, x, y, width, height, minU, minV, maxU, maxV);
+    protected void textureQuad(GuiGraphics gfx, ResourceLocation location, double x, double y, double width, double height, float minU, float minV, float maxU, float maxV) {
+        TorchUtil.textureQuad(gfx, location, x, y, width, height, minU, minV, maxU, maxV);
     }
 
-    protected void colorQuad(PoseStack stack, int color, double x, double y, double width, double height) {
-        TorchUtil.colorQuad(stack, color, x, y, width, height);
+    protected void colorQuad(GuiGraphics gfx, int color, double x, double y, double width, double height) {
+        TorchUtil.colorQuad(gfx, color, x, y, width, height);
     }
 
-    protected void colorQuad(PoseStack stack, float r, float g, float b, float a, double x, double y, double width, double height) {
-        TorchUtil.colorQuad(stack, r, g, b, a, x, y, width, height);
+    protected void colorQuad(GuiGraphics gfx, float r, float g, float b, float a, double x, double y, double width, double height) {
+        TorchUtil.colorQuad(gfx, r, g, b, a, x, y, width, height);
     }
 
     public boolean isKeyDown(int key) {

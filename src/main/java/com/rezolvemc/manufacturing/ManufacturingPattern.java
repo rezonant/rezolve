@@ -5,6 +5,7 @@ import com.rezolvemc.common.registry.RegistryId;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -120,7 +121,7 @@ public class ManufacturingPattern extends ItemBase {
 
         @Override
         public void deserializeNBT(CompoundTag nbt) {
-            level = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString("level")));
+            level = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(nbt.getString("level")));
             position = NbtUtils.readBlockPos(nbt.getCompound("pos"));
             slot = nbt.getInt("slot");
             action = Action.valueOf(nbt.getString("action"));

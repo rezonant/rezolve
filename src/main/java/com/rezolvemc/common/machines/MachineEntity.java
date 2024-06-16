@@ -5,6 +5,7 @@ import com.rezolvemc.common.blocks.BlockEntityBase;
 import com.rezolvemc.common.network.RezolvePacket;
 import com.rezolvemc.common.util.RezolveTagUtil;
 import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.NotNull;
 import org.torchmc.events.Event;
 import org.torchmc.events.EventEmitter;
 import org.torchmc.events.EventType;
@@ -127,17 +128,17 @@ public class MachineEntity extends BlockEntityBase implements Container, IMachin
 	}
 
 	@Override
-	public boolean handleGameEvent(ServerLevel pLevel, GameEvent.Message pEventMessage) {
-		if (pEventMessage.gameEvent() == GameEvent.BLOCK_DESTROY) {
+	public boolean handleGameEvent(@NotNull ServerLevel pLevel, @NotNull GameEvent pEventMessage, @NotNull GameEvent.Context pContext, @NotNull Vec3 pPos) {
+		if (pEventMessage == GameEvent.BLOCK_DESTROY) {
 
 			// Vec3.atCenterOf() always just adds 0.5 to all components, which means if you simply truncate to int
 			// you will get the wrong result. Consider a block at Z -60. -60 + 0.5 = -59.5. Truncate(-59.5) = -59
 			// But that's not the block position.
 
 			var blockPos = new BlockPos(
-					(int)(pEventMessage.source().x() - 0.5),
-					(int)(pEventMessage.source().y() - 0.5),
-					(int)(pEventMessage.source().z() - 0.5)
+					(int)(pPos.x() - 0.5),
+					(int)(pPos.y() - 0.5),
+					(int)(pPos.z() - 0.5)
 			);
 			if (Objects.equals(getBlockPos(), blockPos)) {
 				// uh oh, this is me

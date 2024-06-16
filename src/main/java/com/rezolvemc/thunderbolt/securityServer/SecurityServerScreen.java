@@ -4,6 +4,7 @@ import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.machines.MachineScreen;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.rezolvemc.common.registry.ScreenFor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.torchmc.ui.layout.HorizontalLayoutPanel;
@@ -189,10 +190,10 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 		}
 
 		@Override
-		public void render(PoseStack poseStack, int width, int mouseX, int mouseY, float partialTicks) {
+		public void render(GuiGraphics gfx, int width, int mouseX, int mouseY, float partialTicks) {
 
 			if (selectedRule == rule) {
-				colorQuad(poseStack, 0xFF666666, 0, 0, width, getHeight());
+				colorQuad(gfx, 0xFF666666, 0, 0, width, getHeight());
 			}
 
 			Component modeStr = Component.literal("");
@@ -216,18 +217,8 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 				;
 			}
 
-			font.draw(
-				poseStack,
-				nameStr,
-				2, 4,
-				0x000000
-			);
-			font.draw(
-				poseStack,
-				modeStr,
-				2, 4 + font.lineHeight,
-				0x666666
-			);
+			gfx.drawString(font, nameStr, 2, 4, 0x000000, false);
+			gfx.drawString(font, modeStr, 2, 4 + font.lineHeight, 0x666666, false);
 		}
 	}
 
@@ -243,8 +234,8 @@ public class SecurityServerScreen extends MachineScreen<SecurityServerMenu> {
 	}
 
 	@Override
-	public void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-		super.renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
+	public void renderContents(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
+		super.renderContents(gfx, pMouseX, pMouseY, pPartialTick);
 
 //		if (!this.searchField.isFocused() && "".equals(this.searchField.getValue())) {
 //			this.font.draw(

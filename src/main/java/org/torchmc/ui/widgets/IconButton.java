@@ -1,6 +1,7 @@
 package org.torchmc.ui.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
@@ -10,8 +11,6 @@ import org.torchmc.ui.TorchWidget;
 import org.torchmc.ui.layout.AxisConstraint;
 import org.torchmc.ui.util.Color;
 import org.torchmc.ui.util.TorchUtil;
-
-import java.util.List;
 
 /**
  * A simple square button which only shows an icon texture and a tooltip.
@@ -23,6 +22,7 @@ public class IconButton extends TorchWidget {
         super(Component.empty());
 
         this.text = text;
+        this.setTooltip(Tooltip.create(text));
         this.icon = icon;
         this.size = size;
         this.width = size;
@@ -67,16 +67,6 @@ public class IconButton extends TorchWidget {
         return icon;
     }
 
-    @Override
-    public List<Component> getTooltip() {
-        var tooltip = super.getTooltip();
-        if (tooltip == null) {
-            tooltip = List.of(text);
-        }
-
-        return tooltip;
-    }
-
     public Runnable getHandler() {
         return handler;
     }
@@ -98,6 +88,7 @@ public class IconButton extends TorchWidget {
 
     public void setText(Component text) {
         this.text = text;
+        this.setTooltip(Tooltip.create(text));
     }
 
     public Color getInactiveTextColor() {
@@ -156,16 +147,16 @@ public class IconButton extends TorchWidget {
     }
 
     @Override
-    protected void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    protected void renderContents(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
         if (isHoveredOrFocused()) {
-            TorchUtil.colorQuad(pPoseStack, 0xFFFFFFFF, x, y, width, height);
+            TorchUtil.colorQuad(gfx, 0xFFFFFFFF, getX(), getY(), width, height);
         }
 
-        TorchUtil.colorQuad(pPoseStack, backgroundColor, x + 1, y + 1, width - 2, height - 2);
+        TorchUtil.colorQuad(gfx, backgroundColor, getX() + 1, getY() + 1, width - 2, height - 2);
         if (icon != null)
-            TorchUtil.textureQuad(pPoseStack, icon, x + 1, y + 1, width - 2, height - 2, 0, 0, 1, 1);
+            TorchUtil.textureQuad(gfx, icon, getX() + 1, getY() + 1, width - 2, height - 2, 0, 0, 1, 1);
         else if (item != null)
-            TorchUtil.drawItem(pPoseStack, item, x + 1, y + 1);
+            TorchUtil.drawItem(gfx, item, getX() + 1, getY() + 1);
     }
 
     boolean pressed = false;
@@ -185,7 +176,7 @@ public class IconButton extends TorchWidget {
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
+    public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {
         pNarrationElementOutput.add(NarratedElementType.TITLE, text);
     }
 }

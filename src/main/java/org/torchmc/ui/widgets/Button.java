@@ -1,13 +1,10 @@
 package org.torchmc.ui.widgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import org.torchmc.ui.TorchWidget;
@@ -65,11 +62,14 @@ public class Button extends TorchWidget {
         this.handler = handler;
     }
 
-    protected int getYImage(boolean pIsHovered) {
+    protected int getTextureY() {
+        int i = 1;
         if (!isActive() || pressed || keyPressed)
-            return 0;
+            i = 0;
+        else if (isHovered())
+            i = 2;
 
-        return isHovered() ? 2 : 1;
+        return 46 + i * 20;
     }
 
     public Component getText() {
@@ -97,34 +97,30 @@ public class Button extends TorchWidget {
     }
 
     @Override
-    protected void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    protected void renderContents(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
 
         float focusBorder = 2;
 
         if (isFocused())
-            TorchUtil.colorQuad(pPoseStack, 0xFFFFFFFF, x - focusBorder, y - focusBorder, width + focusBorder*2, height + focusBorder*2);
+            TorchUtil.colorQuad(gfx, 0xFFFFFFFF, getX() - focusBorder, getY() - focusBorder, width + focusBorder*2, height + focusBorder*2);
 
-        scissor(pPoseStack, x, y, width, height, () -> {
+        scissor(gfx, getX(), getY(), width, height, () -> {
             Minecraft minecraft = Minecraft.getInstance();
-            Font font = minecraft.font;
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderTexture(0, AbstractWidget.WIDGETS_LOCATION);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
-            int i = this.getYImage(this.isHoveredOrFocused());
+            gfx.setColor(1.0F, 1.0F, 1.0F, this.alpha);
             RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
-            //RenderSystem.enableDepthTest();
-
-            this.blit(pPoseStack, this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
-            this.blit(
-                    pPoseStack,
-                    this.x + this.width / 2, this.y,
-                    200 - this.width / 2,
-                    46 + i * 20, this.width / 2, this.height
+            RenderSystem.enableDepthTest();
+            gfx.blitNineSliced(
+                WIDGETS_LOCATION,
+                this.getX(), this.getY(), this.getWidth(), this.getHeight(),
+                20, 4, 200, 20, 0,
+                this.getTextureY()
             );
 
-            drawCenteredString(pPoseStack, font, text,
-                    this.x + this.width / 2, this.y + (this.height - 8) / 2,
+            gfx.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+
+            // TODO: vanilla now has scrolling strings
+            gfx.drawCenteredString(minecraft.font, text,
+                    this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2,
                     activeTextColor.multiplyAlpha(this.alpha).argb()
             );
         });
@@ -166,7 +162,7 @@ public class Button extends TorchWidget {
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
+    public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {
         pNarrationElementOutput.add(NarratedElementType.TITLE, text);
     }
 

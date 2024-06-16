@@ -12,7 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
 
 @RegistryId("bundler")
@@ -20,7 +20,7 @@ import net.minecraft.world.phys.BlockHitResult;
 @WithMenu(BundlerMenu.class)
 public class Bundler extends Machine {
 	public Bundler() {
-		super(BlockBehaviour.Properties.of(Material.METAL));
+		super(BlockBehaviour.Properties.of().mapColor(MapColor.METAL));
 	}
 
 	@Override

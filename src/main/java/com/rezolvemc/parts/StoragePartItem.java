@@ -1,11 +1,14 @@
 package com.rezolvemc.parts;
 
 import com.rezolvemc.Rezolve;
+import com.rezolvemc.RezolveCreativeTab;
 import com.rezolvemc.common.ItemBase;
+import com.rezolvemc.common.registry.RezolveRegistry;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.data.event.GatherDataEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -30,7 +33,7 @@ public class StoragePartItem extends ItemBase {
 	public static ItemStack getSizedStack(int storageSize, int count) {
 		return new ItemStack(sizes.get(storageSize), count);
 	}
-	private static Map<Integer, StoragePartItem> sizes = new HashMap<>();
+	private static final Map<Integer, StoragePartItem> sizes = new HashMap<>();
 
 	private static StoragePartItem addSize(StoragePartItem item) {
 		sizes.put(item.size, item);
@@ -52,9 +55,18 @@ public class StoragePartItem extends ItemBase {
 		}
 	}
 
+	@SubscribeEvent
+	public static void buildCreativeTab(BuildCreativeModeTabContentsEvent event) {
+		if (event.getTab().getClass() == RezolveCreativeTab.class) {
+			for (var size : sizes.values()) {
+				event.accept(size);
+			}
+		}
+	}
+
 	private static class ItemsGenerator extends ItemModelProvider {
 		public ItemsGenerator(GatherDataEvent event) {
-			super(event.getGenerator(), Rezolve.ID, event.getExistingFileHelper());
+			super(event.getGenerator().getPackOutput(), Rezolve.ID, event.getExistingFileHelper());
 		}
 
 		@Override
@@ -62,7 +74,7 @@ public class StoragePartItem extends ItemBase {
 			for (int i = 0, max = 16; i < max; ++i) {
 				getBuilder("storage_part_" + i)
 						.parent(new ModelFile.UncheckedModelFile(Rezolve.loc("item/standard_item")))
-						.texture("layer0", Rezolve.loc("storage_parts/size_" + i))
+						.texture("layer0", Rezolve.loc("item/storage_parts/size_" + i))
 				;
 			}
 		}

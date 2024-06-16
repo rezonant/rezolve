@@ -1,9 +1,9 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "rezolve:blocks/block_bundler_front",
-		"1": "rezolve:blocks/block_bundler_side",
-		"particle": "rezolve:blocks/block_bundler_front"
+		"0": "rezolve:block/block_bundler_front",
+		"1": "rezolve:block/block_bundler_side",
+		"particle": "rezolve:block/block_bundler_front"
 	},
 	"elements": [
 		{

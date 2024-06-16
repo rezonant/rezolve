@@ -1,14 +1,18 @@
 package com.rezolvemc.parts;
 
 import com.rezolvemc.Rezolve;
+import com.rezolvemc.RezolveCreativeTab;
 import com.rezolvemc.common.ItemBase;
+import com.rezolvemc.common.registry.RezolveRegistry;
+import net.minecraft.core.registries.Registries;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.data.event.GatherDataEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
+import org.jetbrains.annotations.NotNull;
 
 @Mod.EventBusSubscriber(modid = Rezolve.ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public enum MachinePart {
@@ -47,9 +51,17 @@ public enum MachinePart {
 
 	@SubscribeEvent
 	public static void handleRegisterEvent(RegisterEvent event) {
-		if (event.getRegistryKey() == ForgeRegistries.Keys.ITEMS) {
+		if (event.getRegistryKey() == Registries.ITEM) {
 			for (var part : values())
-				event.register(ForgeRegistries.Keys.ITEMS, Rezolve.loc(part.getName()), () -> part.item());
+				event.register(Registries.ITEM, Rezolve.loc(part.getName()), () -> part.item());
+		}
+	}
+
+	@SubscribeEvent
+	public static void buildCreativeTab(BuildCreativeModeTabContentsEvent event) {
+		if (event.getTab().getClass() == RezolveCreativeTab.class) {
+			for (var part : values())
+				event.accept(part.item());
 		}
 	}
 
@@ -62,15 +74,20 @@ public enum MachinePart {
 
 	public class ItemsGenerator extends ItemModelProvider {
 		public ItemsGenerator(GatherDataEvent event) {
-			super(event.getGenerator(), Rezolve.ID, event.getExistingFileHelper());
+			super(event.getGenerator().getPackOutput(), Rezolve.ID, event.getExistingFileHelper());
 		}
 
 		@Override
 		protected void registerModels() {
 			getBuilder(MachinePart.this.getName())
 					.parent(new ModelFile.UncheckedModelFile(Rezolve.loc("item/standard_item")))
-					.texture("layer0", Rezolve.loc("machine_parts/" + MachinePart.this.getName()))
+					.texture("layer0", Rezolve.loc("item/machine_parts/" + MachinePart.this.getName()))
 			;
+		}
+
+		@Override
+		public @NotNull String getName() {
+			return super.getName() + "." + MachinePart.this.getName();
 		}
 	}
 

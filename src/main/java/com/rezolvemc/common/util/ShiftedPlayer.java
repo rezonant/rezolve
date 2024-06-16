@@ -10,9 +10,9 @@ public class ShiftedPlayer extends Player {
 
     public ShiftedPlayer(Player wrappedPlayer, LevelPosition fakePosition) {
         super(
-                wrappedPlayer.getLevel().getServer().getLevel(fakePosition.levelKey),
+                wrappedPlayer.level().getServer().getLevel(fakePosition.levelKey),
                 fakePosition.blockPos,
-                0, wrappedPlayer.getGameProfile(), wrappedPlayer.getProfilePublicKey()
+                0, wrappedPlayer.getGameProfile()
         );
 
         this.wrappedPlayer = wrappedPlayer;

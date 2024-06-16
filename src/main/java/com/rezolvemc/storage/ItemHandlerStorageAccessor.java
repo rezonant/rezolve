@@ -44,7 +44,7 @@ public class ItemHandlerStorageAccessor implements IStorageAccessor {
 
         for (int i = 0, max = itemHandler.getSlots(); i < max; ++i) {
             var existingStack = itemHandler.getStackInSlot(i);
-            if (ItemStack.isSame(stack, existingStack)) {
+            if (ItemStack.isSameItem(stack, existingStack)) {
                 var takenStack = itemHandler.extractItem(i, remainingAmount, simulate);
                 remainingAmount -= takenStack.getCount();
                 foundAmount += takenStack.getCount();
@@ -73,7 +73,7 @@ public class ItemHandlerStorageAccessor implements IStorageAccessor {
             if (existingStack == null)
                 continue;
 
-            if (ItemStack.isSame(stack, existingStack))
+            if (ItemStack.isSameItem(stack, existingStack))
                 amount += existingStack.getCount();
         }
 

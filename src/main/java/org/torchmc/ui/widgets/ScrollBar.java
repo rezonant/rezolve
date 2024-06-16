@@ -1,6 +1,7 @@
 package org.torchmc.ui.widgets;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import org.torchmc.ui.TorchWidget;
@@ -71,8 +72,8 @@ public class ScrollBar extends TorchWidget {
     }
 
     public boolean isThumbHovered(double pMouseX, double pMouseY) {
-        return x < pMouseX && pMouseX < x + width
-                && y + getThumbPosition() < pMouseY && pMouseY < y + getThumbPosition() + getThumbSize()
+        return getX() < pMouseX && pMouseX < getX() + width
+                && getY() + getThumbPosition() < pMouseY && pMouseY < getY() + getThumbPosition() + getThumbSize()
                 ;
     }
 
@@ -123,7 +124,7 @@ public class ScrollBar extends TorchWidget {
     }
 
     @Override
-    protected void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    protected void renderContents(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
 
         if (getMaxScrollPosition() > 0) {
             Color color = thumbColor;
@@ -133,8 +134,8 @@ public class ScrollBar extends TorchWidget {
             else if (isThumbHovered(pMouseX, pMouseY))
                 color = hoverColor;
 
-            TorchUtil.colorQuad(pPoseStack, barColor, x, y, width, height);
-            TorchUtil.colorQuad(pPoseStack, color.argb(), x, y + getThumbPosition(), width, getThumbSize());
+            TorchUtil.colorQuad(gfx, barColor, getX(), getY(), width, height);
+            TorchUtil.colorQuad(gfx, color.argb(), getX(), getY() + getThumbPosition(), width, getThumbSize());
         }
     }
 
@@ -144,7 +145,7 @@ public class ScrollBar extends TorchWidget {
     }
 
     @Override
-    public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
+    public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {
         // No op
     }
 }

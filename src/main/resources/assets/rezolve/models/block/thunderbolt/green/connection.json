@@ -2,7 +2,7 @@
 	"credit": "Made with Blockbench",
 	"parent": "rezolve:block/thunderbolt/plain/connection",
 	"textures": {
-		"particle": "rezolve:blocks/thunderbolt/green/green_thunderbolt_cable",
-		"cable": "rezolve:blocks/thunderbolt/green/green_thunderbolt_cable"
+		"particle": "rezolve:block/thunderbolt/green/green_thunderbolt_cable",
+		"cable": "rezolve:block/thunderbolt/green/green_thunderbolt_cable"
 	}
 }

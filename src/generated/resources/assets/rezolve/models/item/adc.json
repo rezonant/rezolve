@@ -1,6 +1,6 @@
 {
   "parent": "rezolve:item/standard_item",
   "textures": {
-    "layer0": "rezolve:machine_parts/adc"
+    "layer0": "rezolve:item/machine_parts/adc"
   }
 }

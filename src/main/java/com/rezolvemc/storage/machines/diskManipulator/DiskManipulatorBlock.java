@@ -4,14 +4,14 @@ import com.rezolvemc.common.registry.WithBlockEntity;
 import com.rezolvemc.common.registry.WithMenu;
 import com.rezolvemc.common.machines.Machine;
 import com.rezolvemc.common.registry.RegistryId;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MapColor;
 
 @RegistryId("disk_manipulator")
 @WithBlockEntity(DiskManipulatorEntity.class)
 @WithMenu(DiskManipulatorMenu.class)
 public class DiskManipulatorBlock extends Machine {
 	public DiskManipulatorBlock() {
-		super(Properties.of(Material.METAL));
+		super(Properties.of().mapColor(MapColor.METAL));
 	}
 
 //	@Override

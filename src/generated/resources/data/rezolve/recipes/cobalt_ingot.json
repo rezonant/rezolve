@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "building",
   "key": {
     "a": {
       "item": "rezolve:cobalt_nugget"
@@ -12,5 +13,6 @@
   ],
   "result": {
     "item": "rezolve:cobalt_ingot"
-  }
+  },
+  "show_notification": true
 }

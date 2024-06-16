@@ -2,6 +2,7 @@ package com.rezolvemc.thunderbolt.remoteShell.common;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceKey;
@@ -56,7 +57,7 @@ public class MachineListing implements INBTSerializable<CompoundTag> {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         if (nbt.contains("level")) {
-            level = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString("level")));
+            level = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(nbt.getString("level")));
         } else {
             level = Level.OVERWORLD;
         }

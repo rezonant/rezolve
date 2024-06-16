@@ -9,6 +9,7 @@ import com.rezolvemc.common.machines.Operation;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.rezolvemc.common.registry.ScreenFor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.torchmc.ui.layout.AxisAlignment;
@@ -69,8 +70,8 @@ public class UnbundlerScreen extends MachineScreen<UnbundlerMenu> {
 	}
 
 	@Override
-	public void renderContents(PoseStack pPoseStack, int mouseX, int mouseY, float partialTick) {
-		super.renderContents(pPoseStack, mouseX, mouseY, partialTick);
+	public void renderContents(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
+		super.renderContents(gfx, mouseX, mouseY, partialTick);
 
 	    // Draw operation details
 
@@ -87,6 +88,6 @@ public class UnbundlerScreen extends MachineScreen<UnbundlerMenu> {
 	    }
 
 		int titleWidth = font.width(this.title.getString() + " ");
-		this.font.draw(pPoseStack, statusStr, this.titleLabelX + titleWidth, this.titleLabelY, 0xFF666666);
+		gfx.drawString(font, statusStr, this.titleLabelX + titleWidth, this.titleLabelY, 0xFF666666, false);
 	}
 }

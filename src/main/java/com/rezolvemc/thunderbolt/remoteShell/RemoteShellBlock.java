@@ -6,14 +6,14 @@ import com.rezolvemc.common.registry.WithMenu;
 import com.rezolvemc.common.machines.Machine;
 import com.rezolvemc.common.registry.RegistryId;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MapColor;
 
 @RegistryId("remote_shell")
 @WithBlockEntity(RemoteShellEntity.class)
 @WithMenu(RemoteShellMenu.class)
 public class RemoteShellBlock extends Machine {
 	public RemoteShellBlock() {
-		super(Block.Properties.of(Material.METAL));
+		super(Block.Properties.of().mapColor(MapColor.METAL));
 	}
 
 	@Override

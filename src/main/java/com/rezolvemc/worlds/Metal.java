@@ -1,5 +1,6 @@
 package com.rezolvemc.worlds;
 
+import com.mojang.serialization.JsonOps;
 import com.rezolvemc.Rezolve;
 import com.rezolvemc.common.ItemBase;
 import com.rezolvemc.common.blocks.BlockBase;
@@ -7,12 +8,11 @@ import com.rezolvemc.common.network.RezolvePacket;
 import com.google.gson.JsonObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.recipes.*;
-import net.minecraft.data.worldgen.features.OreFeatures;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -31,22 +31,26 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.placement.*;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
+import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.client.model.generators.ModelFile;
+import net.minecraftforge.common.world.BiomeModifier;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 @Mod.EventBusSubscriber(modid = Rezolve.ID, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -255,15 +259,28 @@ public enum Metal {
 			generator.addProvider(true, metal.new Recipes(event));
 			generator.addProvider(true, metal.new BlocksGenerator(event));
 			generator.addProvider(true, metal.new ItemsGenerator(event));
-			generator.addProvider(true, metal.new BiomeModifiersGenerator(event));
+			generator.addProvider(true, metal.new MetalDataProvider(event));
 		}
 	}
 
-	private ConfiguredFeature<OreConfiguration, Feature<OreConfiguration>> overworldOreConfiguration;
-	private PlacedFeature overworldOrePlacedFeature;
+	static final RuleTest STONE_ORE_REPLACEABLES = new TagMatchTest(BlockTags.STONE_ORE_REPLACEABLES);
+	static final RuleTest DEEPSLATE_ORE_REPLACEABLES = new TagMatchTest(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
 
-	public ConfiguredFeature<OreConfiguration, Feature<OreConfiguration>> getOverworldOreConfiguration() {
-		return overworldOreConfiguration;
+	private static ConfiguredFeature<OreConfiguration, Feature<OreConfiguration>> createConfiguredOreFeature(Metal metal) {
+		return new ConfiguredFeature<>(
+				Feature.ORE,
+				new OreConfiguration(List.of(
+						OreConfiguration.target(STONE_ORE_REPLACEABLES, metal.ore().defaultBlockState()),
+						OreConfiguration.target(DEEPSLATE_ORE_REPLACEABLES, metal.deepSlateOre().defaultBlockState())
+				), metal.veinSize)
+		);
+	}
+
+	private static PlacedFeature createPlacedOreFeature(Metal metal, ConfiguredFeature<OreConfiguration, Feature<OreConfiguration>> configuredOreFeature) {
+		return new PlacedFeature(
+				new Holder.Direct<>(configuredOreFeature),
+				metal.orePlacement
+		);
 	}
 
 	@SubscribeEvent
@@ -287,39 +304,7 @@ public enum Metal {
 				event.register(ForgeRegistries.Keys.ITEMS, new ResourceLocation(Rezolve.ID, metal.getName() + "_ingot"), () -> metal.ingot());
 				event.register(ForgeRegistries.Keys.ITEMS, new ResourceLocation(Rezolve.ID, metal.getName() + "_nugget"), () -> metal.nugget());
 			}
-		} else if (event.getRegistryKey() == Registry.CONFIGURED_FEATURE_REGISTRY) {
-			for (var metal : values()) {
-				if (!metal.hasOre)
-					continue;
-
-				event.register(
-						Registry.CONFIGURED_FEATURE_REGISTRY,
-						Rezolve.loc(metal.getName()),
-						() -> metal.overworldOreConfiguration = new ConfiguredFeature<>(
-								Feature.ORE,
-								new OreConfiguration(List.of(
-									OreConfiguration.target(OreFeatures.STONE_ORE_REPLACEABLES, metal.ore().defaultBlockState()),
-									OreConfiguration.target(OreFeatures.DEEPSLATE_ORE_REPLACEABLES, metal.deepSlateOre().defaultBlockState())
-								), metal.veinSize)
-						)
-				);
-			}
-		} else if (event.getRegistryKey() == Registry.PLACED_FEATURE_REGISTRY) {
-			for (var metal : values()) {
-				if (!metal.hasOre)
-					continue;
-
-				event.register(
-						Registry.PLACED_FEATURE_REGISTRY,
-						Rezolve.loc(metal.getName()),
-						() -> metal.overworldOrePlacedFeature = new PlacedFeature(
-								new Holder.Direct<>(metal.overworldOreConfiguration),
-								metal.orePlacement
-						)
-				);
-			}
 		}
-
 	}
 
 	@Override
@@ -329,7 +314,7 @@ public enum Metal {
 
 	public class MetalBlock extends BlockBase {
 		public MetalBlock(String stateName) {
-			this(stateName, Properties.of(Material.METAL));
+			this(stateName, Properties.of().mapColor(MapColor.METAL));
 		}
 
 		public MetalBlock(String stateName, Properties properties) {
@@ -377,7 +362,7 @@ public enum Metal {
 
 		public class MetalBlockItem extends BlockItem {
 			public MetalBlockItem() {
-				super(MetalBlock.this, new Properties().tab(Rezolve.CREATIVE_MODE_TAB));
+				super(MetalBlock.this, new Properties());
 			}
 
 			@Override
@@ -463,7 +448,7 @@ public enum Metal {
 
 	public class Ore extends MetalBlock {
 		public Ore() {
-			super("ore", Properties.of(Material.METAL)
+			super("ore", Properties.of().mapColor(MapColor.METAL)
 					.requiresCorrectToolForDrops()
 			);
 		}
@@ -503,37 +488,57 @@ public enum Metal {
 		}
 	}
 
-	public class BiomeModifiersGenerator implements DataProvider {
-		BiomeModifiersGenerator(GatherDataEvent event) {
+	public class MetalDataProvider implements DataProvider {
+		MetalDataProvider(GatherDataEvent event) {
 			generator = event.getGenerator();
 		}
 
 		private DataGenerator generator;
 
 		@Override
-		public void run(CachedOutput pOutput) throws IOException {
+		public @NotNull CompletableFuture<?> run(@NotNull CachedOutput pOutput) {
+			var futures = new ArrayList<CompletableFuture<?>>();
+
 			var obj = new JsonObject();
+
 			obj.addProperty("type", "forge:add_features");
 			obj.addProperty("biomes", "#minecraft:is_overworld");
 			obj.addProperty("features", "rezolve:" + Metal.this.getName());
 			obj.addProperty("step", "underground_ores");
 
-			Path mainOutput = generator.getOutputFolder();
+			Path mainOutput = generator.getPackOutput().getOutputFolder();
 			String pathSuffix = "data/rezolve/forge/biome_modifier/add_" + Metal.this.getName() + ".json";
 			Path outputPath = mainOutput.resolve(pathSuffix);
-			DataProvider.saveStable(pOutput, obj, outputPath);
+			futures.add(DataProvider.saveStable(pOutput, obj, outputPath));
+
+			var configuredOreFeature = createConfiguredOreFeature(Metal.this);
+			futures.add(DataProvider.saveStable(
+					pOutput,
+					ConfiguredFeature.CODEC.encodeStart(JsonOps.INSTANCE, Holder.direct(configuredOreFeature)).result().get(),
+					mainOutput.resolve("data/rezolve/worldgen/configured_feature/" + Metal.this.getName() + ".json")
+			));
+
+			var placedOreFeature = createPlacedOreFeature(Metal.this, configuredOreFeature);
+			futures.add(DataProvider.saveStable(
+				pOutput,
+				PlacedFeature.CODEC.encodeStart(JsonOps.INSTANCE, Holder.direct(placedOreFeature)).result().get(),
+				mainOutput.resolve("data/rezolve/worldgen/placed_feature/" + Metal.this.getName() + ".json")
+			));
+
+
+			return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 		}
 
 		@Override
 		public String getName() {
-			return "Biome Modifiers: rezolve";
+			return "Rezolve Metals [" + Metal.this.getName() + "]";
 		}
 	}
 
 	public class BlocksGenerator extends BlockStateProvider {
 
 		public BlocksGenerator(GatherDataEvent event) {
-			super(event.getGenerator(), Rezolve.ID, event.getExistingFileHelper());
+			super(event.getGenerator().getPackOutput(), Rezolve.ID, event.getExistingFileHelper());
 		}
 
 		@Override
@@ -554,7 +559,7 @@ public enum Metal {
 				prefix = prefix + "_";
 
 			var blockName = prefix + Metal.this.getName() + "_" + type;
-			var metalFolder = "metals/" + Metal.this.getName() + "/";
+			var metalFolder = "block/metals/" + Metal.this.getName() + "/";
 
 			simpleBlock(block, models().cubeAll(blockName, Rezolve.loc(metalFolder + blockName)));
 
@@ -563,16 +568,20 @@ public enum Metal {
 				;
 		}
 
+		@Override
+		public String getName() {
+			return super.getName() + "." + Metal.this.getName();
+		}
 	}
 
 	public class ItemsGenerator extends ItemModelProvider {
 		public ItemsGenerator(GatherDataEvent event) {
-			super(event.getGenerator(), Rezolve.ID, event.getExistingFileHelper());
+			super(event.getGenerator().getPackOutput(), Rezolve.ID, event.getExistingFileHelper());
 		}
 
 		private void itemModel(String type) {
 			var itemName = Metal.this.getName() + "_" + type;
-			var metalFolder = "metals/" + Metal.this.getName() + "/";
+			var metalFolder = "block/metals/" + Metal.this.getName() + "/";
 
 			getBuilder(itemName)
 					.parent(new ModelFile.UncheckedModelFile(Rezolve.loc("item/standard_item")))
@@ -585,40 +594,50 @@ public enum Metal {
 			itemModel("ingot");
 			itemModel("nugget");
 		}
+
+		@Override
+		public String getName() {
+			return super.getName() + "." + Metal.this.getName();
+		}
 	}
 
 	public class Recipes extends RecipeProvider {
 		public Recipes(GatherDataEvent event) {
-			super(event.getGenerator());
+			super(event.getGenerator().getPackOutput());
 		}
 
 		@Override
-		protected final void buildCraftingRecipes(Consumer<FinishedRecipe> consumer) {
-			ShapedRecipeBuilder.shaped(ingot, 1)
+		protected final void buildRecipes(@NotNull Consumer<FinishedRecipe> consumer) {
+			ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ingot, 1)
 					.pattern("aaa")
 					.pattern("aaa")
 					.pattern("aaa")
 					.define('a', nugget)
 					.unlockedBy("has_ore", has(ingot))
 					.save(consumer, Rezolve.loc(name + "_ingot"));
-			ShapedRecipeBuilder.shaped(storageBlock, 1)
+			ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, storageBlock, 1)
 					.pattern("aaa")
 					.pattern("aaa")
 					.pattern("aaa")
 					.define('a', ingot)
 					.unlockedBy("has_ingot", has(ingot))
 					.save(consumer, Rezolve.loc(name + "_block"));
-			ShapelessRecipeBuilder.shapeless(nugget, 9)
+			ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, nugget, 9)
 					.requires(ingot)
 					.unlockedBy("has_ingot", has(ingot))
 					.save(consumer, Rezolve.loc(name + "_nugget"));
-			ShapelessRecipeBuilder.shapeless(ingot, 9)
+			ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ingot, 9)
 					.requires(storageBlock)
 					.unlockedBy("has_storage_block", has(storageBlock))
 					.save(consumer, Rezolve.loc(name + "_ingot_from_block"));
-			SimpleCookingRecipeBuilder.smelting(Ingredient.of(ore.asItem()), ingot, 0.7F, 100)
+			SimpleCookingRecipeBuilder.smelting(Ingredient.of(ore.asItem()), RecipeCategory.BUILDING_BLOCKS, ingot, 0.7F, 100)
 					.unlockedBy("has_ore", has(ore))
 					.save(consumer, Rezolve.loc(name + "_ingot_from_ore"));
+		}
+
+		@Override
+		public String getName() {
+			return super.getName() + "." + Metal.this.getName();
 		}
 	}
 }

@@ -8,6 +8,7 @@ import com.rezolvemc.common.machines.Operation;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.rezolvemc.common.registry.ScreenFor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.torchmc.ui.Window;
@@ -64,8 +65,8 @@ public class BundlerScreen extends MachineScreen<BundlerMenu> {
 	}
 
 	@Override
-	public void renderContents(PoseStack pPoseStack, int mouseX, int mouseY, float pPartialTick) {
-		super.renderContents(pPoseStack, mouseX, mouseY, pPartialTick);
+	public void renderContents(GuiGraphics gfx, int mouseX, int mouseY, float pPartialTick) {
+		super.renderContents(gfx, mouseX, mouseY, pPartialTick);
 
 	    Operation<BundlerEntity> op = this.menu.operation;
 	    String statusStr;
@@ -78,6 +79,6 @@ public class BundlerScreen extends MachineScreen<BundlerMenu> {
 	    }
 
 		int titleWidth = font.width(this.title.getString() + " ");
-		this.font.draw(pPoseStack, statusStr, this.titleLabelX + titleWidth, this.titleLabelY, 0xFF666666);
+		gfx.drawString(font, statusStr, this.titleLabelX + titleWidth, this.titleLabelY, 0xFF666666, false);
 	}
 }

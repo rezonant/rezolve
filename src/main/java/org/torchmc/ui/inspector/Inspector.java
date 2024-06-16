@@ -1,6 +1,7 @@
 package org.torchmc.ui.inspector;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import org.torchmc.ui.TorchWidget;
 import org.torchmc.ui.Window;
 import org.torchmc.events.Subscription;
@@ -64,27 +65,28 @@ public class Inspector extends Window {
     private Color outlineColor = new Color(0, 1, 0, 1);
 
     private void drawHighlight(TorchWidget widget, RenderEvent event) {
-        TorchUtil.colorQuad(event.poseStack, highlightColor, widget.getX(), widget.getY(), widget.getWidth(), widget.getHeight());
-        TorchUtil.colorOutline(event.poseStack, outlineColor, 2, widget.getX(), widget.getY(), widget.getWidth(), widget.getHeight());
+        var gfx = event.graphics;
+        TorchUtil.colorQuad(gfx, highlightColor, widget.getX(), widget.getY(), widget.getWidth(), widget.getHeight());
+        TorchUtil.colorOutline(gfx, outlineColor, 2, widget.getX(), widget.getY(), widget.getWidth(), widget.getHeight());
 
-        pushPose(event.poseStack, () -> {
+        pushPose(gfx.pose(), () -> {
             repose(() -> {
-                event.poseStack.translate(widget.getX(), widget.getY(), 0);
-                event.poseStack.scale(0.5f, 0.5f, 1);
+                gfx.pose().translate(widget.getX(), widget.getY(), 0);
+                gfx.pose().scale(0.5f, 0.5f, 1);
             });
 
             var text = String.format("%dx%d @ %d,%d", widget.getWidth(), widget.getHeight(), widget.getX(), widget.getY());
 
-            TorchUtil.colorQuad(event.poseStack, Color.WHITE, - 2, - font.lineHeight - 2, font.width(text) + 4, font.lineHeight + 4);
-            font.draw(event.poseStack, text, 0, - font.lineHeight, Color.BLACK.argb());
+            TorchUtil.colorQuad(gfx, Color.WHITE, - 2, - font.lineHeight - 2, font.width(text) + 4, font.lineHeight + 4);
+            gfx.drawString(font, text, 0, - font.lineHeight, Color.BLACK.argb(), false);
 
             var wc = widget.getWidthConstraint(0);
             var hc = widget.getHeightConstraint(0);
 
             text = String.format("W: %d / %d / %d | H: %d / %d / %d", wc.min, wc.desired, wc.max, hc.min, hc.desired, hc.max);
 
-            TorchUtil.colorQuad(event.poseStack, Color.WHITE, -2, widget.getHeight(), font.width(text) + 4, font.lineHeight + 4);
-            font.draw(event.poseStack, text, 0, widget.getHeight(), Color.BLACK.argb());
+            TorchUtil.colorQuad(gfx, Color.WHITE, -2, widget.getHeight(), font.width(text) + 4, font.lineHeight + 4);
+            gfx.drawString(font, text, 0, widget.getHeight(), Color.BLACK.argb(), false);
         });
     }
 
@@ -120,10 +122,11 @@ public class Inspector extends Window {
         int depth;
 
         @Override
-        public void render(PoseStack poseStack, int width, int mouseX, int mouseY, float partialTicks) {
+        public void render(GuiGraphics gfx, int width, int mouseX, int mouseY, float partialTicks) {
             int indent = depth * 8;
-            font.draw(poseStack, widget.getClass().getSimpleName(), indent, 0, Color.BLACK.argb());
-            font.draw(poseStack, widget.getClass().getPackageName(), indent, font.lineHeight, Color.GRAY.argb());
+            
+            gfx.drawString(font, widget.getClass().getSimpleName(), indent, 0, Color.BLACK.argb(), false);
+            gfx.drawString(font, widget.getClass().getPackageName(), indent, font.lineHeight, Color.GRAY.argb(), false);
         }
 
         @Override

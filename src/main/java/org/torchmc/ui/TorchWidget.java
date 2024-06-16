@@ -6,8 +6,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.rezolvemc.common.util.RezolveUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
@@ -16,16 +18,15 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.joml.Vector3f;
 import org.torchmc.events.*;
 import org.torchmc.ui.layout.Axis;
 import org.torchmc.ui.layout.AxisConstraint;
 import org.torchmc.ui.util.Point;
 import org.torchmc.ui.util.Size;
-import org.torchmc.ui.util.TorchUtil;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -36,9 +37,9 @@ import java.util.function.Function;
 /**
  * Base class of all Torch widgets.
  */
-public abstract class TorchWidget extends GuiComponent implements Widget, GuiEventListener, NarratableEntry, EventEmitter {
+public abstract class TorchWidget extends AbstractWidget implements GuiEventListener, NarratableEntry, EventEmitter {
     public TorchWidget(Component narrationTitle) {
-        this.narrationTitle = narrationTitle;
+        super(0, 0, 0, 0, narrationTitle);
 
         if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> acScreen)
             this.screen = acScreen;
@@ -76,14 +77,14 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
     }
 
     public class RenderEvent extends Event {
-        public RenderEvent(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-            this.poseStack = poseStack;
+        public RenderEvent(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+            this.graphics = graphics;
             this.mouseX = mouseX;
             this.mouseY = mouseY;
             this.partialTick = partialTick;
         }
 
-        public final PoseStack poseStack;
+        public final GuiGraphics graphics;
         public final int mouseX;
         public final int mouseY;
         public final float partialTick;
@@ -96,13 +97,7 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
     private boolean hovered = false;
     private boolean focused = false;
     private boolean active = true;
-    private List<Component> tooltip = null;
     private Runnable onTick = null;
-
-    protected int x;
-    protected int y;
-    protected int width;
-    protected int height;
     protected Minecraft minecraft;
     protected Font font;
 
@@ -127,7 +122,7 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
     @SubscribeEvent
     void postRender(ScreenEvent.Render.Post event) {
         if (parent == null)
-            renderTooltipPass(event.getPoseStack(), event.getMouseX(), event.getMouseY(), event.getPartialTick());
+            renderTooltipPass(event.getGuiGraphics(), event.getMouseX(), event.getMouseY(), event.getPartialTick());
     }
 
     /**
@@ -210,51 +205,14 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
         this.bottomPadding = bottomPadding;
     }
 
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public List<Component> getTooltip() {
-        return tooltip;
-    }
-
     /**
-     * Set the tooltip to be shown when the user hovers over this widget.
-     * @param tooltip
-     */
-    public void setTooltip(List<Component> tooltip) {
-        this.tooltip = tooltip;
-    }
-
-    /**
-     * Set the tooltip to be shown when the user hovers over this widget.
-     * @param tooltip
-     */
-    public void setTooltip(Component tooltip) {
-        if (tooltip == null)
-            this.tooltip = null;
-        else
-            this.tooltip = List.of(tooltip);
-    }
-
-    /**
-     * Set the tooltip to be shown when the user hovers over this widget.
+     * Set a simple tooltip to be shown when the user hovers over this widget. For advanced usage, see the setTooltip(Tooltip)
+     * overload.
+     *
      * @param text
      */
     public void setTooltip(String text) {
-        this.tooltip = List.of(Component.literal(text));
+        setTooltip(Tooltip.create(Component.literal(text)));
     }
 
     /**
@@ -280,8 +238,8 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
         var y = 0;
         var self = this;
         while (self != null) {
-            x += self.x;
-            y += self.y;
+            x += self.getX();
+            y += self.getY();
             self = self.parent;
         }
 
@@ -297,8 +255,8 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
         var y = 0;
         var self = this;
         while (self != null) {
-            x += self.x;
-            y += self.y;
+            x += self.getX();
+            y += self.getY();
             self = self.parent;
         }
 
@@ -339,11 +297,11 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      * @param y The Y position relative to the parent widget's position.
      */
     public final void move(int x, int y) {
-        if (this.x == x && this.y == y)
+        if (getX() == x && getY() == y)
             return;
 
-        this.x = x;
-        this.y = y;
+        this.setX(x);
+        this.setY(y);
         didMove();
         emitEvent(MOVED, new PositionEvent(x, y));
     }
@@ -502,7 +460,7 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      */
     @Override
     public boolean isMouseOver(double pMouseX, double pMouseY) {
-        return visible && x < pMouseX && pMouseX < x + width && y < pMouseY && pMouseY < y + height;
+        return visible && getX() < pMouseX && pMouseX < getX() + width && getY() < pMouseY && pMouseY < getY() + height;
     }
 
     public boolean isMouseOver(Point point) {
@@ -598,8 +556,8 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      *
      * @param direction
      */
-    @Override
-    public boolean changeFocus(boolean direction) {
+    //@Override
+    public boolean changeFocusOLD(boolean direction) {
         if (active && visible) {
 
             if (focusable && focusedChild == null) {
@@ -614,7 +572,7 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
             for (int i = index; i < list.size(); ++i) {
                 var child = list.get(i);
 
-                if (child.changeFocus(direction)) {
+                if (child.changeFocusOLD(direction)) {
                     // The child has a new focusable widget, so nothing else to do
                     if (focusedChild != null) {
                         focusedChild.setFocusState(false);
@@ -830,11 +788,6 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
     }
 
     /**
-     * The title read to the user when this widget is observed during Narrator mode.
-     */
-    protected Component narrationTitle;
-
-    /**
      * Render this widget within the current context.
      *
      * TorchWidgets cannot override this method. Instead, override:
@@ -842,14 +795,15 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      * - renderBackground() to modify early rendering of the widget (before children are rendered)
      * - renderChildren() to modify how the children of this widget are rendered
      *
-     * @param pPoseStack
+     * @param gfx
      * @param pMouseX Current mouse X position relative to the parent's bounding box (not screen coordinates)
      * @param pMouseY Current mouse Y position relative to the parent's bounding box (not screen coordinates)
      * @param pPartialTick
      */
     @Override
-    public final void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-        var renderEvent = new RenderEvent(pPoseStack, pMouseX, pMouseY, pPartialTick);
+    public final void renderWidget(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
+        var pPoseStack = gfx.pose();
+        var renderEvent = new RenderEvent(gfx, pMouseX, pMouseY, pPartialTick);
 
         emitEvent(BEFORE_RENDER, renderEvent);
 
@@ -861,51 +815,49 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
 
         hovered = isMouseOver(pMouseX, pMouseY);
 
-        screenScissor(() -> {
+        screenScissor(gfx, () -> {
             emitEvent(BEFORE_RENDER_BACKGROUND, renderEvent);
-            renderBackground(pPoseStack, pMouseX, pMouseY, pPartialTick);
+            renderBackground(gfx, pMouseX, pMouseY, pPartialTick);
             emitEvent(AFTER_RENDER_BACKGROUND, renderEvent);
 
             pushPose(pPoseStack, () -> {
-                repose(() -> pPoseStack.translate(x, y, 0));
+                repose(() -> pPoseStack.translate(getX(), getY(), 0));
 
                 emitEvent(BEFORE_RENDER_CHILDREN, renderEvent);
-                renderChildren(pPoseStack, pMouseX - x, pMouseY - y, pPartialTick);
+                renderChildren(gfx, pMouseX - getX(), pMouseY - getY(), pPartialTick);
                 emitEvent(AFTER_RENDER_CHILDREN, renderEvent);
             });
 
             emitEvent(BEFORE_RENDER_CONTENTS, renderEvent);
-            renderContents(pPoseStack, pMouseX, pMouseY, pPartialTick);
+            renderContents(gfx, pMouseX, pMouseY, pPartialTick);
             emitEvent(AFTER_RENDER_CONTENTS, renderEvent);
         });
 
         emitEvent(AFTER_RENDER, renderEvent);
     }
 
-    public final boolean renderTooltipPass(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    public final boolean renderTooltipPass(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
 
         // Children
 
-        pPoseStack.pushPose();
-        pPoseStack.translate(x, y, 0);
+        gfx.pose().pushPose();
+        gfx.pose().translate(getX(), getY(), 0);
         RenderSystem.applyModelViewMatrix();
 
         try {
             for (var child : children) {
-                if (child.renderTooltipPass(pPoseStack, pMouseX - x, pMouseY - y, pPartialTick))
+                if (child.renderTooltipPass(gfx, pMouseX - getX(), pMouseY - getY(), pPartialTick))
                     return true;
             }
         } finally {
-            pPoseStack.popPose();;
+            gfx.pose().popPose();
             RenderSystem.applyModelViewMatrix();
         }
 
-        // Self
-
         if (isHovered()) {
-            var renderEvent = new RenderEvent(pPoseStack, pMouseX, pMouseY, pPartialTick);
+            var renderEvent = new RenderEvent(gfx, pMouseX, pMouseY, pPartialTick);
             emitEvent(BEFORE_RENDER_TOOLTIP, renderEvent);
-            renderTooltip(pPoseStack, pMouseX, pMouseY, pPartialTick);
+            renderTooltip(gfx, pMouseX, pMouseY, pPartialTick);
             emitEvent(AFTER_RENDER_TOOLTIP, renderEvent);
             return true;
         }
@@ -916,18 +868,23 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
     /**
      * Render parts of this widget which should be rendered below child widgets.
      *
-     * @param pPoseStack
+     * @param gfx
      * @param pMouseX Current mouse position relative to the parent's bounding box (not the screen)
      * @param pMouseY Current mouse position relative to the parent's bounding box (not the screen)
      * @param pPartialTick
      */
-    protected void renderBackground(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    protected void renderBackground(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
     }
 
-    protected boolean renderTooltip(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+    protected boolean renderTooltip(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
         var tooltip = getTooltip(); // Important to allow customization of tooltip behavior in widget classes
-        if (tooltip != null && tooltip.size() > 0 && screen != null) {
-            screen.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY);
+        if (tooltip != null && screen != null) {
+            gfx.renderTooltip(
+                    Minecraft.getInstance().font,
+                    tooltip.toCharSequence(Minecraft.getInstance()),
+                    mouseX, mouseY
+            );
+            //screen.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY);
             return true;
         }
 
@@ -937,14 +894,14 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
     /**
      * Render the children attached to this widget. Can be overridden to customize, but the default implementation
      * should be correct in nearly all cases. Runs after renderBackground() but before renderContents().
-     * @param pPoseStack
+     * @param gfx
      * @param pMouseX The current mouse position relative to the parent's bounding box (not the screen)
      * @param pMouseY The current mouse position relative to the parent's bounding box (not the screen)
      * @param pPartialTick
      */
-    protected void renderChildren(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+    protected void renderChildren(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
         for (var child : children) {
-            child.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
+            child.render(gfx, pMouseX, pMouseY, pPartialTick);
         }
     }
 
@@ -953,13 +910,12 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      * This is performed after renderBackground() and renderChildren(), so it is effectively the "top" layer of
      * the rendering process.
      *
-     * @param pPoseStack
+     * @param gfx
      * @param pMouseX
      * @param pMouseY
      * @param pPartialTick
      */
-    protected void renderContents(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-
+    protected void renderContents(GuiGraphics gfx, int pMouseX, int pMouseY, float pPartialTick) {
     }
 
     /**
@@ -979,8 +935,8 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      * @param pNarrationElementOutput
      */
     @Override
-    public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
-        pNarrationElementOutput.add(NarratedElementType.TITLE, narrationTitle);
+    public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {
+        pNarrationElementOutput.add(NarratedElementType.TITLE, getMessage());
     }
 
     public TorchWidget getRootParent() {
@@ -996,7 +952,7 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      * function in that context, and finally removes the scissor (clip) state.
      * @param runnable
      */
-    protected void screenScissor(Runnable runnable) {
+    protected void screenScissor(GuiGraphics gfx, Runnable runnable) {
         var border = 2;
         var root = getRootParent();
 
@@ -1004,6 +960,7 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
             if (root instanceof Window window) {
                 var rect = window.getScreenRect();
                 displayScissor(
+                        gfx,
                         rect.getX() + border, rect.getY() + border,
                         rect.getWidth() - border * 2, rect.getHeight() - border * 2,
                         runnable);
@@ -1011,6 +968,7 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
             }
 
             displayScissor(
+                    gfx,
                     screen.getGuiLeft() + border, screen.getGuiTop() + border,
                     screen.getXSize() - border * 2, screen.getYSize() - border * 2,
                     runnable);
@@ -1031,18 +989,18 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      * to the parent widget's bounding box. Once the clip operation is set, the given function is called, and finally
      * the scissor (clip) is cleared before returning.
      *
-     * @param stack The current PoseStack. Will be used to adjust the passed coordinates to match its current state
+     * @param gfx
      * @param x X coordinate of the box
      * @param y Y coordinate of the box
      * @param width Width of the box (not the coordinate of the right-side point like vanilla's enableScissor)
      * @param height Height of the box (not the coordinate of the bottom-side point like vanilla's enableScissor)
      * @param runnable
      */
-    protected void scissor(PoseStack stack, int x, int y, int width, int height, Runnable runnable) {
-        var tr = TorchUtil.getTranslation(stack.last().pose());
+    protected void scissor(GuiGraphics gfx, int x, int y, int width, int height, Runnable runnable) {
+        var tr = gfx.pose().last().pose().getTranslation(new Vector3f());
 
         if (enableScissoring) {
-            enableScissor(
+            gfx.enableScissor(
                     (int) tr.x() + x,
                     (int) tr.y() + y,
                     (int) tr.x() + x + Math.max(1, width),
@@ -1054,7 +1012,7 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
             runnable.run();
         } finally {
             if (enableScissoring)
-                disableScissor();
+                gfx.disableScissor();
         }
     }
 
@@ -1066,22 +1024,23 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      * After the clipping operation is set up, the given function is called, and finally the clipping operation is
      * removed before returning.
      *
+     * @param gfx
      * @param x The X coordinate of the bounding box in global screen space
      * @param y The Y coordinate of the bounding box in global screen space
      * @param width The width of the bounding box (not the coordinate of the right side)
      * @param height The height of the bounding box (not the coordinate of the bottom side)_
      * @param runnable
      */
-    protected void displayScissor(int x, int y, int width, int height, Runnable runnable) {
+    protected void displayScissor(GuiGraphics gfx, int x, int y, int width, int height, Runnable runnable) {
         if (enableScissoring) {
-            enableScissor(x, y, x + width, y + height);
+            gfx.enableScissor(x, y, x + width, y + height);
         }
 
         try {
             runnable.run();
         } finally {
             if (enableScissoring)
-                disableScissor();
+                gfx.disableScissor();
         }
     }
 
@@ -1121,8 +1080,8 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      */
     @Override
     public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
-        pMouseX -= x;
-        pMouseY -= y;
+        pMouseX -= getX();
+        pMouseY -= getY();
 
         for (var child : children) {
             if (child.isVisible() && child.isMouseOver(pMouseX, pMouseY)) {
@@ -1131,7 +1090,10 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
                 }
             }
         }
-        return GuiEventListener.super.mouseScrolled(pMouseX, pMouseY, pDelta);
+
+        return false;
+        // why were we doing this again? it just returns false in 1.19 anyway
+        // return GuiEventListener.super.mouseScrolled(pMouseX, pMouseY, pDelta);
     }
 
     /**
@@ -1161,8 +1123,8 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
 
         // Pass to children, putting it into their parent coordinate space (ours)
 
-        pMouseX -= x;
-        pMouseY -= y;
+        pMouseX -= getX();
+        pMouseY -= getY();
 
         clickX = pMouseX;
         clickY = pMouseY;
@@ -1197,8 +1159,8 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
 
         // Pass to children, putting it into their parent coordinate space (ours)
 
-        pMouseX -= x;
-        pMouseY -= y;
+        pMouseX -= getX();
+        pMouseY -= getY();
 
         boolean result = false;
 
@@ -1210,7 +1172,7 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
         return result;
     }
 
-    private Widget draggedWidget = null;
+    private Renderable draggedWidget = null;
 
     /**
      * Called when the user has a mouse button held down and the mouse is moved.
@@ -1224,8 +1186,8 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      */
     @Override
     public boolean mouseDragged(double pMouseX, double pMouseY, int pButton, double pDragX, double pDragY) {
-        pMouseX -= x;
-        pMouseY -= y;
+        pMouseX -= getX();
+        pMouseY -= getY();
 
         if (draggedWidget != null && draggedWidget instanceof GuiEventListener listener) {
             listener.mouseDragged(pMouseX, pMouseY, pButton, pDragX, pDragY);
@@ -1244,7 +1206,7 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      */
     @Override
     public void mouseMoved(double pMouseX, double pMouseY) {
-        pMouseY -= y;
+        pMouseY -= getY();
 
         for (var child : children) {
             if (child.isMouseOver(pMouseX, pMouseY)) {
@@ -1514,7 +1476,7 @@ public abstract class TorchWidget extends GuiComponent implements Widget, GuiEve
      */
     public Point screenToParent(Point point) {
         var rect = getScreenRect();
-        return new Point(point.x - rect.getX() + x, point.y - rect.getY() + y);
+        return new Point(point.x - rect.getX() + getX(), point.y - rect.getY() + getY());
     }
 
     public boolean isKeyDown(int key) {

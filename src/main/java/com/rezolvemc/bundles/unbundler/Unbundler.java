@@ -5,13 +5,13 @@ import com.rezolvemc.common.registry.RegistryId;
 import com.rezolvemc.common.registry.WithBlockEntity;
 import com.rezolvemc.common.registry.WithMenu;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MapColor;
 
 @RegistryId("unbundler")
 @WithBlockEntity(UnbundlerEntity.class)
 @WithMenu(UnbundlerMenu.class)
 public class Unbundler extends Machine {
 	public Unbundler() {
-		super(BlockBehaviour.Properties.of(Material.METAL));
+		super(BlockBehaviour.Properties.of().mapColor(MapColor.METAL));
 	}
 }

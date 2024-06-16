@@ -2,6 +2,7 @@ package com.rezolvemc.thunderbolt.remoteShell.client;
 
 import com.rezolvemc.Rezolve;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -92,7 +93,7 @@ public class RemoteShellOverlay extends Window {
                 button.setBackgroundColor(Color.TRANSPARENT);
                 button.setOnTick(() -> {
                     button.setIcon(Rezolve.icon(getSession() != null && getSession().recording ? "stop" : "record"));
-                    button.setTooltip(Rezolve.str(getSession() != null && getSession().recording ? "stop" : "record"));
+                    button.setTooltip(Tooltip.create(Rezolve.str(getSession() != null && getSession().recording ? "stop" : "record")));
                 });
                 button.setHandler(() -> getSession().toggleRecording());
             });
@@ -133,7 +134,7 @@ public class RemoteShellOverlay extends Window {
         int xPadding = 6;
         move(xPadding, 3, screen.width - xPadding * 2, 33);
 
-        machineList.move(x, y + height + 5, 255, 212);
+        machineList.move(getX(), getY() + height + 5, 255, 212);
     }
 
     public static RemoteAccessClientSession getSession() {

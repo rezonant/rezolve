@@ -2,12 +2,12 @@ package com.rezolvemc.parts;
 
 import com.rezolvemc.common.blocks.BlockBase;
 import com.rezolvemc.common.registry.RegistryId;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MapColor;
 
 @RegistryId("machine_frame")
 public class MachineFrameBlock extends BlockBase {
 	public MachineFrameBlock() {
-		super(Properties.of(Material.METAL));
+		super(Properties.of().mapColor(MapColor.METAL));
 	}
 
 //	@Override
